@@ -494,10 +494,34 @@ function mailProviders() {
     buildTransporter('SMTP_', 'primary'),
     buildTransporter('SMTP_FALLBACK_', 'fallback'),
   ].filter(Boolean);
+  if (!list.length && process.env.RT_MAIL_OUTBOX) list.push(outboxProvider());
   if (!list.length) {
     logger.warn('[auth] no SMTP configured — verification codes are only logged to the server console (dev mode).');
   }
   return list;
+}
+
+// racktrack-app (development): with no SMTP set and RT_MAIL_OUTBOX naming a
+// folder, every message is written there as one JSON file instead of being
+// sent, so sign-up and reset codes can be read without a real mail call.
+let _outbox = null;
+function outboxProvider() {
+  if (_outbox) return _outbox;
+  const dir = path.resolve(process.env.RT_MAIL_OUTBOX);
+  fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+  const tx = {
+    async sendMail(msg) {
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const to = String(msg.to || 'unknown').replace(/[^A-Za-z0-9@._-]/g, '_').slice(0, 80);
+      const file = path.join(dir, `${stamp}_${to}_${crypto.randomBytes(3).toString('hex')}.json`);
+      fs.writeFileSync(file, JSON.stringify({ to: msg.to, from: msg.from, subject: msg.subject, text: msg.text,
+        replyTo: msg.replyTo || null, at: new Date().toISOString() }, null, 1), { mode: 0o600 });
+      return { file };
+    },
+  };
+  logger.info(`[auth] no SMTP set: mail goes to the outbox ${dir}`);
+  _outbox = { tx, from: 'RackTrack <no-reply@racktrack.local>', host: 'outbox', label: 'outbox' };
+  return _outbox;
 }
 
 // Can this server deliver mail AT ALL right now?

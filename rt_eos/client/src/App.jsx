@@ -250,7 +250,7 @@ function Routed() {
 
 export default function App() {
   return (
-    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/+$/, '') || undefined} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <ToastProvider>
           <AndroidBack />
