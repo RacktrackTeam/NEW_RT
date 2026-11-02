@@ -24,10 +24,11 @@ from playwright.sync_api import sync_playwright
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs" / "proof" / "flow"
 APP = os.environ.get("RT_APP", "http://127.0.0.1:8700")
-NETBOX = os.environ.get("RACKTRACK_NETBOX_URL", "http://127.0.0.1:3301")
-SNOW = os.environ.get("RACKTRACK_SERVICENOW_URL", "http://127.0.0.1:5301")
+NETBOX = os.environ.get("RACKTRACK_NETBOX_URL", "http://127.0.0.1:3303")
+SNOW = os.environ.get("RACKTRACK_SERVICENOW_URL", "http://127.0.0.1:3304")
 RUN = "91af02c09bbc"
-LOGIN = os.environ.get("RT_PROOF_LOGIN")          # "email:password" once sign-in is in; else the name-only sign-in
+PW_FILE = ROOT / "data" / "auth" / "seed-password.txt"     # made by auth.sh, mode 600; read, never printed
+LOGIN = os.environ.get("RT_PROOF_LOGIN") or (("owner:" + PW_FILE.read_text().strip()) if PW_FILE.exists() else None)   # the platform owner sees the stored runs from before sign-in
 
 
 def call(method, url, body=None):
@@ -77,7 +78,7 @@ def main():
             pg.goto(APP + "/app/#signin"); pg.wait_for_timeout(800)
             if LOGIN:
                 email, pw = LOGIN.split(":", 1)
-                pg.fill("#si-email", email); pg.fill("#si-password", pw)
+                pg.fill("#si-user", email); pg.fill("#si-pass", pw)
             else:
                 pg.fill("#si-name", "Aasritha")
             pg.click("#signin button[type=submit]"); pg.wait_for_selector('[data-screen="home"]:not([hidden])', timeout=15000)
@@ -103,7 +104,7 @@ def main():
             pg.goto(APP + "/app/#sweep"); shot("scan")
             # the result of our rack, from Home
             pg.goto(APP + "/app/#home"); pg.wait_for_selector(f'#home-racks a[href="#result/{RUN}"]', timeout=15000)
-            pg.click(f'#home-racks a[href="#result/{RUN}"]'); pg.wait_for_selector("#res-rack .rackshot img", timeout=20000); pg.wait_for_selector("#cmp-src", timeout=20000)
+            pg.click(f'#home-racks a[href="#result/{RUN}"]'); pg.wait_for_selector("#res-rack .rackshot", timeout=20000); pg.wait_for_selector("#cmp-src", timeout=20000)
             shot("result_page", 2500); secshot("rack_picture", "rack", "res-rack", 300)
             seen[(width, "headings")] = pg.eval_on_selector_all(".rsh", "hs => hs.map(h => h.innerText.replace(/\\n+/g, ' | '))")
             for i in (1, 2):                         # D1 router, D2 firewall: one kind, its source in words
@@ -123,15 +124,15 @@ def main():
                 pg.select_option("#cmp-src", src); pg.wait_for_timeout(400)
                 pg.click("#cmp-go"); pg.wait_for_selector(".idcard", timeout=15000); pg.wait_for_timeout(800)
                 seen[(width, f"{src} identify")] = [text(".idcard .verdict")] + pg.eval_on_selector_all(".idsteps li", "ls => ls.map(l => l.innerText.replace(/\\n+/g, ' | '))")
-                secshot(f"record_{src}", "record", "res-record")
+                secshot(f"compare_{src}", "compare", "sec-compare")
                 pg.click("#cmp-continue"); pg.wait_for_selector("#diff-top .seg2", timeout=15000); pg.wait_for_timeout(800)
                 seen[(width, f"{src} differences")] = pg.eval_on_selector_all("#diff-top .dflines li", "ls => ls.map(l => l.dataset.dftype + ': ' + l.querySelector('p').textContent)")
-                secshot(f"differences_{src}", "diff", "res-diff")
+                secshot(f"differences_{src}", "diff", "sec-diff")
                 if src == "netbox":
-                    pg.click('[data-dfmode="detailed"]'); secshot("differences_detailed_netbox", "diff", "res-diff", 1500)
+                    pg.click('[data-dfmode="detailed"]'); secshot("differences_detailed_netbox", "diff", "sec-diff", 1500)
                     pg.click('[data-dfmode="short"]'); pg.wait_for_timeout(300)
             secshot("report", "report", "res-report", 1200)
-            seen[(width, "report compare line")] = text("#rp-cmp")
+            seen[(width, "earlier scans")] = text("#res-others summary")
             pg.goto(APP + "/app/#more"); shot("profile", 1200)
             pg.close()
         b.close()

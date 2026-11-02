@@ -209,7 +209,7 @@ function _ensureColumn(table, col, ddl) {
 // even if the user's role later changes.
 function _pubPrefix(role) {
   if (role === 'owner') return 'OWN';
-  if (role === 'org_admin' || role === 'site_manager') return 'ADM';
+  if (role === 'org_admin' || role === 'org_owner' || role === 'site_manager') return 'ADM';
   return 'USR';
 }
 
@@ -1022,9 +1022,20 @@ function orgStatusOf(user) {
 }
 
 // Role gate — runs requireAuth first, then checks req.user.role is allowed.
+// The five roles of racktrack-app, by name (docs/AUTH.md). The stored values stay RT-EOS's, so its checks keep working:
+//   platform owner     'owner'
+//   organization owner 'org_owner'   the first person of an approved organization; may do all an admin may, and edit admins
+//   admin              'org_admin'   manages one organization (works with portal.racktrack.ai)
+//   site manager       'site_manager'
+//   technician         'member'      (shown as Technician on every screen)
+const ROLES = Object.freeze({ platformOwner: 'owner', orgOwner: 'org_owner', admin: 'org_admin', siteManager: 'site_manager', technician: 'member' });
+const isOrgAdminRole = (role) => role === ROLES.admin || role === ROLES.orgOwner;
+
 function requireRole(...roles) {
+  const allowed = new Set(roles);
+  if (allowed.has(ROLES.admin)) allowed.add(ROLES.orgOwner);       // an organization owner may do everything an admin may
   return (req, res, next) => requireAuth(req, res, () => {
-    if (!roles.includes(req.user.role)) {
+    if (!allowed.has(req.user.role)) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
     next();
@@ -1034,7 +1045,7 @@ function requireRole(...roles) {
 // Owner sees any org; an org_admin only their own.
 function canManageOrg(user, orgId) {
   if (user.role === 'owner') return true;
-  return user.role === 'org_admin' && Number(user.organization_id) === Number(orgId);
+  return isOrgAdminRole(user.role) && Number(user.organization_id) === Number(orgId);
 }
 
 // Is an organization approved & active? (owner-created = active; a self-signup
@@ -1052,7 +1063,7 @@ function canManageSite(user, siteId) {
   if (user.role === 'owner') return true;
   const site = db.prepare('SELECT organization_id FROM tenants WHERE id = ?').get(Number(siteId));
   if (!site) return false;
-  if (user.role === 'org_admin') return Number(user.organization_id) === Number(site.organization_id);
+  if (isOrgAdminRole(user.role)) return Number(user.organization_id) === Number(site.organization_id);
   if (user.role === 'site_manager') return Number(user.tenant_id) === Number(siteId);
   return false;
 }
@@ -1858,10 +1869,10 @@ function registerRoutes(app) {
         -- The person who runs the organization: its org admin, or, where it
         -- has none (the EOS pilot has one site manager and no org admin), its
         -- first site manager. admin_role says which one it is.
-        (SELECT username FROM users u WHERE u.organization_id = o.id AND u.role IN ('org_admin', 'site_manager')
-           ORDER BY CASE u.role WHEN 'org_admin' THEN 0 ELSE 1 END, u.created_at, u.id LIMIT 1) AS admin_username,
-        (SELECT role FROM users u WHERE u.organization_id = o.id AND u.role IN ('org_admin', 'site_manager')
-           ORDER BY CASE u.role WHEN 'org_admin' THEN 0 ELSE 1 END, u.created_at, u.id LIMIT 1) AS admin_role
+        (SELECT username FROM users u WHERE u.organization_id = o.id AND u.role IN ('org_owner', 'org_admin', 'site_manager')
+           ORDER BY CASE u.role WHEN 'org_owner' THEN 0 WHEN 'org_admin' THEN 1 ELSE 2 END, u.created_at, u.id LIMIT 1) AS admin_username,
+        (SELECT role FROM users u WHERE u.organization_id = o.id AND u.role IN ('org_owner', 'org_admin', 'site_manager')
+           ORDER BY CASE u.role WHEN 'org_owner' THEN 0 WHEN 'org_admin' THEN 1 ELSE 2 END, u.created_at, u.id LIMIT 1) AS admin_role
       FROM organizations o ORDER BY o.created_at DESC
     `).all();
     res.json({ ok: true, organizations });
@@ -1887,8 +1898,8 @@ function registerRoutes(app) {
       const org = createOrganization(name, req.user.id);
       const hash = bcrypt.hashSync(adminPassword, BCRYPT_COST);
       db.prepare(`INSERT INTO users (email, username, password_hash, email_verified, role, organization_id)
-                  VALUES (?, ?, ?, 1, 'org_admin', ?)`)
-        .run(emailN, adminUsername, hash, org.id);
+                  VALUES (?, ?, ?, 1, 'org_owner', ?)`)
+        .run(emailN, adminUsername, hash, org.id);              // the first person of the organization is its organization owner
       return org;
     }).immediate();
     audit.log({ req, user: req.user, action: 'org.create', status: 'ok', targetType: 'organization', targetId: out.id, payload: { name } });
@@ -1907,8 +1918,8 @@ function registerRoutes(app) {
   app.get('/api/orgs/pending', requireRole('owner'), (req, res) => {
     const pending = db.prepare(`
       SELECT o.id, o.name, o.slug, o.created_at,
-        (SELECT username FROM users u WHERE u.organization_id = o.id AND u.role = 'org_admin' ORDER BY u.created_at LIMIT 1) AS admin_username,
-        (SELECT email    FROM users u WHERE u.organization_id = o.id AND u.role = 'org_admin' ORDER BY u.created_at LIMIT 1) AS admin_email
+        (SELECT username FROM users u WHERE u.organization_id = o.id AND u.role IN ('org_owner', 'org_admin') ORDER BY u.created_at LIMIT 1) AS admin_username,
+        (SELECT email    FROM users u WHERE u.organization_id = o.id AND u.role IN ('org_owner', 'org_admin') ORDER BY u.created_at LIMIT 1) AS admin_email
       FROM organizations o WHERE o.status = 'pending' ORDER BY o.created_at DESC
     `).all();
     res.json({ ok: true, pending });
@@ -1921,6 +1932,9 @@ function registerRoutes(app) {
     const org = db.prepare('SELECT * FROM organizations WHERE id = ?').get(orgId);
     if (!org) return res.status(404).json({ error: 'Organization not found' });
     db.prepare("UPDATE organizations SET status = 'active' WHERE id = ?").run(orgId);
+    // the first person of an approved organization becomes its organization owner
+    db.prepare(`UPDATE users SET role = 'org_owner' WHERE id = (SELECT id FROM users WHERE organization_id = ? AND role = 'org_admin' ORDER BY created_at, id LIMIT 1)
+                AND NOT EXISTS (SELECT 1 FROM users WHERE organization_id = ? AND role = 'org_owner')`).run(orgId, orgId);
     audit.log({ req, user: req.user, action: 'org.approve', status: 'ok', targetType: 'organization', targetId: orgId });
     res.json({ ok: true });
   });
@@ -2176,8 +2190,8 @@ function registerRoutes(app) {
         return res.status(403).json({ error: 'Not a member of your site' });
     } else {
       if (!canManageOrg(req.user, orgId)) return res.status(403).json({ error: 'Not your organization' });
-      if (member.role === 'org_admin' && req.user.role !== 'owner')
-        return res.status(403).json({ error: 'Only the owner can edit an organization admin' });
+      if (isOrgAdminRole(member.role) && req.user.role !== 'owner' && !(req.user.role === ROLES.orgOwner && member.role === ROLES.admin))
+        return res.status(403).json({ error: 'Only the organization owner or the platform owner can edit an admin' });
     }
 
     let { username, email, password, role, siteId, active } = req.body || {};
@@ -2259,8 +2273,8 @@ function registerRoutes(app) {
         return res.status(403).json({ error: 'Not a member of your site' });
     } else {
       if (!canManageOrg(req.user, orgId)) return res.status(403).json({ error: 'Not your organization' });
-      if (member.role === 'org_admin' && req.user.role !== 'owner')
-        return res.status(403).json({ error: 'Only the owner can remove an organization admin' });
+      if (isOrgAdminRole(member.role) && req.user.role !== 'owner' && !(req.user.role === ROLES.orgOwner && member.role === ROLES.admin))
+        return res.status(403).json({ error: 'Only the organization owner or the platform owner can remove an admin' });
     }
 
     const tx = db.transaction(() => {

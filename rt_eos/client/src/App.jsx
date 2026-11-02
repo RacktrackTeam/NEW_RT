@@ -9,14 +9,12 @@ import { PhotoZoom } from './components/PhotoZoom.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import { Loading } from './components/Text.jsx';
 import NavBar, { hasOwnTabs } from './components/NavBar.jsx';
-import { isAuthCallbackUrl, parseAuthFragment } from './utils/socialSession';
 import { setupDecision, setupUnknown } from './utils/setupGuard';
 import { clearPendingScan, fetchScanJob, getPendingScan } from './utils/pendingScan';
 import { isAdmin, isManager } from './utils/format';
 import SignInPage from './pages/SignInPage.jsx';
 import AcceptInvitePage from './pages/AcceptInvitePage.jsx';
 import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx';
-import AuthCallbackPage from './pages/AuthCallbackPage.jsx';
 import PendingPage from './pages/PendingPage.jsx';
 import HomePage from './pages/HomePage.jsx';
 import ScanPage from './pages/ScanPage.jsx';
@@ -122,28 +120,6 @@ function AndroidBack() {
 
 /* The social sign-in comes back to the phone as a deep link; the web build
    lands on /auth/callback instead. */
-function SocialDeepLink() {
-  const navigate = useNavigate();
-  const { adoptSession } = useAuth();
-  useEffect(() => {
-    if (!Capacitor.isNativePlatform()) return undefined;
-    let sub;
-    (async () => {
-      sub = await CapApp.addListener('appUrlOpen', ({ url }) => {
-        if (!isAuthCallbackUrl(url)) return;
-        const result = parseAuthFragment(url);
-        if (!result) return;
-        Browser.close().catch(() => {});
-        if (!result.ok) { navigate('/login', { replace: true, state: { socialError: result.message } }); return; }
-        adoptSession(result.token, result.user);
-        navigate('/', { replace: true });
-      });
-    })();
-    return () => { sub?.remove?.(); };
-  }, [adoptSession, navigate]);
-  return null;
-}
-
 /* A scan that was being read when the phone put the app to sleep: ask the
    server what became of it and open its result. */
 function PendingScanResumer() {
@@ -204,7 +180,6 @@ function Routed() {
           <Route path="/login" element={<SignInPage />} />
           <Route path="/invite/:code" element={<AcceptInvitePage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/pending" element={<PendingRoute><PendingPage /></PendingRoute>} />
 
           <Route element={<Shell />}>
@@ -255,7 +230,6 @@ export default function App() {
       <AuthProvider>
         <ToastProvider>
           <AndroidBack />
-          <SocialDeepLink />
           <PendingScanResumer />
           <Routed />
           <PhotoZoom />

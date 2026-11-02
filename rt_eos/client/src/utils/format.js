@@ -1,16 +1,17 @@
 /* Words and numbers the way a person reads them. */
 
 export const ROLE_WORD = {
-  owner: 'Owner',
-  org_admin: 'Organization admin',
+  owner: 'Platform owner',
+  org_owner: 'Organization owner',
+  org_admin: 'Admin',
   site_manager: 'Site manager',
   member: 'Technician',
 };
 
 export const roleWord = (role) => ROLE_WORD[role] || 'Technician';
 
-export const isManager = (role) => role === 'site_manager' || role === 'org_admin' || role === 'owner';
-export const isAdmin = (role) => role === 'org_admin' || role === 'owner';
+export const isManager = (role) => role === 'site_manager' || role === 'org_admin' || role === 'org_owner' || role === 'owner';
+export const isAdmin = (role) => role === 'org_admin' || role === 'org_owner' || role === 'owner';
 
 export function plural(n, one, many) {
   const k = Number(n) || 0;

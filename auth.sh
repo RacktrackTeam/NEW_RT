@@ -36,8 +36,6 @@ RT_MAIL_OUTBOX=$AUTH_DIR/outbox
 CORS_ALLOWED_ORIGINS=http://127.0.0.1:8700,http://localhost:8700,http://127.0.0.1:8701,http://localhost:8701
 COOKIE_SECURE=false
 # Optional: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM to send mail for real.
-# Optional: the Google, Apple and Facebook keys (see rt_eos/server/lib/oauthProviders.js);
-# without them the three buttons stay hidden.
 ENV
   echo "auth.sh: made $ENV_FILE"
 fi

@@ -144,6 +144,6 @@ def can_see(p, run):
         return True
     if run.get("org") is None or str(run.get("org")) != str(p.get("org")):
         return False
-    if p["role"] == "org_admin":
+    if p["role"] in ("org_admin", "org_owner"):
         return True
     return run.get("site") is not None and str(run.get("site")) == str(p.get("site"))

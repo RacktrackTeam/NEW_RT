@@ -19,19 +19,40 @@ Stop either with `kill $(lsof -ti TCP:<port>)`.
 
 ## Seeded accounts
 
-All three use the password in `data/auth/seed-password.txt`.
+All five use the password in `data/auth/seed-password.txt`.
 
 | Username | Role | Organization | Site |
 |---|---|---|---|
 | owner | platform owner | - | - |
-| admin | organization admin | Demo Organization | Hyderabad DC (setup complete) |
+| orgowner | organization owner | Demo Organization | Hyderabad DC (setup complete) |
+| admin | admin | Demo Organization | Hyderabad DC |
+| manager | site manager | Demo Organization | Hyderabad DC |
 | tech | technician | Demo Organization | Hyderabad DC |
 
 The proof adds a second organization (admin2, tech2, Pune DC) and a second site of the first organization (admin3, tech3, Chennai DC) with `node rt_eos/server/scripts/seed-auth.js --org ... --site ... --suffix 2`.
 
+## The five roles
+
+The roles are exactly five. The value stored for each stays RT-EOS's, so its checks keep working; every screen shows the name in the first column. `requireRole` in rt_eos/server/auth.js holds the list (ROLES) and lets an organization owner through wherever an admin may go.
+
+| Role | Stored as | Who | What they may do |
+|---|---|---|---|
+| Platform owner | `owner` | RackTrack | Approve or reject organizations, see every organization, site and run, the platform console (logs, dashboard), edit any admin or organization owner. Never sent into setup. |
+| Organization owner | `org_owner` | The first person of an approved organization (approval promotes the organization's first admin; the seed makes `orgowner`) | Everything an admin may do, and add, edit or remove the organization's admins. Only the platform owner edits an organization owner. |
+| Admin | `org_admin` | Runs one organization; the role that works with portal.racktrack.ai | The organization's settings, sites, people and invites, every run, copy and connection of the organization, first-run setup. Cannot edit another admin or the organization owner. |
+| Site manager | `site_manager` | Runs one site | The site's people (technicians: invite, password, on or off), the site's runs. |
+| Technician | `member` (shown as Technician everywhere) | Scans racks | Scan, see the runs of their own site, compare with the organization's copies. Never gated by setup. |
+
+Checked by name in: auth.js (requireRole, canManageOrg, canAccessSite, member edit and remove), lib/estate.js, lib/estate_profile.js, lib/rack_access.js, lib/scan_site.js, lib/site_scope.js, lib/tenant.js, routes/home.js, routes/org_data.js; the engine's server/rt_session.py (which runs a person sees); the screens' utils/format.js, utils/setupGuard.js, SitePage.jsx, SetupPage.jsx and mobile/app.js (the Profile entries and the setup redirect).
+
+## Removed by the owner's order (2 Nov 2026)
+
+- Google, Apple and Facebook sign-in: rt_eos/server/socialAuth.js, lib/oauthProviders.js, their routes in auth_service.js and app.js, the buttons on the engine's sign-in screen and RT-EOS's invite page, AuthCallbackPage, SocialSignIn and utils/socialSession.js, and the provider settings in rt_eos/.env and .env.example. The social_identities and oauth_states tables stay in the schema, empty; no code path offers them. GET /api/auth/providers answers 404.
+- Logical network features: a search of the served code and screens (mobile/, server/, rt_eos/server/auth_service.js and the routes it mounts, rt_eos/client/src) for firmware, marketplace, EVE-NG, Lab, Netdisco and SSH found none (only words like "hasShelf"). The switch_specs lookups stay. RT-EOS's full server (rt_eos/server/app.js) is not started by this app.
+
 ## What a person sees
 
-- **Sign in** (engine app): email or username and password, Forgot password? (a code by mail, then a new password), Create an organization (opens RT-EOS's own sign-up at /org/login). Google, Apple and Facebook buttons appear only when the service has their keys. Today it has none, so they are hidden.
+- **Sign in** (engine app): email or username and password, Forgot password? (a code by mail, then a new password), Create an organization (opens RT-EOS's own sign-up at /org/login). There is no Google, Apple or Facebook sign-in (removed, see below).
 - **Invite link**: `/app/#invite/<code>` shows the organization and site and asks for a username and password. RT-EOS's own link `/org/invite/<code>` works too.
 - **Waiting**: someone whose organization is not yet approved sees "Waiting for approval". The engine answers 403 to every call until the platform owner approves.
 - **First-run setup**: an organization admin whose organization is not set up is sent to RT-EOS's four-step setup popup at /org/setup. A technician is never sent there (RT-EOS decides this, as before).
@@ -62,7 +83,7 @@ With no SMTP settings, every message (sign-up code, reset code) is written as a 
 
 ## Proof
 
-`_cache/venv/bin/python tools/proof_auth.py` needs the service on 3302 and the engine on 8701. Run it with `--fixtures` first, which seeds the second organization and site and places four stored runs.
+`_cache/venv/bin/python tools/proof_auth.py --engine http://127.0.0.1:8700` needs the service on 3302 and the engine (8701 by default; 8700 since the merge). Run it with `--fixtures` first, which seeds the second organization and site and places four stored runs.
 
 On 2 Nov 2026 all 31 checks passed (`docs/proof/auth/results.json`):
 
@@ -78,7 +99,7 @@ RT-EOS's own server tests for these parts still pass: smoke, setup, setup mount,
 
 ## Reused from RT-EOS
 
-- **Unchanged**: `auth.js` (sign-in, sign-up, codes, refresh, invites, organizations, sites, members, approval), `socialAuth.js`, `routes/setup.js`, `routes/home.js`, `routes/org_data.js`, `routes/scan_sites.js`, `lib/estate.js` and the libraries they need, and the React screens for sign-in, setup, sites, people, invites, settings and the console.
+- **Unchanged**: `auth.js` (sign-in, sign-up, codes, refresh, invites, organizations, sites, members, approval), `routes/setup.js`, `routes/home.js`, `routes/org_data.js`, `routes/scan_sites.js`, `lib/estate.js` and the libraries they need, and the React screens for sign-in, setup, sites, people, invites, settings and the console.
 - **Changed**:
   - `rt_eos/server/auth_service.js` (new): app.js's security headers, CORS, CSRF check, credential rate limit and the routers above. Nothing else is mounted, and the /org/ screens are served from it.
   - `auth.js`: an outbox mail provider when `RT_MAIL_OUTBOX` is set and no SMTP is configured.
@@ -93,3 +114,9 @@ RT-EOS's own server tests for these parts still pass: smoke, setup, setup mount,
 - The camera-guide takes (`/api/captures`), close-ups and photos now need a session but are not yet split by organization.
 - The native app reaches the service at the engine's host on port 3302. A phone on another network needs `RT_AUTH_URL`, which the engine passes to the screens.
 - Social sign-in was not tried with real keys (no outside call allowed).
+
+## After the merge into rt-eos-integration (2 Nov 2026, evening)
+
+- The NetBox and ServiceNow mocks moved to 3303 and 3304 (sources.sh, src/source_db.py, the tests and proofs), so the sign-in service keeps 3302 and nothing uses 3301 or 5301.
+- tools/proof_auth.py rerun on the merged branch with the engine on 8700: 31 checks passed (the provider check now asserts the provider route is gone).
+- RT-EOS server tests for these parts: 76 passed (smoke, setup, setup mount, setup profile, tenant isolation, org data, home, site manager access).

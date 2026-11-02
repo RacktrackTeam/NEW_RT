@@ -137,7 +137,7 @@ function Spoc({ dc, s, showAll }) {
   const ap = dc.approver;
   const [changing, setChanging] = useState(false);
   const candidates = (s.members || []).filter((m) => m.active !== 0 && m.active !== false
-    && (Number(m.tenant_id) === Number(dc.id) || m.role === 'org_admin')
+    && (Number(m.tenant_id) === Number(dc.id) || m.role === 'org_admin' || m.role === 'org_owner')
     && Number(m.id) !== Number(ap?.user_id));
   const [mode, setMode] = useState('new');
   const [acc, setAcc] = useState({ username: '', email: '', password: '' });

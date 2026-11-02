@@ -95,7 +95,7 @@ function listFor(user) {
   if (!user) return { sites: [], preselect: null };
   const own = Number(user.tenant_id ?? user.tenantId ?? 0) || null;
   const org = Number(user.organization_id ?? user.organizationId ?? 0) || null;
-  const wide = user.role === 'owner' || user.role === 'org_admin';
+  const wide = user.role === 'owner' || (user.role === 'org_admin' || user.role === 'org_owner');
 
   let rows;
   if (wide && org) {

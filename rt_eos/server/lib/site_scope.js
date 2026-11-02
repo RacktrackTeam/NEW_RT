@@ -20,7 +20,7 @@ class ScopeError extends Error {
   }
 }
 
-const ADMIN_ROLES = new Set(['owner', 'org_admin']);
+const ADMIN_ROLES = new Set(['owner', 'org_owner', 'org_admin']);
 
 /**
  * @param {object} user   req.user

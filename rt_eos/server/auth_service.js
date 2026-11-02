@@ -13,7 +13,7 @@
  *
  * Every block below is copied from app.js unchanged in what it does: the
  * security headers, CORS, the CSRF origin check, the credential rate limit,
- * auth.registerRoutes, socialAuth, and the setup, home, org_data and
+ * auth.registerRoutes and the setup, home, org_data and
  * scan-sites routers. What is new: the RT-EOS client built with the base
  * path /org/ is served at /org/, and nothing else is mounted.
  *
@@ -120,8 +120,9 @@ const authLimit = uploadLimiter({
 app.use(['/api/auth/login', '/api/auth/signup', '/api/auth/forgot-password',
   '/api/auth/reset-password', '/api/auth/login-with-code',
   '/api/auth/verify-reset-code', '/api/auth/verify', '/api/auth/resend-code'], authLimit);
+// No self sign-up in racktrack-app (owner, 2 Nov 2026): organizations are created by the platform owner (POST /api/orgs).
+app.post('/api/auth/signup', (req, res) => res.status(404).json({ error: 'Organizations are created by RackTrack. Use Contact us on the sign-in page.' }));
 auth.registerRoutes(app);
-require('./socialAuth').registerRoutes(app);
 
 app.use('/api/setup', auth.requireAuth, require('./routes/setup'));
 app.use('/api/scan-sites', auth.requireAuth, require('./routes/scan_sites'));

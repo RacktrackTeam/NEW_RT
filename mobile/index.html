@@ -15,8 +15,8 @@
 <link rel="preload" href="/app/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/app/app.css?v=127">
 <link rel="stylesheet" href="/app/rt/rt-topology.css?v=12">
-<link rel="stylesheet" href="/app/flow.css?v=3">
-<link rel="stylesheet" href="/app/features.css?v=2"><!-- wt/features -->
+<link rel="stylesheet" href="/app/flow.css?v=13">
+<link rel="stylesheet" href="/app/features.css?v=3"><!-- wt/features -->
 <style>
 /* the Drift tab: the database the run is checked against, the matched record, the differences */
 #df-top { display:flex; flex-direction:column; gap:12px; width:100%; }
@@ -107,12 +107,28 @@
         <label>Password<input id="si-pass" type="password" autocomplete="current-password" maxlength="200" required></label>
         <button class="btn primary big block" type="submit">Sign in</button>
         <p class="err" id="si-err" hidden></p>
-        <div class="si-social" id="si-social" hidden></div>
-        <p class="si-links"><a href="#forgot">Forgot password?</a> <span class="muted">·</span> <a id="si-new" href="#">Create an organization</a></p>
+        <p class="si-links"><a href="#forgot">Forgot password?</a> <span class="muted">·</span> <a href="#contact">Contact us</a></p>
       </form>
       <p class="muted small" id="si-server" hidden></p>
     </div>
   </section>
+  <section class="screen" data-screen="contact" hidden>
+    <div class="auth">
+      <img class="logo big" src="/app/img/logo-192.png" alt="">
+      <h1>Contact us</h1>
+      <p class="muted">For a new organization, an account or help with signing in. RackTrack creates organizations; we answer by email.</p>
+      <form class="card form" id="contact">
+        <label>Your name<input id="ct-name" autocomplete="name" maxlength="80" required></label>
+        <label>Email<input id="ct-email" type="email" autocomplete="email" maxlength="120" required></label>
+        <label>Organization<input id="ct-org" autocomplete="organization" maxlength="120"></label>
+        <label>Message<textarea id="ct-msg" rows="4" maxlength="2000" required></textarea></label>
+        <button class="btn primary big block" type="submit">Send</button>
+        <p class="err" id="ct-err" hidden></p><p class="dfok" id="ct-ok" hidden>Thank you. We have your message and will answer by email.</p>
+        <p class="si-links"><a href="#signin">Back to sign in</a></p>
+      </form>
+    </div>
+  </section>
+
   <section class="screen" data-screen="forgot" hidden>
     <div class="auth">
       <h1>Reset your password</h1>
@@ -234,7 +250,7 @@
   <section class="screen" data-screen="result" hidden>
     <span id="res-eyebrow" hidden></span><span id="res-title" hidden></span><span id="res-sub" hidden></span><a id="rep-full" href="#" hidden></a>
     <div class="card note" id="res-pending" hidden><span class="dot run"></span><div><b>Ports are being read in the background.</b><p class="muted small">Makes, models and ports fill in when done. Everything else is final.</p></div></div>
-    <header class="rsh" id="sec-rack"><span class="rsn">1</span><div><h2>The rack picture</h2><p class="muted">The rack stitched from the video, with every unit numbered. Switch the layer to see free space, devices or types. Next: the devices read from it.</p></div></header>
+    <header class="rsh" id="sec-rack"><span class="rsn">1</span><div><h2>The rack picture</h2><p class="muted">The rack stitched from the video, with every unit numbered. Switch the layer to see free space, devices or types.</p></div></header>
     <div class="rpart" id="res-rack">
       <div class="card rkask" id="rk-ask" hidden></div>
       <a class="nextstrip" id="rk-next" href="#" hidden></a>
@@ -246,7 +262,7 @@
       <div class="caprow" id="caprow"><p class="laycap" id="lay-cap"></p><button class="link fittog" id="fit-tog" type="button">Zoom in</button></div>
       <aside class="webside" id="rack-side"></aside>
     </div>
-    <header class="rsh" id="sec-devices"><span class="rsn">2</span><div><h2>Devices read</h2><p class="muted">Every device found, top to bottom: its kind and where that came from, and where read its make, model and ports. Open one to check it. Next: the record to compare with.</p></div></header>
+    <header class="rsh" id="sec-devices"><span class="rsn">2</span><div><h2>Devices read</h2><p class="muted">Every device found, top to bottom: its kind and where that came from, and where read its make, model and ports. Open one to check it.</p></div></header>
     <div class="rpart" id="res-devices">
       <div id="dv-pick"><p class="glabel" id="dv-pick-title">Choose a device</p><div class="card flush plist2" id="dv-list"></div></div>
       <div id="dv-one" hidden>
@@ -259,15 +275,13 @@
       <div class="elegend" id="rt-legend"></div>
       <div class="rteos" id="rt-topo"></div>
     </div>
-    <header class="rsh" id="sec-record"><span class="rsn">3</span><div><h2>The record</h2><p class="muted">Choose the database to check this rack against and press Compare. You see which rack id the video read and which record it matched, with the proof. Change the record if it is wrong, then Continue.</p></div></header>
-    <div class="rpart" id="res-record"><div id="df-top"></div></div>
-    <header class="rsh" id="sec-diff"><span class="rsn">4</span><div><h2>Differences</h2><p class="muted">What the video shows that the record does not, and the other way round, after you Continue. Nothing is ever written back to the database. Next: the report.</p></div></header>
-    <div class="rpart" id="res-diff"><div id="diff-top"><p class="muted small">Compare against a database in step 3 first.</p></div></div>
-    <header class="rsh" id="sec-report"><span class="rsn">5</span><div><h2>Report</h2><p class="muted">The rack on one page to keep or share: units, devices, free space and, once compared, the differences.</p></div></header>
-    <div class="rpart" id="res-report"><div id="rp-cmp"></div><div id="rp-top"></div></div>
-    <!-- wt/features: step 6, the remaining RT-EOS functions on this run (mobile/features.js) -->
-    <header class="rsh" id="sec-tools"><span class="rsn">6</span><div><h2>More on this rack</h2><p class="muted">Find a port, the connections, the cables against the Excel matrix, the worklist, read again, the physical layer document, SFP advice and the topology.</p></div></header>
-    <div class="rpart" id="res-tools"></div>
+    <header class="rsh" id="sec-report"><span class="rsn">3</span><div><h2>Report</h2><p class="muted">The rack on one page: units, devices and free space. Below it, compare the rack against your database: the rack is identified step by step with its proof, then the differences are listed.</p></div></header>
+    <div class="rpart" id="res-report"><div id="rp-top"></div>
+      <div class="cmpsec" id="sec-compare"><h3>Compare against the database</h3><p class="muted small">Choose Excel workbook, NetBox or ServiceNow CMDB and press Compare. Check which rack it matched, then Continue. Nothing is ever written back to the database.</p><div id="df-top"></div></div>
+      <div class="cmpsec" id="sec-diff"><div id="diff-top"></div></div>
+      <!-- wt/features: the remaining RT-EOS functions on this run, inside the Report (mobile/features.js) -->
+      <div class="cmpsec" id="sec-tools"><h3>More on this rack</h3><p class="muted small">Find a port, the connections, the cables against the Excel matrix, the worklist, read again, the physical layer document, SFP advice and the topology.</p><div id="res-tools"></div></div>
+      <div id="res-others"></div></div>
   </section>
 
   <!-- wt/features: one rack tool at a time (#tools/<run>/<tool>, #tools/site) -->
@@ -335,11 +349,9 @@
 <!-- the result's own bar: it replaces the app bar while a result is open -->
 <nav class="bottom" id="rnav" hidden>
   <div class="pill">
-    <a href="#" data-rtab="rack"><svg class="ic"><use href="#i-rack"/></svg><span>1 Rack</span></a>
-    <a href="#" data-rtab="devices"><svg class="ic"><use href="#i-guide"/></svg><span>2 Devices</span></a>
-    <a href="#" data-rtab="record"><svg class="ic"><use href="#i-server"/></svg><span>3 Record</span></a>
-    <a href="#" data-rtab="diff"><svg class="ic"><use href="#i-check"/></svg><span>4 Differences</span></a>
-    <a href="#" data-rtab="report"><svg class="ic"><use href="#i-doc"/></svg><span>5 Report</span></a>
+    <a href="#" data-rtab="rack"><svg class="ic"><use href="#i-rack"/></svg><span>Rack</span></a>
+    <a href="#" data-rtab="devices"><svg class="ic"><use href="#i-guide"/></svg><span>Devices</span></a>
+    <a href="#" data-rtab="report"><svg class="ic"><use href="#i-doc"/></svg><span>Report</span></a>
   </div>
 </nav>
 <nav class="bottom" id="nav" hidden>
@@ -354,7 +366,7 @@
 <div id="lb" hidden><img id="lbimg" alt=""><span>tap to close</span></div>
 <script src="/app/topology.js?v=1"></script>
 <script src="/app/rt/rt-topology.js?v=12" defer></script>
-<script src="/app/app.js?v=148"></script>
-<script src="/app/features.js?v=2"></script><!-- wt/features -->
+<script src="/app/app.js?v=153"></script>
+<script src="/app/features.js?v=3"></script><!-- wt/features -->
 </body>
 </html>

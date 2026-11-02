@@ -18,7 +18,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs" / "proof" / (sys.argv[1] if len(sys.argv) > 1 else "crosscheck")
-APP, NETBOX, SNOW = "http://127.0.0.1:8700", "http://127.0.0.1:3301", "http://127.0.0.1:5301"
+APP, NETBOX, SNOW = "http://127.0.0.1:8700", "http://127.0.0.1:3303", "http://127.0.0.1:3304"
 RUN = "91af02c09bbc"
 WB = ROOT / "modules" / "sources" / "ground_truth" / "vdo1.xlsx"
 

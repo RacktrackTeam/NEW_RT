@@ -38,8 +38,8 @@
   // ---------------------------------------------------------------- routing: #signin #home #history #sweep #job/<id> #result/<id> #report/<id> #more #models
   var DETAIL = { job: 'Run', result: 'Result', history: 'History', models: 'Models and accuracy', connections: 'Connections', copies: 'Database copies', tools: 'Rack tools' };   // tools: wt/features
   // the result's bar: Main is the rack read from the data; the other four show the report's steps in groups
-  var TABS = { rack: '1 The rack picture', devices: '2 Devices read', record: '3 The record', diff: '4 Differences', report: '5 Report' };   // one page in this order; the keys are the steps to jump to
-  var ALIAS = { elevation: 'devices', drift: 'record', ports: 'devices' };   // ports live on each device (user, 2026-10-27: one place per device)
+  var TABS = { rack: 'Rack', devices: 'Devices', report: 'Report' };   // one page in three parts; the compare and its differences live inside the Report
+  var ALIAS = { elevation: 'devices', drift: 'compare', record: 'compare', diff: 'diff', ports: 'devices', compare: 'compare' };   // ports live on each device (user, 2026-10-27: one place per device)
   var KINDS = ['Switch', 'Router', 'Firewall', 'Gateway', 'Patch Panel', 'Server', 'Storage unit', 'PDU', 'UPS', 'Other'];
   var LAST = null;                                   // the run the Report tab opens: the one being looked at, else the newest finished one
   try { LAST = localStorage.getItem('rt_last') || null; } catch (e) {}
@@ -56,7 +56,8 @@
   function route() {
     var h = (location.hash || '#home').slice(1), name = h.split('/')[0], arg = h.split('/')[1], arg2 = h.split('/')[2];
     if (name === 'report') { if (arg) return go('result/' + arg + '/report'); if (LAST) return go('result/' + LAST + '/report'); toast('The report appears here once a video has been analysed.'); return go('home'); }
-    var rtab = name === 'result' ? (TABS[arg2] ? arg2 : ALIAS[arg2] || 'rack') : null;
+    var rtab = name === 'result' ? (TABS[arg2] ? arg2 : ALIAS[arg2] ? (ALIAS[arg2] === 'compare' || ALIAS[arg2] === 'diff' ? 'report' : ALIAS[arg2]) : 'rack') : null;
+    if (name === 'result' && (ALIAS[arg2] === 'compare' || ALIAS[arg2] === 'diff')) RES.jump = ALIAS[arg2];
     if (rtab) { var order = Object.keys(TABS), was = order.indexOf(RES.tab || 'rack'), now = order.indexOf(rtab); document.body.dataset.dir = now > was ? 'fwd' : now < was ? 'back' : 'same'; RES.tab = rtab; }   // the tab's content slides in from the side it came from
     if (!me && !AUTH_SCREENS[name]) { name = 'signin'; }
     if (me && AUTH_SCREENS[name]) { name = 'home'; }
@@ -97,7 +98,7 @@
   // RT-EOS's sign-in service (auth.sh, rt_eos/server/auth_service.js) signs the session: these screens call it directly and it sets
   // the rt_access cookie on this host, which the engine reads. Its own screens (organization, sites and people, settings, the
   // platform owner's console, the first-run setup) are RT-EOS's React screens at <service>/org/, sharing the same cookie.
-  var AUTH_SCREENS = { signin: 1, forgot: 1, invite: 1, pending: 1 };
+  var AUTH_SCREENS = { signin: 1, forgot: 1, invite: 1, pending: 1, contact: 1 };
   var AUTH = (function () {
     var base = location.protocol + '//' + location.hostname + ':3302';
     function url(p) { return base + p; }
@@ -116,7 +117,7 @@
       return call('/api/auth/me').then(function (j) {
         var u = j.user || {};
         if (u.organization && u.organization.status && u.organization.status !== 'active' && u.role !== 'owner') { me = null; return go('pending'); }
-        if (u.role === 'org_admin' && u.setup && u.setup.needsSetup) { location.href = url('/org/setup'); return; }
+        if ((u.role === 'org_admin' || u.role === 'org_owner') && u.setup && u.setup.needsSetup) { location.href = url('/org/setup'); return; }
         return api('/api/me').then(function (m) { me = m; setWho(m); go('home'); });
       });
     }
@@ -126,14 +127,12 @@
         .then(function () { $('si-pass').value = ''; try { localStorage.setItem('rt_user', $('si-user').value.trim()); } catch (x) {} return landed(); })
         .catch(function (x) { err('si-err', x); });
     });
-    $('si-new').addEventListener('click', function (e) { e.preventDefault(); location.href = url('/org/login'); });
-    function social() {     // Google, Apple and Facebook only when the service has their keys
-      call('/api/auth/providers').then(function (j) {
-        var list = (j.providers || []).filter(function (p) { return /google|apple|facebook/i.test(p.id || p); });
-        $('si-social').innerHTML = list.map(function (p) { var id = p.id || p; return '<a class="btn big block" href="' + esc(url('/api/auth/oauth/' + encodeURIComponent(id) + '/start?return=' + encodeURIComponent(location.origin + '/app/'))) + '">Continue with ' + esc(p.name || (id.charAt(0).toUpperCase() + id.slice(1))) + '</a>'; }).join('');
-        $('si-social').hidden = !list.length;
-      }).catch(function () { $('si-social').hidden = true; });
-    }
+    $('contact').addEventListener('submit', function (e) {          // Contact us: kept in the local outbox for RackTrack (no mail is sent from here)
+      e.preventDefault(); $('ct-err').hidden = true; $('ct-ok').hidden = true;
+      fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: $('ct-name').value, email: $('ct-email').value, organization: $('ct-org').value, message: $('ct-msg').value }) })
+        .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || r.statusText); $('contact').reset(); $('ct-ok').hidden = false; }); })
+        .catch(function (x) { $('ct-err').textContent = x.message; $('ct-err').hidden = false; });
+    });
     var fgStep = 1;
     function openForgot() { fgStep = 1; $('fg-step2').hidden = true; $('fg-go').textContent = 'Send the code'; $('fg-err').hidden = true; $('fg-lead').textContent = 'Enter the email on your account. We send a code to it.'; }
     $('forgot').addEventListener('submit', function (e) {
@@ -163,13 +162,13 @@
     function links(role) {     // Profile: the RT-EOS organization screens, by role (as RT-EOS's own routes allow them)
       var L = [];
       if (role === 'owner') L.push(['/org/console', 'Platform console', 'Organizations waiting, activity']);
-      if (role === 'owner' || role === 'org_admin') L.push(['/org/settings', 'Organization', 'Profile, sites, data settings']);
-      if (role === 'owner' || role === 'org_admin' || role === 'site_manager') L.push(['/org/site', 'Sites and people', 'People, roles, invites']);
+      if (role === 'owner' || role === 'org_owner' || role === 'org_admin') L.push(['/org/settings', 'Organization', 'Profile, sites, data settings']);
+      if (role === 'owner' || role === 'org_owner' || role === 'org_admin' || role === 'site_manager') L.push(['/org/site', 'Sites and people', 'People, roles, invites']);
       L.push(['/org/you', 'Settings', 'Your account']);
       $('org-links').innerHTML = L.map(function (x) { return '<a class="grow" href="' + esc(url(x[0])) + '"><svg class="ic"><use href="#i-server"/></svg><span>' + esc(x[1]) + '</span><em>' + esc(x[2]) + '</em><span class="arr">→</span></a>'; }).join('');
       $('org-links').hidden = false; $('org-label').hidden = false;
     }
-    return { url: url, call: call, where: where, refresh: refresh, landed: landed, social: social, openForgot: openForgot, openInvite: openInvite, links: links };
+    return { url: url, call: call, where: where, refresh: refresh, landed: landed, openForgot: openForgot, openInvite: openInvite, links: links };
   })();
   function setWho(j) {
     var site = j.site_name || '', ini = (j.name || '?').trim().charAt(0).toUpperCase();
@@ -207,13 +206,17 @@
       $('now-card').hidden = !running;
       if (running) { var n = stepOf(running.progress, running.status); $('now-title').textContent = running.partial ? 'Rack read, ports next' : 'Reading a rack'; $('now-step').textContent = running.partial ? '' : 'step ' + n + ' of 15'; $('now-card').href = (running.partial ? '#result/' : '#job/') + running.id;
         clearInterval(pollTimer); pollTimer = setInterval(function () { if ((location.hash || '#home') === '#home') loadHome(); }, 5000); }
-      var list = rows.filter(function (x) { return !x.demo && x.status !== 'running'; });
+      // one row per rack: its latest run (with that run's compare state); earlier runs of the rack are listed on its result page
+      var byRack = {}, order = [];
+      rows.filter(function (x) { return !x.demo && x.status !== 'running'; }).forEach(function (x) { var k = String(x.rack_id || x.id).toUpperCase();
+        if (!byRack[k]) { byRack[k] = []; order.push(k); } byRack[k].push(x); });
+      var list = order.map(function (k) { var g = byRack[k].slice().sort(function (a, b) { return (b.started || '').localeCompare(a.started || '') || (b.record ? 1 : 0) - (a.record ? 1 : 0); }); g[0]._scans = g.length; return g[0]; });
       $('home-racks').innerHTML = list.length ? '<div class="card flush">' + list.map(function (x) {
         var href = (x.status === 'done' || x.partial) ? '#result/' + x.id : '#job/' + x.id, s = x.summary || {};
         var rec = x.record ? esc(x.record.source) + ': ' + esc(x.record.rack_key) + (x.record.how === 'exact' ? ', exact' : x.record.how === 'close' ? ', close' : x.record.how === 'picked' ? ', picked' : '') : x.status === 'done' ? 'Not compared yet' : esc(x.error || 'Not finished');
         var diff = x.differences == null ? '' : '<span class="chip ' + (x.differences ? 'part' : 'done') + '">' + (x.differences ? pl(x.differences, 'difference') : 'No differences') + '</span>';
         return '<a class="rkrow" href="' + href + '"><span class="thumb">' + thumb(x) + '<svg class="ic"><use href="#i-rack"/></svg></span><span class="t"><b>' + esc(x.rack_id || x.title || x.name) + '</b>'
-          + '<small>Scanned ' + esc(when(x.started)) + (s.devices != null ? ' · ' + pl(s.devices, 'device') + ' · ' + s.units + ' units' : '') + '</small><small class="rkrec">' + rec + '</small></span><span class="side2">' + diff + '<svg class="ic chev"><use href="#i-next"/></svg></span></a>'; }).join('') + '</div>'
+          + '<small>' + (x._scans > 1 ? x._scans + ' scans, last ' : 'Scanned ') + esc(when(x.started)) + (s.devices != null ? ' · ' + pl(s.devices, 'device') + ' · ' + s.units + ' units' : '') + '</small><small class="rkrec">' + rec + '</small></span><span class="side2">' + diff + '<svg class="ic chev"><use href="#i-next"/></svg></span></a>'; }).join('') + '</div>'
         : '<div class="card waitcard"><b>No racks yet</b><p class="muted small">Scan a rack to begin: record it with the camera or upload a video.</p><a class="btn primary" href="#sweep">Scan a rack</a></div>';
     }).catch(function (e) { $('home-racks').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
@@ -526,15 +529,24 @@
   function openResult(id, tab) {
     if (!id) return go('history');
     var fresh = RES.id !== id;
-    if (fresh) { RES.sel = null; RES.view = null; RES.pick = null; RES.labelAsked = null; RES.cmp = null; RES.cmpSrc = null; RES.diffMode = null; $('df-top').innerHTML = ''; $('diff-top').innerHTML = ''; $('rp-cmp').innerHTML = ''; }
+    if (fresh) { RES.sel = null; RES.view = null; RES.pick = null; RES.labelAsked = null; RES.cmp = null; RES.cmpSrc = null; RES.diffMode = null; $('df-top').innerHTML = ''; $('diff-top').innerHTML = ''; }
     RES.id = id; clearInterval(RES.timer); remember(id);
-    RES.tab = tab; Object.keys(TABS).forEach(function (k) { $('res-' + k).hidden = false; }); $('res-elevation').hidden = false; $('res-eyebrow').textContent = TABS[tab]; $('rep-full').hidden = NATIVE;   // every step on one page
+    RES.tab = tab; Object.keys(TABS).forEach(function (k) { $('res-' + k).hidden = false; }); $('res-elevation').hidden = false; $('res-eyebrow').textContent = 'Result'; $('rep-full').hidden = NATIVE;   // every step on one page
     loadView(true);
     watchPorts();
     if (fresh || !RES.cmp) loadDrift();
+    if (fresh) loadOtherScans(id);
   }
   function loadView(first) {
-    api('/api/video/' + RES.id + '/view').then(function (v) { RES.view = v; renderResult(v, first); if (first) secTo(RES.tab); }).catch(function (e) { toast(e.message); if (first) go('job/' + RES.id); });
+    api('/api/video/' + RES.id + '/view').then(function (v) { RES.view = v; renderResult(v, first); if (first) { secTo(RES.jump || RES.tab); RES.jump = null; } }).catch(function (e) { toast(e.message); if (first) go('job/' + RES.id); });
+  }
+  function loadOtherScans(id) {                                         // the other scans of the same rack, newest first (Home lists a rack once)
+    var el = $('res-others'); el.innerHTML = '';
+    api('/api/video/history').then(function (rows) { var me_ = rows.filter(function (x) { return x.id === id; })[0]; if (!me_ || !me_.rack_id || RES.id !== id) return;
+      var others = rows.filter(function (x) { return x.id !== id && x.rack_id && x.rack_id.toUpperCase() === me_.rack_id.toUpperCase(); });
+      if (others.length) el.innerHTML = '<details class="card othscans"><summary>Earlier scans of this rack (' + others.length + ')</summary><ul class="dflines">' + others.map(function (x) { var s = x.summary || {};
+        return '<li><b>' + esc(when(x.started)) + '</b> <span class="muted small">' + (s.devices != null ? pl(s.devices, 'device') + ' · ' + s.units + ' units · ' : '') + (x.record ? 'compared with ' + esc(x.record.source) + ', ' + (x.differences ? pl(x.differences, 'difference') : 'no differences') : 'not compared') + '</span> <a href="#result/' + encodeURIComponent(x.id) + '">Open</a></li>'; }).join('') + '</ul></details>';
+    }).catch(function () {});
   }
   function secTo(tab) { if (!tab || tab === 'rack') return window.scrollTo(0, 0); var el = $('sec-' + tab); if (el) el.scrollIntoView({ block: 'start' }); }   // jump to a step of the result page
   function portCells(ports, max) {
@@ -545,7 +557,7 @@
   function devName(d) { var L = d.layout || {}; return L.vendor ? esc(L.vendor) + (L.model ? ' ' + esc(L.model) : '') : (L.mapped ? 'make and model not read' : ''); }
   function renderResult(v, first) {
     var s = v.rack.summary || {}, devs = v.devices || [], named = devs.filter(function (d) { return d.kind && d.kind !== 'Other'; }).length, lay = devs.filter(function (d) { return d.layout && (d.layout.fitted || d.layout.auto); }).length;
-    $('res-title').textContent = v.title || 'Rack';
+    $('res-title').textContent = (v.rack_id && v.rack_id.id) || v.title || 'Rack';
     // the result has no header: the top bar names the tab
     $('res-pending').hidden = true;
     applyFit(); drawLayer(v, LAY, first); renderReport(v); renderRackSide(v); renderRackAsk(v);
@@ -875,8 +887,8 @@
   function pc(x) { return x == null ? '' : Math.round(x * 100) + ' %'; }
   var OUTCOME = { one: 'named one rack', narrowed: 'narrowed the racks', skipped: 'skipped', none: 'no single rack', tied: 'tied' };
   var HINT = { missing: 'Check whether the device is still in the rack. If the video did not reach that unit, scan the whole rack.',
-    extra: 'A device is in the rack that the record does not list: add it to the record, or check the reading in step 2.',
-    moved: 'The device sits at another unit than the record says: update the record, or check the unit numbers in step 1.',
+    extra: 'A device is in the rack that the record does not list: add it to the record, or check the reading under Devices.',
+    moved: 'The device sits at another unit than the record says: update the record, or check the unit numbers on the rack picture.',
     height: 'The record and the video give the device a different size.', kind: 'The record and the video name a different kind of device.',
     make: 'The faceplate reads another make than the record.', model: 'The faceplate reads another model than the record.', serial: 'The serial read differs from the record.',
     port_type: 'Look at the port: if the video is right, the record has the wrong port type.', port_occupied: 'A cable is where the record expects none, or missing where it expects one.',
@@ -903,7 +915,7 @@
       if (!d.match && I.top && I.top.length) h += '<p class="glabel">The closest racks</p><div class="idtop">' + I.top.map(function (t) { return '<button class="btn" type="button" data-cmppick="' + esc(t.rack_key) + '">' + esc(t.rack_key) + '<small class="muted"> ' + esc(t.why) + '</small></button>'; }).join('') + '</div>';
       h += '<div class="dfrow"><label class="muted small" for="cmp-type">' + (d.match ? 'Use another record' : 'Which rack is this?') + '</label><input id="cmp-type" list="cmp-list" placeholder="Search or type a rack id" autocomplete="off"><datalist id="cmp-list">'
         + d.candidates.map(function (r) { return '<option value="' + esc(r.rack_key) + '">' + esc(r.rack_key) + ' - ' + pl(r.devices, 'device') + '</option>'; }).join('') + '</datalist><button class="btn" type="button" id="cmp-use">Use this record</button></div>'
-        + '<p class="muted small">A name not in this copy is kept as this rack\'s id for the next scan of it (step 1, Change).</p>'
+        + '<p class="muted small">A name not in this copy is kept as this rack\'s id for the next scan of it (Change, next to the rack id at the top).</p>'
         + (d.match ? '<div class="dfrow"><button class="btn primary big" type="button" id="cmp-continue">' + (d.confirmed ? 'Compared. Compare again' : 'Continue') + '</button></div>' : '') + '</div>';
     }
     $('df-top').innerHTML = h;
@@ -912,8 +924,8 @@
   function recordRow(d, name) { var r = (d.record || []).filter(function (x) { return x.name === name; })[0]; if (!r) return '';
     return [r.name, r.kind, [r.manufacturer, r.model].filter(Boolean).join(' '), r.ru_start != null ? 'U' + r.ru_start + (r.ru_height > 1 ? '-' + (r.ru_start + r.ru_height - 1) : '') : ''].filter(Boolean).map(esc).join(' · '); }
   function renderDiff(d) {
-    var el = $('diff-top'), rp = $('rp-cmp');
-    if (!(d.confirmed && d.drift && d.match)) { el.innerHTML = '<p class="muted small">Press Compare in step 3, check the record, then Continue.</p>'; rp.innerHTML = ''; return; }
+    var el = $('diff-top');
+    if (!(d.confirmed && d.drift && d.match)) { el.innerHTML = ''; return; }
     var rows = d.drift.rows, mode = RES.diffMode || 'short', by = {}, src = d.sources[d.source];
     rows.forEach(function (r) { by[r.what] = (by[r.what] || 0) + 1; });
     var head = '<b>' + rows.length + '</b> ' + (rows.length === 1 ? 'difference' : 'differences') + ' against <b>' + esc(d.match.rack_key) + '</b> in ' + esc(src);
@@ -928,7 +940,6 @@
       + '<p>' + esc(r.words) + '</p><p class="muted small">' + esc(HINT[r.type] || '') + '</p></div>'; }).join('');
     if (d.drift.notes.length) h += '<details class="card"><summary>Not checked (' + d.drift.notes.length + ')</summary><ul class="muted small">' + d.drift.notes.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('') + '</ul></details>';
     el.innerHTML = h;
-    rp.innerHTML = '<div class="card"><span class="glabel">Compared with the record</span><p>' + head + '. ' + (rows.length ? Object.keys(by).map(function (k) { return by[k] + ' ' + k.toLowerCase(); }).join(', ') + '.' : 'No differences.') + ' <a href="#result/' + encodeURIComponent(RES.id) + '/diff">See step 4</a></p></div>';
   }
   document.addEventListener('change', function (e) { if (e.target.id !== 'cmp-src') return; RES.cmpSrc = e.target.value; renderCompare(RES.cmp); });
   document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('#cmp-go, #cmp-copy, #cmp-use, #cmp-continue, [data-cmppick], [data-dfmode], [data-cmpchange]'); if (!t) return;
@@ -993,7 +1004,7 @@
   // Database copies (Profile): every copy with its source, version, time and counts; the active ones marked; delete
   function loadCopies() { api('/api/sources/copies').then(renderCopies).catch(function (e) { $('cp-list').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
   function renderCopies(d) {
-    if (!d.copies.length) { $('cp-list').innerHTML = '<div class="card"><p class="muted">No copy yet. Read a workbook or copy NetBox or the CMDB in from a run\'s Drift tab.</p></div>'; return; }
+    if (!d.copies.length) { $('cp-list').innerHTML = '<div class="card"><p class="muted">No copy yet. Read a workbook or copy NetBox or the CMDB in above.</p></div>'; return; }
     $('cp-list').innerHTML = '<div class="card flush"><table class="dftable cptable"><thead><tr><th>Source</th><th class="wide">Version</th><th class="wide">Copied</th><th class="cpn">Racks</th><th class="cpn">Devices</th><th class="cpn wide">Ports</th><th class="wide">From</th><th>State</th><th></th></tr></thead><tbody>'
       + d.copies.map(function (c) { return '<tr data-copy="' + c.id + '"' + (c.active ? ' class="on"' : '') + '><td><b>' + esc(d.sources[c.source] || c.source) + '</b><span class="cpwhen small muted">v' + c.version + ' · ' + esc(c.imported_at.replace('T', ' ').slice(0, 16)) + '</span></td><td class="mono wide">v' + c.version + '</td><td class="mono small wide">' + esc(c.imported_at.replace('T', ' ').slice(0, 16)) + '</td>'
         + '<td class="cpn">' + c.racks + '</td><td class="cpn">' + c.devices + '</td><td class="cpn wide">' + (c.ports || 0) + '</td><td class="wide small muted">' + esc(String(c.file || '').replace(/^workbook_[0-9a-f]{8}_/, '')) + '</td>'
@@ -1217,7 +1228,7 @@
       return r.ok ? r.json() : null;
     });
   }
-  AUTH.where().then(function () { AUTH.social(); return whoAmI(); }).then(function (j) {
+  AUTH.where().then(function () { return whoAmI(); }).then(function (j) {
     me = (j && j.name) ? j : null; if (me) setWho(me);
     var h = location.hash.slice(1).split('/')[0];
     if (j && j.pending) location.hash = '#pending';

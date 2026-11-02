@@ -238,7 +238,7 @@ function orgAccessLevel(user, orgId) {
   if (user.role === 'owner') return 'write';
   const own = Number(user.organization_id ?? user.organizationId ?? 0);
   if (!own || own !== Number(o.id)) return null;
-  return user.role === 'org_admin' ? 'write' : 'member';
+  return (user.role === 'org_admin' || user.role === 'org_owner') ? 'write' : 'member';
 }
 
 function orgProfileOf(o) {

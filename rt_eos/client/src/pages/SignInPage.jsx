@@ -20,7 +20,7 @@ export default function SignInPage() {
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
   // A failed social sign-in lands here with its reason.
-  const [error, setError] = useState(location.state?.socialError || null);
+  const [error, setError] = useState(null);
 
   // Everybody lands on Home; a deep link that bounced here is still honoured.
   const from = safeRedirect(location.state?.from, '/');

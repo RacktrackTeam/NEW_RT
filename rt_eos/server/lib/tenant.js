@@ -199,7 +199,7 @@ function visibleTenantIds(principal) {
   // through to its own tenant. Including it granted every Site in the
   // organisation, so the first time an org gained a second Site every site
   // manager in it would have picked up that Site's racks and scans.
-  if (role === 'org_admin' && orgId) {
+  if ((role === 'org_admin' || role === 'org_owner') && orgId) {
     const rows = db.prepare(`SELECT id FROM tenants WHERE organization_id = ?`).all(Number(orgId));
     const ids = rows.map((r) => r.id);
     // An org admin also holds a Site of their own (often the "Default" one),

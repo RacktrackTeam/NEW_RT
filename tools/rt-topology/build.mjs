@@ -3,7 +3,7 @@
 import { createRequire } from 'node:module';
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-const RT = '/Volumes/Racktrack/RT-EOS/client';
+const RT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../rt_eos/client');   // the RT-EOS client copied into this folder (its node_modules link into _cache)
 const require = createRequire(path.join(RT, 'package.json'));
 const esbuild = require('esbuild');
 const here = path.dirname(new URL(import.meta.url).pathname), out = path.resolve(here, '../../mobile/rt');

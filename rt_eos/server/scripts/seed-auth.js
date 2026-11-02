@@ -56,6 +56,9 @@ const ROSTER = [
   { username: 'owner', email: 'owner@racktrack.local', role: 'owner' },
   { username: `admin${SUFFIX}`, email: `admin${SUFFIX}@demo.local`, role: 'org_admin' },
   { username: `tech${SUFFIX}`, email: `tech${SUFFIX}@demo.local`, role: 'member' },
+  // the other two of the five roles: the organization owner (its first person) and a site manager
+  { username: `orgowner${SUFFIX}`, email: `orgowner${SUFFIX}@demo.local`, role: 'org_owner' },
+  { username: `manager${SUFFIX}`, email: `manager${SUFFIX}@demo.local`, role: 'site_manager' },
 ].map((r) => ({ ...r, password: PASSWORD }));
 
 const dataPaths = require('../lib/data_paths');
@@ -125,6 +128,8 @@ if (!site) {
 // backfill in auth.js gives them the "Default" site, which is never set up, and RT-EOS would send them to setup forever.
 const admin = upsertUser(ROSTER[1], org.id, site.id);
 const tech = upsertUser(ROSTER[2], org.id, site.id);
+const orgOwner = upsertUser(ROSTER[3], org.id, site.id);
+const manager = upsertUser(ROSTER[4], org.id, site.id);
 
 // The organization profile and the site's first-run setup, so nobody is
 // sent into the setup popup (as in seed-local-pilot.js).
@@ -154,7 +159,7 @@ fs.chmodSync(PASSWORD_FILE, 0o600);
 console.log(`Database:     ${TARGET}`);
 console.log(`Organization: ${org.name} (id ${org.id}, active)`);
 console.log(`Site:         ${site.name} (id ${site.id}), setup complete`);
-console.log(`Accounts:     owner (platform owner), admin${SUFFIX} (organization admin), tech${SUFFIX} (technician of the site)`);
-console.log(`Password:     the same for all three, in ${PASSWORD_FILE} (mode 600). Not printed.`);
+console.log(`Accounts:     owner (platform owner), orgowner${SUFFIX} (organization owner, id ${orgOwner.id}), admin${SUFFIX} (admin), manager${SUFFIX} (site manager, id ${manager.id}), tech${SUFFIX} (technician of the site)`);
+console.log(`Password:     the same for all five, in ${PASSWORD_FILE} (mode 600). Not printed.`);
 db.pragma('wal_checkpoint(TRUNCATE)');
 process.exit(0);

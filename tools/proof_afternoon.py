@@ -141,9 +141,9 @@ def main():
             if width == 1280:
                 shot("connections_empty")
                 f = 'form[data-cn="netbox"]'
-                pg.fill(f + ' input[name=address]', "http://127.0.0.1:3301"); pg.fill(f + ' input[name=token]', SECRETS[0]); pg.click(f + ' button[type=submit]'); pg.wait_for_timeout(700)
+                pg.fill(f + ' input[name=address]', "http://127.0.0.1:3303"); pg.fill(f + ' input[name=token]', SECRETS[0]); pg.click(f + ' button[type=submit]'); pg.wait_for_timeout(700)
                 f = 'form[data-cn="cmdb"]'
-                pg.fill(f + ' input[name=address]', "http://127.0.0.1:5399"); pg.fill(f + ' input[name=username]', "proof.user"); pg.fill(f + ' input[name=password]', SECRETS[1])
+                pg.fill(f + ' input[name=address]', "http://127.0.0.1:3399"); pg.fill(f + ' input[name=username]', "proof.user"); pg.fill(f + ' input[name=password]', SECRETS[1])
                 pg.click(f + ' button[type=submit]'); pg.wait_for_timeout(700)
                 for t in ("netbox", "cmdb"):
                     pg.click(f'form[data-cn="{t}"] [data-cntest]'); pg.wait_for_timeout(1500)
