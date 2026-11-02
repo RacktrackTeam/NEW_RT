@@ -273,12 +273,16 @@
       <div class="elegend" id="rt-legend"></div>
       <div class="rteos" id="rt-topo"></div>
     </div>
-    <div class="rpart" id="res-report"><div id="rp-top"></div>
-      <div class="cmpsec" id="sec-compare"><h3>Compare against the database</h3><p class="muted small">Choose Excel workbook, NetBox or ServiceNow CMDB and press Compare. Check which rack it matched, then Continue. Nothing is ever written back to the database.</p><div id="df-top"></div></div>
+    <div class="rpart" id="res-report">
+      <div class="rpbar"><div class="cmpdd"><button class="btn primary" type="button" id="cmp-btn" aria-haspopup="true" aria-expanded="false">Compare against the database</button>
+        <div class="ddmenu" id="cmp-menu" hidden><button type="button" data-cmpsrc="excel">Excel workbook</button><button type="button" data-cmpsrc="netbox">NetBox</button><button type="button" data-cmpsrc="cmdb">ServiceNow CMDB</button></div></div></div>
+      <div id="rp-top"></div>
+      <div class="cmpsec" id="sec-compare"><div id="df-top"></div></div>
       <div class="cmpsec" id="sec-diff"><div id="diff-top"></div></div>
-      <!-- wt/features: the remaining RT-EOS functions on this run, inside the Report (mobile/features.js) -->
-      <div class="cmpsec" id="sec-tools"><h3>More on this rack</h3><p class="muted small">Find a port, the connections, the cables against the Excel matrix, the worklist, read again, the physical layer document, SFP advice and the topology.</p><div id="res-tools"></div></div>
-      <div id="res-others"></div></div>
+      <div id="res-others"></div>
+      <!-- wt/features: the remaining RT-EOS functions on this run (mobile/features.js), opened by the small link below -->
+      <p class="rpmore"><a href="#" id="more-link">More on this rack</a></p>
+      <div id="sec-tools" hidden><div id="res-tools"></div></div></div>
   </section>
 
   <!-- wt/features: one rack tool at a time (#tools/<run>/<tool>, #tools/site) -->
