@@ -171,7 +171,7 @@
 
   <!-- home: the racks scanned and their state, one button -->
   <section class="screen" data-screen="home" hidden>
-    <div class="phead"><div><p class="eyebrow" id="greet-sub"></p><h1>Racks</h1><p class="muted">Every rack scanned, newest first: when it was scanned, the record it was compared with and how many differences were found. Open a rack to see the result.</p></div>
+    <div class="phead"><div><p class="eyebrow" id="greet-sub"></p><h1>Racks</h1><p class="muted">One row per rack: its last scan, what it was compared with and its state. Open a rack to see its result.</p></div>
       <a class="btn primary big" href="#sweep"><svg class="ic"><use href="#n-camera"/></svg>Scan a rack</a></div>
     <a class="card nowcard" id="now-card" href="#" hidden><i class="sig live"></i><b id="now-title">Reading your rack</b><span class="mono muted small" id="now-step"></span></a>
     <div id="home-racks" class="racklist"><p class="muted">Loading...</p></div>
@@ -186,25 +186,23 @@
 
   <!-- sweep: two ways in, the camera (the guided capture) or an upload -->
   <section class="screen scanpage" data-screen="sweep" hidden>
-    <div class="swh a1"><h1>Scan a rack</h1><p class="muted">Record the rack with the camera, top to bottom, or upload a video of it. Then the run reads it step by step and the result opens by itself.</p></div>
+    <div class="swh a1"><h1>Scan a rack</h1><p class="muted">Film the rack from top to bottom, or upload a video of it.</p></div>
     <div class="scanbody a2" id="sw-choices">
       <div class="upcard dropzone" id="dropzone" role="button" tabindex="0" aria-label="Pick a video">
-        <div class="dz-idle" id="dz-idle">
-          <span class="up-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4.5 4.5 0 0 1-.5-9 6 6 0 0 1 11.5 1.5A3.5 3.5 0 0 1 17.5 18H7z"/><path d="M12 13v7M9 16l3-3 3 3"/></svg></span>
-          <b>Tap to pick a video</b><small>MP4 or MOV · one pass, top to bottom</small>
-          <span class="or">or</span>
-          <button class="btn mini ink" id="sw-camera" type="button">Open camera</button>
+        <div class="dz-idle choices" id="dz-idle">
+          <button class="choice" id="sw-camera" type="button"><span class="cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="13" height="12" rx="2"/><path d="m15.5 10.5 6-3.5v10l-6-3.5"/></svg></span><b>Record with the camera</b><small>One slow pass, top to bottom</small></button>
+          <span class="choice" id="sw-pickvideo"><span class="cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m-5 5 5-5 5 5M4 20h16"/></svg></span><b>Upload a video</b><small>MP4 or MOV</small></span>
         </div>
-        <div class="dz-pick" id="dz-pick" hidden><video id="dz-video" muted playsinline preload="metadata"></video><div class="dz-meta"><b id="dz-name"></b><small id="dz-info"></small><button class="link" id="dz-clear" type="button">Choose another</button></div></div>
+        <div class="dz-pick" id="dz-pick" hidden><video id="dz-video" muted playsinline preload="metadata"></video><div class="dz-meta"><b id="dz-name"></b><small id="dz-info"></small><button class="link" id="dz-clear" type="button">Change</button></div></div>
       </div>
-      <div class="scanfoot a3"><button class="btn primary big" id="vsend" type="button" disabled><i class="sig"></i>Analyse</button></div>
-      <div class="rules a3" id="sw-tips"><span class="glabel">How to film</span>
+      <div class="scanfoot a3"><button class="btn primary big" id="vsend" type="button" disabled>Read the rack</button></div>
+      <details class="rules a3" id="sw-tips"><summary>How to film</summary>
         <ul class="rulelist">
-          <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18h2"/></svg></i><div><b>Hold the phone upright</b><small>The rack fills the picture</small></div></li>
-          <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v18M18 3v18"/><path d="M9 7h6M9 12h6M9 17h6"/></svg></i><div><b>Keep both rails in view</b><small>Left and right rails inside the frame</small></div></li>
-          <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16"/><path d="M7 15l5 5 5-5"/></svg></i><div><b>Glide slowly, top to bottom</b><small>One pass, 20 to 60 seconds</small></div></li>
+          <li><div><b>Hold the phone upright</b><small>The rack fills the picture</small></div></li>
+          <li><div><b>Keep both rails in view</b><small>Left and right rails inside the frame</small></div></li>
+          <li><div><b>Glide slowly, top to bottom</b><small>One pass, 20 to 60 seconds</small></div></li>
         </ul>
-      </div>
+      </details>
       <button id="sw-upload" type="button" hidden></button>
       <input type="file" id="vcam" accept="video/*" capture="environment" hidden>
       <input type="file" id="vfile" accept="video/*" hidden>
@@ -351,10 +349,6 @@
     <a href="#" data-rtab="connections" data-tool="1"><svg class="ic"><use href="#i-server"/></svg><span>Connections</span></a>
     <a href="#" data-rtab="cables" data-tool="1"><svg class="ic"><use href="#i-doc"/></svg><span>Cables</span></a>
     <a href="#" data-rtab="worklist" data-tool="1"><svg class="ic"><use href="#i-check"/></svg><span>Worklist</span></a>
-    <a href="#" data-rtab="again" data-tool="1"><svg class="ic"><use href="#i-refresh"/></svg><span>Read again</span></a>
-    <a href="#" data-rtab="physical" data-tool="1"><svg class="ic"><use href="#i-guide"/></svg><span>Physical layer</span></a>
-    <a href="#" data-rtab="sfp" data-tool="1"><svg class="ic"><use href="#i-chart"/></svg><span>SFP advice</span></a>
-    <a href="#" data-rtab="topology" data-tool="1"><svg class="ic"><use href="#i-more"/></svg><span>Topology</span></a>
   </div>
 </nav>
 <nav class="bottom" id="nav" hidden>

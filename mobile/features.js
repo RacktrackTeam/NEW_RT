@@ -244,5 +244,15 @@
     if (h[0] === 'result' && h[1]) { delete VIEW[h[1]]; fillResult(h[1]); }
   }
   window.addEventListener('hashchange', onHash); onHash();
-  window.RTFEAT = { open: open, idsBlock: idsBlock, fillResult: fillResult };
+  // SFP advice on a device's own page: which optic and cable fit the fibre or SFP ports read on it (nothing for a device without them)
+  var SFPS = {};
+  function sfpInto(box, run, index) {
+    if (!box) return;
+    (SFPS[run] ? Promise.resolve(SFPS[run]) : api('/api/video/' + encodeURIComponent(run) + '/sfp-advice').then(function (r) { SFPS[run] = r; return r; })).then(function (r) {
+      var xs = (r.items || []).filter(function (x) { return x.index === index; }); if (!xs.length || !box.isConnected) return;
+      box.insertAdjacentHTML('beforeend', '<div class="card ft-sfp"><span class="eyebrow">SFP advice</span>' + xs.map(function (x) {
+        return '<h2>' + x.count + ' ' + esc(x.port_type) + (x.count === 1 ? ' port' : ' ports') + '</h2><div class="ft-kv"><span>Optic</span><b>' + esc(x.suggestion.optic) + '</b></div><div class="ft-kv"><span>Cable</span><b>' + esc(x.suggestion.cable) + '</b></div>' + (x.suggestion.note ? '<p class="muted small">' + esc(x.suggestion.note) + '</p>' : ''); }).join('') + '</div>');
+    }).catch(function () {});
+  }
+  window.RTFEAT = { open: open, idsBlock: idsBlock, fillResult: fillResult, sfpInto: sfpInto };
 })();

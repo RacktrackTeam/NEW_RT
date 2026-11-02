@@ -214,12 +214,12 @@
       rows.filter(function (x) { return !x.demo && x.status !== 'running'; }).forEach(function (x) { var k = String(x.rack_id || x.id).toUpperCase();
         if (!byRack[k]) { byRack[k] = []; order.push(k); } byRack[k].push(x); });
       var list = order.map(function (k) { var g = byRack[k].slice().sort(function (a, b) { return (b.started || '').localeCompare(a.started || '') || (b.record ? 1 : 0) - (a.record ? 1 : 0); }); g[0]._scans = g.length; return g[0]; });
-      $('home-racks').innerHTML = list.length ? '<div class="card flush">' + list.map(function (x) {
-        var href = (x.status === 'done' || x.partial) ? '#result/' + x.id : '#job/' + x.id, s = x.summary || {};
-        var rec = x.record ? esc(x.record.source) + ': ' + esc(x.record.rack_key) + (x.record.how === 'exact' ? ', exact' : x.record.how === 'close' ? ', close' : x.record.how === 'picked' ? ', picked' : '') : x.status === 'done' ? 'Not compared yet' : esc(x.error || 'Not finished');
-        var diff = x.differences == null ? '' : '<span class="chip ' + (x.differences ? 'part' : 'done') + '">' + (x.differences ? pl(x.differences, 'difference') : 'No differences') + '</span>';
-        return '<a class="rkrow" href="' + href + '"><span class="thumb">' + thumb(x) + '<svg class="ic"><use href="#i-rack"/></svg></span><span class="t"><b>' + esc(x.rack_id || x.title || x.name) + '</b>'
-          + '<small>' + (x._scans > 1 ? x._scans + ' scans, last ' : 'Scanned ') + esc(when(x.started)) + (s.devices != null ? ' · ' + pl(s.devices, 'device') + ' · ' + s.units + ' units' : '') + '</small><small class="rkrec">' + rec + '</small></span><span class="side2">' + diff + '<svg class="ic chev"><use href="#i-next"/></svg></span></a>'; }).join('') + '</div>'
+      $('home-racks').innerHTML = list.length ? '<div class="rktable"><div class="rkhead"><span>Rack</span><span>Last scan</span><span>Compared with</span><span>State</span><span></span></div>' + list.map(function (x) {
+        var href = (x.status === 'done' || x.partial) ? '#result/' + x.id : '#job/' + x.id, site = typeof x.site_name === 'string' ? x.site_name : typeof x.site === 'string' ? x.site : '';
+        var rec = x.record ? esc(x.record.source) : x.status === 'done' ? 'Not compared yet' : '-';
+        var st = x.status === 'failed' ? ['bad', 'Failed'] : x.differences == null ? (x.status === 'done' ? ['grey', 'Not compared'] : ['grey', 'Not finished']) : x.differences ? ['bad', pl(x.differences, 'difference')] : ['ok', 'No differences'];
+        return '<a class="rkrow2" href="' + href + '"><span class="c-rack"><b>' + esc(x.rack_id || x.title || x.name) + '</b>' + (site ? '<small>' + esc(site) + '</small>' : '') + '</span>'
+          + '<span class="c-when">' + esc(when(x.started)) + (x._scans > 1 ? '<small>' + x._scans + ' scans</small>' : '') + '</span><span class="c-with">' + rec + '</span><span class="c-state"><span class="spill ' + st[0] + '">' + esc(st[1]) + '</span></span><svg class="ic chev"><use href="#i-next"/></svg></a>'; }).join('') + '</div>'
         : '<div class="card waitcard"><b>No racks yet</b><p class="muted small">Scan a rack to begin: record it with the camera or upload a video.</p><a class="btn primary" href="#sweep">Scan a rack</a></div>';
     }).catch(function (e) { $('home-racks').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
@@ -1154,6 +1154,7 @@
     var cine = $('cine'); if (cine) setTimeout(function () { cine.classList.add('play'); }, 350);
     var ob = $('res-dev').querySelector('.svgov .c-base'); if (ob) { var fitOv = function () { ob.nextElementSibling.setAttribute('viewBox', '0 0 ' + ob.naturalWidth + ' ' + ob.naturalHeight); }; if (ob.complete && ob.naturalWidth) fitOv(); else ob.onload = fitOv; }
     loadSpecs($('res-dev').querySelector('.specblock'));
+    if (!isUnit && window.RTFEAT && devs[at]) window.RTFEAT.sfpInto($('res-dev').querySelector('.dvbelow'), RES.id, devs[at].index);   // SFP advice lives on the device page now, not in a tab
     [].forEach.call($('res-dev').querySelectorAll('.dvinfo > *, .dvbelow > *'), function (el, i) { el.style.setProperty('--i', i); });
     drawLocator();
   }
