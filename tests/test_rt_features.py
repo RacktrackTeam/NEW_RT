@@ -121,3 +121,16 @@ def test_kind_words_say_the_true_source():
     assert SDB.device_kind(d2, "2026-10-27T12:54:50")["words"].startswith("Firewall, as read when its ports were mapped on 27 Oct 2026; the picture was not sure")
     assert SDB.device_kind(d3)["words"] == "Switch, from the faceplate"
     assert SDB.device_kind(dict(d1, kind_override={"kind": "Router", "by": "admin"}))["words"].startswith("Router, your correction (admin); Switch from the picture")
+
+
+def test_find_port_places_a_port_on_the_crop_when_the_layout_was_not_fitted():
+    import rt_features as RTF
+    fs = sorted((ROOT / "data" / "runs").glob("**/fx1hyd000001/result.json"))
+    if not fs:
+        pytest.skip("the stored run fx1hyd000001 is not in this folder")
+    r = json.loads(fs[0].read_text())
+    d1 = RTF.find_port(r, [], [], None, 1, 3)
+    assert d1["found"] and d1["placed"] == "crop" and d1["crop_box"] and d1["crop_file"].endswith("_cut.jpg")
+    d4 = RTF.find_port(r, [], [], None, 4, 25)
+    assert d4["found"] and d4["placed"] == "rack" and d4["read"]["type"] == "sfp" and len(d4["read"]["rack_polygon"]) == 4
+    assert RTF.find_port(r, [], [], None, 1, 99)["placed"] is None

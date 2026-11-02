@@ -492,7 +492,14 @@ def find_port(result, record, cables, rack_key, index, port):
                     cab = {"label": c.get(f"label_{e}") or c.get("cable_label"), "cable": c.get("cable_label"), "end": e.upper(),
                            "other": {"device": c.get(f"{o}_device"), "port": c.get(f"{o}_port"), "rack": c.get(f"{o}_rack")}, "type": c.get("cable_type"), "colour": c.get("cable_color")}
     kind = SDB.device_kind(d)["kind"]
+    # where the port can be drawn: on the rack picture (a polygon the port finder placed there), or on the device's own crop (the box it read
+    # there, which is all there is when the layout was not fitted), or nowhere (the ports were counted, not located)
+    pdm = {str(x.get("id")): x for x in (((d.get("layout") or {}).get("port_details") or {}).get("ports") or [])}
+    cbox = (pdm.get(str(port)) or {}).get("box") if p is not None else None
+    cut = ((d.get("layout") or {}).get("pictures") or {}).get("cut")
+    placed = "rack" if p and p.get("rack_polygon") else "crop" if cbox and cut else None
     return {"index": index, "device": (rec or {}).get("name") or f"D{index}", "kind": kind, "unit": SDB._units(*_span(d)), "port": port,
+            "placed": placed, "crop_file": cut if placed == "crop" else None, "crop_box": cbox if placed == "crop" else None,
             "found": p is not None, "read": p, "ports": [x["n"] for x in ports if x["n"] is not None], "cable": cab,
             "box": _bbox(p["rack_polygon"]) if p and p.get("rack_polygon") else _bbox(d.get("polygon")) if d.get("polygon") else None,
             "device_box": _bbox(d.get("polygon")) if d.get("polygon") else None}

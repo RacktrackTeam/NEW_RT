@@ -1849,6 +1849,13 @@ def api_features_find_port_jpg(job: str, device: int, port: int):
     j = _features_job(job)
     rid, key, result, record, cables = _features_record(j)
     fp = RTF.find_port(result, record, cables, key, device, port)
+    if fp is not None and fp.get("placed") == "crop":                      # the device's own crop with the port boxed: the only place this port was read
+        cf = pathlib.Path(j["dir"]) / pathlib.Path(fp["crop_file"]).name
+        if cf.exists():
+            img = Image.open(cf).convert("RGB"); dr = ImageDraw.Draw(img); x0, y0, x1, y1 = fp["crop_box"]; m = 3
+            dr.rectangle([x0 - m, y0 - m, x1 + m, y1 + m], outline=(220, 38, 38), width=max(2, img.size[0] // 220))
+            sc = max(1, 900 // img.size[0]); img = img.resize((img.size[0] * sc, img.size[1] * sc), Image.LANCZOS) if sc > 1 else img
+            return Response(jpeg_bytes(img), media_type="image/jpeg", headers={"Cache-Control": "no-store"})
     f = pathlib.Path(j["dir"]) / "rack.png"
     if fp is None or not f.exists() or not fp.get("device_box"):
         raise HTTPException(404, "No picture for this port.")
@@ -1857,10 +1864,11 @@ def api_features_find_port_jpg(job: str, device: int, port: int):
     x0, y0, x1, y1 = 0, max(0, int(dy0 - pad)), W, min(H, int(dy1 + pad))
     dr = ImageDraw.Draw(img)
     dr.rectangle([dx0, dy0, dx1, dy1], outline=(37, 99, 235), width=3)
-    if fp.get("found") and fp["read"].get("rack_polygon"):
-        bx = fp["box"]; cx, cy = (bx[0] + bx[2]) / 2, (bx[1] + bx[3]) / 2; rr = max(14, (bx[3] - bx[1]) * 1.1)
-        dr.ellipse([cx - rr, cy - rr, cx + rr, cy + rr], outline=(220, 38, 38), width=5)
-        dr.line([cx, cy - rr - 6, cx, max(y0 + 4, cy - rr - 60)], fill=(220, 38, 38), width=5)
+    if fp.get("placed") == "rack":
+        poly = [tuple(q) for q in fp["read"]["rack_polygon"]]; bx = fp["box"]; cx, cy = (bx[0] + bx[2]) / 2, (bx[1] + bx[3]) / 2
+        dr.line(poly + [poly[0]], fill=(220, 38, 38), width=4)               # the port itself outlined, from the polygon the port finder placed
+        rr = max(18, (bx[3] - bx[1]) * 1.4)
+        dr.ellipse([cx - rr, cy - rr, cx + rr, cy + rr], outline=(220, 38, 38), width=3)
     return Response(jpeg_bytes(img.crop((x0, y0, x1, y1))), media_type="image/jpeg", headers={"Cache-Control": "no-store"})
 
 
