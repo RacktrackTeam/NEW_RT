@@ -127,6 +127,9 @@ app.use('/api/setup', auth.requireAuth, require('./routes/setup'));
 app.use('/api/scan-sites', auth.requireAuth, require('./routes/scan_sites'));
 app.use('/api', require('./routes/home')({ requireAuth: auth.requireAuth }));
 app.use('/api', require('./routes/org_data')({ requireAuth: auth.requireAuth, audit }));
+// The platform owner's console (logs and the dashboard), the same routes app.js mounts. The scan feedback tally belongs
+// to the scan side, which this service does not run, so it counts nothing here.
+require('./routes/owner_console')(app, { auth, audit, logger, feedbackTally: () => ({ right: 0, wrong: 0 }) });
 
 // Anything else under /api is not this service's.
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
