@@ -251,3 +251,18 @@ details.rules summary::after { content:"+"; float:right; color:var(--t2); font-w
 }
 .dropzone .dz-idle.choices { align-items:stretch; justify-content:stretch; align-content:start; } .dropzone { align-items:stretch !important; justify-content:flex-start !important; }
 .dropzone, .dropzone .dz-idle.choices { width:100% !important; }
+
+/* Keyboard focus is always visible; no text is cut off at any width. */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible, [tabindex]:focus-visible { outline:2px solid #1f2a3a !important; outline-offset:2px; }
+h1, h2, b, .rkrow2 b, .fx-body, .fx-row span { overflow-wrap:anywhere; }
+
+/* At phone width the result's tab bar sits at the top, under the title bar, and scrolls sideways; the bottom of the screen is left for the thumb. */
+@media (max-width:760px) {
+  body.tabbed #rnav { position:fixed !important; top:var(--topbar-h, 61px); bottom:auto !important; left:0; right:0; padding:0 !important; background:#fff; border-bottom:1px solid var(--line); z-index:19; }
+  body.tabbed #rnav .pill { height:50px; max-width:none; border-radius:0; box-shadow:none !important; background:#fff; padding:0 8px; }
+  body.tabbed #rnav .pill a { flex-direction:row; gap:6px; min-width:0; padding:0 12px; border-radius:999px; height:36px; align-self:center; font-size:12px; }
+  body.tabbed #rnav .pill a span { font-size:12px; letter-spacing:0; text-transform:none; } body.tabbed #rnav .pill a .ic { width:16px; height:16px; }
+  body.tabbed #rnav .pill a.on { background:#1f2a3a; color:#fff !important; } body.tabbed #rnav .pill a.on .ic { stroke-width:2; }
+  body.tabbed main { padding-top:calc(50px + 16px) !important; padding-bottom:24px !important; }
+  body.tabbed .runpage, body.tabbed .fx-page { padding-bottom:16px; }
+}

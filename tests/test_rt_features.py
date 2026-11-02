@@ -132,5 +132,5 @@ def test_find_port_places_a_port_on_the_crop_when_the_layout_was_not_fitted():
     d1 = RTF.find_port(r, [], [], None, 1, 3)
     assert d1["found"] and d1["placed"] == "crop" and d1["crop_box"] and d1["crop_file"].endswith("_cut.jpg")
     d4 = RTF.find_port(r, [], [], None, 4, 25)
-    assert d4["found"] and d4["placed"] == "rack" and d4["read"]["type"] == "sfp" and len(d4["read"]["rack_polygon"]) == 4
+    assert d4["found"] and d4["placed"] == "crop" and d4["read"]["type"] == "sfp" and len(d4["read"]["rack_polygon"]) == 4 and d4["port_boxes"]["25"]
     assert RTF.find_port(r, [], [], None, 1, 99)["placed"] is None

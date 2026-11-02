@@ -476,6 +476,18 @@ def _detail_ports(d):
     return out
 
 
+def cut_boxes(d):
+    """The device's own crop (its 'cut' picture) and, per port id, the box the port finder read on it, in that picture's pixels.
+    Where there is no box, the bounding box of the port's polygon (the same picture). A port with neither is not located."""
+    L = d.get("layout") or {}
+    cut = (L.get("pictures") or {}).get("cut")
+    boxes = {str(p.get("id")): p.get("box") for p in (L.get("port_details") or {}).get("ports") or [] if p.get("box")}
+    for p in L.get("ports") or []:
+        if str(p.get("id")) not in boxes and p.get("polygon"):
+            boxes[str(p.get("id"))] = _bbox(p["polygon"])
+    return (cut if boxes else None), boxes
+
+
 def find_port(result, record, cables, rack_key, index, port):
     """A device and a port number: where it is on the rack picture, what the video read on it, and the matrix's cable and label there."""
     d = _dev(result, index)
@@ -494,12 +506,12 @@ def find_port(result, record, cables, rack_key, index, port):
     kind = SDB.device_kind(d)["kind"]
     # where the port can be drawn: on the rack picture (a polygon the port finder placed there), or on the device's own crop (the box it read
     # there, which is all there is when the layout was not fitted), or nowhere (the ports were counted, not located)
-    pdm = {str(x.get("id")): x for x in (((d.get("layout") or {}).get("port_details") or {}).get("ports") or [])}
-    cbox = (pdm.get(str(port)) or {}).get("box") if p is not None else None
-    cut = ((d.get("layout") or {}).get("pictures") or {}).get("cut")
-    placed = "rack" if p and p.get("rack_polygon") else "crop" if cbox and cut else None
+    cut, cboxes = cut_boxes(d)
+    cbox = cboxes.get(str(port)) if p is not None else None
+    placed = "crop" if cbox and cut else "rack" if p and p.get("rack_polygon") else None
     return {"index": index, "device": (rec or {}).get("name") or f"D{index}", "kind": kind, "unit": SDB._units(*_span(d)), "port": port,
             "placed": placed, "crop_file": cut if placed == "crop" else None, "crop_box": cbox if placed == "crop" else None,
+            "port_boxes": {k: v for k, v in cboxes.items()} if placed == "crop" else {},
             "found": p is not None, "read": p, "ports": [x["n"] for x in ports if x["n"] is not None], "cable": cab,
             "box": _bbox(p["rack_polygon"]) if p and p.get("rack_polygon") else _bbox(d.get("polygon")) if d.get("polygon") else None,
             "device_box": _bbox(d.get("polygon")) if d.get("polygon") else None}
@@ -529,7 +541,7 @@ def connections(result, record, drift_rows, cable_rows):
         for p in ports:
             st[p["state"] if p["state"] in st else "unknown"] += 1
         out.append({"index": i, "name": name.get(i) or f"D{i}", "kind": SDB.device_kind(d)["kind"], "unit": SDB._units(*_span(d)), "problems": probs,
-                    "ports": [{"n": p["n"], "id": p["id"], "type": p["type"], "state": p["state"], "colour": p["colour"]} for p in ports], "counts": st,
+                    "cut": cut_boxes(d)[0], "ports": [{"n": p["n"], "id": p["id"], "type": p["type"], "state": p["state"], "colour": p["colour"], "box": cut_boxes(d)[1].get(str(p["id"]))} for p in ports], "counts": st,
                     "serial": (d.get("ids") or {}).get("serial") or d.get("serial"), "asset_tag": (d.get("ids") or {}).get("asset_tag") or d.get("asset_tag")})
     out.sort(key=lambda x: -(SDB._unum(x["unit"]) or 0))
     return out
@@ -549,13 +561,14 @@ def worklist(result):
         if k["from"] not in ("corrected", "faceplate", "ports") and prob < LOW_DEVICE:
             items.append({"id": f"d{d['index']}", "kind": "device", "index": d["index"], "unit": SDB._units(*_span(d)), "read": k["kind"] or cl.get("class") or "Not sure",
                           "confidence": round(prob, 2), "question": f"What is the device at {SDB._units(*_span(d))}?",
-                          "why": f"The picture read {cl.get('class') or 'nothing sure'} at {round(100 * prob)} %."})
+                          "why": f"The picture read {cl.get('class') or 'nothing sure'} at {round(100 * prob)} %.", "cut": None, "box": None})
         n = 0
         for p in _detail_ports(d):
             if p["n"] is None or p["state"] in ("connected", "empty"):
                 continue
             items.append({"id": f"p{d['index']}-{p['n']}", "kind": "port", "index": d["index"], "port": p["n"], "unit": SDB._units(*_span(d)), "read": "not sure",
-                          "confidence": 0.0, "question": f"Is there a cable in port {p['n']} of D{d['index']}?", "why": "The video could not tell whether a cable is plugged in."})
+                          "confidence": 0.0, "question": f"Is there a cable in port {p['n']} of D{d['index']}?", "why": "The video could not tell whether a cable is plugged in.",
+                          "cut": cut_boxes(d)[0], "box": cut_boxes(d)[1].get(str(p["id"])), "type": p["type"]})
             n += 1
             if n >= PORTS_PER_DEVICE:
                 break

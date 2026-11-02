@@ -71,13 +71,16 @@
     else if (wide && tool) { var ts = document.querySelector('[data-screen="tools"]'); if (rn.parentNode !== ts) { ts.insertBefore(rn, ts.firstChild); rn.classList.add('inpage'); } }
     else if (rn.classList.contains('inpage')) { rn._home.insertBefore(rn, rn._next); rn.classList.remove('inpage'); }
     document.body.classList.toggle('web', wide);
-    $('rnav').hidden = !(me && (rtab || tool)); document.body.classList.toggle('result', !!(me && rtab));
+    $('rnav').hidden = !(me && (rtab || tool)); document.body.classList.toggle('tabbed', !!(me && (rtab || tool))); document.body.classList.toggle('result', !!(me && rtab));
     if (rtab || tool) document.querySelectorAll('#rnav a').forEach(function (a) { a.href = a.dataset.tool ? '#tools/' + arg + '/' + a.dataset.rtab : '#result/' + arg + (a.dataset.rtab === 'rack' ? '' : '/' + a.dataset.rtab); a.classList.toggle('on', a.dataset.rtab === (rtab || tool)); });
     if (tool) { var onA = document.querySelector('#rnav a.on'); if (onA && onA.scrollIntoView) onA.scrollIntoView({ inline: 'center', block: 'nearest' }); }
     document.querySelectorAll('[data-nav]').forEach(function (a) { a.classList.toggle('on', a.dataset.nav === tab); });
     $('nav').hidden = !me || !!rtab || !!tool; $('top').hidden = !me; $('side').hidden = !me; document.body.classList.toggle('signed', !!me);
     $('back').hidden = !DETAIL[name]; $('topmark').hidden = !!DETAIL[name]; $('toptitle').textContent = (rtab || tool) ? 'Result' : (DETAIL[name] || 'RackTrack');
     $('top').classList.toggle('detail', !!DETAIL[name]); $('who').hidden = !!DETAIL[name]; $('topspacer').hidden = !DETAIL[name]; if (name !== 'result') { $('topsub').hidden = true; }
+    var TT = { home: 'Racks', sweep: 'Scan a rack', job: 'Reading the rack', history: 'History', more: 'Profile', models: 'Models and accuracy', connections: 'Connections', copies: 'Database copies', signin: 'Sign in', contact: 'Contact us', forgot: 'Reset your password', invite: 'Accept your invite', pending: 'Waiting for approval' };
+    var tt = rtab ? TABS[rtab] : tool ? ({ find: 'Find a port', connections: 'Connections', cables: 'Cables', worklist: 'Worklist' }[tool] || 'Rack tool') : TT[name] || 'RackTrack';
+    document.title = tt + (tt === 'RackTrack' ? '' : ' - RackTrack');
     clearInterval(pollTimer); stopGuide();
     window.scrollTo(0, 0);
     if (name === 'home') loadHome(); else setTimeout(reveal, 0);
@@ -174,7 +177,7 @@
     return { url: url, call: call, where: where, refresh: refresh, landed: landed, openForgot: openForgot, openInvite: openInvite, links: links };
   })();
   function setWho(j) {
-    var site = j.site_name || '', ini = (j.name || '?').trim().charAt(0).toUpperCase();
+    var ROLE = { owner: 'Platform owner', org_admin: 'Organization admin', site_manager: 'Site manager', member: 'Technician' }, site = [ROLE[j.role] || '', j.site_name || ''].filter(Boolean).join(' · '), ini = (j.name || '?').trim().charAt(0).toUpperCase();
     $('who').textContent = ini; $('av2').textContent = ini; $('av3').textContent = ini; $('who2').textContent = j.name; $('who3').textContent = j.name; $('site2').textContent = site; $('site3').textContent = site; $('site2').hidden = !site; $('site3').hidden = !site;
     AUTH.links(j.role);
   }
