@@ -121,7 +121,9 @@ if (!site) {
   site = db.prepare('SELECT * FROM tenants WHERE id = ?').get(r.lastInsertRowid);
 }
 
-const admin = upsertUser(ROSTER[1], org.id, null);
+// The admin holds the organization's site as their own (as a sign-up admin does): with no site of their own the
+// backfill in auth.js gives them the "Default" site, which is never set up, and RT-EOS would send them to setup forever.
+const admin = upsertUser(ROSTER[1], org.id, site.id);
 const tech = upsertUser(ROSTER[2], org.id, site.id);
 
 // The organization profile and the site's first-run setup, so nobody is

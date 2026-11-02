@@ -58,6 +58,9 @@ async function callApi(path, options = {}) {
 export function AuthProvider({ children }) {
   const [{ token, user }, setState] = useState(readStored);
   const [loading, setLoading] = useState(false);
+  // racktrack-app: the engine's screens sign in and then open these screens at /org/ with only the cookie, so no user is
+  // stored yet. Until the first /api/auth/me answers, a protected screen waits instead of sending the person to /login.
+  const [booting, setBooting] = useState(() => !readStored().user);
 
   // Persist on every change.
   //
@@ -108,6 +111,7 @@ export function AuthProvider({ children }) {
         return null;
       })
       .then(data => { if (!cancelled && data?.user) setState(prev => ({ ...prev, user: data.user })); })
+      .finally(() => { if (!cancelled) setBooting(false); })
       .catch(() => {
         // Network error - keep the cached session. The user can still use
         // offline features; auth will revalidate next time the server is
@@ -226,7 +230,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={{
-      user, token, loading,
+      user, token, loading, booting,
       isAuthed: !!user,
       login, logout, refreshUser,
       forgotPassword, verifyResetCode, resetPassword, loginWithCode,
