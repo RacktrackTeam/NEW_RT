@@ -3,7 +3,7 @@ rack's NetBox CSV record with one planted difference:
   Excel   SP-R1-U15-SW02's model changed to TL-SG3428 in a copy of the vdo1 workbook   -> Wrong model
   NetBox  SP-R1-U7-PP3 moved from U7 to U8 in the NetBox mock                         -> Moved
   CMDB    SP-R1-U18-SW04's manufacturer changed to Cisco in the ServiceNow mock       -> Wrong make
-Everything goes through the screens (headless Chromium): the workbook upload, the two Copy in buttons, the source buttons.
+Everything goes through the screens (headless Chromium): the workbook upload and its report, Import, the two Copy in buttons, the source buttons.
 Needs the engine on 8700 (engine.sh) and the mocks on 3301 and 5301 (sources.sh). Writes docs/proof/today/.
 
   _cache/venv/bin/python tools/proof_today.py [run id]
@@ -64,6 +64,7 @@ def main():
                 if width == 1280:                                   # copy each database in once, through the screen
                     if src == "excel":
                         pg.set_input_files("#df-file", str(wb_path)); pg.click("#df-xlsx")
+                        pg.wait_for_selector("#df-import", timeout=15000); pg.click("#df-import")   # the report first, then Import
                     else:
                         pg.click(f'[data-dfimp="{src}"]')
                     pg.wait_for_timeout(1500)
