@@ -16,7 +16,7 @@
  */
 
 export function isSetupAdmin(user) {
-  return user?.role === 'owner' || user?.role === 'org_admin';
+  return user?.role === 'owner' || user?.role === 'org_admin' || user?.role === 'org_owner';
 }
 
 /**

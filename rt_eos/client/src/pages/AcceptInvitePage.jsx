@@ -3,7 +3,6 @@ import { Link, useParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import styles from './AuthPages.module.css';
 import AuthLayout, { AuthAside, IcAlert, IcEye } from '../components/AuthLayout.jsx';
-import SocialSignIn from '../components/SocialSignIn.jsx';
 import { nextPasswordRule } from '../components/PasswordFields.jsx';
 import { apiUrl } from '../utils/api';
 import { setItem } from '../utils/safeStorage';
@@ -92,7 +91,6 @@ export default function AcceptInvitePage() {
             Join <b>{org}</b>{site ? <> · {String(site)}</> : null} as {roleWord(invite.role)}.
           </p>
 
-          <SocialSignIn mode="invite" inviteCode={code} />
 
           <form className={styles.form} onSubmit={submit} autoComplete="on" noValidate>
             <div className={styles.field}>

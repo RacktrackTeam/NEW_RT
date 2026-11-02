@@ -242,8 +242,8 @@ def test_forgot_and_invite(auth, engine):
     me = j.e("GET", "/api/me")
     check("an invite link is accepted and opens the engine on the invited site", inv.status_code == 200 and look.status_code == 200 and acc.status_code == 200
           and me.status_code == 200 and me.json().get("site_name") == "Hyderabad DC", f"{inv.status_code} {look.status_code} {acc.status_code} {me.status_code}")
-    prov = j.a("GET", "/api/auth/providers").json()
-    check("Google, Apple and Facebook stay hidden without keys (the service lists no provider)", prov.get("providers") == [], json.dumps(prov))
+    prov = j.a("GET", "/api/auth/providers")
+    check("Google, Apple and Facebook sign-in are gone (no provider route, the owner's order of 2 Nov)", prov.status_code == 404, str(prov.status_code))
 
 
 # ------------------------------------------------------------------ 6 screenshots

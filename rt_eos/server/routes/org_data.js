@@ -48,7 +48,7 @@ module.exports = function orgDataRouter({ requireAuth, audit = null } = {}) {
     const u = req.user || {};
     const sameOrg = Number(u.organization_id ?? 0) === orgId;
     if (!org || (u.role !== 'owner' && !sameOrg)) return res.status(404).json({ error: 'Organization not found.' });
-    if (u.role !== 'owner' && u.role !== 'org_admin') {
+    if (u.role !== 'owner' && u.role !== 'org_owner' && u.role !== 'org_admin') {
       return res.status(403).json({ error: 'Only an organization admin can see or change the data settings.' });
     }
     req.org = org;

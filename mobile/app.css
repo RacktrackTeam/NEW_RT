@@ -1219,5 +1219,4 @@ body[data-dir="back"] .rpart.mo > *, body[data-dir="back"] #dv-one.mo > * { anim
 
 /* racktrack-app sign-in: the links under the sign-in form and the Google / Apple / Facebook buttons (shown only when the service has keys) */
 .si-links { margin:4px 0 0; font-size:var(--fs-sub); text-align:center; } .si-links a { color:var(--ink); font-weight:600; }
-.si-social { display:flex; flex-direction:column; gap:8px; } .si-social:empty { display:none; }
 #forgot #fg-step2 { display:flex; flex-direction:column; gap:14px; } #forgot #fg-step2[hidden] { display:none; }

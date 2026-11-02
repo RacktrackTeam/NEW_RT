@@ -199,9 +199,9 @@ function accessLevel(user, tenantId) {
   const own = Number(user.tenant_id ?? user.tenantId ?? 0);
   const org = Number(user.organization_id ?? user.organizationId ?? 0);
   if (role === 'owner') return 'write';
-  if (role === 'org_admin' && org && Number(t.organization_id) === org) return 'write';
+  if ((role === 'org_admin' || role === 'org_owner') && org && Number(t.organization_id) === org) return 'write';
   if (own !== Number(t.id)) return null;
-  if (role === 'org_admin' || role === 'site_manager') return 'write';
+  if ((role === 'org_admin' || role === 'org_owner') || role === 'site_manager') return 'write';
   return 'read';
 }
 
@@ -476,7 +476,7 @@ function setApprover(tenantId, body = {}, userId = null) {
     const uid = _optInt(body.user_id, 'user_id', 1, Number.MAX_SAFE_INTEGER);
     const u = db.prepare('SELECT id, role, tenant_id, organization_id, active FROM users WHERE id = ?').get(uid);
     const inSite = u && Number(u.tenant_id) === Number(t.id);
-    const orgAdmin = u && u.role === 'org_admin' && t.organization_id != null
+    const orgAdmin = u && (u.role === 'org_admin' || u.role === 'org_owner') && t.organization_id != null
       && Number(u.organization_id) === Number(t.organization_id);
     if (!u || u.active === 0 || !(inSite || orgAdmin)) {
       throw new EstateError(400, 'The approver must be a member of this Site or an admin of its organisation');
@@ -624,7 +624,7 @@ function snapshot(tenantId) {
 
 // ── Per-principal state (what the app gates on) ───────
 function _isAdmin(user) {
-  return user && (user.role === 'owner' || user.role === 'org_admin');
+  return user && (user.role === 'owner' || (user.role === 'org_admin' || user.role === 'org_owner'));
 }
 
 /**

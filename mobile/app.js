@@ -115,7 +115,7 @@
       return call('/api/auth/me').then(function (j) {
         var u = j.user || {};
         if (u.organization && u.organization.status && u.organization.status !== 'active' && u.role !== 'owner') { me = null; return go('pending'); }
-        if (u.role === 'org_admin' && u.setup && u.setup.needsSetup) { location.href = url('/org/setup'); return; }
+        if ((u.role === 'org_admin' || u.role === 'org_owner') && u.setup && u.setup.needsSetup) { location.href = url('/org/setup'); return; }
         return api('/api/me').then(function (m) { me = m; setWho(m); go('home'); });
       });
     }
@@ -126,13 +126,6 @@
         .catch(function (x) { err('si-err', x); });
     });
     $('si-new').addEventListener('click', function (e) { e.preventDefault(); location.href = url('/org/login'); });
-    function social() {     // Google, Apple and Facebook only when the service has their keys
-      call('/api/auth/providers').then(function (j) {
-        var list = (j.providers || []).filter(function (p) { return /google|apple|facebook/i.test(p.id || p); });
-        $('si-social').innerHTML = list.map(function (p) { var id = p.id || p; return '<a class="btn big block" href="' + esc(url('/api/auth/oauth/' + encodeURIComponent(id) + '/start?return=' + encodeURIComponent(location.origin + '/app/'))) + '">Continue with ' + esc(p.name || (id.charAt(0).toUpperCase() + id.slice(1))) + '</a>'; }).join('');
-        $('si-social').hidden = !list.length;
-      }).catch(function () { $('si-social').hidden = true; });
-    }
     var fgStep = 1;
     function openForgot() { fgStep = 1; $('fg-step2').hidden = true; $('fg-go').textContent = 'Send the code'; $('fg-err').hidden = true; $('fg-lead').textContent = 'Enter the email on your account. We send a code to it.'; }
     $('forgot').addEventListener('submit', function (e) {
@@ -162,13 +155,13 @@
     function links(role) {     // Profile: the RT-EOS organization screens, by role (as RT-EOS's own routes allow them)
       var L = [];
       if (role === 'owner') L.push(['/org/console', 'Platform console', 'Organizations waiting, activity']);
-      if (role === 'owner' || role === 'org_admin') L.push(['/org/settings', 'Organization', 'Profile, sites, data settings']);
-      if (role === 'owner' || role === 'org_admin' || role === 'site_manager') L.push(['/org/site', 'Sites and people', 'People, roles, invites']);
+      if (role === 'owner' || role === 'org_owner' || role === 'org_admin') L.push(['/org/settings', 'Organization', 'Profile, sites, data settings']);
+      if (role === 'owner' || role === 'org_owner' || role === 'org_admin' || role === 'site_manager') L.push(['/org/site', 'Sites and people', 'People, roles, invites']);
       L.push(['/org/you', 'Settings', 'Your account']);
       $('org-links').innerHTML = L.map(function (x) { return '<a class="grow" href="' + esc(url(x[0])) + '"><svg class="ic"><use href="#i-server"/></svg><span>' + esc(x[1]) + '</span><em>' + esc(x[2]) + '</em><span class="arr">→</span></a>'; }).join('');
       $('org-links').hidden = false; $('org-label').hidden = false;
     }
-    return { url: url, call: call, where: where, refresh: refresh, landed: landed, social: social, openForgot: openForgot, openInvite: openInvite, links: links };
+    return { url: url, call: call, where: where, refresh: refresh, landed: landed, openForgot: openForgot, openInvite: openInvite, links: links };
   })();
   function setWho(j) {
     var site = j.site_name || '', ini = (j.name || '?').trim().charAt(0).toUpperCase();
@@ -1215,7 +1208,7 @@
       return r.ok ? r.json() : null;
     });
   }
-  AUTH.where().then(function () { AUTH.social(); return whoAmI(); }).then(function (j) {
+  AUTH.where().then(function () { return whoAmI(); }).then(function (j) {
     me = (j && j.name) ? j : null; if (me) setWho(me);
     var h = location.hash.slice(1).split('/')[0];
     if (j && j.pending) location.hash = '#pending';

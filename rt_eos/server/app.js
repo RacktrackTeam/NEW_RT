@@ -1911,10 +1911,6 @@ app.use(['/api/auth/login', '/api/auth/signup', '/api/auth/forgot-password',
   '/api/auth/reset-password', '/api/auth/login-with-code',
   '/api/auth/verify-reset-code', '/api/auth/verify', '/api/auth/resend-code'], authLimit);
 auth.registerRoutes(app);
-// "Continue with Google / Apple / Facebook". Registered after auth so it can
-// reuse the same token minting; its routes live under /api/auth/oauth/* and are
-// therefore already exempt from the pending-org gate in requireAuth.
-require('./socialAuth').registerRoutes(app);
 
 // ── Audit log query (auth-required) ───────────────────────────
 //

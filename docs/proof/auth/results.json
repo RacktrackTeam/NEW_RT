@@ -1,10 +1,10 @@
 {
- "when": "2026-11-02 15:08",
+ "when": "2026-11-02 15:30",
  "checks": [
   {
    "check": "no engine route answers without a session (no cookie, and a token signed with another key)",
    "ok": true,
-   "detail": "47 routes called twice"
+   "detail": "48 routes called twice"
   },
   {
    "check": "health stays open",
@@ -64,7 +64,7 @@
   {
    "check": "database copies are per organization",
    "ok": true,
-   "detail": "first 6, second 0"
+   "detail": "first 2, second 0"
   },
   {
    "check": "the second organization cannot delete the first one's copy",
@@ -89,7 +89,7 @@
   {
    "check": "the new organization starts as pending",
    "ok": true,
-   "detail": "{\"id\": 12, \"slug\": \"new-organization-612254-634a\", \"name\": \"New Organization 612254\", \"status\": \"pending\"}"
+   "detail": "{\"id\": 5, \"slug\": \"new-organization-613572-6286\", \"name\": \"New Organization 613572\", \"status\": \"pending\"}"
   },
   {
    "check": "the engine refuses a pending organization",
@@ -99,7 +99,7 @@
   {
    "check": "the owner sees it waiting and approves it",
    "ok": true,
-   "detail": "waiting [12, 11, 9, 7, 5], approve 200"
+   "detail": "waiting [5, 4], approve 200"
   },
   {
    "check": "after approval the same session opens the engine",
@@ -122,9 +122,9 @@
    "detail": "200 200 200 200"
   },
   {
-   "check": "Google, Apple and Facebook stay hidden without keys (the service lists no provider)",
+   "check": "Google, Apple and Facebook sign-in are gone (no provider route, the owner's order of 2 Nov)",
    "ok": true,
-   "detail": "{\"ok\": true, \"providers\": []}"
+   "detail": "404"
   },
   {
    "check": "the owner's console opens (logs and dashboard served by the sign-in service)",
@@ -134,7 +134,7 @@
   {
    "check": "the owner's organizations screen lists the organization waiting for approval",
    "ok": true,
-   "detail": "RackTrack Home Scan Map History Site Default O Owner Owner Organization settings ORGANIZATION New Organization 612254 New Organization 612182 New Organization 611991 New Organization 611896 New Organi"
+   "detail": "RackTrack Home Scan Map History Site Default O Owner Platform owner Organization settings ORGANIZATION New Organization 613572 New Organization 613484 Second Organization Demo Organization Organizatio"
   },
   {
    "check": "a new organization's admin is sent to RT-EOS's first-run setup",

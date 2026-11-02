@@ -50,7 +50,7 @@ function canAccessRack(principal, rackId, tenant) {
   if (!auth) return false;
   if (auth.role === 'owner') return true;
   // An org_admin sees every rack in their organization...
-  if (auth.role === 'org_admin'
+  if ((auth.role === 'org_admin' || auth.role === 'org_owner')
       && auth.organizationId
       && tenant.rackInOrg(rackId, auth.organizationId)) {
     return true;
@@ -97,7 +97,7 @@ function visibleRackIds(principal, tenant, { userId = null, perUser = false } = 
   const auth = normalize(principal);
   if (!auth) return new Set();
   if (auth.role === 'owner') return null;
-  if (auth.role === 'org_admin' && auth.organizationId) {
+  if ((auth.role === 'org_admin' || auth.role === 'org_owner') && auth.organizationId) {
     const ids = tenant.orgRackIds(auth.organizationId);
     if (auth.tenantId) for (const id of tenant.tenantRackIds(auth.tenantId)) ids.add(id);
     return ids;

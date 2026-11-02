@@ -56,9 +56,11 @@ export function allowed(viewer, p) {
     // The server lets a site manager change a technician's password and switch them on or off.
     return { edit: true, identity: false, role: false, site: false, active: true, remove: true };
   }
+  if (p.role === 'org_owner' && viewer.role !== 'owner') return none;                 // only the platform owner edits an organization owner
   if (viewer.role === 'org_admin' && p.role === 'org_admin') return none;
   if (!isAdmin(viewer.role)) return none;
-  return { edit: true, identity: true, role: p.role !== 'org_admin', site: p.role !== 'org_admin', active: true, remove: true };
+  const top = p.role === 'org_admin' || p.role === 'org_owner';
+  return { edit: true, identity: true, role: !top, site: !top, active: true, remove: true };
 }
 
 function rackFromOverview(r) {

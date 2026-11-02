@@ -38,7 +38,7 @@ const { rackNameFor } = require('../lib/rack_name');
 const { AUTH_DB } = require('../lib/data_paths');
 const { logger } = require('../lib/observability');
 
-const MANAGERS = new Set(['owner', 'org_admin', 'site_manager']);
+const MANAGERS = new Set(['owner', 'org_owner', 'org_admin', 'site_manager']);
 const RECENT = 8;
 
 let _db = null;
