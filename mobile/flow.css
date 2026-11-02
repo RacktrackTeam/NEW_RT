@@ -173,3 +173,33 @@ body.web.result #rnav.inpage { align-self:flex-start !important; margin:0 !impor
 .rpmore { margin:24px 0 8px; font-size:13px; } .rpmore a { color:var(--t2); text-decoration:underline; }
 @media (max-width:600px) { .cmpdd, #cmp-btn { width:100%; } .ddmenu { left:0; right:0; } }
 #sec-compare:has(#df-top:empty) { display:none; }
+
+/* Sign in: one centred column, white page, no card. */
+.screen[data-screen="signin"]:not([hidden]) { min-height:calc(100vh - 140px); min-height:calc(100dvh - 140px); display:flex; align-items:center; justify-content:center; }
+.auth.signin { padding:0 !important; max-width:360px !important; width:100%; gap:0; margin:0 auto !important; align-items:stretch; text-align:center; }
+.auth.signin .logo.big { align-self:center; margin-bottom:4px; }
+.auth.signin h1 { margin:12px 0 20px; font-size:24px; }
+.auth.signin .form { background:none !important; border:0 !important; box-shadow:none !important; padding:0 !important; margin:0 !important; display:flex; flex-direction:column; gap:14px; }
+.auth.signin .form label { display:flex; flex-direction:column; gap:6px; font-size:var(--fs-sub); color:var(--t2); }
+.auth.signin .si-links { display:flex; justify-content:center; gap:20px; margin-top:18px; }
+.auth.signin .si-links a { font-weight:500; color:var(--t2); text-decoration:none; } .auth.signin .si-links a:hover { color:var(--ink); text-decoration:underline; }
+@media (max-width:600px) { .screen > .auth.signin, main > .screen > .auth.signin { max-width:none !important; padding-top:0 !important; } }
+
+/* The run page: the picture so far, one heading, the stages, the time, the way out. Near-black accent, green only for a state. */
+.runpage { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:32px; align-items:start; }
+.runpic { margin:0; border:1px solid var(--line); border-radius:12px; background:#fff; min-height:260px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.runpic img { width:100%; max-height:70vh; object-fit:contain; display:block; } .runpic-ph { color:var(--t2); font-size:var(--fs-sub); padding:24px; text-align:center; }
+.runbody { display:flex; flex-direction:column; gap:12px; min-width:0; } .runbody h1 { margin:0; } .runbody p { margin:0; }
+.runstages { list-style:none; margin:4px 0; padding:0; display:flex; flex-direction:column; }
+.runstages li { display:grid; grid-template-columns:24px minmax(0,1fr) auto; gap:12px; align-items:center; padding:10px 0; border-top:1px solid var(--line2); font-size:var(--fs-body); color:var(--t2); }
+.runstages li:last-child { border-bottom:1px solid var(--line2); }
+.runstages .mk { width:20px; height:20px; border-radius:999px; border:1.5px solid rgba(18,18,18,.18); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; }
+.runstages li.done { color:var(--ink); } .runstages li.done .mk { background:#1f2a3a; border-color:#1f2a3a; }
+.runstages li.on { color:var(--ink); font-weight:600; } .runstages li.on .mk { border-color:#1f2a3a; border-top-color:transparent; animation:runspin 1s linear infinite; }
+.runstages li.bad .mk { border-color:var(--bad); } .runstages .t { font-size:12px; font-weight:400; color:var(--t2); }
+@keyframes runspin { to { transform:rotate(360deg); } }
+.runact { display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+.runact .btn.primary, .btn.primary { background:#1f2a3a !important; border-color:#1f2a3a !important; }
+.pill a.on { background:#1f2a3a !important; }
+@media (max-width:760px) { .runpage { grid-template-columns:1fr; gap:16px; } .runact .btn { flex:1 1 100%; } }
+.runpage { padding-bottom:calc(var(--nav-clear, 90px) + 8px); }

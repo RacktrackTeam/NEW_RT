@@ -98,17 +98,16 @@
 <main id="view">
   <!-- sign in (racktrack-app sign-in: RT-EOS's sign-in service, auth.sh; the screens below call it, the engine trusts its session) -->
   <section class="screen" data-screen="signin" hidden>
-    <div class="auth">
+    <div class="auth signin">
       <img class="logo big" src="/app/img/logo-192.png" alt="">
       <h1>Sign in to RackTrack</h1>
-      <p class="muted">Film a rack once. Every unit, device and port is read for you.</p>
-      <form class="card form" id="signin">
+      <form class="form" id="signin">
         <label>Email or username<input id="si-user" autocomplete="username" maxlength="120" required></label>
         <label>Password<input id="si-pass" type="password" autocomplete="current-password" maxlength="200" required></label>
         <button class="btn primary big block" type="submit">Sign in</button>
         <p class="err" id="si-err" hidden></p>
-        <p class="si-links"><a href="#forgot">Forgot password?</a> <span class="muted">·</span> <a href="#contact">Contact us</a></p>
       </form>
+      <p class="si-links"><a href="#forgot">Forgot password</a><a href="#contact">Contact us</a></p>
       <p class="muted small" id="si-server" hidden></p>
     </div>
   </section>
@@ -224,24 +223,20 @@
 
   <!-- the run -->
   <section class="screen" data-screen="job" hidden>
-    <div class="phead"><div><span class="eyebrow">Run</span><h1 id="job-title">Analysing</h1></div><a class="btn primary" id="job-open" href="#" hidden>Open the result</a></div>
-    <div class="story">
-      <aside class="storyrail">
-        <div class="card progcard">
-          <div class="row between"><span class="chip run" id="job-state">Running</span><span class="muted small mono" id="job-time">0 s</span></div>
-          <div class="stepnow"><span class="big" id="job-stepn">1</span><span class="muted">of 15</span></div>
-          <b id="job-stepname">Input</b>
-          <div class="bar"><i id="job-bar"></i></div>
-          <p id="job-progress" class="muted small prog">queued</p>
-          <p class="err" id="job-err" hidden></p>
+    <div class="runpage">
+      <figure class="runpic" id="run-pic"><img id="run-img" alt="" hidden><span class="runpic-ph" id="run-ph">The picture of the rack appears here</span></figure>
+      <div class="runbody">
+        <h1 id="job-title">Reading the rack</h1>
+        <p class="muted" id="run-line">The video is read frame by frame. First one straight picture of the rack, then every unit, device and port.</p>
+        <ol class="runstages" id="run-stages"></ol>
+        <p class="muted small mono" id="run-time">Elapsed 0 s</p>
+        <p class="muted small" id="run-leave">You can leave this page. The reading carries on, and the rack is under Home when you come back.</p>
+        <p class="err" id="job-err" hidden></p>
+        <div class="runact">
+          <a class="btn primary big" id="job-open" href="#" hidden>Open the result</a>
+          <a class="btn big" id="job-retry" href="#sweep" hidden>Try again</a>
+          <button class="btn danger" id="job-del" type="button" hidden><svg class="ic"><use href="#i-trash"/></svg><span>Remove this run</span></button>
         </div>
-        <details class="card stepsbox" id="steps-box"><summary>All 15 steps</summary><ol class="steps" id="job-steps"></ol></details>
-        <button class="btn danger" id="job-del" type="button" hidden><svg class="ic"><use href="#i-trash"/></svg><span>Remove this run</span></button>
-      </aside>
-      <div class="stage">
-        <figure class="card stagepic" id="stage-pic" hidden><img id="stage-img" alt=""><figcaption><b id="stage-cap"></b><span class="muted small" id="stage-sub"></span></figcaption></figure>
-        <div class="card waitcard" id="stage-wait"><span class="dropic"><svg class="ic"><use href="#i-rack"/></svg></span><b>The rack builds up here</b><p class="muted small">The stitched picture first, then the units, then what is full and free, then every device. The result opens as soon as the devices are in.</p></div>
-        <div class="filmstrip" id="filmstrip"></div>
       </div>
     </div>
   </section>

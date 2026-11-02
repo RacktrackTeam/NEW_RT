@@ -430,7 +430,7 @@ def api_rack_label(job: str):
 
 
 def public_job(j, with_result=False):
-    out = {k: j.get(k) for k in ("id", "status", "progress", "error", "started", "finished", "title", "name", "from_guide", "summary", "phase", "partial")}
+    out = {k: j.get(k) for k in ("id", "status", "progress", "error", "started", "finished", "title", "name", "from_guide", "summary", "phase", "partial", "ports")}
     out["report"] = f"/video-report/{j['id']}/index.html" if (j.get("status") == "done" or j.get("partial")) else None
     try:                                                   # the pictures made so far, so the run screen can show each step as it lands
         out["files"] = sorted(f.name for f in pathlib.Path(j["dir"]).iterdir() if f.suffix in (".jpg", ".png") and not f.name.startswith("closeup"))

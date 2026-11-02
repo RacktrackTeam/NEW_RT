@@ -299,18 +299,7 @@
     var word = (me && me.name) ? me.name + "'s rack" : 'Your rack';
     window.RTEOSAnalysing.mount(AN.el, { racks: [{ key: 'r', word: word, files: AN.file ? [AN.file] : [], state: 'reading' }], finished: false, label: 'Analysing the rack' });
     if (!AN.job) return;
-    clearInterval(AN.timer);
-    AN.timer = setInterval(function () {
-      api('/api/video/' + AN.job).then(function (j) {
-        if (j.status === 'done' || (j.partial && j.status === 'running')) {
-          clearInterval(AN.timer); remember(AN.job);
-          window.RTEOSAnalysing.mount(AN.el, { racks: [{ key: 'r', word: word, files: AN.file ? [AN.file] : [], state: 'done' }], finished: true, label: 'Analysing the rack' });
-          var id = AN.job; setTimeout(function () { analysingOff(); go('result/' + id); }, 900);   // the id is read before analysingOff clears it
-        } else if (j.status === 'failed') {
-          clearInterval(AN.timer); analysingOff(); $('v-err').textContent = j.error || 'The analysis failed.'; $('v-err').hidden = false; $('vsend').disabled = false; go('sweep');
-        }
-      }).catch(function () {});
-    }, 2500);
+    var id = AN.job; remember(id); firstFrame(AN.file, id); var f = AN.file; analysingOff(); go('job/' + id);
   }
   function analysingReused(job) {                                      // a video read before: the analysing animation for a few seconds, then its result (user, 2026-10-30)
     remember(job); RES.sel = null; RES.pick = null;
@@ -321,39 +310,50 @@
     setTimeout(function () { analysingOff(); go('result/' + job); }, 3500);
   }
   function analysingOff() { clearInterval(AN.timer); if (AN.el && window.RTEOSAnalysing) window.RTEOSAnalysing.unmount(AN.el); AN.file = null; AN.job = null; }
+  // The run page: the picture so far, one heading, the stages (current marked, finished ticked), the time, and the way out.
+  var RUN_STAGES = [['Reading the video', 1, 2], ['Stitched picture of the rack', 3, 4], ['Units', 5, 6], ['Devices', 7, 8], ['Makes and models', 9, 10], ['Port layouts', 11, 13], ['Rack report', 14, 14]];
+  var FIRST = {};                                                      // run id -> first frame of the video, taken on this phone or laptop
+  function firstFrame(file, id) {
+    if (!file || !window.URL || FIRST[id]) return;
+    var v = document.createElement('video'), u = URL.createObjectURL(file); v.muted = true; v.preload = 'auto'; v.src = u;
+    v.addEventListener('loadeddata', function () { try { v.currentTime = 0.1; } catch (e) {} });
+    v.addEventListener('seeked', function () { try { var c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight; c.getContext('2d').drawImage(v, 0, 0); FIRST[id] = c.toDataURL('image/jpeg', .7); } catch (e) {} URL.revokeObjectURL(u); });
+  }
+  function portsLine(ports) { var k = Object.keys(ports || {}); if (!k.length) return ''; var d = k.filter(function (x) { return ports[x] === 'done'; }).length; return d + ' of ' + k.length + ' devices'; }
+  function renderRun(j, id) {
+    var running = j.status === 'running', failed = j.status === 'failed', done = j.status === 'done', n = stepOf(j.progress, j.status);
+    var html = RUN_STAGES.map(function (s) {
+      var fin = done || n > s[2], on = running && !fin && n >= s[1], note = '';
+      if (s[0] === 'Port layouts') { var pl = portsLine(j.ports); if (pl && (on || fin)) note = pl; }
+      var cls = fin ? 'done' : on ? 'on' : failed && n >= s[1] ? 'bad' : '';
+      return '<li class="' + cls + '"><span class="mk">' + (fin ? '&#10003;' : '') + '</span><span>' + esc(s[0]) + '</span><span class="t">' + esc(note) + '</span></li>';
+    }).join('');
+    $('run-stages').innerHTML = html;
+  }
   function openJob(id) {
     if (!id) return go('home');
-    var t0 = null, shown = {};
+    var t0 = null, shown = null;
     function tick() {
       api('/api/video/' + id).then(function (j) {
         if (!t0) t0 = new Date(j.started).getTime() || Date.now();
         var secs = Math.max(0, Math.round(((j.finished ? new Date(j.finished).getTime() : Date.now()) - t0) / 1000));
-        $('job-title').textContent = j.title || 'Analysing'; $('job-time').textContent = secs >= 60 ? Math.floor(secs / 60) + ' min ' + (secs % 60) + ' s' : secs + ' s';
-        var ports = j.partial && j.status === 'running', n = stepOf(j.progress, j.status);
-        $('job-progress').textContent = j.status === 'running' ? (j.progress || 'queued') : j.status === 'done' ? 'Done.' : 'Failed.';
-        $('job-state').textContent = j.status === 'running' ? (ports ? 'Result ready, ports reading' : 'Running') : j.status === 'done' ? 'Done' : 'Failed';
-        $('job-state').className = 'chip ' + (j.status === 'running' ? 'run' : j.status === 'done' ? 'done' : 'fail');
-        $('job-stepn').textContent = n; $('job-stepname').textContent = STEPS[n - 1]; $('job-bar').style.width = Math.round(n / 15 * 100) + '%';
-        renderSteps(n, j.status);
-        $('job-err').hidden = j.status !== 'failed'; $('job-err').textContent = j.error || '';
-        $('job-open').hidden = !(ports || j.status === 'done'); $('job-open').href = '#result/' + id; $('job-del').hidden = j.status === 'running' || id.indexOf('example-') === 0;
-        // the pictures as they land
-        var files = j.files || [], strip = '';
-        PICS.forEach(function (p) { if (files.indexOf(p[0]) >= 0) { strip += '<figure class="film" data-pic="' + p[0] + '"><img src="/api/video/' + id + '/file/' + p[0] + '" alt="' + esc(p[2]) + '" loading="lazy"><figcaption><b>' + p[1] + '</b> ' + esc(p[2]) + '</figcaption></figure>'; } });
-        if (j.devices && j.devices.length && (ports || j.status === 'done')) {
-          strip += '<div class="film devs"><div class="devchips">' + j.devices.map(function (d) { return '<span class="chip ' + (d.kind && d.kind !== 'Other' ? 'done' : '') + '">D' + d.index + ' ' + esc(String(d.top).toUpperCase()) + ' · ' + esc(d.kind || '?') + '</span>'; }).join('') + '</div><figcaption><b>8</b> Device kinds</figcaption></div>';
-        }
-        $('filmstrip').innerHTML = strip; $('stage-wait').hidden = !!strip;
-        var last = null; PICS.forEach(function (p) { if (files.indexOf(p[0]) >= 0) last = p; });
-        if (last && shown.pic !== last[0]) { shown.pic = last[0]; $('stage-img').src = '/api/video/' + id + '/file/' + last[0]; $('stage-cap').textContent = last[1] + ' · ' + last[2]; $('stage-sub').textContent = last[3]; $('stage-pic').hidden = false; }
-        if (ports && !openJob.seen[id]) { openJob.seen[id] = 1; toast('Units, occupancy, devices and kinds are in. Ports keep reading in the background.'); go('result/' + id); }
-        if (j.status !== 'running') { clearInterval(pollTimer); if (j.status === 'done' && !openJob.seen[id]) { openJob.seen[id] = 1; go('result/' + id); } }
+        var ports = j.partial && j.status === 'running', ready = ports || j.status === 'done', failed = j.status === 'failed';
+        $('run-time').textContent = (ready ? 'Took ' : 'Elapsed ') + (secs >= 60 ? Math.floor(secs / 60) + ' min ' + (secs % 60) + ' s' : secs + ' s');
+        $('job-title').textContent = failed ? 'The reading stopped' : ready ? 'Rack read' : 'Reading the rack';
+        $('run-line').textContent = failed ? 'The run could not finish.' : ready ? (ports ? 'Units, devices and kinds are in. Port layouts keep reading in the background.' : 'The rack is read. Open the result to see it.') : 'The video is read frame by frame. First one straight picture of the rack, then every unit, device and port.';
+        $('run-leave').hidden = ready || failed;
+        renderRun(j, id);
+        $('job-err').hidden = !failed; $('job-err').textContent = j.error || 'The analysis failed.';
+        $('job-open').hidden = !ready; $('job-open').href = '#result/' + id; $('job-retry').hidden = !failed;
+        $('job-del').hidden = j.status === 'running' || id.indexOf('example-') === 0;
+        var files = j.files || [], pic = files.indexOf('rack.png') >= 0 ? '/api/video/' + id + '/file/rack.png' : (FIRST[id] || null);
+        if (pic && pic !== shown) { shown = pic; $('run-img').src = pic; $('run-img').hidden = false; $('run-ph').hidden = true; }
+        if (j.status !== 'running') clearInterval(pollTimer);
       }).catch(function (e) { clearInterval(pollTimer); if (/No such run/i.test(e.message)) { toast('That run is not here any more.'); return go(LAST ? 'result/' + LAST : 'history'); } $('job-err').textContent = e.message; $('job-err').hidden = false; });
     }
-    $('filmstrip').innerHTML = ''; $('stage-pic').hidden = true; $('stage-wait').hidden = false; $('job-open').hidden = true; $('job-del').hidden = true;
+    $('run-img').hidden = true; $('run-ph').hidden = false; $('job-open').hidden = true; $('job-retry').hidden = true; $('job-del').hidden = true; $('run-stages').innerHTML = '';
     tick(); pollTimer = setInterval(tick, 2000);
   }
-  $('filmstrip').addEventListener('click', function (e) { var f = e.target.closest('.film[data-pic]'); if (!f) return; e.stopPropagation(); var img = f.querySelector('img'); $('stage-img').src = img.src; $('stage-cap').textContent = f.querySelector('figcaption').textContent; $('stage-sub').textContent = ''; $('stage-pic').hidden = false; });
   openJob.seen = {};
   $('job-del').addEventListener('click', function () {
     var id = (location.hash.split('/')[1] || ''); if (!id) return;
