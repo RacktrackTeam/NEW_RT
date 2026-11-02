@@ -38,8 +38,8 @@
   // ---------------------------------------------------------------- routing: #signin #home #history #sweep #job/<id> #result/<id> #report/<id> #more #models
   var DETAIL = { job: 'Run', result: 'Result', history: 'History', models: 'Models and accuracy', connections: 'Connections', copies: 'Database copies' };
   // the result's bar: Main is the rack read from the data; the other four show the report's steps in groups
-  var TABS = { rack: '1 The rack picture', devices: '2 Devices read', record: '3 The record', diff: '4 Differences', report: '5 Report' };   // one page in this order; the keys are the steps to jump to
-  var ALIAS = { elevation: 'devices', drift: 'record', ports: 'devices' };   // ports live on each device (user, 2026-10-27: one place per device)
+  var TABS = { rack: 'Rack', devices: 'Devices', report: 'Report' };   // one page in three parts; the compare and its differences live inside the Report
+  var ALIAS = { elevation: 'devices', drift: 'compare', record: 'compare', diff: 'diff', ports: 'devices', compare: 'compare' };   // ports live on each device (user, 2026-10-27: one place per device)
   var KINDS = ['Switch', 'Router', 'Firewall', 'Gateway', 'Patch Panel', 'Server', 'Storage unit', 'PDU', 'UPS', 'Other'];
   var LAST = null;                                   // the run the Report tab opens: the one being looked at, else the newest finished one
   try { LAST = localStorage.getItem('rt_last') || null; } catch (e) {}
@@ -56,7 +56,8 @@
   function route() {
     var h = (location.hash || '#home').slice(1), name = h.split('/')[0], arg = h.split('/')[1], arg2 = h.split('/')[2];
     if (name === 'report') { if (arg) return go('result/' + arg + '/report'); if (LAST) return go('result/' + LAST + '/report'); toast('The report appears here once a video has been analysed.'); return go('home'); }
-    var rtab = name === 'result' ? (TABS[arg2] ? arg2 : ALIAS[arg2] || 'rack') : null;
+    var rtab = name === 'result' ? (TABS[arg2] ? arg2 : ALIAS[arg2] ? (ALIAS[arg2] === 'compare' || ALIAS[arg2] === 'diff' ? 'report' : ALIAS[arg2]) : 'rack') : null;
+    if (name === 'result' && (ALIAS[arg2] === 'compare' || ALIAS[arg2] === 'diff')) RES.jump = ALIAS[arg2];
     if (rtab) { var order = Object.keys(TABS), was = order.indexOf(RES.tab || 'rack'), now = order.indexOf(rtab); document.body.dataset.dir = now > was ? 'fwd' : now < was ? 'back' : 'same'; RES.tab = rtab; }   // the tab's content slides in from the side it came from
     if (!me && !AUTH_SCREENS[name]) { name = 'signin'; }
     if (me && AUTH_SCREENS[name]) { name = 'home'; }
@@ -527,7 +528,7 @@
   function openResult(id, tab) {
     if (!id) return go('history');
     var fresh = RES.id !== id;
-    if (fresh) { RES.sel = null; RES.view = null; RES.pick = null; RES.labelAsked = null; RES.cmp = null; RES.cmpSrc = null; RES.diffMode = null; $('df-top').innerHTML = ''; $('diff-top').innerHTML = ''; $('rp-cmp').innerHTML = ''; }
+    if (fresh) { RES.sel = null; RES.view = null; RES.pick = null; RES.labelAsked = null; RES.cmp = null; RES.cmpSrc = null; RES.diffMode = null; $('df-top').innerHTML = ''; $('diff-top').innerHTML = ''; }
     RES.id = id; clearInterval(RES.timer); remember(id);
     RES.tab = tab; Object.keys(TABS).forEach(function (k) { $('res-' + k).hidden = false; }); $('res-elevation').hidden = false; $('res-eyebrow').textContent = 'Result'; $('rep-full').hidden = NATIVE;   // every step on one page
     loadView(true);
@@ -536,7 +537,7 @@
     if (fresh) loadOtherScans(id);
   }
   function loadView(first) {
-    api('/api/video/' + RES.id + '/view').then(function (v) { RES.view = v; renderResult(v, first); if (first) secTo(RES.tab); }).catch(function (e) { toast(e.message); if (first) go('job/' + RES.id); });
+    api('/api/video/' + RES.id + '/view').then(function (v) { RES.view = v; renderResult(v, first); if (first) { secTo(RES.jump || RES.tab); RES.jump = null; } }).catch(function (e) { toast(e.message); if (first) go('job/' + RES.id); });
   }
   function loadOtherScans(id) {                                         // the other scans of the same rack, newest first (Home lists a rack once)
     var el = $('res-others'); el.innerHTML = '';
@@ -885,8 +886,8 @@
   function pc(x) { return x == null ? '' : Math.round(x * 100) + ' %'; }
   var OUTCOME = { one: 'named one rack', narrowed: 'narrowed the racks', skipped: 'skipped', none: 'no single rack', tied: 'tied' };
   var HINT = { missing: 'Check whether the device is still in the rack. If the video did not reach that unit, scan the whole rack.',
-    extra: 'A device is in the rack that the record does not list: add it to the record, or check the reading in step 2.',
-    moved: 'The device sits at another unit than the record says: update the record, or check the unit numbers in step 1.',
+    extra: 'A device is in the rack that the record does not list: add it to the record, or check the reading under Devices.',
+    moved: 'The device sits at another unit than the record says: update the record, or check the unit numbers on the rack picture.',
     height: 'The record and the video give the device a different size.', kind: 'The record and the video name a different kind of device.',
     make: 'The faceplate reads another make than the record.', model: 'The faceplate reads another model than the record.', serial: 'The serial read differs from the record.',
     port_type: 'Look at the port: if the video is right, the record has the wrong port type.', port_occupied: 'A cable is where the record expects none, or missing where it expects one.',
@@ -913,7 +914,7 @@
       if (!d.match && I.top && I.top.length) h += '<p class="glabel">The closest racks</p><div class="idtop">' + I.top.map(function (t) { return '<button class="btn" type="button" data-cmppick="' + esc(t.rack_key) + '">' + esc(t.rack_key) + '<small class="muted"> ' + esc(t.why) + '</small></button>'; }).join('') + '</div>';
       h += '<div class="dfrow"><label class="muted small" for="cmp-type">' + (d.match ? 'Use another record' : 'Which rack is this?') + '</label><input id="cmp-type" list="cmp-list" placeholder="Search or type a rack id" autocomplete="off"><datalist id="cmp-list">'
         + d.candidates.map(function (r) { return '<option value="' + esc(r.rack_key) + '">' + esc(r.rack_key) + ' - ' + pl(r.devices, 'device') + '</option>'; }).join('') + '</datalist><button class="btn" type="button" id="cmp-use">Use this record</button></div>'
-        + '<p class="muted small">A name not in this copy is kept as this rack\'s id for the next scan of it (step 1, Change).</p>'
+        + '<p class="muted small">A name not in this copy is kept as this rack\'s id for the next scan of it (Change, next to the rack id at the top).</p>'
         + (d.match ? '<div class="dfrow"><button class="btn primary big" type="button" id="cmp-continue">' + (d.confirmed ? 'Compared. Compare again' : 'Continue') + '</button></div>' : '') + '</div>';
     }
     $('df-top').innerHTML = h;
@@ -922,8 +923,8 @@
   function recordRow(d, name) { var r = (d.record || []).filter(function (x) { return x.name === name; })[0]; if (!r) return '';
     return [r.name, r.kind, [r.manufacturer, r.model].filter(Boolean).join(' '), r.ru_start != null ? 'U' + r.ru_start + (r.ru_height > 1 ? '-' + (r.ru_start + r.ru_height - 1) : '') : ''].filter(Boolean).map(esc).join(' · '); }
   function renderDiff(d) {
-    var el = $('diff-top'), rp = $('rp-cmp');
-    if (!(d.confirmed && d.drift && d.match)) { el.innerHTML = '<p class="muted small">Press Compare in step 3, check the record, then Continue.</p>'; rp.innerHTML = ''; return; }
+    var el = $('diff-top');
+    if (!(d.confirmed && d.drift && d.match)) { el.innerHTML = ''; return; }
     var rows = d.drift.rows, mode = RES.diffMode || 'short', by = {}, src = d.sources[d.source];
     rows.forEach(function (r) { by[r.what] = (by[r.what] || 0) + 1; });
     var head = '<b>' + rows.length + '</b> ' + (rows.length === 1 ? 'difference' : 'differences') + ' against <b>' + esc(d.match.rack_key) + '</b> in ' + esc(src);
@@ -938,7 +939,6 @@
       + '<p>' + esc(r.words) + '</p><p class="muted small">' + esc(HINT[r.type] || '') + '</p></div>'; }).join('');
     if (d.drift.notes.length) h += '<details class="card"><summary>Not checked (' + d.drift.notes.length + ')</summary><ul class="muted small">' + d.drift.notes.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('') + '</ul></details>';
     el.innerHTML = h;
-    rp.innerHTML = '<div class="card"><span class="glabel">Compared with the record</span><p>' + head + '. ' + (rows.length ? Object.keys(by).map(function (k) { return by[k] + ' ' + k.toLowerCase(); }).join(', ') + '.' : 'No differences.') + ' <a href="#result/' + encodeURIComponent(RES.id) + '/diff">See step 4</a></p></div>';
   }
   document.addEventListener('change', function (e) { if (e.target.id !== 'cmp-src') return; RES.cmpSrc = e.target.value; renderCompare(RES.cmp); });
   document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('#cmp-go, #cmp-copy, #cmp-use, #cmp-continue, [data-cmppick], [data-dfmode], [data-cmpchange]'); if (!t) return;
