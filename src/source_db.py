@@ -281,7 +281,9 @@ def _get(base, path, headers=None):
         with urllib.request.urlopen(urllib.request.Request(base.rstrip("/") + path, headers=headers or {}), timeout=15) as r:
             return json.loads(r.read().decode())
     except OSError as e:
-        raise ConnectionError(f"{base} does not answer ({e}).")
+        why = getattr(e, "reason", e)
+        why = getattr(why, "strerror", None) or str(why)
+        raise ConnectionError(f"{base} does not answer ({why.lower()}).")
 
 
 def _login(org, type_, default):

@@ -47,3 +47,36 @@ Two more rows show on every source because they are real: the PDU at U24 is miss
 ## Done earlier today (before the scope change)
 - RT-EOS moved to rt_eos/ (server tests 399 run, 392 pass, 7 skipped; client tests 285 pass). Not used today.
 - The engine's fixed outside paths now read environment variables with defaults inside this folder; engine.sh sets them.
+
+# Afternoon: connections, the workbook report, port drift, copies (2 Nov 2026)
+
+## What works
+
+| Piece | State | What proves it |
+| --- | --- | --- |
+| Drift kind fix | done | The drift now takes a device's kind as the result screen shows it: a person's correction, then the kind the make and model step identified (layout.kind: router, switch, firewall, gateway), then the classifier. On vdo1 the router at U20 and the firewall at U19 no longer show as a wrong kind on any of the three sources (checked through src/source_db.py against Excel, NetBox and the CMDB copied from the mocks). Test: tests/test_source_db.py test_drift_uses_the_kind_the_result_screen_shows. |
+| 1 Connections | done | src/connections.py, copied in shape from dark_mobile's connection_profiles.js (org-scoped half) and netbox/secrets.js: one NetBox and one ServiceNow login per organization (one organization today, "default") in data/sources.db; username, password and token sealed with AES-256-GCM (v1:iv:tag:body) under data/connections.key, made with mode 600 and ignored by git; the screen only gets the address, which fields are held and the state. Test connection: NetBox GET /api/status/, ServiceNow one row of the Table API (cmdb_ci_rack). Copy in from NetBox or CMDB uses the saved login, else the local mock as before. Profile > Connections. Tests: tests/test_connections.py (5). Screens: connections_empty_1280, connections_1280, connections_400 (NetBox Connected against the mock, ServiceNow Not connected on an address where nothing listens; the page text holds neither secret). |
+| 2 Excel report | done | src/source_db.py read_workbook(), the inventory checks of rt_eos/server/lib/workbook.js: missing sheet, missing column, a device whose rack is not in RACK_INVENTORY, duplicate ids, a device outside the rack height, overlapping devices, a port of an unknown device, values outside LOOKUPS, Yes or No fields. Read workbook now only checks; the Drift tab shows counts by kind, every problem (first 100 listed) and Import. A missing RACK_INVENTORY or DEVICE_INVENTORY sheet, or a column the import needs, blocks Import. Tests: tests/test_workbook_checks.py. Screens: excel_report_broken_1280/400, excel_report_vdo1_1280. |
+| 3 Port drift | done | When the source is Excel and PORT_INVENTORY has rows for a matched device, each port the video read is compared by number (RT-EOS's sheet_check.js rules): Port_Type by family (port_type, Wrong port type), Expected_Occupied against a read state only (port_occupied, Missing cable or Extra cable), Expected_Dust_Cap (dust_cap, Dust cap missing: No is never a fault, Yes counts on any port, blank only on an optical port). The run's ports are taken as the result screen takes them (close-up, fitted layout, else port details). Tests: tests/test_port_drift.py. Screens: drift_ports_1280/400. |
+| 4 Copies | done | Every import is a copy (src_copies) with its own version per source; the newest copy holding a rack is the active one; deleting a copy brings the one before it back. Profile > Database copies lists source, version, time, racks, devices, ports, where from, Active or Older, Delete. Tests: tests/test_workbook_checks.py test_copies_versions_active_and_delete. Screens: copies_1280/400, copies_after_delete_400. |
+
+## The planted port facts on vdo1 and what showed
+
+vdo1's workbook with three changes on the router at U20 (SP-R1-U20-ACT): port 1 Expected_Occupied No, port 2 Expected_Occupied Yes, port 3 Expected_Dust_Cap Yes.
+- Extra cable: "Port 1 of SP-R1-U20-ACT should be empty; the video shows a cable in it."
+- Missing cable: "Port 2 of SP-R1-U20-ACT should have a cable; the video shows it empty."
+- Dust cap missing: "Port 3 of SP-R1-U20-ACT is empty and has no dust cap; the record expects one."
+- 332 ports compared. Eight real Wrong port type rows show too: ports 25 to 28 of the two TL-SG2428P switches (U15, U17) are SFP cages, and the office rack's port list (from the NetBox CSV) calls them RJ45. The record is wrong there, not the video.
+
+## How the screenshots were made, and what is still owed
+
+The engine on 8700 had been started before this work and could not be stopped from this session, so it still runs the morning's code. tools/proof_afternoon.py has two modes:
+- live (default): everything through the engine on 8700 and the mocks. Not run yet: it needs the engine restarted (engine.sh) so the new routes load.
+- --shim (what made docs/proof/afternoon/): the screens, sign-in and the run's view come from the live engine (mobile/ is served from disk, so the screens are today's), and only the new routes are answered in the proof's own process by the same modules the engine calls (src/connections.py, src/source_db.py) on a scratch database in data/proof_afternoon_work. NetBox and ServiceNow are still read over HTTP from the local mocks. Chromium gives a route no body for a file upload, so the shim takes the file the proof chose.
+Owed: restart the engine, run `_cache/venv/bin/python tools/proof_afternoon.py` (live) and tools/proof_today.py again, and replace the screenshots.
+
+## Notes
+- The old data/sources.db layout (no copies) is dropped and rebuilt the first time the new code opens it; its copies must be read in again.
+- The office workbook's own LOOKUPS list Port_Type without RJ45, so its 346 port rows each get a "value not in LOOKUPS" warning. RT-EOS does the same.
+- The A_Z_CONNECTION_MATRIX rows are counted but not checked: this app copies no cables yet.
+- Organizations: one today. The copies are not yet kept per organization (the logins are).

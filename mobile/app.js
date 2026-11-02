@@ -129,7 +129,7 @@
       $('now-card').hidden = !running;
       var done = rows.filter(function (x) { return x.status === 'done' && x.summary && x.summary.units != null; }), T = $('tally');   // what the sweeps have read so far, in one quiet line
       if (done.length && T && !T.dataset.shown) { T.dataset.shown = '1'; var u = done.reduce(function (t, x) { return t + (x.summary.units || 0); }, 0), d = done.reduce(function (t, x) { return t + (x.summary.devices || 0); }, 0);
-        T.innerHTML = '<b class="num" data-n="' + done.length + '">0</b> rack' + (done.length === 1 ? '' : 's') + ' · <b class="num" data-n="' + u + '">0</b> units · <b class="num" data-n="' + d + '">0</b> devices read'; T.hidden = false; countUp(T); }
+        T.innerHTML = '<b class="cpn" data-n="' + done.length + '">0</b> rack' + (done.length === 1 ? '' : 's') + ' · <b class="cpn" data-n="' + u + '">0</b> units · <b class="cpn" data-n="' + d + '">0</b> devices read'; T.hidden = false; countUp(T); }
       if (running) { var n = stepOf(running.progress, running.status); $('now-title').textContent = running.partial ? 'Rack read, ports next' : 'Reading your rack'; $('now-step').textContent = running.partial ? '' : n + ' / 15'; $('now-card').href = (running.partial ? '#result/' : '#job/') + running.id;
         clearInterval(pollTimer); pollTimer = setInterval(function () { if ((location.hash || '#home') === '#home') loadHome(); }, 5000); }
     }).catch(function () {});
@@ -816,9 +816,10 @@
     var f = $('df-file').files[0]; if (!f) return toast('Choose the workbook first.');
     var fd = new FormData(); fd.append('workbook', f); upload('/api/sources/excel', fd, function () {}).then(renderWbReport).catch(function (er) { toast(er.message); }); });
   // the workbook's validation report (RT-EOS's checks), shown before anything is imported; Import makes a new Excel copy
+  function pl(n, w) { return n + ' ' + w + (n === 1 ? '' : 's'); }
   function renderWbReport(r) {
     var c = r.counts, kinds = Object.keys(r.by_kind), MAX = 100;
-    var h = '<div class="wbrep"><p><b>' + esc(r.file.replace(/^workbook_[0-9a-f]{8}_/, '')) + '</b>: ' + c.racks + ' racks, ' + c.devices + ' devices, ' + c.ports + ' ports, ' + c.cables + ' cables. '
+    var h = '<div class="wbrep"><p><b>' + esc(r.file.replace(/^workbook_[0-9a-f]{8}_/, '')) + '</b>: ' + pl(c.racks, 'rack') + ', ' + pl(c.devices, 'device') + ', ' + pl(c.ports, 'port') + ', ' + pl(c.cables, 'cable') + '. '
       + (c.problems ? '<b class="' + (c.errors ? 'err' : '') + '">' + c.problems + (c.problems === 1 ? ' problem' : ' problems') + '</b> (' + c.errors + ' errors, ' + c.warnings + ' warnings).' : '<span class="dfok">No problems found.</span>') + '</p>';
     if (kinds.length) h += '<ul class="wbkinds">' + kinds.map(function (k) { return '<li><b>' + r.by_kind[k] + '</b> ' + esc(k) + '</li>'; }).join('') + '</ul>';
     if (c.problems) h += '<table class="dftable wbtable"><thead><tr><th>Sheet</th><th>Row</th><th>Problem</th></tr></thead><tbody>' + r.problems.slice(0, MAX).map(function (x) {
@@ -857,9 +858,9 @@
   function loadCopies() { api('/api/sources/copies').then(renderCopies).catch(function (e) { $('cp-list').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
   function renderCopies(d) {
     if (!d.copies.length) { $('cp-list').innerHTML = '<div class="card"><p class="muted">No copy yet. Read a workbook or copy NetBox or the CMDB in from a run\'s Drift tab.</p></div>'; return; }
-    $('cp-list').innerHTML = '<div class="card flush"><table class="dftable cptable"><thead><tr><th>Source</th><th>Version</th><th>Copied</th><th class="num">Racks</th><th class="num">Devices</th><th class="num wide">Ports</th><th class="wide">From</th><th>State</th><th></th></tr></thead><tbody>'
-      + d.copies.map(function (c) { return '<tr data-copy="' + c.id + '"' + (c.active ? ' class="on"' : '') + '><td><b>' + esc(d.sources[c.source] || c.source) + '</b></td><td class="mono">v' + c.version + '</td><td class="mono small">' + esc(c.imported_at.replace('T', ' ').slice(0, 16)) + '</td>'
-        + '<td class="num">' + c.racks + '</td><td class="num">' + c.devices + '</td><td class="num wide">' + (c.ports || 0) + '</td><td class="wide small muted">' + esc(String(c.file || '').replace(/^workbook_[0-9a-f]{8}_/, '')) + '</td>'
+    $('cp-list').innerHTML = '<div class="card flush"><table class="dftable cptable"><thead><tr><th>Source</th><th class="wide">Version</th><th class="wide">Copied</th><th class="cpn">Racks</th><th class="cpn">Devices</th><th class="cpn wide">Ports</th><th class="wide">From</th><th>State</th><th></th></tr></thead><tbody>'
+      + d.copies.map(function (c) { return '<tr data-copy="' + c.id + '"' + (c.active ? ' class="on"' : '') + '><td><b>' + esc(d.sources[c.source] || c.source) + '</b><span class="cpwhen small muted">v' + c.version + ' · ' + esc(c.imported_at.replace('T', ' ').slice(0, 16)) + '</span></td><td class="mono wide">v' + c.version + '</td><td class="mono small wide">' + esc(c.imported_at.replace('T', ' ').slice(0, 16)) + '</td>'
+        + '<td class="cpn">' + c.racks + '</td><td class="cpn">' + c.devices + '</td><td class="cpn wide">' + (c.ports || 0) + '</td><td class="wide small muted">' + esc(String(c.file || '').replace(/^workbook_[0-9a-f]{8}_/, '')) + '</td>'
         + '<td>' + (c.active ? '<span class="cpon">Active</span>' : '<span class="muted small">Older</span>') + '</td><td><button class="btn danger" type="button" data-cpdel="' + c.id + '">Delete</button></td></tr>'; }).join('') + '</tbody></table></div>';
   }
   document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-cpdel]'); if (!b) return;
