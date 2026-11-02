@@ -203,3 +203,12 @@ body.web.result #rnav.inpage { align-self:flex-start !important; margin:0 !impor
 .pill a.on { background:#1f2a3a !important; }
 @media (max-width:760px) { .runpage { grid-template-columns:1fr; gap:16px; } .runact .btn { flex:1 1 100%; } }
 .runpage { padding-bottom:calc(var(--nav-clear, 90px) + 8px); }
+
+/* The result's bar now holds the rack tools too: it scrolls sideways when it does not fit. */
+#rnav .pill { overflow-x:auto; overflow-y:hidden; scrollbar-width:none; justify-content:flex-start; }
+#rnav .pill::-webkit-scrollbar { display:none; }
+#rnav .pill a { flex:0 0 auto; min-width:68px; padding:0 8px; }
+#rnav .pill a span { font-size:10px; }
+#rnav.inpage { max-width:calc(100vw - 360px); } #rnav.inpage .pill { max-width:100%; } #rnav.inpage a { min-width:0; padding:0 14px !important; }
+.pill a.on { color:var(--ink); }
+.screen[data-screen="tools"] > #rnav.inpage { display:block; margin:0 0 16px !important; max-width:100%; } .screen[data-screen="tools"] > #rnav.inpage .pill { display:flex; }

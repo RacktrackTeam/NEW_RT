@@ -56,6 +56,7 @@
   function route() {
     var h = (location.hash || '#home').slice(1), name = h.split('/')[0], arg = h.split('/')[1], arg2 = h.split('/')[2];
     if (name === 'report') { if (arg) return go('result/' + arg + '/report'); if (LAST) return go('result/' + LAST + '/report'); toast('The report appears here once a video has been analysed.'); return go('home'); }
+    var tool = (name === 'tools' && arg && arg !== 'site') ? (arg2 || 'find') : null;                 // a rack tool: its own tab in the result's bar
     var rtab = name === 'result' ? (TABS[arg2] ? arg2 : ALIAS[arg2] ? (ALIAS[arg2] === 'compare' || ALIAS[arg2] === 'diff' ? 'report' : ALIAS[arg2]) : 'rack') : null;
     if (name === 'result' && (ALIAS[arg2] === 'compare' || ALIAS[arg2] === 'diff')) RES.jump = ALIAS[arg2];
     if (rtab) { var order = Object.keys(TABS), was = order.indexOf(RES.tab || 'rack'), now = order.indexOf(rtab); document.body.dataset.dir = now > was ? 'fwd' : now < was ? 'back' : 'same'; RES.tab = rtab; }   // the tab's content slides in from the side it came from
@@ -66,14 +67,16 @@
     var tab = name === 'job' ? 'sweep' : (name === 'history' || name === 'models' || name === 'connections' || name === 'copies') ? 'more' : name;
     var rn = $('rnav'), wide = window.matchMedia('(min-width:1000px)').matches;             // web layout: the result's tabs sit at the top of the page, not in a bar at the bottom (user, 2026-10-29)
     if (!rn._home) { rn._home = rn.parentNode; rn._next = rn.nextSibling; }
-    if (wide && rtab) { if (!rn.classList.contains('inpage')) { document.querySelector('[data-screen="result"]').insertBefore(rn, $('res-pending')); rn.classList.add('inpage'); } }
+    if (wide && rtab) { if (!rn.classList.contains('inpage') || rn.parentNode !== document.querySelector('[data-screen="result"]')) { document.querySelector('[data-screen="result"]').insertBefore(rn, $('res-pending')); rn.classList.add('inpage'); } }
+    else if (wide && tool) { var ts = document.querySelector('[data-screen="tools"]'); if (rn.parentNode !== ts) { ts.insertBefore(rn, ts.firstChild); rn.classList.add('inpage'); } }
     else if (rn.classList.contains('inpage')) { rn._home.insertBefore(rn, rn._next); rn.classList.remove('inpage'); }
     document.body.classList.toggle('web', wide);
-    $('rnav').hidden = !(me && rtab); document.body.classList.toggle('result', !!(me && rtab));
-    if (rtab) document.querySelectorAll('#rnav a').forEach(function (a) { a.href = '#result/' + arg + (a.dataset.rtab === 'rack' ? '' : '/' + a.dataset.rtab); a.classList.toggle('on', a.dataset.rtab === rtab); });
+    $('rnav').hidden = !(me && (rtab || tool)); document.body.classList.toggle('result', !!(me && rtab));
+    if (rtab || tool) document.querySelectorAll('#rnav a').forEach(function (a) { a.href = a.dataset.tool ? '#tools/' + arg + '/' + a.dataset.rtab : '#result/' + arg + (a.dataset.rtab === 'rack' ? '' : '/' + a.dataset.rtab); a.classList.toggle('on', a.dataset.rtab === (rtab || tool)); });
+    if (tool) { var onA = document.querySelector('#rnav a.on'); if (onA && onA.scrollIntoView) onA.scrollIntoView({ inline: 'center', block: 'nearest' }); }
     document.querySelectorAll('[data-nav]').forEach(function (a) { a.classList.toggle('on', a.dataset.nav === tab); });
-    $('nav').hidden = !me || !!rtab; $('top').hidden = !me; $('side').hidden = !me; document.body.classList.toggle('signed', !!me);
-    $('back').hidden = !DETAIL[name]; $('topmark').hidden = !!DETAIL[name]; $('toptitle').textContent = rtab ? 'Result' : (DETAIL[name] || 'RackTrack');
+    $('nav').hidden = !me || !!rtab || !!tool; $('top').hidden = !me; $('side').hidden = !me; document.body.classList.toggle('signed', !!me);
+    $('back').hidden = !DETAIL[name]; $('topmark').hidden = !!DETAIL[name]; $('toptitle').textContent = (rtab || tool) ? 'Result' : (DETAIL[name] || 'RackTrack');
     $('top').classList.toggle('detail', !!DETAIL[name]); $('who').hidden = !!DETAIL[name]; $('topspacer').hidden = !DETAIL[name]; if (name !== 'result') { $('topsub').hidden = true; }
     clearInterval(pollTimer); stopGuide();
     window.scrollTo(0, 0);
