@@ -176,6 +176,10 @@ async def require_session(request: Request, call_next):
             return JSONResponse({"error": (who or {}).get("blocked") or "sign in first", "org_status": (who or {}).get("org_status")},
                                 status_code=403 if who else 401)
         return RedirectResponse("/app/#signin")
+    if who.get("role") == "owner" and not who.get("org") and (p.startswith("/api/sources") or p.startswith("/api/connections")):
+        rj = JOBS.get(request.query_params.get("run") or "")      # the platform owner has no organization: for the compare, copies and logins they act in the run's own
+        if rj is not None and rj.get("org") is not None:
+            who = dict(who, org=rj.get("org"), site=rj.get("site"), acting_in_run=rj.get("id"))
     request.state.principal = who
     rt_session.CURRENT.set(who)
     SDB.ORG.set(rt_session.org_key(who))                   # each organization has its own database copies

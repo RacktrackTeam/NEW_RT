@@ -12,6 +12,7 @@
   // ---------------------------------------------------------------- api
   function api(path, opts, again) {
     opts = opts || {};
+    if (RES.id && /^\/api\/(sources|connections)/.test(path) && path.indexOf('run=') < 0) path += (path.indexOf('?') < 0 ? '?' : '&') + 'run=' + encodeURIComponent(RES.id);   // the platform owner has no organization: the server acts in this run's own
     return fetch(path, Object.assign({ credentials: 'same-origin', cache: 'no-store' }, opts)).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (j) {
         if (r.status === 401 && !again) return AUTH.refresh().then(function (ok) { if (ok) return api(path, opts, true); me = null; go('signin'); throw new Error('Sign in first.'); });
@@ -925,7 +926,8 @@
   function firstSentence(t) { t = String(t || '').replace(/\s+/g, ' ').trim(); var m = t.match(/^.*?[.!?](\s|$)/); t = m ? m[0].trim() : t; return t.length > 110 ? t.slice(0, 107) + '...' : t; }
   // the compare, in the owner's order: a button, a dropdown of the three databases, one panel to confirm the rack id, then the differences.
   // RES.cmpUi: idle (nothing shown) > confirm (the panel) > drift (the differences)
-  function renderCompare(d) {
+  function renderCompare(d) { try { renderCompareInner(d); } catch (e) { console.error('compare', e); cmpStatus('The compare could not be shown: ' + String(e.message || e).replace(/[.!?]*$/, '') + '.', 'err'); } }
+  function renderCompareInner(d) {
     RES.cmp = d; var ui = RES.cmpUi || 'idle', src = RES.cmpSrc || d.source || 'excel', I = d.identify || { steps: [] };
     if (ui !== 'confirm' || !(d.chosen && d.source === src)) { $('df-top').innerHTML = ''; return renderDiff(d, ui === 'drift'); }
     var m = d.match;
@@ -946,7 +948,10 @@
     return [r.name, r.kind, (r.manufacturer && r.model && String(r.model).toLowerCase().indexOf(String(r.manufacturer).toLowerCase()) === 0 ? r.model : [r.manufacturer, r.model].filter(Boolean).join(' ')), r.ru_start != null ? 'U' + r.ru_start + (r.ru_height > 1 ? '-' + (r.ru_start + r.ru_height - 1) : '') : ''].filter(Boolean).map(esc).join(' · '); }
   function renderDiff(d, show) {
     var el = $('diff-top');
-    if (!(show && d.confirmed && d.drift && d.match)) { el.innerHTML = ''; return; }
+    if (!(show && d.confirmed && d.drift && d.match)) { el.innerHTML = '';
+      if (show) { var why = !d.match ? 'No single rack of this copy was named, so nothing could be compared. Press Change and choose the rack.' : !d.confirmed ? 'The rack was not confirmed, so nothing was compared. Press Confirm again.' : 'The copy gave no devices to compare. Copy the database in again under Profile.'; console.error('compare: no drift', d.source, !!d.match, !!d.confirmed, !!d.drift); cmpStatus(why, 'err'); }
+      return; }
+    cmpStatus('');
     var rows = d.drift.rows, mode = RES.diffMode || 'short', by = {}, src = d.sources[d.source];
     rows.forEach(function (r) { by[r.what] = (by[r.what] || 0) + 1; });
     var head = '<b>' + rows.length + '</b> ' + (rows.length === 1 ? 'difference' : 'differences') + ' against <b>' + esc(d.match.rack_key) + '</b> in ' + esc(src);
@@ -969,13 +974,13 @@
     if (t.id === 'cmp-change') { RES.cmpPick = !RES.cmpPick; renderCompare(RES.cmp); var ty0 = $('cmp-type'); if (ty0) ty0.focus(); return; }
     var src = RES.cmpSrc || (RES.cmp && RES.cmp.source) || 'excel';
     if (t.dataset.dfmode) { RES.diffMode = t.dataset.dfmode; return renderDiff(RES.cmp, true); }
-    if (t.dataset.cmpsrc) { src = t.dataset.cmpsrc; RES.cmpSrc = src; $('cmp-menu').hidden = true; $('cmp-btn').setAttribute('aria-expanded', 'false'); RES.cmpPick = false; RES.cmpUi = 'confirm'; cmpMode(true);
+    if (t.dataset.cmpsrc) { try { src = t.dataset.cmpsrc; RES.cmpSrc = src; $('cmp-menu').hidden = true; $('cmp-btn').setAttribute('aria-expanded', 'false'); RES.cmpPick = false; RES.cmpUi = 'confirm'; cmpMode(true);
       var toCompare = function () { var el = $('sec-compare'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); };   // on a phone the panel opens below the report: go to it
       if (RES.cmp && RES.cmp.imported[src]) { cmpStatus('Finding the rack...'); return Promise.resolve(setDb({ source: src })).then(toCompare); }
       if (src === 'excel') { RES.cmpUi = 'idle'; cmpMode(false); toast('No workbook is copied in yet. Copy one in under Database copies.'); return go('copies'); }
       cmpStatus('Copying in from ' + SRCLABEL[src] + '...');
       return api('/api/sources/' + src + '/import', { method: 'POST' }).then(function (r) { cmpStatus('Finding the rack...'); return Promise.resolve(setDb({ source: src })).then(toCompare); })
-        .catch(function (er) { RES.cmpUi = 'idle'; cmpStatus(String(er.message || 'The copy did not work.').replace(/([^.!?])$/, '$1.'), 'err'); }); }
+        .catch(function (er) { RES.cmpUi = 'idle'; cmpStatus(String(er.message || 'The copy did not work.').replace(/([^.!?])$/, '$1.'), 'err'); });  } catch (er) { console.error('compare', er); RES.cmpUi = 'idle'; cmpStatus(String(er && er.message || 'The compare did not start').replace(/[.!?]*$/, '') + '.', 'err'); } return; }
     if (t.dataset.cmppick) return setDb({ source: src, rack_key: t.dataset.cmppick });
     if (t.id === 'cmp-use') { var v = ($('cmp-type').value || '').trim(); if (!v) return toast('Type or pick a rack id first.');
       var known = (RES.cmp.candidates || []).some(function (r) { return r.rack_key === v; });
