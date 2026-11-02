@@ -55,6 +55,7 @@ import patch_panels  # noqa: E402
 import build_report as video_report  # noqa: E402
 import source_db as SDB  # noqa: E402
 import connections as CONN  # noqa: E402
+import rt_session  # noqa: E402  (racktrack-app sign-in: the RT-EOS session)
 
 # ------------------------------------------------------------------ settings
 PORT = int(os.environ.get("RACKTRACK_PORT", "8600"))
@@ -103,27 +104,24 @@ def keep_only(chosen):
         occ.free_memory()
 
 
-# ------------------------------------------------------------------ sign-in: a name, a signed session cookie
-def _sign(payload: str) -> str:
-    return hmac.new(CONFIG["secret"].encode(), payload.encode(), hashlib.sha256).hexdigest()[:32]
+# ------------------------------------------------------------------ sign-in: the RT-EOS session (server/rt_session.py)
+# racktrack-app sign-in (auth merge): the name-only /api/login is gone. Every /api route except health needs the session
+# the sign-in service (auth.sh, rt_eos/server/auth_service.js) signs; a run of another organization or site is not there.
+OPEN_PATHS = ("/", "/app", "/app/", "/manifest.webmanifest", "/sw.js", "/api/health", "/api/auth-service", "/favicon.ico", "/logo.jpg")
+RUN_PATH = re.compile(r"^/(?:api/video|video-report)/([A-Za-z0-9_-]+)(?:/|$)")
 
 
-def make_session(name: str) -> str:
-    exp = int(time.time()) + SESSION_DAYS * 86400
-    payload = f"{re.sub(r'[^A-Za-z0-9 _.-]', '', name)[:40] or 'user'}|{exp}"
-    return f"{payload}|{_sign(payload)}"
-
-
-def read_session(token: str | None):
-    if not token or token.count("|") != 2:
+def _run_guard(p, path):
+    """A path naming a run another organization or site owns answers 404, as if the run were not there."""
+    m = RUN_PATH.match(path)
+    if not m or m.group(1) == "history":
         return None
-    name, exp, sig = token.split("|")
-    if not hmac.compare_digest(sig, _sign(f"{name}|{exp}")) or int(exp) < time.time():
-        return None
-    return {"name": name, "expires": int(exp)}
-
-
-OPEN_PATHS = ("/", "/app", "/app/", "/manifest.webmanifest", "/sw.js", "/api/login", "/api/me", "/api/health", "/favicon.ico")
+    j = JOBS.get(m.group(1))
+    if j is not None and not rt_session.can_see(p, j):
+        return JSONResponse({"error": "No such run."}, status_code=404)
+    if j is not None and j.get("org") is not None:
+        SDB.ORG.set(str(j["org"]))                       # the run is compared with its own organization's copies
+    return None
 
 
 @app.middleware("http")
@@ -134,36 +132,33 @@ async def require_session(request: Request, call_next):
         if p in ("/app", "/app/") or p.endswith((".html", ".js", ".css")):
             resp.headers["Cache-Control"] = "no-cache"     # the phone app re-checks the screens every time, so a change shows at once
         return resp
-    if read_session(request.cookies.get("rt_session")) is None:
+    who = rt_session.from_request(request)
+    if who is None or who.get("blocked"):
         if p.startswith("/api/") or p.startswith("/capture/upload"):
-            return JSONResponse({"error": "sign in first"}, status_code=401)
+            return JSONResponse({"error": (who or {}).get("blocked") or "sign in first", "org_status": (who or {}).get("org_status")},
+                                status_code=403 if who else 401)
         return RedirectResponse("/app/#signin")
+    request.state.principal = who
+    rt_session.CURRENT.set(who)
+    SDB.ORG.set(rt_session.org_key(who))                   # each organization has its own database copies
+    blocked = _run_guard(who, p)
+    if blocked is not None:
+        return blocked
     return await call_next(request)
 
 
-class Login(BaseModel):
-    name: str = Field(default="", max_length=40)
-
-
-@app.post("/api/login")
-def api_login(body: Login):
-    tok = make_session(body.name.strip() or "user")
-    resp = JSONResponse({"ok": True, "name": read_session(tok)["name"], "site": CONFIG.get("site", "RackTrack")})
-    resp.set_cookie("rt_session", tok, max_age=SESSION_DAYS * 86400, httponly=True, samesite="lax", path="/")
-    return resp
-
-
-@app.post("/api/logout")
-def api_logout():
-    resp = JSONResponse({"ok": True}); resp.delete_cookie("rt_session", path="/"); return resp
+@app.get("/api/auth-service")
+def api_auth_service():
+    """Where the screens reach the sign-in service (open: the sign-in screen needs it before anyone is signed in)."""
+    url, port = rt_session.auth_base()
+    return {"url": url, "port": port}
 
 
 @app.get("/api/me")
 def api_me(request: Request):
-    s = read_session(request.cookies.get("rt_session"))
-    if s is None:
-        return {"name": None}                     # signed out: a plain answer, not an error in the browser's console
-    return {"name": s["name"], "site": CONFIG.get("site", "RackTrack"), "host": socket.gethostname()}
+    p = request.state.principal
+    return {"name": p["username"], "user": p["user"], "role": p["role"], "organization": p["org"], "site": p["site"],
+            "org_name": p.get("org_name"), "site_name": p.get("site_name") or p.get("org_name"), "host": socket.gethostname()}
 
 
 @app.get("/api/health")
@@ -177,7 +172,7 @@ JOBS = {}                                   # id -> {"status", "progress", "resu
 
 def _save(j):
     """status.json beside the run: what the history and the app need, never the big result."""
-    keep = {k: j.get(k) for k in ("id", "status", "progress", "error", "started", "finished", "title", "name", "from_guide", "stride", "summary", "phase", "partial", "ports", "ports_error", "video_file", "rack_id", "video_md5", "video_probe", "db", "position")}
+    keep = {k: j.get(k) for k in ("id", "status", "progress", "error", "started", "finished", "title", "name", "from_guide", "stride", "summary", "phase", "partial", "ports", "ports_error", "video_file", "rack_id", "video_md5", "video_probe", "db", "position", "org", "site")}
     try:
         (pathlib.Path(j["dir"]) / "status.json").write_text(json.dumps(keep, indent=1))
     except OSError:
@@ -197,12 +192,18 @@ def _summary(res):
         return None
 
 
+def run_status_files():
+    """racktrack-app sign-in: runs live in data/runs/<org>/<site>/<run>; a run from before sign-in (data/runs/<run>) has no
+    organization and only the platform owner sees it."""
+    if not RUNS.exists():
+        return []
+    return sorted(RUNS.glob("*/status.json")) + sorted(RUNS.glob("*/*/*/status.json"))
+
+
 def load_runs():
     """Runs left by earlier starts: finished ones come back into the history; one cut off by a restart is marked failed."""
-    for d in sorted(RUNS.iterdir()) if RUNS.exists() else []:
-        f = d / "status.json"
-        if not d.is_dir() or not f.exists():
-            continue
+    for f in run_status_files():
+        d = f.parent
         try:
             j = json.loads(f.read_text())
         except ValueError:
@@ -234,7 +235,8 @@ def job_or_none(job):
         d = smp["run"]
         return {"id": job, "status": "done", "progress": "done", "error": "", "dir": d, "title": smp["title"], "name": name,
                 "result": json.loads((d / "result.json").read_text()), "rack_path": d / "rack.png", "video_path": smp["video"], "report": smp["report"]}
-    return JOBS.get(job)
+    j, me = JOBS.get(job), rt_session.current()          # a background thread has no principal and sees every run
+    return j if j is None or me is None or rt_session.can_see(me, j) else None     # a stranger's run is not there
 
 
 def report_dir(j):
@@ -431,7 +433,8 @@ def _same_video_run(path):
         for chunk in iter(lambda: fh.read(1 << 20), b""):
             h.update(chunk)
     want = h.hexdigest()
-    done = [o for o in sorted(JOBS.values(), key=lambda x: x.get("started") or "", reverse=True) if o.get("status") == "done" and o.get("result") is not None and not o["id"].startswith("example-")]
+    done = [o for o in sorted(JOBS.values(), key=lambda x: x.get("started") or "", reverse=True) if o.get("status") == "done" and o.get("result") is not None and not o["id"].startswith("example-")
+            and rt_session.can_see(rt_session.current(), o)]                       # only the runs this person may open
     for o in done:
         if _video_md5(o) == want:
             return o["id"]
@@ -450,9 +453,10 @@ async def api_video(request: Request, video: UploadFile | None = File(None), sam
     if MODEL_LOCK.locked():
         running = [k for k, v in JOBS.items() if v.get("status") == "running"]
         raise HTTPException(409, "Another rack is being read. Wait for it to finish; one runs at a time on this server." + (f" Running: {running[0]}" if running else ""))
-    who = read_session(request.cookies.get("rt_session"))["name"]
+    who = rt_session.name(request)
     job = hashlib.sha1(f"{datetime.datetime.now().isoformat()}{who}{sample}".encode()).hexdigest()[:12]
-    d = RUNS / job; d.mkdir(parents=True, exist_ok=True)
+    me = rt_session.current()
+    d = rt_session.run_dir(RUNS, job, me); d.mkdir(parents=True, exist_ok=True)      # data/runs/<org>/<site>/<run>
     truth_path, title, name, from_guide = None, None, None, False
     if capture:
         src, _, folder = capture.partition("/")
@@ -480,7 +484,8 @@ async def api_video(request: Request, video: UploadFile | None = File(None), sam
         raise HTTPException(400, "Send a rack video, a take, or ask for the sample.")
     j = {"id": job, "status": "running", "progress": "queued", "result": None, "dir": d, "error": "", "started": datetime.datetime.now().isoformat(timespec="seconds"),
          "title": title, "name": name, "from_guide": from_guide, "stride": max(1, min(30, int(stride))), "by": who,
-         "position": {"lat": lat, "lng": lng} if lat is not None and lng is not None and -90 <= lat <= 90 and -180 <= lng <= 180 else None}   # the phone's position when the scan started (optional); it only narrows the racks
+         "position": {"lat": lat, "lng": lng} if lat is not None and lng is not None and -90 <= lat <= 90 and -180 <= lng <= 180 else None,   # the phone's position when the scan started (optional); it only narrows the racks
+         "org": me.get("org"), "site": me.get("site")}
     with STATE_LOCK:
         JOBS[job] = j
     _save(j)
@@ -491,7 +496,7 @@ async def api_video(request: Request, video: UploadFile | None = File(None), sam
 @app.get("/api/video/history")
 def api_video_history():
     """Every run on this server, newest first."""
-    rows = [dict(public_job(j), **_rack_state(j)) for j in JOBS.values()]       # the stored demo is not listed (user, 2026-10-27); it stays reachable as example-<name>
+    rows = [dict(public_job(j), **_rack_state(j)) for j in JOBS.values() if rt_session.can_see(rt_session.current(), j)]       # the stored demo is not listed (user, 2026-10-27); it stays reachable as example-<name>
     rows.sort(key=lambda x: x["started"] or "", reverse=True)
     return rows
 
@@ -525,7 +530,7 @@ def api_video_view(job: str):
     j = job_or_none(job)
     if j is None or j.get("result") is None:
         raise HTTPException(404, "No result yet.")
-    r = SDB.with_corrections(ORG, (j.get("rack_id") or {}).get("id"), j["result"]); base = f"/api/video/{job}/file/"   # corrections made on earlier scans of this rack
+    r = SDB.with_corrections(_run_org(j), (j.get("rack_id") or {}).get("id"), j["result"]); base = f"/api/video/{job}/file/"   # corrections made on earlier scans of this rack
     ubox = {u["unit"]: u["box"] for u in r["occupancy_frames"]["rows"] if u.get("box")}
     def lay_of(d):
         C = d.get("closeup") or {}; L = d.get("layout") or {}
@@ -971,7 +976,7 @@ def api_add_device(job: str, body: NewDevice, request: Request):
     boxes = [rows[k]["box"] for k in range(a, b + 1)]
     x1, y1, x2, y2 = min(bx[0] for bx in boxes), min(bx[1] for bx in boxes), max(bx[2] for bx in boxes), max(bx[3] for bx in boxes)
     i = max([d["index"] for d in r["devices"]] + [0]) + 1
-    who = read_session(request.cookies.get("rt_session"))["name"]; when = datetime.datetime.now().isoformat(timespec="seconds")
+    who = rt_session.name(request); when = datetime.datetime.now().isoformat(timespec="seconds")
     r["devices"].append({"index": i, "units": units, "top": units[0], "bottom": units[-1], "height": len(units), "box": [x1, y1, x2, y2],
                          "polygon": [[x1, y1], [x2, y1], [x2, y2], [x1, y2]], "polygon_from": "person", "reason": f"Added by {who}: the sweep missed it.",
                          "why_image": "", "frames_shape": [], "top_frames": [], "type": None, "type_hint": None, "type_confidence": 0, "type_votes": 0,
@@ -1081,7 +1086,7 @@ def api_remove_device(job: str, index: int, request: Request):
     gone = next((x for x in r["devices"] if x["index"] == index), None)
     if gone is None:
         raise HTTPException(404, "No such device.")
-    who = read_session(request.cookies.get("rt_session"))["name"]; when = datetime.datetime.now().isoformat(timespec="seconds")
+    who = rt_session.name(request); when = datetime.datetime.now().isoformat(timespec="seconds")
     import shutil
     for f in list(d.glob(f"section_D{index}*.jpg")) + list(d.glob(f"layout_D{index}_*.jpg")) + list(d.glob(f"panel_D{index}_overlay.jpg")) + list((d / "switch_layouts").glob(f"D{index}_*")) + [d / "patch_panels" / f"D{index}"]:
         shutil.rmtree(f, ignore_errors=True) if f.is_dir() else (f.unlink() if f.exists() else None)
@@ -1177,9 +1182,9 @@ def api_set_model(job: str, index: int, body: ModelFix, request: Request):
     dv = next((d for d in (j.get("result") or {}).get("devices") or [] if d["index"] == index), None)
     if dv is None:
         raise HTTPException(404, "No such device.")
-    hint = {"vendor": body.vendor.strip(), "model": body.model.strip(), "by": read_session(request.cookies.get("rt_session"))["name"],
+    hint = {"vendor": body.vendor.strip(), "model": body.model.strip(), "by": rt_session.name(request),
             "when": datetime.datetime.now().isoformat(timespec="seconds")}
-    SDB.save_correction(ORG, (j.get("rack_id") or {}).get("id"), SDB._unum(min(dv.get("units") or ["u0"], key=lambda u: SDB._unum(u) or 0)), hint["by"],
+    SDB.save_correction(_run_org(j), (j.get("rack_id") or {}).get("id"), SDB._unum(min(dv.get("units") or ["u0"], key=lambda u: SDB._unum(u) or 0)), hint["by"],
                         vendor=hint["vendor"] or None, model=hint["model"] or None)
     if SDB.device_kind(dv)["kind"] not in PORT_KINDS:
         # no reader for this kind (a patch panel, a server...): the name is kept as typed, nothing is mapped
@@ -1217,8 +1222,8 @@ def api_fix_kind(job: str, index: int, body: KindFix, request: Request):
     if body.kind is None:
         dev.pop("kind_override", None)
     else:
-        dev["kind_override"] = {"kind": body.kind, "by": read_session(request.cookies.get("rt_session"))["name"], "when": datetime.datetime.now().isoformat(timespec="seconds")}
-        SDB.save_correction(ORG, (j.get("rack_id") or {}).get("id"), SDB._unum(min(dev.get("units") or ["u0"], key=lambda u: SDB._unum(u) or 0)), dev["kind_override"]["by"], kind=body.kind)
+        dev["kind_override"] = {"kind": body.kind, "by": rt_session.name(request), "when": datetime.datetime.now().isoformat(timespec="seconds")}
+        SDB.save_correction(_run_org(j), (j.get("rack_id") or {}).get("id"), SDB._unum(min(dev.get("units") or ["u0"], key=lambda u: SDB._unum(u) or 0)), dev["kind_override"]["by"], kind=body.kind)
     rf.write_text(json.dumps(r, indent=1))
     if job in JOBS:
         JOBS[job]["result"] = r
@@ -1452,7 +1457,7 @@ async def api_sources_excel(workbook: UploadFile = File(...)):
     report (every problem, with counts) and the upload's name for the Import step (RT-EOS's matrix upload, then import)."""
     if not (workbook.filename or "").lower().endswith(".xlsx"):
         raise HTTPException(400, "Send the manager's workbook as an .xlsx file.")
-    d = ROOT / "data" / "sources"; d.mkdir(parents=True, exist_ok=True)
+    d = _uploads(); d.mkdir(parents=True, exist_ok=True)
     f = d / ("workbook_" + secrets.token_hex(4) + "_" + re.sub(r"[^A-Za-z0-9_.-]", "_", workbook.filename)[-80:])
     f.write_bytes(await workbook.read(50 * 1024 * 1024))
     try:
@@ -1468,7 +1473,7 @@ async def api_sources_excel(workbook: UploadFile = File(...)):
 def api_sources_excel_import(body: dict = Body(...)):
     """Import a workbook already read and checked (its upload name from POST /api/sources/excel) as a new Excel copy."""
     name = str(body.get("upload") or "")
-    f = ROOT / "data" / "sources" / name
+    f = _uploads() / name
     if not re.fullmatch(r"workbook_[0-9a-f]{8}_[A-Za-z0-9_.-]+\.xlsx", name) or not f.is_file():
         raise HTTPException(404, "That upload is not here any more. Read the workbook again.")
     try:
@@ -1497,19 +1502,32 @@ def api_sources_import(source: str):
     if fn is None:
         raise HTTPException(404, "No such source.")
     try:
-        return fn(ORG)
+        return fn(_org())
     except (ConnectionError, ValueError, KeyError) as e:
         raise HTTPException(502, str(e))
 
 
-# ------------------------------------------------------------------ the logins vault (src/connections.py): one organization today
-ORG = CONFIG.get("organization", "default")
+# ------------------------------------------------------------------ the logins vault (src/connections.py): per organization
+def _run_org(j):
+    """The organization a run belongs to, for what people confirmed on it (kept in that organization's copies file)."""
+    return str((j or {}).get("org") or "default")
+
+
+def _org():
+    """racktrack-app sign-in: the signed-in person's organization ('platform' for the platform owner)."""
+    return rt_session.org_key(rt_session.current())
+
+
+def _uploads():
+    """Workbook uploads, one folder per organization, so one organization cannot import another's upload."""
+    return ROOT / "data" / "sources" / "orgs" / _org()
+
 
 
 @app.get("/api/connections")
 def api_connections():
     """The organization's NetBox and ServiceNow logins: address and state only, never a secret."""
-    return {"connections": CONN.meta(ORG)}
+    return {"connections": CONN.meta(_org())}
 
 
 @app.post("/api/connections/{kind}")
@@ -1517,11 +1535,11 @@ def api_connections_save(kind: str, request: Request, body: dict = Body(...)):
     if kind not in CONN.TYPES:
         raise HTTPException(404, "No such connection.")
     try:
-        CONN.save(ORG, kind, str(body.get("address") or ""), str(body.get("username") or ""), str(body.get("password") or ""), str(body.get("token") or ""),
-                  by=read_session(request.cookies.get("rt_session"))["name"])
+        CONN.save(_org(), kind, str(body.get("address") or ""), str(body.get("username") or ""), str(body.get("password") or ""), str(body.get("token") or ""),
+                  by=rt_session.name(request))
     except ValueError as e:
         raise HTTPException(400, str(e))
-    return {"connections": CONN.meta(ORG)}
+    return {"connections": CONN.meta(_org())}
 
 
 @app.post("/api/connections/{kind}/test")
@@ -1529,18 +1547,18 @@ def api_connections_test(kind: str):
     if kind not in CONN.TYPES:
         raise HTTPException(404, "No such connection.")
     try:
-        CONN.test(ORG, kind, SDB._get)
+        CONN.test(_org(), kind, SDB._get)
     except LookupError as e:
         raise HTTPException(400, str(e))
-    return {"connections": CONN.meta(ORG)}
+    return {"connections": CONN.meta(_org())}
 
 
 @app.delete("/api/connections/{kind}")
 def api_connections_remove(kind: str):
     if kind not in CONN.TYPES:
         raise HTTPException(404, "No such connection.")
-    CONN.remove(ORG, kind)
-    return {"connections": CONN.meta(ORG)}
+    CONN.remove(_org(), kind)
+    return {"connections": CONN.meta(_org())}
 
 
 def drift_view(j):
@@ -1555,8 +1573,8 @@ def drift_view(j):
         return out
     out["label"] = rack_label_of(j)
     out["rack_id_how"] = (j.get("rack_id") or {}).get("source")
-    result = SDB.with_corrections(ORG, rid, j.get("result"))
-    out["identify"] = SDB.identify(source, rid, result, j.get("position"), out["label"], out["rack_id_how"], SDB.confirmed(ORG, rid, source))     # the ladder: location, label, device labels, layout
+    result = SDB.with_corrections(_run_org(j), rid, j.get("result"))
+    out["identify"] = SDB.identify(source, rid, result, j.get("position"), out["label"], out["rack_id_how"], SDB.confirmed(_run_org(j), rid, source))     # the ladder: location, label, device labels, layout
     if db.get("rack_key") and db.get("source") == source and any(r["rack_key"] == db["rack_key"] for r in out["candidates"]):
         out["match"] = {"rack_key": db["rack_key"], "how": "picked", "why": f"Picked by {db.get('by') or 'a person'}."}
     elif out["identify"]["rack_key"]:
@@ -1606,12 +1624,12 @@ def api_video_database(job: str, request: Request, body: dict = Body(...)):
         raise HTTPException(400, "Choose Excel, NetBox or CMDB.")
     if body.get("rack_key") and not any(r["rack_key"] == body["rack_key"] for r in SDB.racks(source)):
         raise HTTPException(400, f"No record called {body['rack_key']} in {SDB.SOURCES[source]}.")
-    j["db"] = {"source": source, "rack_key": body.get("rack_key") or None, "confirmed": bool(body.get("confirmed")), "by": read_session(request.cookies.get("rt_session"))["name"],
+    j["db"] = {"source": source, "rack_key": body.get("rack_key") or None, "confirmed": bool(body.get("confirmed")), "by": rt_session.name(request),
                "on": datetime.datetime.now().isoformat(timespec="minutes")}
     _save(j)
     dv = drift_view(j)
     if body.get("confirmed") and dv.get("match"):        # kept for the next scan of this rack (step 0 of the identification)
-        SDB.confirm_rack(ORG, dv["rack_id"], source, dv["match"]["rack_key"], j["db"]["by"])
+        SDB.confirm_rack(_run_org(j), dv["rack_id"], source, dv["match"]["rack_key"], j["db"]["by"])
     return dv
 
 

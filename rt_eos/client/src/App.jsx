@@ -49,8 +49,9 @@ export function orgNotActive(user) {
 }
 
 function Protected({ children, allow }) {
-  const { isAuthed, user } = useAuth();
+  const { isAuthed, user, booting } = useAuth();
   const location = useLocation();
+  if (!isAuthed && booting) return <Loading />;
   if (!isAuthed) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   if (orgNotActive(user)) return <Navigate to="/pending" replace />;
   if (allow && !allow(user?.role)) return <Navigate to="/" replace />;
@@ -250,7 +251,7 @@ function Routed() {
 
 export default function App() {
   return (
-    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/+$/, '') || undefined} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <ToastProvider>
           <AndroidBack />

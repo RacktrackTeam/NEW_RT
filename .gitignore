@@ -45,3 +45,6 @@ rt_eos/data/
 rt_eos/server/node_modules
 rt_eos/client/node_modules
 modules/sources/node_modules
+
+# racktrack-app: the RT-EOS screens built for /org/ (auth.sh builds them)
+rt_eos/client/dist-org/
