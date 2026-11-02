@@ -126,6 +126,8 @@ def delete_copy(cid):
             return False
         for t in ("src_racks", "src_devices", "src_ports"):
             c.execute(f"DELETE FROM {t} WHERE copy_id=?", (cid,))
+    import rt_features as RTF                                    # wt/features: its cables go with it
+    RTF.delete_cables(cid)
     return True
 
 
@@ -289,6 +291,8 @@ def import_excel(path):
         raise ValueError(" ".join(x["reason"] for x in report["problems"] if x["level"] == "error" and x["kind"] in ("missing sheet", "missing column")))
     out = _store("excel", racks, devices, pathlib.Path(path).name, ports)
     out["problems"] = report["counts"]["problems"]
+    import rt_features as RTF                                    # wt/features: the A_Z_CONNECTION_MATRIX rows kept with the copy
+    out["cables"] = RTF.store_cables(out["copy_id"], path)
     return out
 
 
@@ -461,7 +465,8 @@ def run_devices(result):
         L = d.get("layout") or {}
         kind = device_kind(d)["kind"]
         out.append({"index": d.get("index"), "ru_start": min(nums), "ru_height": len(nums), "kind": kind,
-                    "manufacturer": _s(L.get("vendor") or (L.get("typed") or {}).get("vendor")), "model": _s(L.get("model") or (L.get("typed") or {}).get("model")), "serial": _s(L.get("serial") or d.get("serial")), "ports": run_ports(d)})
+                    "manufacturer": _s(L.get("vendor") or (L.get("typed") or {}).get("vendor")), "model": _s(L.get("model") or (L.get("typed") or {}).get("model")), "serial": _s(L.get("serial") or d.get("serial")), "ports": run_ports(d),
+                    "asset_tag": _s(d.get("asset_tag") or (d.get("ids") or {}).get("asset_tag"))})     # wt/features: the asset tag a close-up read
     return out
 
 
@@ -582,6 +587,10 @@ def drift(result, record, ports=None):
             rows.append({**base, "type": "model", "what": "Wrong model", "record": r["model"], "read": s["model"], "words": f"{name} is a {r['model']} in the record; the video reads {s['model']}."})
         if s["serial"] and r.get("serial") and _norm(s["serial"]) != _norm(r["serial"]):
             rows.append({**base, "type": "serial", "what": "Wrong serial", "record": r["serial"], "read": s["serial"], "words": f"{name} has serial {r['serial']} in the record; the video reads {s['serial']}."})
+        # ---- wt/features: the asset tag read on a close-up against the record's (RT-EOS wrong_asset_tag)
+        if s.get("asset_tag") and r.get("asset_tag") and _norm(s["asset_tag"]) != _norm(r["asset_tag"]):
+            rows.append({**base, "type": "asset_tag", "what": "Wrong asset tag", "record": r["asset_tag"], "read": s["asset_tag"],
+                         "words": f"{name} has asset tag {r['asset_tag']} in the record; the close-up reads {s['asset_tag']}."})
         want = (ports or {}).get(r.get("device_key")) or {}
         if want:
             pr, n = port_drift(name, s, want)
@@ -617,7 +626,7 @@ def _share_rung(seen, rows, fits):
     return ranked, (top["rack_key"] if decides else None), tied
 
 
-def identify(source, rack_id, result, position=None, label=None, rack_id_how=None, confirmed=None):
+def identify(source, rack_id, result, position=None, label=None, rack_id_how=None, confirmed=None, sites=None):
     """The rack for a run in one source's copy, step by step. Returns {"steps": [...], "rack_key", "state", "words"}; each step has a
     title, its proof in words, the racks it leaves and its outcome."""
     rows, steps = racks(source), []
@@ -626,17 +635,33 @@ def identify(source, rack_id, result, position=None, label=None, rack_id_how=Non
         steps.append({"n": 0, "title": "Confirmed before", "proof": f"Confirmed by {confirmed['by']} on {str(confirmed['on_'])[:10]}: the rack labelled {rack_id} is the record {confirmed['rack_key']}.",
                       "left": [confirmed["rack_key"]], "outcome": "one"})
     # 1 location: the run's phone position against each rack's site position
+    # ---- wt/features: a rack with no position of its own takes its site's (the sign-in service's sites, by name, else the run's own
+    # site); the radius and the accuracy rule are location.js's (300 m, or twice the phone's accuracy; a reading worse than 2 km says nothing)
+    import rt_features as RTF
+    own, others = sites or (None, [])
+    by_name = {_norm(x["name"]): x for x in ([own] if own else []) + list(others) if x and x.get("lat") is not None}
+    for r in rows:
+        if r.get("lat") is None:
+            st = by_name.get(_norm(r.get("site"))) or (own if own and own.get("lat") is not None else None)
+            if st:
+                r["lat"], r["lng"], r["pos_from"] = st["lat"], st["lng"], f"site {st['name']}"
+    acc = (position or {}).get("accuracy")
+    verdict = RTF.judge(position, own, others) if position and position.get("lat") is not None and own else None
     placed = [r for r in rows if r.get("lat") is not None and r.get("lng") is not None]
     if not position or position.get("lat") is None:
         steps.append({"n": 1, "title": "Location", "proof": "No position was sent with this run.", "left": None, "outcome": "skipped"})
+    elif acc is not None and float(acc) > RTF.MAX_USEFUL_ACCURACY_M:
+        steps.append({"n": 1, "title": "Location", "proof": f"The phone's location was only good to {RTF.said(float(acc))}, too rough to say which site this is.", "left": None, "outcome": "skipped"})
     elif not placed:
-        steps.append({"n": 1, "title": "Location", "proof": "No rack in this copy has a site position.", "left": None, "outcome": "skipped"})
+        steps.append({"n": 1, "title": "Location", "proof": "No rack in this copy and no site has a position." + (f" {verdict['note']}" if verdict else ""), "left": None, "outcome": "skipped"})
     else:
         here = (float(position["lat"]), float(position["lng"]))
-        near = [r for r in placed if _metres(here, (r["lat"], r["lng"])) <= NEAR_M]
+        radius = max(NEAR_M, 2 * float(acc or 0))
+        near = [r for r in placed if _metres(here, (r["lat"], r["lng"])) <= radius]
         rows = near or rows
-        steps.append({"n": 1, "title": "Location", "proof": f"{pl(len(near), 'rack')} within {NEAR_M} m of the phone's position" + ("" if near else "; none near, so every rack stays in"),
-                      "left": [r["rack_key"] for r in rows], "outcome": "one" if len(near) == 1 else "narrowed" if near else "none"})
+        steps.append({"n": 1, "title": "Location", "proof": f"{pl(len(near), 'rack')} within {radius:.0f} m of the phone's position" + (f" (accuracy {float(acc):.0f} m)" if acc is not None else "")
+                      + ("" if near else "; none near, so every rack stays in") + (f". {verdict['note']}" if verdict else ""),
+                      "left": [r["rack_key"] for r in rows], "outcome": "one" if len(near) == 1 else "narrowed" if near else "none", "verdict": verdict})
     keys = {r["rack_key"] for r in rows}
     # 2 the rack id or label read from the video, exact, then separators ignored
     m = match(source, rack_id) if rack_id else None

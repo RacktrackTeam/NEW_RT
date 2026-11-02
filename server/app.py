@@ -448,7 +448,8 @@ def _same_video_run(path):
 
 @app.post("/api/video")
 async def api_video(request: Request, video: UploadFile | None = File(None), sample: str | None = Form(None), capture: str | None = Form(None),
-                    stride: int = Form(rack_video.STRIDE), lat: float | None = Form(None), lng: float | None = Form(None)):
+                    stride: int = Form(rack_video.STRIDE), lat: float | None = Form(None), lng: float | None = Form(None),
+                    accuracy: float | None = Form(None)):   # wt/features: the phone's accuracy in metres (location.js)
     """Start a sweep: a video upload, a take from the camera guide (capture = "<source>/<folder>") or the stored sample."""
     if MODEL_LOCK.locked():
         running = [k for k, v in JOBS.items() if v.get("status") == "running"]
@@ -467,6 +468,11 @@ async def api_video(request: Request, video: UploadFile | None = File(None), sam
         if (td / "log.json").is_file():
             shutil.copy(td / "log.json", d / "capture_log.json")
         pt = CAP.public(t); title, name, from_guide = f'{pt["tester"]}\'s rack' + (f', {pt["when"]}' if pt["when"] else ""), "take", True
+        if lat is None and (td / "position.json").is_file():          # wt/features: the position the camera guide sent with the take
+            try:
+                q = json.loads((td / "position.json").read_text()); lat, lng, accuracy = q.get("lat"), q.get("lng"), q.get("accuracy")
+            except ValueError:
+                pass
     elif sample:
         smp = SAMPLES.get(sample)
         if smp is None or not smp["video"].exists():
@@ -478,13 +484,14 @@ async def api_video(request: Request, video: UploadFile | None = File(None), sam
         same = _same_video_run(video_path)                 # a video read before opens its result at once (user, 2026-10-30)
         if same:
             shutil.rmtree(d, ignore_errors=True)
+            _features_keep_position(same, lat, lng, accuracy)            # wt/features: a position sent with a video read before is kept on it
             return {"job": same, "reused": True}
         title, name = f"{who}'s rack, {datetime.datetime.now().strftime('%d %b %H:%M')}", "upload"
     else:
         raise HTTPException(400, "Send a rack video, a take, or ask for the sample.")
     j = {"id": job, "status": "running", "progress": "queued", "result": None, "dir": d, "error": "", "started": datetime.datetime.now().isoformat(timespec="seconds"),
          "title": title, "name": name, "from_guide": from_guide, "stride": max(1, min(30, int(stride))), "by": who,
-         "position": {"lat": lat, "lng": lng} if lat is not None and lng is not None and -90 <= lat <= 90 and -180 <= lng <= 180 else None,   # the phone's position when the scan started (optional); it only narrows the racks
+         "position": _features_position(lat, lng, accuracy),   # the phone's position when the scan started (optional); it only narrows the racks
          "org": me.get("org"), "site": me.get("site")}
     with STATE_LOCK:
         JOBS[job] = j
@@ -589,7 +596,7 @@ def api_video_view(job: str):
                 "prob": None if d.get("kind_override") else (d.get("classification") or {}).get("prob"), "unsure": bool(d.get("unsure")), "kind_model": (d.get("classification") or {}).get("label"), "corrected_by": (d.get("kind_override") or {}).get("by"), "crop": f"/api/video/{job}/crop/{d['index']}" + _crop_ver(j, d["index"]),   # the crop with nothing drawn on it (api_device_crop); a new cut gets a new link
                 "frames": [base + t["file"] for t in d.get("top_frames") or [] if t.get("file")],
                 "views": [f"/api/video/{job}/crop/{d['index']}" + _crop_ver(j, d["index"])] + [f"/api/video/{job}/crop/{d['index']}/{n}" for n in range(1, min(3, len(d.get("top_frames") or [])))],   # clean cuts, nothing drawn
-                "layout": lay_of(d)} for d in r.get("devices") or []]
+                "layout": lay_of(d), "ids": _features_ids_of(d)} for d in r.get("devices") or []]
     units = [{"unit": u["unit"], "status": u["status"], "confidence": u.get("confidence"), "uncertain": u.get("uncertain"), "box": u.get("box"), "decided_by": u.get("decided_by"), "reason": u.get("reason")} for u in r["occupancy_frames"]["rows"]]   # box: where the unit is on the rack picture
     st = r.get("stitch") or {}
     return {"id": job, "title": j.get("title"), "status": j.get("status"), "phase": j.get("phase") or ("done" if j.get("status") == "done" else None),
@@ -793,6 +800,9 @@ async def capture_upload(request: Request):
         return JSONResponse({"error": "upload incomplete"}, status_code=400)
     if index == parts - 1:
         part.replace(final)
+        pos = _features_position(*(_features_float(q.get(k)) for k in ("lat", "lng", "accuracy")))     # wt/features: optional lat, lng, accuracy
+        if pos:
+            (folder / "position.json").write_text(json.dumps(pos))
     return {"ok": True, "saved": f"{folder.name}/{final.name}", "take": f"app/{folder.name}"}
 
 
@@ -1265,7 +1275,7 @@ def _closeup_rebuild(j):
 
 
 @app.post("/api/closeup")
-async def api_closeup(file: UploadFile = File(...), job: str | None = Form(None), device: int | None = Form(None)):
+async def api_closeup(request: Request, file: UploadFile = File(...), job: str | None = Form(None), device: int | None = Form(None)):
     """A close-up of one device's front (from the phone camera or the gallery): make, model, layout and ports are read
     from it; with a run and a device number the answer is kept with that device and the run's report is rebuilt."""
     import cv2
@@ -1281,6 +1291,7 @@ async def api_closeup(file: UploadFile = File(...), job: str | None = Form(None)
     from starlette.concurrency import run_in_threadpool
     if jd and device and jd.get("rack_path") and pathlib.Path(jd["rack_path"]).exists():
         work = pathlib.Path(jd["dir"]) / "closeups" / f"D{device}"
+        ids = await run_in_threadpool(_features_closeup_ids, jd, device, raw, cid, rt_session.name(request))   # wt/features: serial, asset tag, labels (kept first)
         rf = pathlib.Path(jd["dir"]) / "result.json"; r = json.loads(rf.read_text())
         switches = {dv["index"]: {"polygon": dv["polygon"], "units": dv["units"], "kind": (dv.get("layout") or {}).get("kind")}
                     for dv in r.get("devices") or [] if dv.get("polygon")}
@@ -1298,11 +1309,11 @@ async def api_closeup(file: UploadFile = File(...), job: str | None = Form(None)
         mine = next((dv["closeup"] for dv in r["devices"] if dv["index"] == device and device in lays), None)
         if mine is None:
             return {"id": cid, "ok": False, "shows_device": False, "also": sorted(lays), "saved_to_report": bool(lays),
-                    "detail": f"This photo does not show D{device}." + (f" It was kept for {', '.join(f'D{i}' for i in sorted(lays))}." if lays else "")}
+                    "detail": f"This photo does not show D{device}." + (f" It was kept for {', '.join(f'D{i}' for i in sorted(lays))}." if lays else ""), "ids": ids}
         with STATE_LOCK:
             CLOSEUPS[cid] = {"pictures": {k: str(pathlib.Path(jd["dir"]) / f) for k, f in mine["pictures"].items()}}
         return dict(mine, id=cid, ok=True, shows_device=True, pictures={k: f"/api/closeup/{cid}/{k}" for k in mine["pictures"]},
-                    also=sorted(i for i in lays if i != device), saved_to_report=True)
+                    also=sorted(i for i in lays if i != device), saved_to_report=True, ids=ids)
     work = pathlib.Path(tempfile.gettempdir()) / "racktrack_closeups" / cid
     with MODEL_LOCK:                                      # no run given: the photo is read as a switch
         res = await run_in_threadpool(pipe.agent_layouts, [{"key": "closeup", "image": img, "origin": (0, 0), "kind": "switch"}], work)
@@ -1574,7 +1585,8 @@ def drift_view(j):
     out["label"] = rack_label_of(j)
     out["rack_id_how"] = (j.get("rack_id") or {}).get("source")
     result = SDB.with_corrections(_run_org(j), rid, j.get("result"))
-    out["identify"] = SDB.identify(source, rid, result, j.get("position"), out["label"], out["rack_id_how"], SDB.confirmed(_run_org(j), rid, source))     # the ladder: location, label, device labels, layout
+    out["identify"] = SDB.identify(source, rid, result, j.get("position"), out["label"], out["rack_id_how"], SDB.confirmed(_run_org(j), rid, source),
+                                   sites=_features_sites(j))     # wt/features: the sites' positions for step 1     # the ladder: location, label, device labels, layout
     if db.get("rack_key") and db.get("source") == source and any(r["rack_key"] == db["rack_key"] for r in out["candidates"]):
         out["match"] = {"rack_key": db["rack_key"], "how": "picked", "why": f"Picked by {db.get('by') or 'a person'}."}
     elif out["identify"]["rack_key"]:
@@ -1631,6 +1643,301 @@ def api_video_database(job: str, request: Request, body: dict = Body(...)):
     if body.get("confirmed") and dv.get("match"):        # kept for the next scan of this rack (step 0 of the identification)
         SDB.confirm_rack(_run_org(j), dv["rack_id"], source, dv["match"]["rack_key"], j["db"]["by"])
     return dv
+
+
+# ====================================================================== wt/features: the remaining RT-EOS functions on a run (src/rt_features.py)
+# Serials and asset tags from close-ups, the phone's position and the sites', the cable checks, find a port, connections, worklist,
+# read again, the physical layer document, SFP advice and the topology. Every route below is under /api/video/<run>/ (the run guard
+# applies) or keeps to the signed-in person's organization.
+import rt_features as RTF  # noqa: E402
+
+CHECKS = ROOT / "data" / "checks"
+
+
+def _features_float(v):
+    try:
+        return float(v) if v not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _features_position(lat, lng, accuracy=None):
+    """The phone's position when the scan started (optional; it only narrows the racks), with its accuracy in metres."""
+    if lat is None or lng is None or not (-90 <= lat <= 90 and -180 <= lng <= 180):
+        return None
+    return {"lat": lat, "lng": lng, "accuracy": accuracy if accuracy is not None and accuracy >= 0 else None}
+
+
+def _features_keep_position(job, lat, lng, accuracy):
+    j = JOBS.get(job)
+    pos = _features_position(lat, lng, accuracy)
+    if j is not None and pos:
+        j["position"] = pos; _save(j)
+
+
+def _features_sites(j):
+    """The run's own site and its organization's other sites with their positions (the sign-in service's tenants, read only)."""
+    try:
+        return RTF.site_positions(rt_session._setting("RACKTRACK_AUTH_DB"), j.get("org"), j.get("site"))
+    except Exception:  # noqa: BLE001  no sites, no location step from them
+        return None, []
+
+
+def _features_ids_of(d):
+    x = d.get("ids") or {}
+    return {"serial": x.get("serial") or d.get("serial"), "asset_tag": x.get("asset_tag") or d.get("asset_tag"), "labels": x.get("labels") or [],
+            "cables": x.get("cables") or [], "from": x.get("from"), "by": x.get("by"), "when": x.get("when"), "picture": x.get("picture")} if (x or d.get("serial") or d.get("asset_tag")) else None
+
+
+def _features_closeup_ids(jd, device, raw, cid, by):
+    """RT-EOS's close-up OCR on the photo a person took for one device: its serial, asset tag, device labels and cable labels are kept on
+    that device (the person named the device), the run's result is written and the next scan of the rack is told by the drift."""
+    folder = pathlib.Path(jd["dir"]) / "closeups" / f"D{device}"; folder.mkdir(parents=True, exist_ok=True)
+    pic = folder / f"photo_{cid}.jpg"
+    try:
+        ImageOps.exif_transpose(Image.open(io.BytesIO(raw))).convert("RGB").save(pic, quality=92)
+    except (UnidentifiedImageError, OSError):
+        return None
+    with MODEL_LOCK:
+        ids = RTF.read_closeup_ids(pic)
+    rf = pathlib.Path(jd["dir"]) / "result.json"; r = json.loads(rf.read_text())
+    dv = next((x for x in r.get("devices") or [] if x["index"] == device), None)
+    if dv is None:
+        return dict(ids, kept=False)
+    kept = RTF.keep_ids(dv, ids, str(pic.relative_to(jd["dir"])), by)
+    rf.write_text(json.dumps(r, indent=1))
+    if jd["id"] in JOBS:
+        JOBS[jd["id"]]["result"] = r
+    return dict(kept, kept=True, ok=ids.get("ok"), error=ids.get("error"))
+
+
+def _features_job(job):
+    j = job_or_none(job)
+    if j is None or j.get("result") is None:
+        raise HTTPException(404, "No such run.")
+    return j
+
+
+def _features_record(j):
+    """The run's record in the Excel copy (the matrix lives there): the rack matched by the run's rack id, its devices and its cables."""
+    rid = (j.get("rack_id") or {}).get("id")
+    db = j.get("db") or {}
+    m = SDB.match("excel", rid) if rid else None
+    key = db.get("rack_key") if db.get("source") == "excel" and db.get("rack_key") else (m or {}).get("rack_key")
+    result = SDB.with_corrections(_run_org(j), rid, j["result"])
+    if not key:
+        return rid, None, result, [], []
+    return rid, key, result, SDB.devices("excel", key), RTF.cables_for([key])
+
+
+@app.get("/api/video/{job}/cables")
+def api_features_cables(job: str):
+    """The Excel A_Z_CONNECTION_MATRIX rows of this rack against the ports the video read: missing cable, extra cable, wrong port."""
+    j = _features_job(job)
+    rid, key, result, record, cables = _features_record(j)
+    if not key:
+        return {"rack_id": rid, "rack_key": None, "rows": [], "cables": 0, "words": "No Excel copy holds this rack. Copy the workbook in under Profile > Database copies."}
+    out = RTF.cable_check(result, record, cables, key)
+    return dict(out, rack_id=rid, rack_key=key, words=f"{RTF.SDB.pl(len(cables), 'cable')} of the matrix have an end in {key}." if cables else "The matrix has no cable in this rack.")
+
+
+@app.post("/api/cables/az")
+def api_features_az(request: Request, body: dict = Body(...)):
+    """The A-end / Z-end check between two runs (the same run at both ends is allowed), kept per organization; its CSV below."""
+    a, z = job_or_none(str(body.get("a") or "")), job_or_none(str(body.get("z") or body.get("a") or ""))
+    if a is None or z is None or a.get("result") is None or z.get("result") is None:
+        raise HTTPException(404, "No such run.")
+    views, keys = {}, []
+    for side, j in (("a", a), ("z", z)):
+        rid, key, result, record, _ = _features_record(j)
+        views[side] = dict(RTF.run_view(result, record, key or rid), scanId=j["id"]); keys.append(key or rid)
+    cables = RTF.cables_for(keys)
+    if not cables:
+        raise HTTPException(409, "The Excel matrix has no cable in these racks. Copy the workbook with its A_Z_CONNECTION_MATRIX in first.")
+    check = RTF.az_check(views["a"], views["z"], cables, rt_session.name(request))
+    d = CHECKS / rt_session.org_key(rt_session.current()); d.mkdir(parents=True, exist_ok=True)
+    (d / f"{check['id']}.json").write_text(json.dumps(check, indent=1))
+    return check
+
+
+@app.get("/api/cables/az/{cid}.csv")
+def api_features_az_csv(cid: str):
+    if not re.fullmatch(r"[a-f0-9]{8,16}", cid):
+        raise HTTPException(404, "No such check.")
+    f = CHECKS / rt_session.org_key(rt_session.current()) / f"{cid}.json"
+    if not f.exists():
+        raise HTTPException(404, "No such check.")
+    check = json.loads(f.read_text())
+    return Response(RTF.az_csv(check), media_type="text/csv", headers={"Content-Disposition": f'attachment; filename="az-check-{cid}.csv"'})
+
+
+@app.get("/api/video/{job}/find-port")
+def api_features_find_port(job: str, device: int, port: int):
+    j = _features_job(job)
+    rid, key, result, record, cables = _features_record(j)
+    out = RTF.find_port(result, record, cables, key, device, port)
+    if out is None:
+        raise HTTPException(404, "No such device.")
+    return dict(out, picture=f"/api/video/{job}/find-port.jpg?device={device}&port={port}")
+
+
+@app.get("/api/video/{job}/find-port.jpg")
+def api_features_find_port_jpg(job: str, device: int, port: int):
+    """The rack picture around the device with the port marked (a ring and an arrow), and the device outlined."""
+    from PIL import ImageDraw
+    j = _features_job(job)
+    rid, key, result, record, cables = _features_record(j)
+    fp = RTF.find_port(result, record, cables, key, device, port)
+    f = pathlib.Path(j["dir"]) / "rack.png"
+    if fp is None or not f.exists() or not fp.get("device_box"):
+        raise HTTPException(404, "No picture for this port.")
+    img = Image.open(f).convert("RGB"); W, H = img.size
+    dx0, dy0, dx1, dy1 = fp["device_box"]; pad = max(40, (dy1 - dy0) * 1.2)
+    x0, y0, x1, y1 = 0, max(0, int(dy0 - pad)), W, min(H, int(dy1 + pad))
+    dr = ImageDraw.Draw(img)
+    dr.rectangle([dx0, dy0, dx1, dy1], outline=(37, 99, 235), width=3)
+    if fp.get("found") and fp["read"].get("rack_polygon"):
+        bx = fp["box"]; cx, cy = (bx[0] + bx[2]) / 2, (bx[1] + bx[3]) / 2; rr = max(14, (bx[3] - bx[1]) * 1.1)
+        dr.ellipse([cx - rr, cy - rr, cx + rr, cy + rr], outline=(220, 38, 38), width=5)
+        dr.line([cx, cy - rr - 6, cx, max(y0 + 4, cy - rr - 60)], fill=(220, 38, 38), width=5)
+    return Response(jpeg_bytes(img.crop((x0, y0, x1, y1))), media_type="image/jpeg", headers={"Cache-Control": "no-store"})
+
+
+@app.get("/api/video/{job}/connections")
+def api_features_connections(job: str):
+    j = _features_job(job)
+    rid, key, result, record, cables = _features_record(j)
+    drift = SDB.drift(result, record, SDB.ports("excel", key)) if key else {"rows": []}
+    cab = RTF.cable_check(result, record, cables, key) if key else {"rows": []}
+    return {"rack_id": rid, "rack_key": key, "devices": RTF.connections(result, record, drift["rows"], cab["rows"])}
+
+
+@app.get("/api/video/{job}/worklist")
+def api_features_worklist(job: str):
+    j = _features_job(job)
+    return {"items": RTF.worklist(j["result"]), "kinds": list(KINDS)}
+
+
+@app.post("/api/video/{job}/worklist/{item}")
+def api_features_worklist_answer(job: str, item: str, request: Request, body: dict = Body(...)):
+    """Confirm or correct one item: a device's kind (as the device page corrects it) or a port's state (connected or empty)."""
+    j = _features_job(job)
+    if job.startswith("example-"):
+        raise HTTPException(404, "The stored demo cannot be changed.")
+    m = re.fullmatch(r"d(\d{1,3})|p(\d{1,3})-(\d{1,4})", item)
+    if not m:
+        raise HTTPException(404, "No such item.")
+    if m.group(1):
+        return api_fix_kind(job, int(m.group(1)), KindFix(kind=body.get("answer")), request)
+    if body.get("answer") not in ("connected", "empty"):
+        raise HTTPException(400, "Answer connected or empty.")
+    rf = pathlib.Path(j["dir"]) / "result.json"; r = json.loads(rf.read_text())
+    if not RTF.set_port_state(r, int(m.group(2)), m.group(3), body["answer"], rt_session.name(request)):
+        raise HTTPException(404, "No such port.")
+    rf.write_text(json.dumps(r, indent=1)); j["result"] = r
+    return {"ok": True}
+
+
+def _features_read_again_thread(job):
+    """Phase 2 again on every device (its ports, make and model with the current models), one at a time; what people gave and what
+    close-ups read is put back afterwards."""
+    j = JOBS[job]; rf = pathlib.Path(j["dir"]) / "result.json"
+    before = json.loads(rf.read_text()); kept = RTF.kept_before_read_again(before); answers = before.get("port_answers") or {}
+    devs = [(d["index"], SDB.device_kind(d)["kind"]) for d in before.get("devices") or []]
+    j["read_again"] = {"state": "running", "done": 0, "of": len(devs), "started": datetime.datetime.now().isoformat(timespec="seconds")}; _save(j)
+    for n, (i, kind) in enumerate(devs, start=1):
+        j.setdefault("ports", {})[str(i)] = "running"
+        (_read_panel_thread if kind == "Patch Panel" else _read_ports_thread)(job, i)
+        j["read_again"]["done"] = n; _save(j)
+    r = RTF.put_back(json.loads(rf.read_text()), kept, answers)
+    r["port_answers"] = answers
+    rf.write_text(json.dumps(r, indent=1)); j["result"] = r; j["summary"] = _summary(r)
+    j["read_again"].update(state="done", finished=datetime.datetime.now().isoformat(timespec="seconds")); _save(j)
+
+
+@app.post("/api/video/{job}/read-again")
+def api_features_read_again(job: str):
+    j = _features_job(job)
+    if job.startswith("example-"):
+        raise HTTPException(404, "The stored demo cannot be read again.")
+    if (j.get("read_again") or {}).get("state") == "running" or any(v == "running" for v in (j.get("ports") or {}).values()):
+        return {"state": "running", "read_again": j.get("read_again")}
+    threading.Thread(target=_features_read_again_thread, args=(job,), daemon=True).start()
+    return {"state": "running"}
+
+
+@app.get("/api/video/{job}/read-again")
+def api_features_read_again_state(job: str):
+    j = _features_job(job)
+    return j.get("read_again") or {"state": None}
+
+
+@app.get("/api/video/{job}/physical-layer")
+def api_features_physical(job: str):
+    j = _features_job(job)
+    rid, key, result, record, _ = _features_record(j)
+    return RTF.physical_layer(result, rid or job, rack_label_of(j), record)
+
+
+@app.get("/api/video/{job}/physical-layer.html")
+def api_features_physical_page(job: str):
+    """The physical layer document as a page to print (white, plain, one table per unit)."""
+    import html as H
+    doc = api_features_physical(job)
+    e = lambda v: H.escape("" if v is None else str(v))
+    rows = []
+    for u in doc["units"]:
+        for d in u["devices"]:
+            pc = d["ports"]; con = sum(p["status"] == "connected" for p in pc); emp = sum(p["status"] == "empty" for p in pc)
+            rows.append(f"<tr><td>{e(u['unit'].upper().replace(',', ', '))}</td><td>{e(d['device'])}</td><td>{e(d['record_name'] or '-')}</td><td>{e(d['device_type'])}</td>"
+                        f"<td>{e(d['ocr']['make'] or '-')} {e(d['ocr']['model'] or '')}</td><td>{e(d['serial'] or '-')}</td><td>{e(d['asset_tag'] or '-')}</td>"
+                        f"<td>{e((d['label'] or {}).get('text') or '-')}</td><td>{len(pc)} ({con} cabled, {emp} empty, {len(pc) - con - emp} unknown)</td></tr>")
+    cab = "".join(f"<tr><td>{e(c['unit'].upper())}</td><td>{e(c['device_type'])}</td><td>{e(c['port_number'])}</td><td>{e(c['port_type'])}</td><td>{e(c['connector'] or '-')}</td><td>{e(c['color'] or '-')}</td></tr>" for c in doc["cables"])
+    c = doc["counts"]
+    page = f"""<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Physical layer {e(doc['rack_id'])}</title>
+<style>body{{font:14px/1.45 Inter,system-ui,sans-serif;color:#111;background:#fff;margin:0;padding:24px}}h1{{font-size:22px;margin:0 0 4px}}h2{{font-size:16px;margin:28px 0 8px}}
+p{{margin:4px 0;color:#444}}table{{width:100%;border-collapse:collapse;font-size:13px}}th,td{{text-align:left;padding:6px 8px;border-bottom:1px solid #e5e7eb;vertical-align:top}}
+th{{color:#555;font-weight:600}}.wrap{{overflow-x:auto}}button{{font:inherit;padding:8px 14px;border:1px solid #d1d5db;background:#fff;border-radius:8px}}@media print{{button{{display:none}}body{{padding:0}}}}</style></head>
+<body><h1>Physical layer: {e(doc['rack_id'])}</h1><p>Rack label {e(doc['rack']['label']['text'] or 'not read')} ({e(doc['rack']['label']['source'])}). {doc['units_count']} units, {doc['devices_count']} devices, made {e(doc['generated_at'])} from the video.</p>
+<p>{c['ports']} ports: {c['connected']} cabled, {c['empty']} empty, {c['unknown']} unknown.</p><p><button onclick="print()">Print</button></p>
+<h2>Devices</h2><div class="wrap"><table><tr><th>Units</th><th>Device</th><th>Record</th><th>Kind</th><th>Make and model</th><th>Serial</th><th>Asset tag</th><th>Label</th><th>Ports</th></tr>{''.join(rows)}</table></div>
+<h2>Cables seen</h2><div class="wrap"><table><tr><th>Units</th><th>Kind</th><th>Port</th><th>Port type</th><th>Connector</th><th>Colour</th></tr>{cab or '<tr><td colspan="6">No cable colour or connector read.</td></tr>'}</table></div>
+<p style="margin-top:24px">Schema {e(doc['schema'])}. Nothing here is invented: a device with no label read has none, a port the video could not read is unknown.</p></body></html>"""
+    return Response(page, media_type="text/html", headers=NO_CACHE)
+
+
+@app.get("/api/video/{job}/sfp-advice")
+def api_features_sfp(job: str):
+    j = _features_job(job)
+    rid, key, result, record, cables = _features_record(j)
+    return RTF.sfp_advice(result, record, cables)
+
+
+@app.get("/api/video/{job}/topology")
+def api_features_topology(job: str):
+    """The run as RT-EOS's RackTopology "detail": its devices and ports, each port with the matrix's cable on it (expected.other), so the
+    diagram draws the cables between this rack's devices and to the racks they leave for."""
+    j = _features_job(job)
+    rid, key, result, record, cables = _features_record(j)
+    name = {s["index"]: r.get("name") for r, s in RTF.pair_devices(result, record)}
+    ends = {}
+    for c in cables:
+        for e, o in (("a", "z"), ("z", "a")):
+            if not c.get(f"{e}_rack") or SDB._norm(c[f"{e}_rack"]) == SDB._norm(key):
+                ends[(SDB._norm(c.get(f"{e}_device")), RTF.port_no(c.get(f"{e}_port")))] = {"cableLabel": c.get("cable_label"), "cableType": c.get("cable_type"),
+                                                                                            "other": {"device": c.get(f"{o}_device"), "port": c.get(f"{o}_port"), "rack": c.get(f"{o}_rack")}}
+    devices = []
+    for d in result.get("devices") or []:
+        start, h = RTF._span(d); L = d.get("layout") or {}
+        nm = name.get(d["index"])
+        ports = [{"portNo": p["n"], "kind": "sfp" if re.match(r"^(sfp|qsfp|osfp|lc|sc|fc)", str(p["type"] or ""), re.I) else "main", "type": p["type"], "state": p["state"],
+                  "cableColor": p["colour"], "cableConnector": p["connector"], "expected": ends.get((SDB._norm(nm), p["n"]))} for p in RTF._detail_ports(d) if p["n"] is not None]
+        devices.append({"deviceId": d["index"], "name": nm or (" ".join(x for x in (L.get("vendor"), L.get("model")) if x) or f"D{d['index']}"), "sheetName": nm,
+                        "type": SDB.device_kind(d)["kind"] or "unidentified", "heightU": h or 1, "unitTop": (start + h - 1) if start else None, "unitBottom": start,
+                        "make": L.get("vendor"), "model": L.get("model"), "ports": ports})
+    return {"scanId": job, "rackLabel": key or rid or j.get("title"), "unitsTotal": int((result.get("rack") or {}).get("units") or 0), "devices": devices,
+            "matrix": bool(cables), "cables_in_matrix": len(cables)}
+# ====================================================================== end wt/features
 
 
 @app.exception_handler(HTTPException)
