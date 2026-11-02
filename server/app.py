@@ -54,6 +54,7 @@ import rack_label  # noqa: E402
 import patch_panels  # noqa: E402
 import build_report as video_report  # noqa: E402
 import source_db as SDB  # noqa: E402
+import connections as CONN  # noqa: E402
 
 # ------------------------------------------------------------------ settings
 PORT = int(os.environ.get("RACKTRACK_PORT", "8600"))
@@ -1440,9 +1441,50 @@ def api_sources_import(source: str):
     if fn is None:
         raise HTTPException(404, "No such source.")
     try:
-        return fn()
+        return fn(ORG)
     except (ConnectionError, ValueError, KeyError) as e:
         raise HTTPException(502, str(e))
+
+
+# ------------------------------------------------------------------ the logins vault (src/connections.py): one organization today
+ORG = CONFIG.get("organization", "default")
+
+
+@app.get("/api/connections")
+def api_connections():
+    """The organization's NetBox and ServiceNow logins: address and state only, never a secret."""
+    return {"connections": CONN.meta(ORG)}
+
+
+@app.post("/api/connections/{kind}")
+def api_connections_save(kind: str, request: Request, body: dict = Body(...)):
+    if kind not in CONN.TYPES:
+        raise HTTPException(404, "No such connection.")
+    try:
+        CONN.save(ORG, kind, str(body.get("address") or ""), str(body.get("username") or ""), str(body.get("password") or ""), str(body.get("token") or ""),
+                  by=read_session(request.cookies.get("rt_session"))["name"])
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return {"connections": CONN.meta(ORG)}
+
+
+@app.post("/api/connections/{kind}/test")
+def api_connections_test(kind: str):
+    if kind not in CONN.TYPES:
+        raise HTTPException(404, "No such connection.")
+    try:
+        CONN.test(ORG, kind, SDB._get)
+    except LookupError as e:
+        raise HTTPException(400, str(e))
+    return {"connections": CONN.meta(ORG)}
+
+
+@app.delete("/api/connections/{kind}")
+def api_connections_remove(kind: str):
+    if kind not in CONN.TYPES:
+        raise HTTPException(404, "No such connection.")
+    CONN.remove(ORG, kind)
+    return {"connections": CONN.meta(ORG)}
 
 
 def drift_view(j):

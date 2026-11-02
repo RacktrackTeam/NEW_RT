@@ -27,6 +27,11 @@
 .dftable .dk { font-weight:600; white-space:nowrap; }
 .dfok { color:var(--sig-deep, #166534); font-weight:600; }
 #df-top select { min-height:40px; max-width:100%; }
+.cnlist { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:14px; width:100%; }
+.cnform { display:flex; flex-direction:column; gap:10px; } .cnform label { display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--t2); }
+.cnstate { display:inline-block; padding:2px 8px; border-radius:3px; font-size:12px; font-weight:600; background:#f3f4f6; color:var(--t2); }
+.cnstate.ok { background:#ecfdf3; color:#166534; } .cnstate.failed { background:#fef2f2; color:var(--bad); }
+@media (max-width:600px) { .cnlist { grid-template-columns:1fr; } }
 @media (max-width:600px) { .dftable th:nth-child(2), .dftable td:nth-child(2) { display:none; } .dftable th, .dftable td { padding:8px; } }
 </style>
 </head>
@@ -226,6 +231,10 @@
     <div class="card group a3">
       <a class="grow" href="#history"><svg class="ic"><use href="#i-history"/></svg><span>My racks</span><em id="runs-count"></em><span class="arr">→</span></a>
     </div>
+    <span class="glabel a3">Databases</span>
+    <div class="card group a3">
+      <a class="grow" href="#connections"><svg class="ic"><use href="#i-server"/></svg><span>Connections</span><em>NetBox, ServiceNow</em><span class="arr">→</span></a>
+    </div>
     <span class="glabel a3">RackTrack</span>
     <div class="card group a3">
       <a class="grow" href="#models"><svg class="ic"><use href="#i-chart"/></svg><span>How accurate it is</span><span class="arr">→</span></a>
@@ -237,6 +246,12 @@
       <button class="grow danger" id="signout" type="button"><svg class="ic"><use href="#i-out"/></svg><span>Sign out</span></button>
     </div>
     <p class="muted small pfoot a4">RackTrack reads a rack from one video: its units, devices, makes, models and ports.</p>
+  </section>
+
+  <!-- the logins vault: NetBox and ServiceNow for this organization; secrets are kept encrypted and never shown again -->
+  <section class="screen" data-screen="connections" hidden>
+    <div class="phead"><div><h1>Connections</h1><p class="muted">The logins RackTrack uses to copy your NetBox and ServiceNow records in. Passwords and tokens are kept encrypted and never shown again. With no login saved, the local test copy is used.</p></div></div>
+    <div id="cn-list" class="cnlist"></div>
   </section>
 
   <section class="screen" data-screen="models" hidden>

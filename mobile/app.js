@@ -34,7 +34,7 @@
     el.textContent = t; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.hidden = true; }, 3200); }
 
   // ---------------------------------------------------------------- routing: #signin #home #history #sweep #job/<id> #result/<id> #report/<id> #more #models
-  var DETAIL = { job: 'Run', result: 'Result', history: 'History', models: 'Models and accuracy' };
+  var DETAIL = { job: 'Run', result: 'Result', history: 'History', models: 'Models and accuracy', connections: 'Connections' };
   // the result's bar: Main is the rack read from the data; the other four show the report's steps in groups
   var TABS = { rack: 'Rack', devices: 'Devices', elevation: 'Layout', report: 'Report', drift: 'Drift' };   // ports live on each device (user, 2026-10-27: one place per device)
   var KINDS = ['Switch', 'Router', 'Firewall', 'Gateway', 'Patch Panel', 'Server', 'Storage unit', 'PDU', 'UPS', 'Other'];
@@ -59,7 +59,7 @@
     if (me && name === 'signin') { name = 'home'; }
     document.querySelectorAll('.screen').forEach(function (s) { s.hidden = s.dataset.screen !== name; });
     document.body.classList.toggle('on-home', name === 'home');                  // the home page is white, like racktrack.ai
-    var tab = name === 'job' ? 'sweep' : (name === 'history' || name === 'models') ? 'more' : name;
+    var tab = name === 'job' ? 'sweep' : (name === 'history' || name === 'models' || name === 'connections') ? 'more' : name;
     var rn = $('rnav'), wide = window.matchMedia('(min-width:1000px)').matches;             // web layout: the result's tabs sit at the top of the page, not in a bar at the bottom (user, 2026-10-29)
     if (!rn._home) { rn._home = rn.parentNode; rn._next = rn.nextSibling; }
     if (wide && rtab) { if (!rn.classList.contains('inpage')) { document.querySelector('[data-screen="result"]').insertBefore(rn, $('res-pending')); rn.classList.add('inpage'); } }
@@ -77,6 +77,7 @@
     if (name === 'more') api('/api/video/history').then(function (rows) { var mine = rows.filter(function (x) { return !x.demo; }), n = mine.length; $('runs-count').textContent = n ? n + (n === 1 ? ' rack' : ' racks') : '';
       var done = mine.filter(function (x) { return x.status === 'done' && x.summary; }); $('ps-racks').dataset.n = done.length; $('ps-units').dataset.n = done.reduce(function (t, x) { return t + (x.summary.units || 0); }, 0); $('ps-devs').dataset.n = done.reduce(function (t, x) { return t + (x.summary.devices || 0); }, 0); countUp($('ps-racks').parentNode.parentNode); }).catch(function () {});
     if (name === 'history') loadHistory();
+    if (name === 'connections') loadConnections();
     if (name === 'sweep') openSweep();
     if (name === 'job') openJob(arg);
     if (name === 'result') openResult(arg, rtab);
@@ -813,6 +814,27 @@
     var f = $('df-file').files[0]; if (!f) return toast('Choose the workbook first.');
     var fd = new FormData(); fd.append('workbook', f); upload('/api/sources/excel', fd, function () {}).then(done('excel')).catch(function (er) { toast(er.message); }); });
   document.addEventListener('change', function (e) { if (e.target.id !== 'df-pick') return; var b = document.querySelector('#df-top .dfsrc .on'); setDb({ source: b ? b.dataset.dfsrc : null, rack_key: e.target.value || null }); });
+  // Connections (Profile): the organization's NetBox and ServiceNow logins; the server sends back the address and the state only, never a secret
+  function loadConnections() { api('/api/connections').then(renderConnections).catch(function (e) { $('cn-list').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
+  function renderConnections(d) {
+    var c = d.connections;
+    $('cn-list').innerHTML = Object.keys(c).map(function (t) { var x = c[t], nb = t === 'netbox', held = function (k) { return x[k] ? 'saved, leave blank to keep' : ''; };
+      return '<form class="card cnform" data-cn="' + t + '"><div class="dfrow"><b>' + esc(x.label) + '</b><span class="cnstate ' + esc(x.state) + '">' + esc({ ok: 'Connected', failed: 'Not connected', untested: 'Not tested', mock: 'Local test copy' }[x.state] || x.state) + '</span></div>'
+        + '<p class="muted small" data-cnwords>' + esc(x.state_words || '') + (x.tested_at ? ' Tested ' + esc(x.tested_at.replace('T', ' ').slice(0, 16)) + '.' : '') + '</p>'
+        + '<label>Address<input name="address" placeholder="' + (nb ? 'https://netbox.example.com' : 'https://example.service-now.com') + '" value="' + esc(x.address || '') + '" autocomplete="off"></label>'
+        + (nb ? '<label>Token<input name="token" type="password" autocomplete="new-password" placeholder="' + held('token') + '"></label><p class="muted small">Or a username and password:</p>' : '')
+        + '<label>Username<input name="username" autocomplete="off" placeholder="' + held('username') + '"></label>'
+        + '<label>Password<input name="password" type="password" autocomplete="new-password" placeholder="' + held('password') + '"></label>'
+        + '<div class="dfrow"><button class="btn primary" type="submit">Save</button><button class="btn" type="button" data-cntest' + (x.saved ? '' : ' disabled') + '>Test connection</button>'
+        + (x.saved ? '<button class="btn danger" type="button" data-cndel>Remove</button>' : '') + '</div></form>'; }).join('');
+  }
+  document.addEventListener('submit', function (e) { var f = e.target.closest && e.target.closest('form[data-cn]'); if (!f) return; e.preventDefault();
+    var body = {}; ['address', 'username', 'password', 'token'].forEach(function (k) { if (f.elements[k]) body[k] = f.elements[k].value; });
+    api('/api/connections/' + f.dataset.cn, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (d) { toast('Login saved.'); renderConnections(d); }).catch(function (er) { toast(er.message); }); });
+  document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('form[data-cn] [data-cntest], form[data-cn] [data-cndel]'); if (!b) return;
+    var t = b.closest('form').dataset.cn;
+    if (b.hasAttribute('data-cntest')) { b.disabled = true; b.textContent = 'Testing...'; return api('/api/connections/' + t + '/test', { method: 'POST' }).then(renderConnections).catch(function (er) { toast(er.message); loadConnections(); }); }
+    api('/api/connections/' + t, { method: 'DELETE' }).then(function (d) { toast('Login removed. The local test copy is used again.'); renderConnections(d); }).catch(function (er) { toast(er.message); }); });
   // the Devices tab shows ONE thing: a device or a unit (RES.pick), or the list to choose one from
   function selectDevice(i, auto) {
     RES.pick = { kind: 'dev', id: i }; RES.sel = i;
