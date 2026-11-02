@@ -4,7 +4,7 @@ One rack: SP-HYD-RM01-R01-R1, the stored run of vdo1 (run 91af02c09bbc, copied f
 
 Code: `src/rt_features.py` (copied from RT-EOS, see its header for each function's source), the block marked `wt/features` in `server/app.py`, a few marked lines in `src/source_db.py`, `mobile/features.js` and `mobile/features.css` with marked lines in `mobile/index.html` and `mobile/app.js`.
 
-Proof: `tests/test_rt_features.py` (6 tests, no model), `tools/proof_features.py` (API answers into `docs/proof/features/results.json`, screens at 1280 and 400 px into `docs/proof/features/`), `tools/plant_features_workbook.py` (the planted workbook), `tools/make_synthetic_closeup.py` (the synthetic close-ups).
+Proof: `tests/test_rt_features.py` (7 tests, no model; the whole suite 111 passed after the merge), `tools/proof_features.py` (API answers into `docs/proof/features/results.json`, screens at 1280 and 400 px into `docs/proof/features/`), `tools/plant_features_workbook.py` (the planted workbook), `tools/make_synthetic_closeup.py` (the synthetic close-ups).
 
 ## 1 Serials and asset tags from close-ups
 
@@ -12,7 +12,7 @@ Proof: `tests/test_rt_features.py` (6 tests, no model), `tools/proof_features.py
 - Kept on the device (`ids`, `serial`, `asset_tag`, `label_read`) with the picture, who and when. The device page shows them with a Read from a close-up button (it sends `ids_only`, so a label photo does not replace the device's port layout).
 - The drift: Wrong serial (existing) and Wrong asset tag (new, type `asset_tag`). The identification: step 3 counts serials and asset tags, step 5 reads the rack number in the device label.
 - Proof: a real crop of D5 from the vdo1 run (section_D5_clean.jpg) read "Pip-link AM": no serial on any picture of the video, as expected. Then the synthetic close-up `docs/proof/features/synthetic_closeup_D5.jpg` read serial TPL2231X9ZZ, asset tag SP-AT-00415, label SP-R1-U15-SW02 and cable label CBL-PLANT-L1-A; D4's read SGP2231A0BC. The drift showed "SP-R1-U15-SW02 has serial PLANTED0001 in the record; the video reads TPL2231X9ZZ." and the asset tag row; step 3 "3 serial or asset tags read", step 5 "Device labels read: SP-R1-U15-SW02; rack number 1". Screens device_ids_*.png, record_location_*.png.
-- Note: those close-ups were sent before `ids_only` existed, so the existing close-up reader also re-laid D4's and D5's ports from them; those layouts were taken out of the run by hand (the ids stayed). `ids_only` itself is covered by the code path only, not yet by a run on the engine.
+- Note: the first close-ups were sent before `ids_only` existed, so the existing close-up reader also re-laid D4's and D5's ports from them; those layouts were taken out of the run by hand (the ids stayed). After the merge, D4's synthetic close-up sent again with `ids_only` read SGP2231A0BC and left the port layout alone (checked on the engine).
 
 ## 2 Location
 
@@ -27,7 +27,7 @@ Proof: `tests/test_rt_features.py` (6 tests, no model), `tools/proof_features.py
 - POST /api/cables/az {a, z}: checks.js's A-end / Z-end check of two runs (the same run at both ends is allowed); GET /api/cables/az/<id>.csv, checks.js's CSV.
 - Proof with the planted workbook (19 rows, every one marked PLANTED in Notes, Z ends in a rack not filmed): Missing cable on port 2 of SP-R1-U20-ACT, Extra cable on port 23 of SP-R1-U17-SW03, Wrong port 21 to 24 on SP-R1-U18-SW04, Wrong port for CBL-PLANT-L1 (its label read on the D5 close-up). A-Z check: 1 wrong port, 2 missing cable, 16 label not found, CSV in docs/proof/features/az_check.csv. Screens cables_*.png, cables_az_*.png.
 
-## 4 The run's tools (step 6 of the result, #tools/<run>/<tool>)
+## 4 The run's tools (a section More on this rack inside the Report, each tool a screen at #tools/<run>/<tool>)
 
 | Tool | Route | Screens |
 | --- | --- | --- |
@@ -39,7 +39,7 @@ Proof: `tests/test_rt_features.py` (6 tests, no model), `tools/proof_features.py
 | SFP advice | GET sfp-advice | sfp_advice_* |
 | Topology | GET topology (RT-EOS RackTopology detail with the matrix's cables) | topology_* |
 
-Known: the Connections screenshots were taken before port type rows were attached to their device (fixed after, test covered). SFP advice takes the matrix's cable type as RT-EOS does, so a Cat6 row is offered as the cable for an SFP port.
+Read again ran on the engine before the merge: devices 1 to 6 (the switches, router and firewall) were read again with the current models, 4 to 7 port states changed per switch (D1 port 2 no longer reads empty, so the planted Missing cable goes away after a read again); devices 7 to 10 (patch panels) did not finish: the patch panel reader needs patchpanel_classify_overlay/port_model.pt, an untracked model file that is in the main checkout but was not linked into this worktree. The proof's run was put back to its state before the read again. A read again on 8700 (main checkout) has the file. SFP advice takes the matrix's cable type as RT-EOS does, so a Cat6 row is offered as the cable for an SFP port.
 
 ## 5 The phone app
 

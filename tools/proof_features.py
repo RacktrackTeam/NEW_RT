@@ -128,8 +128,10 @@ def screens(engine, user, pw):
             pg.click('#dv-list .prow[data-dev="5"]'); pg.wait_for_selector(".ft-ids", timeout=15000); pg.wait_for_timeout(1500)
             pg.locator(".ft-ids").scroll_into_view_if_needed(); pg.wait_for_timeout(400)
             pg.locator("#res-dev").screenshot(path=str(OUT / f"device_ids_{width}.png"))          # the device card only (the page is long)
-            pg.goto(f"{engine}/app/#result/{RUN}/record"); pg.wait_for_timeout(5000)
-            pg.locator("#res-record").screenshot(path=str(OUT / f"record_location_{width}.png"))  # step 3 with the identification steps
+            pg.goto(f"{engine}/app/#result/{RUN}/report"); pg.wait_for_timeout(5000)
+            pg.locator("#sec-compare").screenshot(path=str(OUT / f"record_location_{width}.png"))  # the compare in the Report, with the identification steps
+            pg.locator("#sec-tools").scroll_into_view_if_needed(); pg.wait_for_timeout(500)
+            pg.locator("#sec-tools").screenshot(path=str(OUT / f"report_tools_{width}.png"))       # the rack tools as a section inside the Report
             pg.close()
         b.close()
     return errors
