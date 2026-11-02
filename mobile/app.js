@@ -548,7 +548,7 @@
   function openResult(id, tab) {
     if (!id) return go('history');
     var fresh = RES.id !== id;
-    if (fresh) { RES.sel = null; RES.view = null; RES.pick = null; RES.labelAsked = null; RES.cmp = null; RES.cmpSrc = null; RES.cmpUi = 'idle'; RES.cmpPick = false; RES.diffMode = null; $('cmp-menu').hidden = true; $('sec-tools').hidden = true; $('df-top').innerHTML = ''; $('diff-top').innerHTML = ''; }
+    if (fresh) { RES.cmpUi = 'idle'; if (typeof cmpMode === 'function') cmpMode(false); RES.sel = null; RES.view = null; RES.pick = null; RES.labelAsked = null; RES.cmp = null; RES.cmpSrc = null; RES.cmpUi = 'idle'; RES.cmpPick = false; RES.diffMode = null; $('cmp-menu').hidden = true; $('sec-tools').hidden = true; $('df-top').innerHTML = ''; $('diff-top').innerHTML = ''; }
     RES.id = id; clearInterval(RES.timer); remember(id);
     RES.tab = tab; $('res-eyebrow').textContent = 'Result'; $('rep-full').hidden = NATIVE;   // only the open tab shows (data-tab)
     loadView(true);
@@ -917,6 +917,8 @@
   function loadDrift() { var id = RES.id; api('/api/video/' + id + '/drift').then(function (d) { if (RES.id === id) renderCompare(d); }).catch(function (e) { $('df-top').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
   // one line under the compare button: a spinner while something runs, one sentence if it fails
   function cmpStatus(text, kind) { var el = $('cmp-status'); if (!el) return; if (!text) { el.hidden = true; el.innerHTML = ''; return; } el.hidden = false; el.className = 'cmpstatus ' + (kind || ''); el.setAttribute('role', kind === 'err' ? 'alert' : 'status'); el.innerHTML = (kind === 'err' ? '' : '<span class="spin" aria-hidden="true"></span>') + '<span>' + esc(text) + '</span>'; }
+  // while a database is being compared, the compare owns the top of the Report: the summary and device table step aside
+  function cmpMode(on) { var r = $('res-report'); if (!r) return; r.classList.toggle('cmp-on', !!on); $('cmp-back').hidden = !on; if (on) { cmpStatus('Starting...'); window.scrollTo(0, 0); } else { cmpStatus(''); $('df-top').innerHTML = ''; $('diff-top').innerHTML = ''; } }
   function setDb(body) { return api('/api/video/' + RES.id + '/database', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (d) { cmpStatus(''); renderCompare(d); return d; }).catch(function (e) { cmpStatus(String(e.message || 'The compare did not run.').replace(/\s*$/, '').replace(/([^.!?])$/, '$1.'), 'err'); }); }
   function copyWhen(d, s) { return d.imported[s] ? 'copy of ' + when(d.imported[s]) : 'no copy yet'; }
   var SRCLABEL = { excel: 'Excel workbook', netbox: 'NetBox', cmdb: 'ServiceNow CMDB' };
@@ -960,17 +962,17 @@
     if (d.drift.notes.length) h += '<details class="card"><summary>Not checked (' + d.drift.notes.length + ')</summary><ul class="muted small">' + d.drift.notes.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('') + '</ul></details>';
     el.innerHTML = h;
   }
-    document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('#cmp-btn, #more-link, #cmp-change, [data-cmpsrc], #cmp-use, #cmp-continue, [data-cmppick], [data-dfmode]'); if (!t) return;
+    document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('#cmp-btn, #cmp-back, #more-link, #cmp-change, [data-cmpsrc], #cmp-use, #cmp-continue, [data-cmppick], [data-dfmode]'); if (!t) return;
+    if (t.id === 'cmp-back') { e.preventDefault(); RES.cmpUi = 'idle'; cmpMode(false); window.scrollTo(0, 0); return; }
     if (t.id === 'cmp-btn') { var mn = $('cmp-menu'); mn.hidden = !mn.hidden; t.setAttribute('aria-expanded', String(!mn.hidden)); return; }
     if (t.id === 'more-link') { e.preventDefault(); var st = $('sec-tools'); st.hidden = !st.hidden; if (!st.hidden) { if (window.RTFEAT && !$('res-tools').children.length) window.RTFEAT.fillResult(RES.id); st.scrollIntoView({ block: 'nearest' }); } return; }
     if (t.id === 'cmp-change') { RES.cmpPick = !RES.cmpPick; renderCompare(RES.cmp); var ty0 = $('cmp-type'); if (ty0) ty0.focus(); return; }
     var src = RES.cmpSrc || (RES.cmp && RES.cmp.source) || 'excel';
     if (t.dataset.dfmode) { RES.diffMode = t.dataset.dfmode; return renderDiff(RES.cmp, true); }
-    if (t.dataset.cmpsrc) { src = t.dataset.cmpsrc; RES.cmpSrc = src; $('cmp-menu').hidden = true; $('cmp-btn').setAttribute('aria-expanded', 'false'); RES.cmpPick = false; RES.cmpUi = 'confirm';
+    if (t.dataset.cmpsrc) { src = t.dataset.cmpsrc; RES.cmpSrc = src; $('cmp-menu').hidden = true; $('cmp-btn').setAttribute('aria-expanded', 'false'); RES.cmpPick = false; RES.cmpUi = 'confirm'; cmpMode(true);
       var toCompare = function () { var el = $('sec-compare'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); };   // on a phone the panel opens below the report: go to it
-      cmpStatus('');
       if (RES.cmp && RES.cmp.imported[src]) { cmpStatus('Finding the rack...'); return Promise.resolve(setDb({ source: src })).then(toCompare); }
-      if (src === 'excel') { RES.cmpUi = 'idle'; toast('No workbook is copied in yet. Copy one in under Database copies.'); return go('copies'); }
+      if (src === 'excel') { RES.cmpUi = 'idle'; cmpMode(false); toast('No workbook is copied in yet. Copy one in under Database copies.'); return go('copies'); }
       cmpStatus('Copying in from ' + SRCLABEL[src] + '...');
       return api('/api/sources/' + src + '/import', { method: 'POST' }).then(function (r) { cmpStatus('Finding the rack...'); return Promise.resolve(setDb({ source: src })).then(toCompare); })
         .catch(function (er) { RES.cmpUi = 'idle'; cmpStatus(String(er.message || 'The copy did not work.').replace(/([^.!?])$/, '$1.'), 'err'); }); }

@@ -30,13 +30,17 @@ def main():
             if src != "excel":
                 pg.route("**/drift", no_copy); pg.route("**/api/sources/*/import", slow)
             pg.goto(ENGINE + "/app/#result/" + RUN + "/report"); pg.reload(); pg.wait_for_timeout(3500)
-            pg.click("#cmp-btn"); pg.click(f'[data-cmpsrc="{src}"]')
+            pg.click("#cmp-btn"); pg.evaluate("window.scrollTo(0, 400)"); pg.click(f'[data-cmpsrc="{src}"]')
+            pg.wait_for_timeout(100)
+            if pg.evaluate("scrollY") > 5 or (src != "excel" and not pg.is_visible("#cmp-status")) or pg.is_visible("#rp-top") or not pg.is_visible("#cmp-back"):
+                bad.append(f"{src}: compare did not take over the top within 100 ms")
             if src != "excel":
                 pg.wait_for_timeout(500)
                 t = pg.inner_text("#cmp-status")
                 if "Copying in" not in t: bad.append(f"{src}: no loading line, got {t!r}")
                 pg.screenshot(path=str(OUT / f"compare_{src}_1_loading.png"))
             pg.wait_for_selector("#cmp-continue", timeout=30000)
+            if pg.evaluate("document.getElementById('df-top').getBoundingClientRect().top") > 400: bad.append(f"{src}: confirm panel not near the top")
             pg.screenshot(path=str(OUT / f"compare_{src}_2_confirm.png"))
             pg.click("#cmp-continue"); pg.wait_for_selector("#diff-top .card", timeout=30000); pg.wait_for_timeout(500)
             print(src, "drift:", pg.inner_text("#diff-top .card p")[:90].replace("\n", " "))

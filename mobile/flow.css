@@ -287,3 +287,8 @@ h1, h2, b, .rkrow2 b, .fx-body, .fx-row span { overflow-wrap:anywhere; }
   #rnav.inpage .pill a:hover:not(.on) { background:#f1f2f4; }
   #rnav.inpage .pill a.on { background:#1f2a3a; color:#fff; }
 }
+
+/* compare mode: the compare takes the top of the Report */
+#res-report.cmp-on > #rp-top, #res-report.cmp-on > #res-others, #res-report.cmp-on > #sec-tools { display:none !important; }
+.cmpback { display:inline-block; margin:12px 0 0; font-size:14px; font-weight:600; color:#1f2a3a; text-decoration:underline; }
+.cmpback[hidden] { display:none; }
