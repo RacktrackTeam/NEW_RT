@@ -22,16 +22,16 @@ def cn(tmp_path, monkeypatch):
 
 def test_secrets_sealed_at_rest_and_never_in_meta(cn, tmp_path):
     assert cn.meta("default")["netbox"]["state"] == "mock"            # no login saved: the mock stays the default
-    cn.save("default", "netbox", "http://127.0.0.1:3301/", token="tok-SECRET-123", by="Proof")
-    cn.save("default", "cmdb", "http://127.0.0.1:5301", username="admin", password="pw-SECRET-456")
+    cn.save("default", "netbox", "http://127.0.0.1:3303/", token="tok-SECRET-123", by="Proof")
+    cn.save("default", "cmdb", "http://127.0.0.1:3304", username="admin", password="pw-SECRET-456")
     assert stat.S_IMODE((tmp_path / "connections.key").stat().st_mode) == 0o600
     raw = (tmp_path / "sources.db").read_bytes()
     assert b"SECRET" not in raw and b"admin" not in raw                # nothing readable in the database file
     m = json.dumps(cn.meta("default"))
     assert "SECRET" not in m and "admin" not in m
-    assert cn.meta("default")["netbox"]["token"] is True and cn.meta("default")["netbox"]["address"] == "http://127.0.0.1:3301"
+    assert cn.meta("default")["netbox"]["token"] is True and cn.meta("default")["netbox"]["address"] == "http://127.0.0.1:3303"
     assert cn.resolve("default", "cmdb")["secret"] == {"username": "admin", "password": "pw-SECRET-456"}
-    cn.save("default", "cmdb", "http://127.0.0.1:5301", password="")   # blank keeps what was saved
+    cn.save("default", "cmdb", "http://127.0.0.1:3304", password="")   # blank keeps what was saved
     assert cn.resolve("default", "cmdb")["secret"]["password"] == "pw-SECRET-456"
     assert cn.meta("other-org")["cmdb"]["saved"] is False              # another organization sees nothing
 
@@ -45,9 +45,9 @@ def test_blob_opens_only_with_its_key(cn, tmp_path):
 
 def test_validation(cn):
     with pytest.raises(ValueError):
-        cn.save("default", "netbox", "127.0.0.1:3301", token="x")
+        cn.save("default", "netbox", "127.0.0.1:3303", token="x")
     with pytest.raises(ValueError):
-        cn.save("default", "cmdb", "http://127.0.0.1:5301", username="a")
+        cn.save("default", "cmdb", "http://127.0.0.1:3304", username="a")
 
 
 def test_test_connection_states_and_auth_headers(cn):
@@ -59,8 +59,8 @@ def test_test_connection_states_and_auth_headers(cn):
 
     def down(base, path, headers):
         raise ConnectionError(f"{base} does not answer.")
-    cn.save("default", "netbox", "http://127.0.0.1:3301", token="t1")
-    cn.save("default", "cmdb", "http://127.0.0.1:5301", username="u", password="p")
+    cn.save("default", "netbox", "http://127.0.0.1:3303", token="t1")
+    cn.save("default", "cmdb", "http://127.0.0.1:3304", username="u", password="p")
     assert cn.test("default", "netbox", ok)["state"] == "ok"
     assert cn.test("default", "cmdb", ok)["state"] == "ok"
     assert seen[0][1] == "/api/status/" and seen[0][2]["Authorization"] == "Token t1"
@@ -81,6 +81,6 @@ def test_import_uses_the_saved_login(cn, monkeypatch):
     monkeypatch.setattr(source_db, "_get", fake)
     source_db.import_netbox("default")
     assert calls[0] == (source_db.NETBOX_URL, None)                    # no login: the mock, no header
-    cn.save("default", "netbox", "http://localhost:3301", token="t9")
+    cn.save("default", "netbox", "http://localhost:3303", token="t9")
     source_db.import_netbox("default")
-    assert calls[-1][0] == "http://localhost:3301" and calls[-1][1]["Authorization"] == "Token t9"
+    assert calls[-1][0] == "http://localhost:3303" and calls[-1][1]["Authorization"] == "Token t9"

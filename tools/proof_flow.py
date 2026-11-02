@@ -24,8 +24,8 @@ from playwright.sync_api import sync_playwright
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs" / "proof" / "flow"
 APP = os.environ.get("RT_APP", "http://127.0.0.1:8700")
-NETBOX = os.environ.get("RACKTRACK_NETBOX_URL", "http://127.0.0.1:3301")
-SNOW = os.environ.get("RACKTRACK_SERVICENOW_URL", "http://127.0.0.1:5301")
+NETBOX = os.environ.get("RACKTRACK_NETBOX_URL", "http://127.0.0.1:3303")
+SNOW = os.environ.get("RACKTRACK_SERVICENOW_URL", "http://127.0.0.1:3304")
 RUN = "91af02c09bbc"
 LOGIN = os.environ.get("RT_PROOF_LOGIN")          # "email:password" once sign-in is in; else the name-only sign-in
 

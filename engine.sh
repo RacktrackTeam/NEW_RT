@@ -1,7 +1,7 @@
 #!/bin/sh
 # Start the video engine (server/app.py) as a private service on 127.0.0.1:8700 (RACKTRACK_PORT to change it).
 # Start ./auth.sh first: every /api route except health needs its sign-in.
-# Only the RT-EOS server (rt_eos/, port 3301) talks to it. It loads models, so it
+# Only the RT-EOS server (rt_eos/, the sign-in service on 3302) talks to it. It loads models, so it
 # runs through the model lock with OMP_NUM_THREADS=2 (scripts/with-model-lock.sh).
 # Every path it reads points inside this folder.
 

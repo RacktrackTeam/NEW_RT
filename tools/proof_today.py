@@ -21,7 +21,7 @@ from playwright.sync_api import sync_playwright
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs" / "proof" / "today"
 APP = "http://127.0.0.1:8700"
-NETBOX, SNOW = "http://127.0.0.1:3301", "http://127.0.0.1:5301"
+NETBOX, SNOW = "http://127.0.0.1:3303", "http://127.0.0.1:3304"
 RUN = sys.argv[1] if len(sys.argv) > 1 else "91af02c09bbc"
 
 

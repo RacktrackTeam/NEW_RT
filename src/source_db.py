@@ -292,8 +292,8 @@ def import_excel(path):
     return out
 
 
-NETBOX_URL = os.environ.get("RACKTRACK_NETBOX_URL", "http://127.0.0.1:3301")          # the local NetBox mock (modules/sources/mock/netbox.js)
-SERVICENOW_URL = os.environ.get("RACKTRACK_SERVICENOW_URL", "http://127.0.0.1:5301")  # the local ServiceNow mock (modules/sources/mock/servicenow.js)
+NETBOX_URL = os.environ.get("RACKTRACK_NETBOX_URL", "http://127.0.0.1:3303")          # the local NetBox mock (modules/sources/mock/netbox.js)
+SERVICENOW_URL = os.environ.get("RACKTRACK_SERVICENOW_URL", "http://127.0.0.1:3304")  # the local ServiceNow mock (modules/sources/mock/servicenow.js)
 CMDB_KIND = {"cmdb_ci_ip_switch": "Switch", "cmdb_ci_netgear": "Patch Panel", "cmdb_ci_server": "Server", "cmdb_ci_firewall_network": "Firewall",
              "cmdb_ci_router": "Router", "cmdb_ci_pdu": "PDU", "cmdb_ci_storage_device": "Storage unit"}
 
