@@ -4,11 +4,16 @@ Everything runs inside racktrack-app's own server (server/app.py) and screens (m
 
 ## How to start it
 
-    ./engine.sh      # the engine and the screens on http://127.0.0.1:8700/app/ (through scripts/with-model-lock.sh, OMP_NUM_THREADS=2)
-    ./sources.sh     # the NetBox mock on 127.0.0.1:3301 and the ServiceNow mock on 127.0.0.1:5301 (no model, no lock)
+    ./auth.sh        # the sign-in service on 127.0.0.1:3302 (first start: data/auth/.env, the /org/ screens, the seeded accounts)
+    ./engine.sh      # the engine and the screens on http://127.0.0.1:8700/app/ (it takes the machine-wide model lock only around a model run)
+    ./sources.sh     # the NetBox mock on 127.0.0.1:3303 and the ServiceNow mock on 127.0.0.1:3304 (no model, no lock)
 
-Open http://127.0.0.1:8700/app/, sign in with any name, open a finished run, then the Drift tab.
-Stop them by their real pids: `kill $(lsof -ti TCP:8700 -sTCP:LISTEN) $(lsof -ti TCP:3301) $(lsof -ti TCP:5301)`.
+Open http://127.0.0.1:8700/app/ and sign in (accounts in docs/AUTH.md; the password is in data/auth/seed-password.txt). The stored runs from
+before sign-in are seen by the platform owner (owner). Open a rack from Home; the compare is in its Report.
+Stop them by their real pids: `kill $(lsof -ti TCP:8700 -sTCP:LISTEN) $(lsof -ti TCP:3302 -sTCP:LISTEN) $(lsof -ti TCP:3303) $(lsof -ti TCP:3304)`.
+
+The sections below are the morning and afternoon record; the evening section at the end says what changed since (the Drift tab is
+gone: the compare now lives in the Report).
 
 ## What works (each one run today)
 
@@ -40,7 +45,7 @@ Two more rows show on every source because they are real: the PDU at U24 is miss
 - Serials and asset tags are empty in the office rack's CSV and the video reads none, so no serial row can appear today.
 
 ## Changes to the plan and why
-- The two mocks use ports 3301 and 5301, the only free ports allowed by the brief while RT-EOS and the dev client are not running today. Tomorrow, when RT-EOS takes 3301, the mocks need two other ports agreed by the owner (RACKTRACK_NETBOX_URL and RACKTRACK_SERVICENOW_URL set them; only 127.0.0.1 is ever called).
+- The two mocks used ports 3301 and 5301 in the morning; since the sign-in merge they run on 3303 and 3304 (RACKTRACK_NETBOX_URL and RACKTRACK_SERVICENOW_URL set them; only 127.0.0.1 is ever called).
 - The Database choice lives at the top of the Drift tab rather than on a screen of its own: one place per run, the least new code.
 - No new video run was made: the stored vdo1 run is the same video (a new upload of the same bytes reopens the stored run in the engine).
 
@@ -80,3 +85,17 @@ Owed: restart the engine, run `_cache/venv/bin/python tools/proof_afternoon.py` 
 - The office workbook's own LOOKUPS list Port_Type without RJ45, so its 346 port rows each get a "value not in LOOKUPS" warning. RT-EOS does the same.
 - The A_Z_CONNECTION_MATRIX rows are counted but not checked: this app copies no cables yet.
 - Organizations: one today. The copies are not yet kept per organization (the logins are).
+
+# Evening: cross-check, one flow, rack identification, evaluation, sign-in merged (2 Nov 2026)
+
+| Piece | State | What proves it |
+| --- | --- | --- |
+| Cross-check, live | done | docs/CROSSCHECK.md: proof_today and proof_afternoon run live for the first time (proof_today fixed to press Import), the whole flow walked at 1280 and 400 px (tools/proof_crosscheck.py, docs/proof/crosscheck), every fix listed there. Those three scripts drive the old Drift tab and name-only sign-in and are kept as the record of that check; tools/proof_flow.py replaces them. |
+| One kind per device | done | src/source_db.py device_kind: a correction, then the faceplate, then the picture, with the source in words; used by the view, status, port reader and drift. D1 "Router, from the faceplate; the picture said Switch", D2 "Firewall, from the faceplate" (docs/proof/flow/device_D1_*, device_D2_*). |
+| The flow | done | Home lists each rack once (its latest run, the record it was compared with, the number of differences, how many scans). Scan is record or upload, then the run. The result has three parts: Rack, Devices, Report. The Report holds the compare: the database dropdown and Compare against the database, the rack identification with proof and confidence, Continue, the differences short or detailed (record value, video value, unit, device crop, what to check), and the earlier scans of the rack in a closed dropdown at the bottom. Copy-in and logins live under Profile. tools/proof_flow.py at 1280 and 400 px on our rack with all three sources (docs/proof/flow); tools/proof_widths.py every screen at 1800, 1280 and 400 px (docs/proof/widths). |
+| Rack identification | done | src/source_db.py identify, the rungs and thresholds of the two rack_identity.js ladders: 0 confirmed before (kept per rack label in the organization's copies), 1 location (optional phone position on the upload; site positions copied in from NetBox sites and ServiceNow cmn_location; test positions in the ground truth), 2 the rack label with the strip above the first unit as proof, 3 serials, asset tags and models read on faceplates, 4 rack height (narrows only), 5 rack number in device labels, 6 layout. The first step that leaves one rack names it; each step has a confidence and a reason; overall confidence combined as the ladder scores, Verified at 70 % or more; top 3 or "Which rack is this?" when no step names one. A person's kind, make or model correction is kept by rack label and unit and applied to the next scan of that rack. tests/test_source_db.py (5 tests). |
+| Evaluation | done | tools/evaluate.py, docs/EVALUATION.md. vdo1: 10 of 11 checkable devices found, units 10 of 10, kind 10 of 10, make and model 4 of 4 read (10 in the record), missing 1 (PDU at U24, outside the video), extra 0; the drift agrees on every count. The two WhatsApp runs: 6 of 9 and 6 of 14 found, units off by one or two; drift and evaluation pair them differently there (start within one unit against overlap), explained in the file. |
+| Sign-in merged | done | wt/auth merged (--no-ff); Google, Apple and Facebook sign-in removed; no self sign-up (the platform owner creates organizations, Contact us on the sign-in screen, kept in data/contact); five roles by name (docs/AUTH.md); test runs in a Test Organization only. tools/proof_auth.py on 8700: 24 of 24 checks without screenshots after the last change, 29 of 30 with screenshots before it (the one failure was the invite site name, fixed). RT-EOS server tests for these parts: 76 of 76. |
+| Model lock | changed | engine.sh starts the server without the wrapper; server/app.py ModelLock takes the same machine-wide lock directory only around a model run, so an idle server never holds it. |
+
+Still open: the second and third "Seen in the video" views of D1 and D2 answer 404 (no frame holds the whole box); the location step has never seen a real phone position (no run carries one, the site positions are test values); the report's device table at 400 px is cramped; copies made by the platform owner live in the owner's own copies file, so the owner's compare of a pre-sign-in run uses those; the Chennai DC test site created by the first proof run remains in the Demo Organization (its fixture runs were removed and its two test accounts moved to the Test Organization).

@@ -20,3 +20,9 @@ racktrack-app is the core: its video engine reads a rack from a sweep video. We 
 - Known: device kinds at U20 and U19 of vdo1 differ between classifier and make-and-model step; the two WhatsApp videos' unit numbering is off by one or two; their ground truth needs the owner's confirmation; the CSV has no serials.
 - Owner's feedback on the UI: the flow is not understood and the experience is poor. Tomorrow's first job is one clear flow: Home (racks and their state), Scan (record, upload, run progress), Result in order (rack picture, devices read, the record and the matched rack, the differences, the report), each step saying what comes next, in the RT-EOS minimal look.
 - Not done: sign-in and organizations, the other RT-EOS functions, serials and asset tags, the other two videos end to end, the GitHub push (remote set, token needed).
+
+## State at 2 Nov 16:10 (evening)
+- Start: ./auth.sh (sign-in on 3302), ./engine.sh (8700, takes the model lock only around a model run), ./sources.sh (mocks on 3303 and 3304). Sign in with the accounts in docs/AUTH.md; the stored runs from before sign-in show for the platform owner.
+- The result is three parts: Rack, Devices, Report; the compare (rack identification steps 0 to 6 with proof and confidence, then the differences) lives in the Report. Copy-in and logins are under Profile. Proof: tools/proof_flow.py, tools/proof_widths.py.
+- docs/CROSSCHECK.md (the live cross-check), docs/EVALUATION.md (tools/evaluate.py), docs/AUTH.md (sign-in, five roles, removals), docs/TODAY-STATUS.md (evening table and what is still open).
+- tools/proof_today.py, proof_afternoon.py and proof_crosscheck.py drive the old Drift tab and name-only sign-in: kept as the record, no longer runnable as they are.
