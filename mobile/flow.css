@@ -129,3 +129,12 @@ table.rptable, table.dftable, table.cptable, table.wbtable { border-collapse:col
   .rptable td:nth-child(2) { width:auto !important; } .rptable td, .rptable th { padding:8px !important; }
   .rptable td:first-child { white-space:nowrap; }
 }
+/* Scan: the heading on the left edge like every screen; at laptop width the picker and Analyse on the left, How to film beside it */
+.scanpage .swh { text-align:left !important; max-width:none !important; margin:0 !important; align-items:flex-start !important; }
+.scanpage .scanbody { max-width:none !important; width:100%; margin:0 !important; }
+@media (min-width:900px) {
+  .scanpage .scanbody { display:grid !important; grid-template-columns:minmax(0, 3fr) minmax(0, 2fr); gap:16px 32px; align-items:start; align-content:start !important; min-height:0 !important; }
+  .scanpage .scanbody > #dropzone { grid-column:1; grid-row:1; } .scanpage .scanbody > .scanfoot { grid-column:1; grid-row:2; }
+  .scanpage .scanbody > #sw-tips { grid-column:2; grid-row:1 / span 2; }
+}
+.scanpage .or { border:0 !important; font-family:var(--font) !important; font-size:13px !important; color:var(--t2); }
