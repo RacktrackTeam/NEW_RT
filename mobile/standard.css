@@ -1,0 +1,47 @@
+/* RackTrack screen standard (docs/design/STANDARD.md): loaded last; where things sit and how they look, never what a screen holds. */
+:root { --s1:8px; --s2:16px; --s3:24px; --s4:32px; --std-line:#e3e7ec; --std-ink:#1f2a3a; --std-gutter:16px; }
+@media (min-width:1000px) { :root { --std-gutter:32px; } }
+
+/* one gutter, full width, one gap between blocks */
+body.signed main { padding-left:var(--std-gutter) !important; padding-right:var(--std-gutter) !important; }
+body.signed .screen { max-width:none !important; gap:var(--s3) !important; }
+
+/* page header: title left, primary action right on the same line, the lead under the title */
+.phead, .swh { display:flex; align-items:flex-start; justify-content:space-between; gap:var(--s2); flex-wrap:wrap; padding:0 !important; margin:0 !important; }
+.phead > div, .swh { min-width:0; }
+.phead h1, .swh h1, .fx-title h1, .screen > h1 { font-size:24px !important; font-weight:600 !important; line-height:32px !important; letter-spacing:-.01em; margin:0 !important; color:#111; text-align:left !important; }
+.phead p.muted, .swh p.muted { font-size:14px; line-height:20px; margin:var(--s1) 0 0 !important; }
+.phead > .btn, .phead > a.btn { margin-left:auto; flex:none; }
+.fx-page { gap:var(--s3) !important; padding:0 !important; } .fx-title { margin:0 !important; }
+
+/* buttons: 40 px, 8 px radius; primary filled, secondary outline */
+.btn, .btn.big, .btn.mini, .btn.ghost, .btn.danger, button.btn, a.btn, .btn.mini.ink { min-height:40px !important; height:40px; padding:0 var(--s2) !important; border-radius:8px !important; font-size:14px !important; font-weight:600 !important; letter-spacing:0 !important; box-shadow:none !important; border:1px solid #cfd6df !important; background:#fff !important; color:#111 !important; }
+.btn.primary, .btn.mini.ink, .btn.primary.big { background:var(--std-ink) !important; border-color:var(--std-ink) !important; color:#fff !important; }
+.btn.danger { color:#b3261e !important; border-color:#e4b9b5 !important; }
+.btn:disabled { opacity:.45; }
+.btn.block { width:100%; }
+.ft-btns, .fx-acts, .dfrow:has(> .btn.primary) { justify-content:flex-end; }
+
+/* back links: top left, text link */
+#back, .cmpback { font-size:14px; font-weight:600; }
+
+/* cards: one border, one radius, one padding */
+.card, .run, .li, .kpirow, .film, .repbox, .choice, .fx-card, .upcard { background:#fff !important; border:1px solid var(--std-line) !important; border-radius:8px !important; box-shadow:none !important; padding:var(--s2); }
+.card.flush, .fx-card { padding:0 !important; }
+.card.group, .card.mtable { padding:0 !important; }
+
+/* pills: one size */
+.fx-pill, .acc, .chip, .idconf, .fchip { display:inline-flex; align-items:center; min-height:24px; height:24px; padding:0 10px !important; border-radius:999px; font-size:12px !important; font-weight:600; line-height:1; }
+
+/* tables: one header style */
+table th, .dftable th, .wbtable th { font-size:12px !important; font-weight:600 !important; color:#5b6573 !important; background:#f6f7f9 !important; text-transform:none !important; letter-spacing:0 !important; padding:12px var(--s2) !important; text-align:left; }
+table td, .dftable td { font-size:14px; padding:12px var(--s2) !important; border-top:1px solid var(--std-line); }
+
+/* the status line under an action */
+.cmpstatus { margin:var(--s1) 0 0; }
+@media (max-width:999px) { .phead > .btn, .phead > a.btn { margin-left:0; align-self:flex-end; } }
+
+/* the primary action is always at the right of its block: it comes last, so it is the right-most button */
+.runact, .dfrow.idbtns { width:100%; display:flex; flex-direction:row-reverse; justify-content:flex-start; flex-wrap:wrap; gap:var(--s1); }
+.swh { display:block !important; }
+.swh p.muted { margin-top:var(--s1) !important; }
