@@ -1533,7 +1533,7 @@ def drift_view(j):
         out["match"] = SDB.match(source, rid)
     if out["match"]:
         out["record"] = SDB.devices(source, out["match"]["rack_key"])
-        out["drift"] = SDB.drift(j.get("result"), out["record"])
+        out["drift"] = SDB.drift(j.get("result"), out["record"], SDB.ports(source, out["match"]["rack_key"]) if source == "excel" else None)
     return out
 
 

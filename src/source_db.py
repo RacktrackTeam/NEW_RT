@@ -402,8 +402,68 @@ def run_devices(result):
         L = d.get("layout") or {}
         kind = (d.get("kind_override") or {}).get("kind") or layout_kind(L) or d.get("type") or (d.get("classification") or {}).get("label")
         out.append({"index": d.get("index"), "ru_start": min(nums), "ru_height": len(nums), "kind": None if kind in (None, "", "Other", "Not sure") else kind,
-                    "manufacturer": _s(L.get("vendor")), "model": _s(L.get("model")), "serial": _s(L.get("serial") or d.get("serial"))})
+                    "manufacturer": _s(L.get("vendor")), "model": _s(L.get("model")), "serial": _s(L.get("serial") or d.get("serial")), "ports": run_ports(d)})
     return out
+
+
+def run_ports(d):
+    """The device's ports as the result screen takes them (server/app.py lay_of: a close-up first, the fitted layout's ports, else the
+    port details), each as number, type, state and the dust cap where the cap model read one."""
+    C, L = d.get("closeup") or {}, d.get("layout") or {}
+    src = C if (C.get("fitted") or C.get("auto")) else L
+    pd = ((C.get("port_details") if src is C else None) or L.get("port_details") or {})
+    used = src.get("fitted") or src.get("auto") or src.get("mode") == "patchpanel"
+    raw = (src.get("ports") or []) if used else (pd.get("ports") or [])
+    cap = {p.get("id"): p.get("cap_state") for p in pd.get("ports") or [] if p.get("cap_state")}
+    out = []
+    for p in raw:
+        n = _int(p.get("id")) if str(p.get("id") or "").strip().isdigit() else None
+        if n is not None:
+            out.append({"n": n, "type": _s(p.get("type")), "state": p.get("status"), "cap": p.get("cap_state") or cap.get(p.get("id"))})
+    return out
+
+
+def port_family(t):
+    """RT-EOS's portFamily (rt_eos/server/lib/workbook.js): a read "sfp" fits the sheet's "SFP+", "qsfp" its "QSFP28"."""
+    k = _key(t)
+    for fam, words in (("OSFP", ("osfp",)), ("QSFP", ("qsfp",)), ("SFP", ("sfp",)), ("RJ45", ("rj45", "8p8c", "copper", "ethernet"))):
+        if any(w in k for w in words):
+            return fam
+    return None
+
+
+COPPER = re.compile(r"RJ45|RJ-45|CONSOLE|AUX|MANAGEMENT|USB", re.I)
+
+
+def port_drift(name, dev, want):
+    """RT-EOS's port rules (rt_eos/server/lib/sheet_check.js check()) for one matched device against its PORT_INVENTORY rows:
+    Port_Type against the read cage, Expected_Occupied against the read state (missing or extra cable), Expected_Dust_Cap against
+    the cap model (No is never a fault, Yes counts on any port, blank only on an optical port). Unread states are not judged."""
+    rows, checked = [], 0
+    at = _units(dev["ru_start"], dev["ru_height"])
+    for p in dev["ports"]:
+        x = want.get(p["n"])
+        if not x:
+            continue
+        checked += 1
+        base = {"unit": at, "device": f"{name} / D{dev['index']}", "port": p["n"]}
+        wf, gf = port_family(x.get("port_type")), port_family(p["type"])
+        if wf and gf and wf != gf:
+            rows.append({**base, "type": "port_type", "what": "Wrong port type", "record": x["port_type"], "read": p["type"],
+                         "words": f"Port {p['n']} of {name} is {x['port_type']} in the record; the video reads {p['type'].upper()}."})
+        occ = x.get("expected_occupied")
+        if occ == "Yes" and p["state"] == "empty":
+            rows.append({**base, "type": "port_occupied", "what": "Missing cable", "record": "occupied", "read": "empty",
+                         "words": f"Port {p['n']} of {name} should have a cable; the video shows it empty."})
+        elif occ == "No" and p["state"] == "connected":
+            rows.append({**base, "type": "port_occupied", "what": "Extra cable", "record": "empty", "read": "cable",
+                         "words": f"Port {p['n']} of {name} should be empty; the video shows a cable in it."})
+        capw = x.get("expected_dust_cap")
+        optical = bool(p["type"]) and not COPPER.search(p["type"])
+        if capw != "No" and (capw == "Yes" or optical) and p["state"] == "empty" and p.get("cap") == "empty":
+            rows.append({**base, "type": "dust_cap", "what": "Dust cap missing", "record": "cap" if capw == "Yes" else "cap on an empty optical port", "read": "no cap",
+                         "words": f"Port {p['n']} of {name} is empty and has no dust cap" + ("; the record expects one." if capw == "Yes" else "; an empty optical port needs one.")})
+    return rows, checked
 
 
 def _same(a, b):
@@ -415,9 +475,10 @@ def _units(start, height):
     return f"U{start}" if not height or height == 1 else f"U{start}-{start + height - 1}"
 
 
-def drift(result, record):
-    """One row per difference between the run and the record, in plain words."""
-    rows, notes = [], []
+def drift(result, record, ports=None):
+    """One row per difference between the run and the record, in plain words. `ports` ({device_key: {port_number: row}}, from an Excel
+    copy's PORT_INVENTORY) adds the port rows of each matched device."""
+    rows, notes, ports_checked = [], [], 0
     seen = run_devices(result)
     top = max([_unum(r.get("unit")) or 0 for r in ((result or {}).get("rack") or {}).get("rows") or []] + [0]) or None
     free = list(seen)
@@ -462,5 +523,11 @@ def drift(result, record):
             rows.append({**base, "type": "model", "what": "Wrong model", "record": r["model"], "read": s["model"], "words": f"{name} is a {r['model']} in the record; the video reads {s['model']}."})
         if s["serial"] and r.get("serial") and _norm(s["serial"]) != _norm(r["serial"]):
             rows.append({**base, "type": "serial", "what": "Wrong serial", "record": r["serial"], "read": s["serial"], "words": f"{name} has serial {r['serial']} in the record; the video reads {s['serial']}."})
-    rows.sort(key=lambda x: -(_unum(x["unit"]) or 0))
-    return {"rows": rows, "checked": len(pairs), "record_devices": len(record), "video_devices": len(seen), "notes": notes}
+        want = (ports or {}).get(r.get("device_key")) or {}
+        if want:
+            pr, n = port_drift(name, s, want)
+            rows += pr; ports_checked += n
+            if not n:
+                notes.append(f"{name} has {len(want)} ports in PORT_INVENTORY but the video read none of its ports, so they are not checked.")
+    rows.sort(key=lambda x: (-(_unum(x["unit"]) or 0), x.get("port") or 0))
+    return {"rows": rows, "checked": len(pairs), "record_devices": len(record), "video_devices": len(seen), "notes": notes, "ports_checked": ports_checked}

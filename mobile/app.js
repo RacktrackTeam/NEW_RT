@@ -799,7 +799,7 @@
       + d.candidates.map(function (r) { return '<option value="' + esc(r.rack_key) + '"' + (d.match && d.match.how === 'picked' && d.match.rack_key === r.rack_key ? ' selected' : '') + '>' + esc(r.rack_key) + (r.label && r.label !== r.rack_key ? ' (' + esc(r.label) + ')' : '') + ' - ' + r.devices + ' devices</option>'; }).join('') + '</select></div>';
     h += '</div>';
     if (d.drift) { var rows = d.drift.rows;
-      h += '<span class="glabel">Drift</span><div class="card"><p><b>' + rows.length + '</b> ' + (rows.length === 1 ? 'difference' : 'differences') + ' · ' + d.drift.checked + ' devices compared · ' + d.drift.video_devices + ' in the video · ' + d.drift.record_devices + ' in the record</p></div>';
+      h += '<span class="glabel">Drift</span><div class="card"><p><b>' + rows.length + '</b> ' + (rows.length === 1 ? 'difference' : 'differences') + ' · ' + d.drift.checked + ' devices compared' + (d.drift.ports_checked ? ' · ' + d.drift.ports_checked + ' ports compared' : '') + ' · ' + d.drift.video_devices + ' in the video · ' + d.drift.record_devices + ' in the record</p></div>';
       h += rows.length ? '<div class="card flush"><table class="dftable"><thead><tr><th>Difference</th><th>Unit</th><th>Record</th><th>Video</th></tr></thead><tbody>' + rows.map(function (r) {
         return '<tr data-dftype="' + esc(r.type) + '"><td><span class="dk">' + esc(r.what) + '</span><p>' + esc(r.words) + '</p></td><td class="mono">' + esc(r.unit) + '</td><td>' + esc(r.record) + '</td><td>' + esc(r.read) + '</td></tr>'; }).join('') + '</tbody></table></div>'
         : '<div class="card"><p class="dfok">No drift. The rack matches the record.</p></div>';
