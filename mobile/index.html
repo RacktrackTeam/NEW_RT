@@ -246,7 +246,7 @@
     </div>
   </section>
 
-  <!-- the result: four tabs in the bottom bar (Rack, Devices, Elevation, Report) -->
+  <!-- the result: four parts: Rack, Devices, Layout, Report -->
   <section class="screen" data-screen="result" hidden>
     <span id="res-eyebrow" hidden></span><span id="res-title" hidden></span><span id="res-sub" hidden></span><a id="rep-full" href="#" hidden></a>
     <div class="card note" id="res-pending" hidden><span class="dot run"></span><div><b>Ports are being read in the background.</b><p class="muted small">Makes, models and ports fill in when done. Everything else is final.</p></div></div>
@@ -271,11 +271,12 @@
         <div class="oneacts"><button class="btn primary big" id="dv-another" type="button">Pick another device</button><button class="btn ghost big" id="dv-rack" type="button">Back to the rack</button></div>
       </div>
     </div>
-    <div class="rpart" id="res-elevation"><p class="glabel">The same devices, drawn as an elevation</p>
+    <header class="rsh" id="sec-layout"><span class="rsn">3</span><div><h2>Layout</h2><p class="muted">The rack elevation drawn from the data: every device in its units, coloured by kind. Tap a device to open it.</p></div></header>
+    <div class="rpart" id="res-layout">
       <div class="elegend" id="rt-legend"></div>
       <div class="rteos" id="rt-topo"></div>
     </div>
-    <header class="rsh" id="sec-report"><span class="rsn">3</span><div><h2>Report</h2><p class="muted">The rack on one page: units, devices and free space. Below it, compare the rack against your database: the rack is identified step by step with its proof, then the differences are listed.</p></div></header>
+    <header class="rsh" id="sec-report"><span class="rsn">4</span><div><h2>Report</h2><p class="muted">The rack on one page: units, devices and free space. Below it, compare the rack against your database: the rack is identified step by step with its proof, then the differences are listed.</p></div></header>
     <div class="rpart" id="res-report"><div id="rp-top"></div>
       <div class="cmpsec" id="sec-compare"><h3>Compare against the database</h3><p class="muted small">Choose Excel workbook, NetBox or ServiceNow CMDB and press Compare. Check which rack it matched, then Continue. Nothing is ever written back to the database.</p><div id="df-top"></div></div>
       <div class="cmpsec" id="sec-diff"><div id="diff-top"></div></div>
@@ -351,6 +352,7 @@
   <div class="pill">
     <a href="#" data-rtab="rack"><svg class="ic"><use href="#i-rack"/></svg><span>Rack</span></a>
     <a href="#" data-rtab="devices"><svg class="ic"><use href="#i-guide"/></svg><span>Devices</span></a>
+    <a href="#" data-rtab="layout"><svg class="ic"><use href="#i-chart"/></svg><span>Layout</span></a>
     <a href="#" data-rtab="report"><svg class="ic"><use href="#i-doc"/></svg><span>Report</span></a>
   </div>
 </nav>

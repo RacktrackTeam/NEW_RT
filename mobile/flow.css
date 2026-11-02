@@ -56,7 +56,7 @@ main { max-width:none !important; margin:0 !important; padding-left:16px !import
 .rsh:first-of-type { border-top:0; padding-top:4px; }
 .rsn { width:32px; height:32px; border-radius:999px; background:#121212; color:#fff; font-weight:600; display:inline-flex; align-items:center; justify-content:center; flex:none; font-size:14px; }
 .rsh h2 { font-size:20px; letter-spacing:-.01em; margin:2px 0 4px; } .rsh p { font-size:14px; max-width:80ch; }
-#res-elevation .glabel { display:block; margin:8px 0; }
+#res-layout .glabel { display:block; margin:8px 0; }
 .cmpcard .dfrow, .idcard .dfrow { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
 .cmpcard select { flex:1 1 260px; }
 .lblstrip { margin:4px 0; } .lblstrip img { width:100%; max-height:180px; object-fit:contain; background:#1e1f22; border-radius:12px; display:block; }

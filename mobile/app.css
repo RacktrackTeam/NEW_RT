@@ -626,7 +626,7 @@ main > .screen > .stage0 { margin:-16px -16px 0; }
 .invwrap > summary::-webkit-details-marker { display:none; } .invwrap > summary::after { content:'›'; font-size:18px; transition:transform .25s var(--ease); } .invwrap[open] > summary::after { transform:rotate(90deg); }
 
 /* the Elevation tab: the drawing and the scene fit the screen */
-#res-elevation { --elev-h:calc(100svh - 56px - env(safe-area-inset-top, 0px) - var(--nav-clear) - 160px); }
+#res-layout { --elev-h:calc(100svh - 56px - env(safe-area-inset-top, 0px) - var(--nav-clear) - 160px); }
 .dvinfo .dfacts .kind-edit { min-height:32px; padding:0 8px; margin:-7px 0 -7px 2px; border-radius:6px; }
 
 /* the Rack tab: compact by default (the whole rack within the screen), Detail = full width and scrolls */
@@ -921,7 +921,7 @@ body.on-home, body.on-home #top { background:#fff; }
   #dv-one .pshot.vfig img { max-height:300px; width:auto; margin:0 auto; }
   .oneacts { max-width:560px; }
   /* Layout tab: the drawing at a comfortable width */
-  #res-elevation { max-width:none; --elev-h:calc(100vh - 230px); }
+  #res-layout { max-width:none; --elev-h:calc(100vh - 230px); }
   /* Report tab: the device table in one column, the numbers, free space and what needs a look in the other */
   #res-report > * { max-width:none !important; } #rp-top .rphead .muted { display:none; }
   #rp-top { display:grid; grid-template-columns:minmax(0, 1.25fr) minmax(0, 1fr); gap:0 32px; align-items:start; }
@@ -981,7 +981,7 @@ body.on-home, body.on-home #top { background:#fff; }
   #rp-top .rpcol.a { min-height:0; overflow:auto; }
   #rp-top .rpcol.b, #rp-top .rpcol.c { min-height:0; } #rp-top .rpcol.c { overflow:auto; }
   /* Layout: the drawing fills the space left */
-  #res-elevation { height:100%; min-height:0; --elev-h:calc(100vh - 215px); }
+  #res-layout { height:100%; min-height:0; --elev-h:calc(100vh - 215px); }
 }
 
 @media (min-width:1000px) {                       /* the device card fills the height; the small rack runs its full height as the locator */

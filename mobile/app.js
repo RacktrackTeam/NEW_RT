@@ -38,8 +38,8 @@
   // ---------------------------------------------------------------- routing: #signin #home #history #sweep #job/<id> #result/<id> #report/<id> #more #models
   var DETAIL = { job: 'Run', result: 'Result', history: 'History', models: 'Models and accuracy', connections: 'Connections', copies: 'Database copies', tools: 'Rack tools' };   // tools: wt/features
   // the result's bar: Main is the rack read from the data; the other four show the report's steps in groups
-  var TABS = { rack: 'Rack', devices: 'Devices', report: 'Report' };   // one page in three parts; the compare and its differences live inside the Report
-  var ALIAS = { elevation: 'devices', drift: 'compare', record: 'compare', diff: 'diff', ports: 'devices', compare: 'compare' };   // ports live on each device (user, 2026-10-27: one place per device)
+  var TABS = { rack: 'Rack', devices: 'Devices', layout: 'Layout', report: 'Report' };   // one page in four parts; the compare and its differences live inside the Report
+  var ALIAS = { elevation: 'layout', drift: 'compare', record: 'compare', diff: 'diff', ports: 'devices', compare: 'compare' };   // ports live on each device (user, 2026-10-27: one place per device)
   var KINDS = ['Switch', 'Router', 'Firewall', 'Gateway', 'Patch Panel', 'Server', 'Storage unit', 'PDU', 'UPS', 'Other'];
   var LAST = null;                                   // the run the Report tab opens: the one being looked at, else the newest finished one
   try { LAST = localStorage.getItem('rt_last') || null; } catch (e) {}
@@ -531,7 +531,7 @@
     var fresh = RES.id !== id;
     if (fresh) { RES.sel = null; RES.view = null; RES.pick = null; RES.labelAsked = null; RES.cmp = null; RES.cmpSrc = null; RES.diffMode = null; $('df-top').innerHTML = ''; $('diff-top').innerHTML = ''; }
     RES.id = id; clearInterval(RES.timer); remember(id);
-    RES.tab = tab; Object.keys(TABS).forEach(function (k) { $('res-' + k).hidden = false; }); $('res-elevation').hidden = false; $('res-eyebrow').textContent = 'Result'; $('rep-full').hidden = NATIVE;   // every step on one page
+    RES.tab = tab; Object.keys(TABS).forEach(function (k) { $('res-' + k).hidden = false; }); $('res-eyebrow').textContent = 'Result'; $('rep-full').hidden = NATIVE;   // every step on one page
     loadView(true);
     watchPorts();
     if (fresh || !RES.cmp) loadDrift();

@@ -23,6 +23,6 @@ racktrack-app is the core: its video engine reads a rack from a sweep video. We 
 
 ## State at 2 Nov 16:10 (evening)
 - Start: ./auth.sh (sign-in on 3302), ./engine.sh (8700, takes the model lock only around a model run), ./sources.sh (mocks on 3303 and 3304). Sign in with the accounts in docs/AUTH.md; the stored runs from before sign-in show for the platform owner.
-- The result is three parts: Rack, Devices, Report; the compare (rack identification steps 0 to 6 with proof and confidence, then the differences) lives in the Report. Copy-in and logins are under Profile. Proof: tools/proof_flow.py, tools/proof_widths.py.
+- The result is four parts: Rack, Devices, Layout (the rack elevation drawn from the data), Report; the compare (rack identification steps 0 to 6 with proof and confidence, then the differences) lives in the Report. Copy-in and logins are under Profile. Proof: tools/proof_flow.py, tools/proof_widths.py.
 - docs/CROSSCHECK.md (the live cross-check), docs/EVALUATION.md (tools/evaluate.py), docs/AUTH.md (sign-in, five roles, removals), docs/TODAY-STATUS.md (evening table and what is still open).
 - tools/proof_today.py, proof_afternoon.py and proof_crosscheck.py drive the old Drift tab and name-only sign-in: kept as the record, no longer runnable as they are.

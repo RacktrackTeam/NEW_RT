@@ -59,7 +59,7 @@ def main():
             pg.goto(APP + "/app/#history"); pg.wait_for_selector("#hist a.run", timeout=15000); shot("history")
             seen[(width, "history")] = pg.eval_on_selector_all("#hist a.run", "as => as.map(a => a.innerText.replace(/\\n+/g, ' | '))")
             # the result of the office rack, tab by tab
-            for tab in ("rack", "devices", "elevation", "report"):
+            for tab in ("rack", "devices", "layout", "report"):
                 pg.goto(f"{APP}/app/#result/{RUN}" + ("" if tab == "rack" else "/" + tab)); shot(f"result_{tab}", 2500)
             seen[(width, "report")] = text("#rp-top")[:1500]
             # the Drift tab: the workbook, its report, Import; NetBox; CMDB
