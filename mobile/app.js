@@ -36,7 +36,7 @@
     el.textContent = t; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.hidden = true; }, 3200); }
 
   // ---------------------------------------------------------------- routing: #signin #home #history #sweep #job/<id> #result/<id> #report/<id> #more #models
-  var DETAIL = { job: 'Run', result: 'Result', history: 'History', models: 'Models and accuracy', connections: 'Connections', copies: 'Database copies' };
+  var DETAIL = { job: 'Run', result: 'Result', history: 'History', models: 'Models and accuracy', connections: 'Connections', copies: 'Database copies', tools: 'Rack tools' };   // tools: wt/features
   // the result's bar: Main is the rack read from the data; the other four show the report's steps in groups
   var TABS = { rack: '1 The rack picture', devices: '2 Devices read', record: '3 The record', diff: '4 Differences', report: '5 Report' };   // one page in this order; the keys are the steps to jump to
   var ALIAS = { elevation: 'devices', drift: 'record', ports: 'devices' };   // ports live on each device (user, 2026-10-27: one place per device)
@@ -88,6 +88,7 @@
     if (name === 'result') openResult(arg, rtab);
     if (name === 'invite') AUTH.openInvite(arg);
     if (name === 'forgot') AUTH.openForgot();
+    if (name === 'tools' && window.RTFEAT) window.RTFEAT.open(arg, arg2, h.split('/')[3]);      // wt/features: the rack tools (mobile/features.js)
   }
   window.addEventListener('hashchange', route);
   $('back').addEventListener('click', function () { if (location.hash.indexOf('#result/') === 0) return go('history'); if (history.length > 1) history.back(); else go('home'); });
@@ -1134,6 +1135,7 @@
       below += '<div class="rmdev"><button class="link rmbtn" type="button" data-dev="' + dv.index + '" data-top="' + dv.top + '">Not a device? Remove it</button></div>';   // a box that is no device (user, 2026-10-27: 'there is no D6')
       RES.zoom = { html: '<img class="zimg" id="dv-crop" alt="D' + dv.index + '">', title: 'D' + dv.index + (mm ? ' · ' + esc(mm) : ''), dev: dv };
     }
+    if (!isUnit && window.RTFEAT) below = window.RTFEAT.idsBlock(devs[at], RES.id) + below;     // wt/features: serial and asset tag from a close-up
     $('res-dev').innerHTML = '<div class="dvwrap">' + loc + '<div class="dvinfo">' + info + '</div></div><div class="dvbelow">' + below + '</div>';
     renderDevSide();
     var cine = $('cine'); if (cine) setTimeout(function () { cine.classList.add('play'); }, 350);

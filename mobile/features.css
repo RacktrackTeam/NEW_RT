@@ -1,0 +1,37 @@
+/* wt/features: the rack tools (mobile/features.js) in the RT-EOS minimal look: white, flat, 1px lines, full device width. Light theme only. */
+.ft-head h1 { margin:4px 0 6px; }
+.ft-head .eyebrow a { color:inherit; }
+.ft-list .grow { align-items:center; }
+.ft-t { display:flex; flex-direction:column; gap:2px; flex:1; min-width:0; } .ft-t small { color:var(--t2); font-size:13px; }
+.ft-form { display:flex !important; flex-direction:row !important; flex-wrap:wrap; gap:12px; align-items:flex-end !important; padding:16px !important; }
+.ft-field { display:flex; flex-direction:column; gap:6px; flex:1 1 220px; min-width:0; margin:0; } .ft-field span { font-size:13px; color:var(--t2); }
+.ft-form select, .ft-form input { width:100%; }
+.ft-form .btn { flex:0 0 auto; padding:0 22px; }
+.ft-found, .ft-dev, .ft-sfp, .ft-wl, .ft-again, .ft-ids { padding:16px; margin-top:12px; display:flex; flex-direction:column; gap:8px; }
+.ft-found h2, .ft-dev h2, .ft-sfp h2 { margin:2px 0; font-size:18px; overflow-wrap:anywhere; }
+.ft-pic { margin:4px 0; } .ft-pic img { width:100%; height:auto; border-radius:10px; border:1px solid var(--line); display:block; }
+.ft-kvs { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:4px 24px; }
+.ft-kv { display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-bottom:1px solid var(--line2); font-size:14px; }
+.ft-kv span { color:var(--t2); flex:none; } .ft-kv b { text-align:right; overflow-wrap:anywhere; font-weight:600; }
+.ft-devh { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.ft-probs { margin:0; padding-left:18px; display:flex; flex-direction:column; gap:6px; font-size:14px; }
+.ft-cells { display:flex; flex-wrap:wrap; gap:4px; }
+.ft-cell { display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:26px; padding:0 4px; border-radius:6px; font-size:12px; font-weight:600; border:1px solid var(--line); }
+.ft-cell.on { background:#121212; color:#fff; border-color:#121212; } .ft-cell.off { background:#fff; color:#121212; border-color:rgba(18,18,18,.35); }
+.ft-cell.na { background:#f6f6f6; color:#757575; border-style:dashed; }
+.ft-legend { display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:13px; color:var(--t2); }
+.ft-wrap { overflow-x:auto; margin-top:12px; border:1px solid var(--line); border-radius:12px; }
+.ft-table { width:100%; border-collapse:collapse; font-size:13px; } .ft-table th, .ft-table td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line2); vertical-align:top; }
+.ft-table th { color:var(--t2); font-weight:600; white-space:nowrap; background:#fff; } .ft-table tr:last-child td { border-bottom:0; }
+.ft-h2 { margin:28px 0 4px; font-size:18px; }
+.ft-btns { display:flex; flex-wrap:wrap; gap:8px; align-items:center; } .ft-btns select { flex:1 1 180px; }
+.ft-wl b { font-size:15px; } .ft-wl.ft-done { opacity:.7; }
+.ft-bar { height:8px; border-radius:999px; background:#f1f1f1; overflow:hidden; } .ft-bar i { display:block; height:100%; background:#121212; }
+.ft-topo { margin-top:12px; }
+.ft-ids { margin-top:12px; } .ft-ids .btn.file { align-self:flex-start; padding:0 18px; display:inline-flex; align-items:center; }
+@media (max-width:600px) { .ft-form .btn { width:100%; } .ft-kv { flex-direction:column; gap:2px; } .ft-kv b { text-align:left; } .ft-table { font-size:12px; } }
+@media (max-width:600px) {   /* a table on a phone: one card per row, each cell with its column name */
+  .ft-table thead { display:none; } .ft-table, .ft-table tbody { display:block; }
+  .ft-table tr { display:block; padding:8px 0; border-bottom:1px solid var(--line); } .ft-table tr:last-child { border-bottom:0; }
+  .ft-table td { display:flex; justify-content:space-between; gap:12px; border:0; padding:3px 12px; text-align:right; overflow-wrap:anywhere; }
+  .ft-table td::before { content:attr(data-label); color:var(--t2); font-weight:600; flex:none; max-width:40%; text-align:left; } }

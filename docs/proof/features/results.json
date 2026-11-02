@@ -1,0 +1,308 @@
+{
+ "answers": {
+  "identify": [
+   {
+    "n": 0,
+    "title": "Confirmed before",
+    "outcome": "one",
+    "proof": "Confirmed by admin on 2026-11-02: the rack labelled SP-HYD-RM01-R01-R1 is the record SP-HYD-RM01-R01-R1."
+   },
+   {
+    "n": 1,
+    "title": "Location",
+    "outcome": "one",
+    "proof": "1 rack within 300 m of the phone's position (accuracy 35 m). Taken at Hyderabad DC, 50 m from its position."
+   },
+   {
+    "n": 2,
+    "title": "Rack label",
+    "outcome": "one",
+    "proof": "Rack id SP-HYD-RM01-R01-R1 (\"SP-HYD-RM01-R01-R1\" read in 5 frames, confidence 52 %). The rack id SP-HYD-RM01-R01-R1 is the record's rack label exactly."
+   },
+   {
+    "n": 3,
+    "title": "Device labels",
+    "outcome": "one",
+    "proof": "3 serial or asset tags read. 4 models read on faceplates (DGS-1024C, TL-SG2428P, TL-SG2428P, DGS-1210-52); 5 of them are in SP-HYD-RM01-R01-R1."
+   },
+   {
+    "n": 4,
+    "title": "Rack height",
+    "outcome": "narrowed",
+    "proof": "The video counted 22 units; 1 rack in this copy can hold that many."
+   },
+   {
+    "n": 5,
+    "title": "Rack number in device labels",
+    "outcome": "one",
+    "proof": "Device labels read: SP-R1-U15-SW02; rack number 1."
+   },
+   {
+    "n": 6,
+    "title": "Layout",
+    "outcome": "one",
+    "proof": "SP-HYD-RM01-R01-R1: 10 of 10 devices at the same units with the same kind"
+   },
+   "Step 0 named one rack: SP-HYD-RM01-R01-R1. Step 2 agrees. Step 3 agrees, 5 of 7. Step 5 agrees. Step 6 agrees, 10 of 10. Verified, 100 %."
+  ],
+  "drift_ids": [
+   "SP-R1-U15-SW02 has serial PLANTED0001 in the record; the video reads TPL2231X9ZZ.",
+   "SP-R1-U15-SW02 has asset tag SP-AT-SW02 in the record; the close-up reads SP-AT-00415."
+  ],
+  "cables": {
+   "rows": [
+    {
+     "cable": "CBL-PL-002",
+     "cable_id": "CBL-PL-002",
+     "connection_id": "CONN-PL-002",
+     "row_no": 3,
+     "end": "A",
+     "device": "SP-R1-U20-ACT / D1",
+     "index": 1,
+     "unit": "U20",
+     "port": 2,
+     "other": "SP-R2-U1-PP1 port 2 in SP-HYD-RM01-R02-R2",
+     "type_record": "Cat6 UTP",
+     "colour_record": "Blue",
+     "type": "missing_cable",
+     "what": "Missing cable",
+     "record": "cable",
+     "read": "empty",
+     "words": "Cable CBL-PL-002 (A-end, to SP-R2-U1-PP1 port 2 in SP-HYD-RM01-R02-R2) should be on port 2 of SP-R1-U20-ACT; the video shows the port empty."
+    },
+    {
+     "cable": "CBL-PL-019",
+     "cable_id": "CBL-PL-019",
+     "connection_id": "CONN-PL-019",
+     "row_no": 20,
+     "end": "A",
+     "device": "SP-R1-U18-SW04 / D3",
+     "index": 3,
+     "unit": "U18",
+     "port": 21,
+     "other": "SP-R2-U1-PP1 port 19 in SP-HYD-RM01-R02-R2",
+     "type_record": "Cat6 UTP",
+     "colour_record": "Blue",
+     "type": "wrong_port",
+     "what": "Wrong port",
+     "record": "port 21",
+     "read": "port 24",
+     "words": "Cable CBL-PL-019 should be on port 21 of SP-R1-U18-SW04; port 21 is empty and port 24 has a cable no row names, so it is likely in port 24."
+    },
+    {
+     "cable": "CBL-PLANT-L1",
+     "cable_id": "CBL-PL-008",
+     "connection_id": "CONN-PL-008",
+     "row_no": 9,
+     "end": "A",
+     "device": "SP-R1-U17-SW03 / D4",
+     "index": 4,
+     "unit": "U17",
+     "port": 9,
+     "other": "SP-R2-U1-PP1 port 8 in SP-HYD-RM01-R02-R2",
+     "type_record": "Cat6 UTP",
+     "colour_record": "Blue",
+     "type": "wrong_port",
+     "what": "Wrong port",
+     "record": "SP-R1-U17-SW03 port 9",
+     "read": "label on D5",
+     "words": "Cable CBL-PLANT-L1 should be on port 9 of SP-R1-U17-SW03; its label was read on D5."
+    },
+    {
+     "type": "extra_cable",
+     "what": "Extra cable",
+     "device": "SP-R1-U17-SW03 / D4",
+     "index": 4,
+     "unit": "U17",
+     "port": 23,
+     "record": "no cable",
+     "read": "cable",
+     "words": "Port 23 of SP-R1-U17-SW03 has a cable; no row of the matrix puts one there."
+    }
+   ],
+   "cables": 19,
+   "ends_checked": 21,
+   "ends_not_read": 0,
+   "ends_elsewhere": 0,
+   "rack_id": "SP-HYD-RM01-R01-R1",
+   "rack_key": "SP-HYD-RM01-R01-R1",
+   "words": "19 cables of the matrix have an end in SP-HYD-RM01-R01-R1."
+  },
+  "find_port": {
+   "index": 4,
+   "device": "SP-R1-U17-SW03",
+   "kind": "Switch",
+   "unit": "U17",
+   "port": 9,
+   "found": true,
+   "read": {
+    "n": 9,
+    "id": 9,
+    "type": "rj45",
+    "state": "connected",
+    "colour": "White",
+    "connector": "RJ-45",
+    "rack_polygon": [
+     [
+      603.5,
+      545.1
+     ],
+     [
+      625.0,
+      545.5
+     ],
+     [
+      624.8,
+      558.4
+     ],
+     [
+      603.3,
+      558.1
+     ]
+    ],
+    "by": null
+   },
+   "ports": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28
+   ],
+   "cable": {
+    "label": "CBL-PLANT-L1-A",
+    "cable": "CBL-PLANT-L1",
+    "end": "A",
+    "other": {
+     "device": "SP-R2-U1-PP1",
+     "port": "8",
+     "rack": "SP-HYD-RM01-R02-R2"
+    },
+    "type": "Cat6 UTP",
+    "colour": "Blue"
+   },
+   "box": [
+    603.3,
+    545.1,
+    625.0,
+    558.4
+   ],
+   "device_box": [
+    185.5,
+    520.0,
+    974.3,
+    599.0
+   ],
+   "picture": "/api/video/91af02c09bbc/find-port.jpg?device=4&port=9"
+  },
+  "worklist_count": 32,
+  "physical_counts": {
+   "ports": 336,
+   "connected": 239,
+   "empty": 21,
+   "unknown": 76,
+   "cables_by_color": {
+    "Blue": 1,
+    "White": 36,
+    "Black": 4
+   }
+  },
+  "sfp": [
+   {
+    "index": 4,
+    "device": "SP-R1-U17-SW03",
+    "model": "TP-Link TL-SG2428P",
+    "unit": "U17",
+    "port_type": "SFP",
+    "count": 4,
+    "suggestion": {
+     "optic": "SFP 1 Gbps: 1000BASE-SX (multimode) or 1000BASE-LX (single mode)",
+     "cable": "Cat6 UTP",
+     "note": "The sheet lists Cat6 UTP for this device, so the optic follows that fibre."
+    }
+   },
+   {
+    "index": 5,
+    "device": "SP-R1-U15-SW02",
+    "model": "TP-Link TL-SG2428P",
+    "unit": "U15",
+    "port_type": "SFP",
+    "count": 4,
+    "suggestion": {
+     "optic": "SFP 1 Gbps: 1000BASE-SX (multimode) or 1000BASE-LX (single mode)",
+     "cable": "LC-LC duplex, OM3 or OM4 multimode (up to 300 m at 10G); LC-LC duplex, OS2 single mode (up to 10 km)",
+     "note": "No cable type for this device in the sheet."
+    }
+   },
+   {
+    "index": 6,
+    "device": "SP-R1-U13-SW01",
+    "model": "D-Link DGS-1210-52",
+    "unit": "U13",
+    "port_type": "SFP",
+    "count": 4,
+    "suggestion": {
+     "optic": "SFP 1 Gbps: 1000BASE-SX (multimode) or 1000BASE-LX (single mode)",
+     "cable": "LC-LC duplex, OM3 or OM4 multimode (up to 300 m at 10G); LC-LC duplex, OS2 single mode (up to 10 km)",
+     "note": "No cable type for this device in the sheet."
+    }
+   }
+  ],
+  "topology_cables": 19,
+  "az": {
+   "counts": {
+    "matched": 0,
+    "wrongPort": 1,
+    "notInSheet": 0,
+    "notFound": 16,
+    "missingCable": 2
+   },
+   "accuracy": {
+    "labelsRead": 1,
+    "labelsExpected": 19,
+    "readRate": 0.053
+   },
+   "id": "8f4a65897f",
+   "csv_lines": 39
+  }
+ },
+ "screen_errors": [
+  "1280: 401 2/api/me",
+  "1280: 404 2/api/video/91af02c09bbc/crop/5/1",
+  "1280: 404 2/api/video/91af02c09bbc/crop/5/2",
+  "1280: 404 2/api/video/91af02c09bbc/crop/5/1?r=1793614880326",
+  "1280: 404 2/api/video/91af02c09bbc/crop/5/2?r=1793614880339",
+  "1280: 404 2/api/video/91af02c09bbc/crop/5/1",
+  "1280: 404 2/api/video/91af02c09bbc/crop/5/2",
+  "1280: 404 2/api/video/91af02c09bbc/crop/5/1?r=1793614881826",
+  "1280: 404 2/api/video/91af02c09bbc/crop/5/2?r=1793614881839",
+  "1280: 404 2/api/video/91af02c09bbc/crop/5/1?r=1793614882367",
+  "1280: 404 2/api/video/91af02c09bbc/crop/5/2?r=1793614882381",
+  "1280: 404 2/api/video/91af02c09bbc/crop/5/1?r=1793614883867",
+  "1280: 404 2/api/video/91af02c09bbc/crop/5/2?r=1793614883881",
+  "400: 401 2/api/me"
+ ]
+}

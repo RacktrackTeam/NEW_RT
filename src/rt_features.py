@@ -517,7 +517,7 @@ def connections(result, record, drift_rows, cable_rows):
     for d in (result or {}).get("devices") or []:
         i = d["index"]
         ports = _detail_ports(d)
-        probs = [x for x in (drift_rows or []) + (cable_rows or []) if x.get("index") == i]
+        probs = [x for x in (drift_rows or []) + (cable_rows or []) if x.get("index") == i or str(x.get("device") or "").endswith(f"/ D{i}")]   # port rows name the device only
         st = {"connected": 0, "empty": 0, "unknown": 0}
         for p in ports:
             st[p["state"] if p["state"] in st else "unknown"] += 1

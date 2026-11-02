@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="/app/app.css?v=127">
 <link rel="stylesheet" href="/app/rt/rt-topology.css?v=12">
 <link rel="stylesheet" href="/app/flow.css?v=3">
+<link rel="stylesheet" href="/app/features.css?v=2"><!-- wt/features -->
 <style>
 /* the Drift tab: the database the run is checked against, the matched record, the differences */
 #df-top { display:flex; flex-direction:column; gap:12px; width:100%; }
@@ -264,7 +265,13 @@
     <div class="rpart" id="res-diff"><div id="diff-top"><p class="muted small">Compare against a database in step 3 first.</p></div></div>
     <header class="rsh" id="sec-report"><span class="rsn">5</span><div><h2>Report</h2><p class="muted">The rack on one page to keep or share: units, devices, free space and, once compared, the differences.</p></div></header>
     <div class="rpart" id="res-report"><div id="rp-cmp"></div><div id="rp-top"></div></div>
+    <!-- wt/features: step 6, the remaining RT-EOS functions on this run (mobile/features.js) -->
+    <header class="rsh" id="sec-tools"><span class="rsn">6</span><div><h2>More on this rack</h2><p class="muted">Find a port, the connections, the cables against the Excel matrix, the worklist, read again, the physical layer document, SFP advice and the topology.</p></div></header>
+    <div class="rpart" id="res-tools"></div>
   </section>
+
+  <!-- wt/features: one rack tool at a time (#tools/<run>/<tool>, #tools/site) -->
+  <section class="screen" data-screen="tools" hidden><div id="ft-root"></div></section>
 
   <!-- more -->
   <section class="screen" data-screen="more" hidden>
@@ -278,6 +285,7 @@
     <div class="card group a3">
       <a class="grow" href="#connections"><svg class="ic"><use href="#i-server"/></svg><span>Connections</span><em>NetBox, ServiceNow</em><span class="arr">→</span></a>
       <a class="grow" href="#copies"><svg class="ic"><use href="#i-history"/></svg><span>Database copies</span><em id="copies-count"></em><span class="arr">→</span></a>
+      <a class="grow" href="#tools/site"><svg class="ic"><use href="#i-server"/></svg><span>Site position</span><em>Latitude, longitude</em><span class="arr">→</span></a><!-- wt/features -->
     </div>
     <span class="glabel a3">RackTrack</span>
     <div class="card group a3">
@@ -347,5 +355,6 @@
 <script src="/app/topology.js?v=1"></script>
 <script src="/app/rt/rt-topology.js?v=12" defer></script>
 <script src="/app/app.js?v=148"></script>
+<script src="/app/features.js?v=2"></script><!-- wt/features -->
 </body>
 </html>

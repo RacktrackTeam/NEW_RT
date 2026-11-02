@@ -1275,7 +1275,8 @@ def _closeup_rebuild(j):
 
 
 @app.post("/api/closeup")
-async def api_closeup(request: Request, file: UploadFile = File(...), job: str | None = Form(None), device: int | None = Form(None)):
+async def api_closeup(request: Request, file: UploadFile = File(...), job: str | None = Form(None), device: int | None = Form(None),
+                      ids_only: str | None = Form(None)):    # wt/features: ids_only reads the serial and asset tag and leaves the port layout alone
     """A close-up of one device's front (from the phone camera or the gallery): make, model, layout and ports are read
     from it; with a run and a device number the answer is kept with that device and the run's report is rebuilt."""
     import cv2
@@ -1292,6 +1293,8 @@ async def api_closeup(request: Request, file: UploadFile = File(...), job: str |
     if jd and device and jd.get("rack_path") and pathlib.Path(jd["rack_path"]).exists():
         work = pathlib.Path(jd["dir"]) / "closeups" / f"D{device}"
         ids = await run_in_threadpool(_features_closeup_ids, jd, device, raw, cid, rt_session.name(request))   # wt/features: serial, asset tag, labels (kept first)
+        if ids_only:                                       # a photo of the label, not of the faceplate: its ports are not read from it
+            return {"id": cid, "ok": bool(ids and ids.get("ok")), "ids_only": True, "shows_device": True, "ids": ids}
         rf = pathlib.Path(jd["dir"]) / "result.json"; r = json.loads(rf.read_text())
         switches = {dv["index"]: {"polygon": dv["polygon"], "units": dv["units"], "kind": (dv.get("layout") or {}).get("kind")}
                     for dv in r.get("devices") or [] if dv.get("polygon")}
