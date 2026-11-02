@@ -10,7 +10,7 @@ For one switch cut (BGR) and its layout (pipeline.switch_layouts):
   4. spec     the RT-EOS spec agent (switch_specs) for the make and model: the port configuration ("24x 1G RJ45 +
               4x 1G SFP") gives each port its type and speed, RJ45 ports first in number order, then SFP
 
-The RT-EOS repo is found at $RACKTRACK_REPO or /Volumes/Racktrack/RT-EOS; its model paths are made absolute here.
+The RT-EOS repo is found at $RACKTRACK_REPO or rt_eos/ in this folder; its model paths are made absolute here.
 """
 import os
 import pathlib
@@ -20,12 +20,12 @@ import sys
 import cv2
 import numpy as np
 
-RTEOS = pathlib.Path(os.environ.get("RACKTRACK_REPO", "/Volumes/Racktrack/RT-EOS"))
+RTEOS = pathlib.Path(os.environ.get("RACKTRACK_REPO", pathlib.Path(__file__).resolve().parents[1] / "rt_eos"))
 M = RTEOS / "Models"
 # the cable step is dark_mobile's (user, 2026-10-29): its cable module and its models. port_count.pt finds which ports are
 # connected; each connected port is cut at four times its size (1.5 of its width and height each side, as dark_mobile's
 # runner does) and its cable read by cable_eff_best, held to what the port can take (fibre on SFP, copper on RJ45)
-DARK = pathlib.Path(os.environ.get("DARK_MOBILE", "/Volumes/Racktrack/dark_mobile"))
+DARK = pathlib.Path(os.environ.get("DARK_MOBILE", pathlib.Path(__file__).resolve().parents[1] / "vendor" / "dark_mobile"))
 DARK_CABLE_CODE = DARK / "pipeline" / "cable.py"
 DARK_CABLE_MODEL = DARK / "Models" / "cable_eff_best"
 DARK_STATUS_MODEL = DARK / "Models" / "port_count.pt"

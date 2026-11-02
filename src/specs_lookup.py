@@ -30,16 +30,13 @@ import time
 # The same agent lives in several RackTrack projects; the first complete copy is used.
 # On another machine, point RACKTRACK_SPECS_AGENT at its Agent/Agent_scrap folder.
 import os
-AGENT_DIRS = [pathlib.Path(p) for p in [os.environ.get("RACKTRACK_SPECS_AGENT")] if p] + [pathlib.Path("/Volumes/Racktrack/RT-EOS/Agent/Agent_scrap"),
-              pathlib.Path("/Volumes/Racktrack/dark_mobile/Agent/Agent_scrap"),
-              pathlib.Path("/Volumes/Racktrack/switch_mapper/Agent/Agent_scrap")]
+AGENT_DIRS = [pathlib.Path(p) for p in [os.environ.get("RACKTRACK_SPECS_AGENT")] if p] + [pathlib.Path(os.environ.get("RACKTRACK_REPO", pathlib.Path(__file__).resolve().parents[1] / "rt_eos")) / "switch_specs"]
 AGENT_DIR = next((d for d in AGENT_DIRS if (d / "agent.py").exists() and (d / "data" / "switches.db").exists()),
                  AGENT_DIRS[0])
 LIVE_DEADLINE_S = 25      # same as RT-EOS device_lookup.js AGENT_LIVE_DEADLINE_S
 SUGGESTION_MIN = 0.75     # same as RT-EOS device_lookup.js
 MAX_TRUSTED_U = 12
-SWITCH_MAPPER_DIRS = [pathlib.Path(p) for p in [os.environ.get("SWITCH_MAPPER_DIR")] if p] + [pathlib.Path("/Users/aasritha/Downloads/switch-mapper/src"),
-                      pathlib.Path("/Users/aasritha/Downloads/switch-mapper")]
+SWITCH_MAPPER_DIRS = [pathlib.Path(p) for p in [os.environ.get("SWITCH_MAPPER_DIR")] if p] + [pathlib.Path(__file__).resolve().parents[1] / "tools" / "switch-mapper"]
 SWITCH_MAPPER = next((d for d in SWITCH_MAPPER_DIRS if (d / "agent_images.py").exists()), SWITCH_MAPPER_DIRS[0])
 PAGE_LIMIT = 6
 

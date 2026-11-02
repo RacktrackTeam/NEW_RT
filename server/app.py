@@ -850,7 +850,7 @@ KINDS = ("Switch", "Router", "Firewall", "Gateway", "Patch Panel", "Server", "St
 
 
 # ------------------------------------------------------------------ specifications of an identified model (RT-EOS's switch_specs agent: local knowledge base, then its web lookup)
-SPECS_CLI = pathlib.Path(os.environ.get("RACKTRACK_SPECS_CLI", "/Volumes/Racktrack/RT-EOS/switch_specs/cli.py"))
+SPECS_CLI = pathlib.Path(os.environ.get("RACKTRACK_SPECS_CLI", ROOT / "rt_eos" / "switch_specs" / "cli.py"))
 SPECS_CACHE = ROOT / "data" / "specs_cache.json"
 SPEC_FIELDS = (("port_config", "Ports", ""), ("uplink_config", "Uplinks", ""), ("port_speed_max_gbps", "Max port speed", " Gbps"), ("switching_capacity_gbps", "Switching capacity", " Gbps"),
                ("poe_standard", "PoE", ""), ("poe_budget_w", "PoE budget", " W"), ("power_max_w", "Power max", " W"), ("layer", "Layer", ""), ("rack_units", "Height", "U"), ("nos", "Network OS", ""))

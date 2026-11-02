@@ -6,6 +6,7 @@
 3. Classify — the chosen approach returns P(occupied) per row.
 """
 import json
+import os
 import pathlib
 import warnings
 
@@ -261,7 +262,7 @@ def build_approaches(version="v2"):
 # iou_dedup 0.5, run through the same shrink-for-inference). It sees whole devices on the full
 # photo, so it catches what a row crop can miss: shelf-mounted UPS / NAS boxes, multi-U chassis.
 # RT-EOS device finder: the copy shipped in this folder, else the RT-EOS checkout on this machine.
-DEVICE_FINDER = next((p for p in (ROOT / "weights/device_finder.pt", pathlib.Path("/Volumes/Racktrack/RT-EOS/Models/device_finder.pt"))
+DEVICE_FINDER = next((p for p in (ROOT / "weights/device_finder.pt", pathlib.Path(os.environ.get("RACKTRACK_REPO", ROOT / "rt_eos")) / "Models" / "device_finder.pt")
                       if p.exists()), ROOT / "weights/device_finder.pt")
 DEVICE_CONF = 0.2
 DEVICE_TRUST = 0.4      # only detections at least this confident override the classifier
