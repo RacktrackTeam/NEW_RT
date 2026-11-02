@@ -104,7 +104,7 @@ def main():
             pg.goto(APP + "/app/#sweep"); shot("scan")
             # the result of our rack, from Home
             pg.goto(APP + "/app/#home"); pg.wait_for_selector(f'#home-racks a[href="#result/{RUN}"]', timeout=15000)
-            pg.click(f'#home-racks a[href="#result/{RUN}"]'); pg.wait_for_selector("#res-rack .rackshot img", timeout=20000); pg.wait_for_selector("#cmp-src", timeout=20000)
+            pg.click(f'#home-racks a[href="#result/{RUN}"]'); pg.wait_for_selector("#res-rack .rackshot", timeout=20000); pg.wait_for_selector("#cmp-src", timeout=20000)
             shot("result_page", 2500); secshot("rack_picture", "rack", "res-rack", 300)
             seen[(width, "headings")] = pg.eval_on_selector_all(".rsh", "hs => hs.map(h => h.innerText.replace(/\\n+/g, ' | '))")
             for i in (1, 2):                         # D1 router, D2 firewall: one kind, its source in words
