@@ -35,3 +35,7 @@ search_keys.env
 
 # Work-area caches (venv, node_modules, model copies)
 _cache/
+
+# Sample videos and photos, and model files: inside this folder, not in git
+samples/
+models/

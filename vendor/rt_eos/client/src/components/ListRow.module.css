@@ -1,0 +1,64 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  width: 100%;
+  min-height: var(--row);
+  padding: var(--s3) 0;
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+}
+
+.compact {
+  min-height: var(--row);
+  padding: var(--s2) 0;
+}
+
+.tap {
+  cursor: pointer;
+}
+
+.tap:hover .rn {
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+}
+
+.lead {
+  flex: none;
+  display: inline-flex;
+}
+
+.rt {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.rn {
+  font-size: var(--t2);
+  overflow-wrap: anywhere;
+}
+
+.rm {
+  font-size: var(--t3);
+  color: var(--grey);
+  overflow-wrap: anywhere;
+}
+
+.rr {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  max-width: 55%;
+  font-size: var(--t3);
+  text-align: right;
+  color: var(--ink);
+}

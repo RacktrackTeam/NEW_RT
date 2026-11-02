@@ -1,0 +1,105 @@
+/* Worklist: board screen 10. */
+
+.crop {
+  position: relative;
+  height: 300px;
+  background: var(--photo);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.crop.lg {
+  height: 640px;
+  max-height: calc(100vh - 260px);
+  min-height: 360px;
+}
+
+.cropImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.tag {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #fff;
+  color: var(--ink);
+  font-size: var(--t4);
+}
+
+.ask {
+  min-width: 0;
+}
+
+.q {
+  margin-top: var(--s6);
+  font-size: var(--t-q);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.confirm {
+  margin-top: var(--s6);
+}
+
+.g {
+  color: var(--grey);
+}
+
+.queue {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s4);
+  margin-top: var(--s6);
+}
+
+.qitem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--s2);
+  border: 1px solid transparent;
+  border-radius: var(--r);
+  background: none;
+  font-size: var(--t3);
+  text-align: left;
+}
+
+.qitem.on {
+  border-color: var(--ink);
+}
+
+.cropmini {
+  position: relative;
+  display: block;
+  width: 140px;
+  height: 64px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--photo);
+}
+
+.cropmini img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (min-width: 1024px) {
+  .wl {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: var(--s12);
+    align-items: start;
+  }
+
+  .wl .q {
+    margin-top: 0;
+  }
+}

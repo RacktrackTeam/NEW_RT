@@ -1,0 +1,13 @@
+/* The waiting-for-approval screen. These three rules used to live in
+   AuthPages.module.css, which is now RackTrack's sign-in stylesheet. */
+.body {
+  max-width: 440px;
+}
+
+.lead {
+  margin: var(--s3) 0 var(--s1);
+}
+
+.mt24 {
+  margin-top: var(--s6);
+}

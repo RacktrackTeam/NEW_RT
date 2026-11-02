@@ -1,0 +1,189 @@
+/* First-run setup: a popup container, one step at a time.
+   Phone: fills the screen under the top bar. Laptop: a white panel with a
+   hairline over a scrim - the one centred box the app allows, because it is
+   a popup and not a page. */
+
+.veil {
+  background: #fff;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - var(--top) - var(--safe-top));
+  background: #fff;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s4);
+  padding: var(--s6) var(--s4) 0;
+}
+
+.title {
+  flex: 1;
+  font-size: var(--t1);
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  outline: none;
+}
+
+.lead {
+  padding: 0 var(--s4);
+}
+
+.body {
+  flex: 1;
+  padding: var(--s4) var(--s4) var(--s8);
+}
+
+.foot {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--s3) var(--s4) calc(var(--s4) + var(--safe-bottom));
+  border-top: 1px solid var(--line);
+  background: #fff;
+}
+
+.foot > * {
+  margin-top: 0;
+}
+
+.acts {
+  width: 100%;
+  justify-content: space-between;
+  margin-top: 0;
+}
+
+.stop {
+  margin-bottom: var(--s4);
+}
+
+.facts {
+  margin-bottom: var(--s2);
+}
+
+.site {
+  padding-bottom: var(--s6);
+  margin-bottom: var(--s6);
+  border-bottom: 1px solid var(--line);
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 var(--s4);
+}
+
+.spoc {
+  margin-top: var(--s2);
+}
+
+.seg {
+  margin: var(--s3) 0 var(--s2);
+}
+
+.ask {
+  margin-top: var(--s6);
+}
+
+.ask p {
+  margin-bottom: var(--s2);
+}
+
+.removeLink {
+  margin-top: var(--s6);
+}
+
+.newSite {
+  margin-top: var(--s2);
+}
+
+.addMore {
+  margin-top: 0;
+}
+
+.rule {
+  margin: 0 0 var(--s4);
+  font-size: 17px;
+  line-height: 1.45;
+  max-width: 60ch;
+}
+
+.still {
+  margin: var(--s3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.still li {
+  padding: var(--s2) 0;
+}
+
+.mt16 {
+  margin-top: var(--s4);
+}
+
+.lapOnly {
+  display: none;
+}
+
+@media (min-width: 600px) {
+  .pair {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .phoneOnly {
+    display: none;
+  }
+
+  .lapOnly {
+    display: inline;
+  }
+
+  .veil {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--s8);
+    background: rgba(17, 17, 17, 0.32);
+  }
+
+  .panel {
+    width: 100%;
+    max-width: 640px;
+    min-height: 0;
+    max-height: calc(100vh - 64px);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    overflow: hidden;
+  }
+
+  .head {
+    padding: var(--s6) var(--s8) 0;
+  }
+
+  .lead {
+    padding: 0 var(--s8);
+  }
+
+  .body {
+    overflow-y: auto;
+    padding: var(--s4) var(--s8) var(--s8);
+  }
+
+  .foot {
+    position: static;
+    padding: var(--s4) var(--s8);
+  }
+}

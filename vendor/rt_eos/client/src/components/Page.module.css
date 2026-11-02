@@ -1,0 +1,100 @@
+.pad {
+  display: block;
+  width: 100%;
+  padding: var(--s4) var(--s4) var(--s8);
+}
+
+
+.stick {
+  padding-bottom: calc(140px + var(--safe-bottom));
+}
+
+.stickBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: var(--nav-bottom);
+  z-index: 15;
+  padding: var(--s3) var(--s4) var(--s4);
+  border-top: 1px solid var(--line);
+  background: #fff;
+}
+
+.stickBar > :first-child {
+  margin-top: 0;
+}
+
+.two {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s3) var(--s6);
+  margin: var(--s4) 0;
+}
+
+.sp {
+  flex: 1;
+}
+
+.measure {
+  max-width: 440px;
+}
+
+.wide {
+  max-width: 720px;
+}
+
+@media (min-width: 1024px) {
+  .pad {
+    padding: var(--s8) var(--s8) var(--s12);
+  }
+
+  .stick {
+    padding-bottom: var(--s12);
+  }
+
+  .stickBar {
+    position: static;
+    padding: 0;
+    border: 0;
+    margin-top: var(--s6);
+  }
+
+  .stickBar > button,
+  .stickBar > a {
+    width: auto;
+    display: inline-flex;
+    min-height: 44px;
+  }
+
+  .two {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    gap: var(--s12);
+  }
+
+  .two.eq {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+/* A main screen with no bar of its own starts below the phone's status bar. */
+:global(nav) + .pad {
+  padding-top: calc(var(--s6) + var(--safe-top));
+}
+
+/* A screen with its own bar already sits below the status bar. */
+:global(header) ~ :global(nav) + .pad {
+  padding-top: var(--s4);
+}
+
+@media (min-width: 1024px) {
+  :global(nav) + .pad {
+    padding-top: var(--s8);
+  }
+}

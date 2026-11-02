@@ -1,0 +1,15 @@
+.mt8 {
+  margin-top: var(--s2);
+}
+
+.mt16 {
+  margin-top: var(--s4);
+}
+
+@media (min-width: 1024px) {
+  .send {
+    display: inline-flex;
+    width: auto;
+    min-height: 44px;
+  }
+}

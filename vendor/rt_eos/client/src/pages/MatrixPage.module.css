@@ -1,0 +1,97 @@
+/* Excel dataset: the file, the count, one button, a search box and the cables. */
+
+.empty {
+  margin-top: var(--s6);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s4) var(--s6);
+  margin-bottom: var(--s4);
+}
+
+.headText {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.count {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.who {
+  margin-top: 2px;
+  overflow-wrap: anywhere;
+}
+
+.replace {
+  flex: none;
+}
+
+.search {
+  display: flex;
+  width: 100%;
+  margin: 0 0 var(--s2);
+}
+
+
+.danger {
+  color: var(--bad);
+}
+
+/* The one table screen in the app: hairlines, never boxes. */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t3);
+  margin-top: var(--s2);
+}
+
+.tbl th {
+  text-align: left;
+  font-weight: 400;
+  color: var(--grey);
+  font-size: var(--t4);
+  padding: var(--s2) var(--s3) var(--s2) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.tbl td {
+  padding: var(--s3) var(--s3) var(--s3) 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.tr {
+  cursor: pointer;
+}
+
+.tr:hover td {
+  background: rgba(107, 107, 107, 0.05);
+}
+
+.cellBtn {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+}
+
+.more {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s2) var(--s6);
+  margin-top: var(--s6);
+}
+
+.template {
+  margin-top: var(--s3);
+}

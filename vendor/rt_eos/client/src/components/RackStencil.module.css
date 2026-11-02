@@ -1,0 +1,352 @@
+/* A rack drawn flat from the front, like a rack stencil: neutral greys,
+   1 px outlines, no radius, no shadows, no gradients for depth. The detail
+   comes from small repeated pieces (port grids, dot patterns, mesh). Sizes
+   follow --uh, the height of one rack unit in pixels. */
+
+.rack {
+  position: relative;
+  flex: none;
+}
+
+.body {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+  border: 1px solid #7b7b7b;
+  background: #cccccc;
+}
+
+/* The top cap and the plinth: a plain inset panel each. */
+.body::before,
+.body::after {
+  content: '';
+  position: absolute;
+  left: var(--post);
+  right: var(--post);
+  box-sizing: border-box;
+  border: 1px solid #9d9d9d;
+  background: #d5d5d5;
+}
+
+.body::before {
+  top: calc(var(--cap) * 0.22);
+  height: calc(var(--cap) * 0.5);
+}
+
+.body::after {
+  bottom: calc(var(--uh) * 0.32);
+  height: calc(var(--uh) * 1.3);
+}
+
+.bay {
+  position: absolute;
+  left: var(--post);
+  right: var(--post);
+  box-sizing: border-box;
+  border: 1px solid #9d9d9d;
+  background: #ffffff;
+}
+
+.rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--rail);
+  box-sizing: border-box;
+  border-left: 1px solid #9d9d9d;
+  border-right: 1px solid #9d9d9d;
+  background:
+    radial-gradient(circle closest-side, #a9a9a9 0 30%, transparent 40%) center top / 100% calc(var(--uh) / 3) repeat-y,
+    #d0d0d0;
+}
+
+.railL { left: 0; }
+.railR { right: 0; }
+
+.wheel {
+  position: absolute;
+  bottom: 0;
+  width: calc(var(--uh) * 0.5);
+  height: calc(var(--uh) * 0.6);
+  border-radius: 2px;
+  background: #1b1b1b;
+}
+
+.wheelL { left: calc(var(--post) * 0.5); }
+.wheelR { right: calc(var(--post) * 0.5); }
+
+/* ── A device: two ears on the rails, the face between ─────────── */
+.dev {
+  position: absolute;
+  left: var(--post);
+  right: var(--post);
+  display: flex;
+  box-sizing: border-box;
+}
+
+.ear {
+  flex: none;
+  width: var(--rail);
+  box-sizing: border-box;
+  border: 1px solid #888888;
+  background:
+    radial-gradient(circle closest-side, #5e5e5e 0 34%, #f2f2f2 37% 52%, transparent 56%) center top / 100% var(--uh) repeat-y,
+    #dadada;
+}
+
+.ear:first-child { border-right: 0; }
+.ear:last-child { border-left: 0; }
+
+.face {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: calc(var(--uh) * 0.1) calc(var(--uh) * 0.22);
+  border: 1px solid #888888;
+  background: #e8e8e8;
+  overflow: hidden;
+}
+
+.k_patch .face {
+  border-color: #2a2a2a;
+  background: #fbfbfb;
+}
+
+.k_patch .ear {
+  border-color: #2a2a2a;
+  background:
+    radial-gradient(circle closest-side, #3a3a3a 0 34%, transparent 40%) center top / 100% var(--uh) repeat-y,
+    #f6f6f6;
+}
+
+.k_storage .face { background: #dcdcdc; }
+.k_unknown .face { background: #e3e3e3; }
+
+/* ── Ports: RJ45 jacks in blocks of 6 x 2, SFP cages ───────────── */
+.ports {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--uh) * 0.16);
+  width: 100%;
+  min-width: 0;
+}
+
+.block {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: calc(var(--uh) * 2.7);
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(2, max(2px, calc(var(--uh) * 0.21)));
+  grid-auto-flow: column;
+  gap: max(1px, calc(var(--uh) * 0.05)) max(1px, calc(var(--uh) * 0.06));
+  box-sizing: border-box;
+  padding: max(1px, calc(var(--uh) * 0.05));
+  border: 1px solid #b9b4ae;
+  background: #dedad7;
+}
+
+.blockPatch {
+  border: 0;
+  background: linear-gradient(to bottom, transparent 44%, #b5aa9a 44% 56%, transparent 56%);
+}
+
+/* The keyhole of an RJ45 jack: wide at the top, the latch notch below; the
+   bottom row is turned over, as on a real switch. */
+.jack {
+  display: block;
+  min-width: 0;
+  background: #141414;
+  clip-path: polygon(0 0, 100% 0, 100% 68%, 72% 68%, 72% 100%, 28% 100%, 28% 68%, 0 68%);
+}
+
+.jack:nth-child(even) { transform: scaleY(-1); }
+
+.leds {
+  flex: none;
+  width: calc(var(--uh) * 1.1);
+  height: calc(var(--uh) * 0.42);
+  background: radial-gradient(circle closest-side, #7ab07a 0 55%, transparent 65%) 0 0 / calc(var(--uh) * 0.16) calc(var(--uh) * 0.14);
+}
+
+.console {
+  flex: none;
+  display: grid;
+  gap: max(1px, calc(var(--uh) * 0.06));
+}
+
+.console i {
+  display: block;
+  width: calc(var(--uh) * 0.34);
+  height: max(2px, calc(var(--uh) * 0.16));
+  border: 1px solid #555555;
+  background: #f4f4f4;
+}
+
+.cages {
+  flex: none;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(2, max(2px, calc(var(--uh) * 0.2)));
+  gap: max(1px, calc(var(--uh) * 0.05));
+}
+
+.cage {
+  display: block;
+  width: max(4px, calc(var(--uh) * 0.38));
+  box-sizing: border-box;
+  border: 1px solid #555555;
+  background: #2b2b2b;
+  box-shadow: inset 0 0 0 max(1px, calc(var(--uh) * 0.04)) #efefef;
+}
+
+/* ── Server: drive caddies with a mesh and a black latch bar ───── */
+.server {
+  display: flex;
+  align-items: stretch;
+  gap: calc(var(--uh) * 0.2);
+  width: 100%;
+  height: 100%;
+}
+
+.caddies {
+  flex: 1;
+  display: grid;
+  gap: max(1px, calc(var(--uh) * 0.07)) max(1px, calc(var(--uh) * 0.12));
+}
+
+.caddy {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  border: 1px solid #8a8a8a;
+  background:
+    repeating-linear-gradient(45deg, #a3a3a3 0 0.6px, transparent 0.6px 2.4px),
+    repeating-linear-gradient(-45deg, #a3a3a3 0 0.6px, transparent 0.6px 2.4px),
+    #e9e9e9;
+}
+
+.caddy::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 14%;
+  height: max(1px, calc(var(--uh) * 0.08));
+  background: #111111;
+}
+
+.status {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  gap: max(1px, calc(var(--uh) * 0.08));
+  padding-top: calc(var(--uh) * 0.08);
+}
+
+.status i {
+  display: block;
+  width: max(2px, calc(var(--uh) * 0.1));
+  height: max(2px, calc(var(--uh) * 0.1));
+  border-radius: 50%;
+  background: #b9b9b9;
+}
+
+.status i:first-child { background: #7ab07a; }
+.status i:last-child { background: #c0506a; }
+
+/* ── PDU: an outlet, round gauges with red needles, a knob ─────── */
+.pdu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.outlet {
+  display: block;
+  width: calc(var(--uh) * 0.42);
+  height: calc(var(--uh) * 0.42);
+  box-sizing: border-box;
+  border: 1px solid #555555;
+  background: radial-gradient(circle closest-side, #222 0 30%, transparent 40%) 0 0 / 50% 50%, #f7f7f7;
+}
+
+.gauge {
+  position: relative;
+  display: block;
+  width: calc(var(--uh) * 0.48);
+  height: calc(var(--uh) * 0.48);
+  box-sizing: border-box;
+  border: 1px solid #8a8a8a;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.gauge::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  width: 1px;
+  height: 42%;
+  background: #c0506a;
+  transform-origin: 50% 100%;
+  transform: rotate(var(--a));
+}
+
+.knob {
+  display: block;
+  width: calc(var(--uh) * 0.5);
+  height: calc(var(--uh) * 0.5);
+  border-radius: 50%;
+  background: #4a4a4a;
+}
+
+/* ── Storage: dark perforated trays with white pull tabs ───────── */
+.trays {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: max(1px, calc(var(--uh) * 0.08)) calc(var(--uh) * 0.16);
+  width: 100%;
+  height: 100%;
+}
+
+.tray {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  border: 1px solid #555555;
+  background: radial-gradient(circle closest-side, #8c8c8c 0 40%, transparent 55%) 0 0 / 3px 3px, #2e2e2e;
+}
+
+.tray::before {
+  content: '';
+  position: absolute;
+  left: 35%;
+  right: 35%;
+  top: 0;
+  height: 22%;
+  background: #ffffff;
+}
+
+/* ── Cable manager: a thick black bar with finger slots ────────── */
+.manager {
+  display: block;
+  width: 100%;
+  height: 56%;
+  background: repeating-linear-gradient(90deg, #1b1b1b 0 calc(var(--uh) * 0.55), #c9c9c9 calc(var(--uh) * 0.55) calc(var(--uh) * 0.65));
+}
+
+/* ── Not identified: a plain vented panel ─────────────────────── */
+.vents {
+  display: block;
+  width: 100%;
+  height: 70%;
+  background: repeating-linear-gradient(to bottom, #c4c4c4 0 1px, transparent 1px 3px);
+}

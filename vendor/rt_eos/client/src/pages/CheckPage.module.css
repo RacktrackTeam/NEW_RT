@@ -1,0 +1,110 @@
+/* A-end / Z-end label check: board screen 9. */
+
+.sub {
+  margin-bottom: var(--s3);
+}
+
+.counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2) var(--s4);
+  margin: 0 0 var(--s4);
+  font-size: var(--t3);
+  color: var(--grey);
+}
+
+.counts b {
+  font-size: 17px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.counts b.ok {
+  color: var(--ok);
+}
+
+.counts b.bad {
+  color: var(--bad);
+}
+
+.counts b.warn {
+  color: var(--warn);
+}
+
+.lc {
+  gap: var(--s2) var(--s8);
+}
+
+.lc b {
+  font-size: var(--t1);
+}
+
+/* The two ends side by side, on a phone too. */
+.azpair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--s3);
+}
+
+.end {
+  min-width: 0;
+}
+
+.endlab {
+  margin: 0 0 var(--s2);
+  font-size: var(--t3);
+  font-weight: 600;
+}
+
+.devSel {
+  margin-bottom: var(--s2);
+}
+
+.probBar {
+  margin-top: var(--s8);
+}
+
+.st2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.cols2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0 var(--s8);
+}
+
+.acc {
+  margin-top: var(--s4);
+}
+
+.downloads {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s4);
+  margin-top: var(--s2);
+}
+
+.again {
+  margin-top: var(--s6);
+  padding-top: var(--s4);
+  border-top: 1px solid var(--line);
+}
+
+@media (min-width: 1024px) {
+  .azpair {
+    gap: var(--s8);
+  }
+}
+
+.endPhoto {
+  --photo-h: 46vh;
+}
+
+.selLine {
+  margin-top: var(--s2);
+  font-size: var(--t3);
+}

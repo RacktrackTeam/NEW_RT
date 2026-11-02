@@ -1,0 +1,207 @@
+@import './fonts.css';
+/* RT-EOS design tokens and base rules.
+   The approved board (app-screens-minimal-redesign-design-board.html) is the
+   source for every value here. Light theme only. */
+:root {
+  /* The RackTrack family look (from RT's index.css): pure white ground,
+     near-black ink doing the accenting, true-greyscale neutrals, soft depth
+     from one top-left light, Geist type, pill controls. Light theme only. */
+  color-scheme: light;
+  --bg: #ffffff;
+  --ink: #121212;
+  --grey: #6b6b6b;
+  --grey2: #757575;
+  --line: rgba(18, 18, 18, 0.08);
+  --line-soft: rgba(18, 18, 18, 0.06);
+  --line-strong: rgba(18, 18, 18, 0.14);
+  --accent: #121212;
+  --accent-soft: rgba(18, 18, 18, 0.06);
+  --ok: #15803d;
+  --bad: #ba1a1a;
+  --warn: #b45309;
+  --ok-bg: rgba(22, 163, 74, 0.09);
+  --bad-bg: rgba(186, 26, 26, 0.08);
+  --warn-bg: rgba(245, 158, 11, 0.12);
+  --photo: #1e1f22;
+  /* Outline colours drawn on a dark photo. */
+  --on-photo-ok: #34d06b;
+  --on-photo-bad: #ff5a4e;
+  --on-photo-warn: #f5b841;
+
+  --font: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Type scale: the only sizes a screen uses. Page titles live in the TopBar. */
+  --t1: 26px;
+  --t-q: 20px;
+  --t2: 15px; /* body */
+  --t3: 13px; /* secondary and meta, grey */
+  --t4: 12px; /* section label: 600, uppercase, .06em, grey */
+  --t-title: 15px; /* card and row title, 600 */
+  --t-figure: 18px; /* a large figure in a tile, 600, tabular */
+
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s6: 24px;
+  --s8: 32px;
+  --s12: 48px;
+
+  /* One radius for fields, buttons and cards; pills are fully round. */
+  --r: 12px;
+  --r-lg: 12px;
+  --r-pill: 999px;
+  --row: 56px; /* minimum height of a row in a list */
+  --btn: 52px; /* buttons and text fields */
+  --btn-big: 52px;
+  --pill: 36px; /* filter and segment pills */
+  --field-line: rgba(17, 17, 17, 0.14);
+  --top: 56px;
+  --top-lt: 60px;
+  --tabs: 72px;
+
+  /* Depth: cards and controls are flat (a 1px line, no shadow). Only floating
+     things - the bottom navigation, sheets and menus - carry a shadow. */
+  --lift: none;
+  --lift-hover: none;
+  --press: none;
+  --shadow-modal: 0 -10px 36px rgba(17, 17, 17, 0.14);
+  --shadow-menu: 0 10px 30px rgba(17, 17, 17, 0.14);
+  --grad-btn: #121212;
+
+  --surface: #f6f6f6;
+  --sunken: #f6f6f6;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* The main navigation: a floating pill at the bottom of a phone, a bar at
+     the top of a laptop. Screens that pin something to an edge keep clear. */
+  --nav-h: 62px;
+  --nav-gap: 10px;
+  --nav-lift: 14px;
+  --nav-top: 0px;
+  --nav-bottom: 0px;
+  --nav-shadow: 0 8px 24px rgba(17, 17, 17, 0.1), 0 2px 6px rgba(17, 17, 17, 0.05);
+}
+
+body.has-nav {
+  --nav-bottom: calc(var(--nav-h) + var(--nav-gap) + 12px + var(--safe-bottom));
+}
+
+@media (min-width: 1024px) {
+  body.has-nav {
+    --nav-top: 64px;
+    --nav-bottom: 0px;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body {
+  font: var(--t2) / 1.5 var(--font);
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img {
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: 0.93em;
+}
+
+.appIcon {
+  display: inline-block;
+  flex: none;
+  vertical-align: middle;
+}
+
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.route-loading {
+  min-height: 40vh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Room for the main navigation. */
+body.has-nav #root {
+  padding-top: var(--nav-top);
+  padding-bottom: var(--nav-bottom);
+}

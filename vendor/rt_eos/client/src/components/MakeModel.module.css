@@ -1,0 +1,32 @@
+.prompt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2) var(--s3);
+  padding: var(--s3);
+  border: 1px dashed var(--warn);
+  border-radius: var(--r);
+  background: var(--warn-bg);
+}
+
+.promptT {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.form {
+  display: grid;
+  gap: var(--s2);
+  padding: var(--s3);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: #fff;
+}
+
+.acts {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+}

@@ -1,0 +1,1390 @@
+.grey {
+  color: var(--grey);
+}
+
+.plain {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.warnText {
+  color: var(--warn);
+  font-weight: 600;
+}
+
+.hint {
+  margin-top: var(--s3);
+  color: var(--grey);
+  font-size: 13px;
+}
+
+.rowLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.rowLink:hover {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── Overview: the photo, the port finder, one line of numbers ── */
+.overview {
+  display: block;
+}
+
+.photoCol {
+  --photo-h: 54vh;
+}
+
+.photo {
+  padding: var(--s3);
+  border-radius: var(--r);
+  background: #121212;
+}
+
+.infoCol {
+  margin-top: var(--s4);
+}
+
+.warnLine {
+  margin-top: var(--s3);
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r);
+  background: var(--warn-bg);
+  color: var(--warn);
+  font-size: 13px;
+}
+
+.quietLine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: var(--s3);
+  color: var(--grey);
+  font-size: 13px;
+  text-align: center;
+}
+
+.flags {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.flags li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2px var(--s3);
+  padding: var(--s3) 0;
+  font-size: 14px;
+}
+
+.flags li + li {
+  border-top: 1px solid var(--line-soft);
+}
+
+.flagWhat {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.flagDetail {
+  grid-column: 1 / -1;
+  color: var(--grey);
+  font-size: 13px;
+}
+
+/* ── Ports ─────────────────────────────────────────────────── */
+.prows {
+  margin: 0;
+  padding: 4px 14px;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: #fff;
+  box-shadow: var(--lift);
+}
+
+.prows li {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s3);
+  padding: 9px 0;
+  font-size: 13px;
+}
+
+.prows li + li {
+  border-top: 1px solid var(--line-soft);
+}
+
+.pno {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 24px;
+  border-radius: 7px;
+  background: var(--sunken);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.pmeta {
+  color: var(--grey);
+  overflow-wrap: anywhere;
+}
+
+.filter {
+  margin-bottom: var(--s4);
+}
+
+/* Four chips side by side on a phone, none of them scrolled out of sight. */
+@media (max-width: 600px) {
+  .filter {
+    display: flex;
+    width: 100%;
+  }
+
+  .filter > button {
+    flex: 1 1 auto;
+    padding: 0 8px;
+    gap: 4px;
+    font-size: 12.5px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .overview {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: var(--s8);
+    align-items: start;
+  }
+
+  .photoCol {
+    --photo-h: calc(100vh - var(--nav-top) - var(--top-lt) - 90px);
+  }
+
+  .infoCol {
+    position: sticky;
+    top: calc(var(--nav-top) + var(--top-lt) + var(--s6));
+    margin-top: 0;
+  }
+
+
+}
+
+/* ── Cards (RackTrack surfaces) ────────────────────────────── */
+.card {
+  padding: var(--s4);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: #fff;
+}
+
+.dl {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: #fff;
+  box-shadow: var(--lift);
+  font-size: 13.5px;
+  text-decoration: none;
+}
+
+.nextIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--sunken);
+  font-size: 19px;
+}
+
+.nextText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.chev {
+  flex: none;
+  color: var(--grey);
+  font-size: 18px;
+}
+
+/* ── Devices: one list, top unit first ─────────────────────── */
+.listHead {
+  margin: 0 0 var(--s3);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.listNote {
+  display: block;
+  margin-top: 2px;
+  color: var(--grey);
+  font-size: 12.5px;
+  font-weight: 400;
+}
+
+.dlist {
+  margin: 0;
+  padding: 0 var(--s4);
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: #fff;
+  box-shadow: var(--lift);
+}
+
+.dlist > li + li {
+  border-top: 1px solid var(--line-soft);
+}
+
+.drow {
+  display: grid;
+  grid-template-columns: 56px 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s3);
+  width: calc(100% + 2 * var(--s2));
+  min-height: 68px;
+  margin: 0 calc(-1 * var(--s2));
+  padding: 10px var(--s2);
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 140ms ease, transform 140ms ease;
+}
+
+.drow:hover {
+  background: rgba(18, 18, 18, 0.025);
+}
+
+.drow:active {
+  background: var(--accent-soft);
+  transform: scale(0.992);
+}
+
+.dthumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 40px;
+  overflow: hidden;
+  border-radius: 9px;
+  background: var(--photo);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.dthumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dthumbIcon {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 18px;
+}
+
+.dunitCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.hbar {
+  display: block;
+  width: 4px;
+  min-height: 6px;
+  border-radius: 2px;
+  background: var(--ink);
+  opacity: 0.8;
+}
+
+.dports {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 2px;
+  color: var(--grey);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dots {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  max-width: 180px;
+}
+
+.dot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.dot_on { background: var(--ink); }
+.dot_off { background: #fff; box-shadow: inset 0 0 0 1.2px var(--line-strong); }
+.dot_unk { background: rgba(18, 18, 18, 0.18); }
+.dot_warn { background: var(--warn); }
+.dot_bad { background: var(--bad); }
+
+.pbar {
+  display: inline-flex;
+  width: 120px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.pbarSeg {
+  display: block;
+  min-width: 2px;
+}
+
+.ring {
+  --p: 0%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: conic-gradient(var(--ink) var(--p), rgba(18, 18, 18, 0.08) 0);
+}
+
+.ringWarn {
+  background: conic-gradient(var(--warn) var(--p), rgba(180, 83, 9, 0.12) 0);
+}
+
+.ringIn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  font-size: 10.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ringNone {
+  width: 34px;
+}
+
+.flagMark {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 7px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.flag_bad { background: var(--bad); }
+.flag_warn { background: var(--warn); }
+
+.gapLine {
+  display: block;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, var(--line-strong) 0 4px, transparent 4px 8px);
+}
+
+.dunit,
+.gapU {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.dmain {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dname {
+  font-size: 14.5px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.dmeta {
+  color: var(--grey);
+  font-size: 12.5px;
+}
+
+.dsrc {
+  display: block;
+  color: var(--grey);
+  font-size: 12px;
+}
+
+.srcLine {
+  display: block;
+  color: var(--grey);
+  font-size: 12.5px;
+}
+
+.srcWarn {
+  display: block;
+  color: var(--warn);
+  font-size: 12.5px;
+}
+
+.dbad {
+  color: var(--bad);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.gapRow {
+  display: grid;
+  grid-template-columns: 56px 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s3);
+  padding: 7px 0;
+  color: var(--grey);
+  font-size: 12px;
+}
+
+.gapRow .gapU {
+  grid-column: 2;
+}
+
+.gapRow .gapLine {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.gapRow .gapU {
+  color: var(--grey);
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drow { transition: none; }
+  .drow:active { transform: none; }
+}
+
+/* ── Connections: a card per device ────────────────────────── */
+.cards {
+  display: grid;
+  gap: var(--s4);
+}
+
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-bottom: var(--s2);
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.cardSub {
+  margin: 2px 0 0;
+  color: var(--grey);
+  font-size: 12.5px;
+}
+
+.crows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.crow {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--s3);
+  padding: 9px 0;
+  font-size: 13px;
+}
+
+.crow + .crow {
+  border-top: 1px solid var(--line-soft);
+}
+
+.cmain {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cOn {
+  font-weight: 600;
+}
+
+.cOff {
+  color: var(--grey);
+}
+
+.cdetail {
+  color: var(--grey);
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
+}
+
+/* ── Topology ──────────────────────────────────────────────── */
+.topo {
+  padding: var(--s3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: #fff;
+  box-shadow: var(--lift);
+}
+
+.ends {
+  display: grid;
+  gap: var(--s3);
+  margin: 0;
+}
+
+.ends > div {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr);
+  gap: var(--s3);
+  font-size: 14px;
+}
+
+.ends dt {
+  color: var(--grey);
+}
+
+.ends dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ── Report ────────────────────────────────────────────────── */
+.reportLine {
+  margin: 0 0 var(--s4);
+  font-size: 15px;
+}
+
+.reportBtns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3);
+  margin-top: var(--s6);
+}
+
+@media (min-width: 1024px) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .topo {
+    padding: var(--s6);
+  }
+}
+
+/* ── Overview: the port finder ─────────────────────────────── */
+/* On a phone, once a device is chosen the photo stays in view under the
+   header, smaller, so the ring and the zoom are seen while ports are picked. */
+@media (max-width: 1023px) {
+  .stuck {
+    position: sticky;
+    top: calc(var(--top) + var(--safe-top));
+    z-index: 5;
+    --photo-h: 30vh;
+    margin: 0 calc(-1 * var(--s4));
+    padding: var(--s2) var(--s4) var(--s2);
+    background: var(--bg);
+    box-shadow: 0 6px 12px -8px rgba(17, 17, 17, 0.18);
+  }
+
+  .stuck .photo {
+    padding: 6px;
+    border-radius: 14px;
+  }
+
+  .stuck .zoomBtn {
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .stuck .keyLine {
+    margin-top: 6px;
+    font-size: 12.5px;
+  }
+}
+
+.photoWrap {
+  position: relative;
+}
+
+
+.keyLine {
+  margin: var(--s3) 0 0;
+  color: var(--grey);
+  font-size: 13.5px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.badText {
+  color: var(--bad);
+  font-weight: 600;
+}
+
+.finderTitle {
+  margin: 0 0 var(--s3);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.pickLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s2);
+  margin: var(--s4) 0 var(--s2);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pickLabel .grey {
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.portGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+  gap: 6px;
+}
+
+.pchip {
+  height: 38px;
+  padding: 0;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.pOn {
+  border-color: #121212;
+  background: #121212;
+  color: #fff;
+}
+
+.pOff {
+  border-color: var(--line-strong);
+  background: #fff;
+}
+
+.pUnk {
+  border-style: dashed;
+  color: var(--grey);
+}
+
+.pMiss {
+  border-color: var(--bad);
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+
+.pCap {
+  border-color: var(--warn);
+  border-style: dotted;
+  border-width: 2px;
+}
+
+.pSel {
+  outline: 2.5px solid #f79009;
+  outline-offset: 2px;
+}
+
+.portKey {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px var(--s4);
+  margin: var(--s2) 0 0;
+  color: var(--grey);
+  font-size: 12.5px;
+}
+
+.portKey span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.key {
+  display: inline-block;
+  width: 14px;
+  height: 11px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 3px;
+}
+
+.found {
+  margin-top: var(--s4);
+}
+
+.foundBad {
+  border-color: rgba(186, 26, 26, 0.35);
+}
+
+.foundHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-bottom: var(--s3);
+}
+
+.foundTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.found .ends > div {
+  grid-template-columns: 92px minmax(0, 1fr);
+}
+
+.missNote {
+  margin: var(--s3) 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--bad-bg);
+  color: var(--bad);
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.foundLinks {
+  margin: var(--s3) 0 0;
+}
+
+.pnoBad {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+
+/* ── Report: everything about the rack ─────────────────────── */
+.reportHead {
+  display: grid;
+  gap: var(--s4);
+}
+
+.reportHead .reportBtns {
+  margin-top: 0;
+}
+
+.rsec {
+  margin-top: var(--s8);
+}
+
+.rsecTitle {
+  margin: 0 0 var(--s3);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.reportPhoto {
+  --photo-h: 60vh;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: #fff;
+  box-shadow: var(--lift);
+}
+
+.rtable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.rtable th {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--grey);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.rtable td {
+  padding: 8px 12px;
+  border-top: 1px solid var(--line-soft);
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.rtable tbody tr:first-child td {
+  border-top: 0;
+}
+
+.tdUnit {
+  width: 52px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.dim td {
+  color: var(--grey);
+}
+
+.dim .tdUnit {
+  color: var(--ink);
+}
+
+.wideOnly {
+  display: none;
+}
+
+@media (min-width: 700px) {
+  .wideOnly {
+    display: table-cell;
+  }
+}
+
+@media (min-width: 1024px) {
+  .reportHead {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: var(--s8);
+  }
+
+  .reportPhoto {
+    --photo-h: 70vh;
+  }
+
+  .rtable {
+    font-size: 14px;
+  }
+}
+
+.capTicks {
+  margin-top: var(--s3);
+}
+
+.settleLine {
+  margin: var(--s2) 0 0;
+  color: var(--grey);
+  font-size: 13px;
+}
+
+/* ── Connections, compact: one device, a dense port grid ──────── */
+.conn {
+  display: grid;
+  gap: var(--s3);
+}
+
+.conn .filter {
+  margin-bottom: 0;
+}
+
+.connCard {
+  padding: var(--s3) var(--s4) var(--s4);
+}
+
+.cgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(34px, 1fr));
+  gap: 5px;
+}
+
+.ccell {
+  position: relative;
+  height: 32px;
+  padding: 0;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: transform 120ms ease;
+}
+
+.ccell:active {
+  transform: scale(0.94);
+}
+
+.cell_on { border-color: var(--ink); background: var(--ink); color: #fff; }
+.cell_off { background: #fff; }
+.cell_unk { border-style: dashed; color: var(--grey); }
+.cell_bad { border-color: var(--bad); background: var(--bad-bg); color: var(--bad); }
+.cell_warn { border-color: var(--warn); background: var(--warn-bg); color: var(--warn); }
+
+.cellDim {
+  opacity: 0.22;
+}
+
+.cellLabel {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #f79009;
+}
+
+.cellLabelKey {
+  width: 8px;
+  height: 8px;
+  border: 0;
+  border-radius: 50%;
+  background: #f79009;
+}
+
+@media (min-width: 1024px) {
+  .conn {
+    grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .conn > .filter,
+  .conn > .hint {
+    grid-column: 1 / -1;
+  }
+
+  .cgrid {
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+  }
+
+  .ccell {
+    height: 36px;
+    font-size: 13px;
+  }
+}
+
+/* ── Report, short ─────────────────────────────────────────── */
+.reportBtnsTop {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3);
+  margin-bottom: var(--s3);
+}
+
+.rsum {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: var(--s4);
+  align-items: start;
+  margin-bottom: var(--s3);
+  padding: var(--s3);
+}
+
+.rthumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  cursor: zoom-in;
+  --photo-h: 180px;
+}
+
+.rthumbPhoto {
+  pointer-events: none;
+}
+
+.rthumbHint {
+  display: block;
+  margin-top: 4px;
+  color: var(--grey);
+  font-size: 11px;
+  text-align: center;
+}
+
+.rfacts {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.rfacts > div {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: var(--s2);
+}
+
+.rfacts dt {
+  color: var(--grey);
+}
+
+.rfacts dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+.tdSub {
+  display: block;
+  color: var(--grey);
+  font-size: 11.5px;
+}
+
+.inner {
+  box-shadow: none;
+}
+
+@media (min-width: 1024px) {
+  .rsum {
+    grid-template-columns: 150px minmax(0, 1fr);
+  }
+
+  .rthumb {
+    --photo-h: 240px;
+  }
+
+  .rfacts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s3) var(--s6);
+  }
+
+  .rfacts > div {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}
+
+/* ── The port finder: kind, number, Find ───────────────────── */
+.finder {
+  display: grid;
+  gap: var(--s2);
+  margin-top: var(--s2);
+}
+
+.typeTabs {
+  margin: 0;
+}
+
+.typeOne {
+  margin: 0;
+  color: var(--grey);
+  font-size: 12.5px;
+}
+
+.findRow {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--s2);
+}
+
+.findField {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.findBtn {
+  flex: none;
+  min-width: 88px;
+}
+
+.findErr {
+  margin: 0;
+  color: var(--bad);
+  font-size: 13px;
+}
+
+.connPick {
+  display: grid;
+  gap: var(--s3);
+}
+
+.connPick .pf {
+  margin-top: 0;
+}
+
+.connSum {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.probs {
+  padding: var(--s3) 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: #fff;
+}
+
+.probsT {
+  margin: 0 0 var(--s2);
+  color: var(--grey);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.probList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2) var(--s4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.probRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.probNo {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.mmPrompt {
+  margin-top: var(--s2);
+}
+
+.wrongLine {
+  margin: var(--s4) 0 0;
+}
+
+.strayRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+/* Added after the restore. */
+.dtable { margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: var(--r); background: #fff; overflow: hidden; }
+.dtable > li + li { border-top: 1px solid var(--line-soft); }
+.trow { display: grid; grid-template-columns: 44px minmax(0, 1fr) 64px 8px; align-items: center; gap: 10px; width: 100%; min-height: var(--row); padding: 8px 14px; border: 0; background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.trow:active { background: var(--accent-soft); }
+.trowGhost { cursor: default; background: var(--sunken); }
+.trowGhost .tname { color: var(--grey); }
+.trowGhost:active { background: var(--sunken); }
+.tunit { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--grey); }
+.tmain { display: flex; flex-direction: column; min-width: 0; }
+.tname { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; }
+.tmeta { font-size: 13px; color: var(--grey); white-space: nowrap; overflow: hidden; }
+.tports { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.tnum { font-size: 13px; font-variant-numeric: tabular-nums; color: var(--ink); }
+.tbar { display: block; width: 100%; height: 4px; border-radius: 2px; background: rgba(18, 18, 18, 0.08); overflow: hidden; }
+.tbar i { display: block; height: 100%; background: var(--ink); }
+.tflag { width: 8px; height: 8px; border-radius: 50%; }
+
+/* The photo's own toggle: whole rack, or zoomed to the device or port. */
+.zoomBtn {
+  position: absolute; right: 20px; bottom: 20px; z-index: 6; min-height: 34px; padding: 0 14px;
+  border: 0; border-radius: var(--r-pill); background: rgba(255, 255, 255, 0.94); color: var(--ink);
+  font: inherit; font-size: 13px; font-weight: 600; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25); cursor: pointer;
+}
+
+/* Overview: the action rows under the port finder. */
+.ovActions { margin-top: var(--s4); }
+.kpiGap { margin-bottom: var(--s3); }
+
+/* A label and value list (port facts, a flag's facts). */
+.pfList { margin: 0; display: flex; flex-direction: column; }
+.pfList > div { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-top: 1px solid var(--line-soft); }
+.pfList > div:last-child { border-bottom: 1px solid var(--line-soft); }
+.pfList dt { font-size: 13px; color: var(--grey); }
+.pfList dd { margin: 0; font-size: 15px; font-weight: 500; color: var(--ink); overflow-wrap: anywhere; }
+
+/* One port as a card: header, photo, the A-to-Z strip, one facts line, Previous and Next. */
+.pc { margin-top: var(--s4); padding: var(--s4); border: 1px solid var(--line); border-radius: var(--r); background: #fff; }
+.pcBad { border-color: rgba(186, 26, 26, 0.3); }
+.pcHead { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
+.pcTitle { font-size: 18px; font-weight: 600; line-height: 1.3; }
+.pcBadges { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.pcState { display: inline-flex; align-items: center; min-height: 24px; padding: 0 10px; border-radius: var(--r-pill); background: rgba(17, 17, 17, 0.06); color: var(--ink); font-size: 13px; font-weight: 600; }
+.pcSub { margin-top: 2px; font-size: 13px; color: var(--grey); }
+.pcCols { display: block; }
+.pcWithThumb { display: grid; grid-template-columns: minmax(0, 1fr) 38%; gap: var(--s3); align-items: start; }
+.pcMain, .fsMain { container-type: inline-size; min-width: 0; }
+.thumb { display: block; width: 100%; height: 140px; padding: 0; border: 0; border-radius: 10px; overflow: hidden; background: var(--photo); cursor: zoom-in; }
+.thumbPhoto { --photo-h: 140px; height: 140px; align-items: center; }
+.bigPhoto { --photo-h: 60vh; height: 60vh; margin-top: var(--s3); border-radius: var(--r); overflow: hidden; background: var(--photo); }
+/* A device cut out on its own: the picture takes the device's shape. */
+.thumb.thumbCrop, .thumbPhoto.thumbCrop { height: auto; }
+.bigPhoto.bigCrop { height: auto; }
+@media (min-width: 1024px) {
+  .thumb { height: 200px; }
+  .thumbPhoto { --photo-h: 200px; height: 200px; }
+  .thumb.thumbCrop, .thumbPhoto.thumbCrop { height: auto; }
+}
+.pcStrip { display: grid; grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr); align-items: stretch; margin-top: var(--s3); }
+/* Connections: each end over its own zoomed photo and close-up action. */
+.pcA, .pcZ { display: flex; min-width: 0; }
+.pcA > *, .pcZ > * { flex: 1; }
+.pcStripPhotos { row-gap: var(--s2); }
+.pcShot { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; grid-row: 2; }
+.pcShotA { grid-column: 1; }
+.pcShotZ { grid-column: 3; }
+.pcNoPhoto { display: flex; align-items: center; justify-content: center; height: 140px; padding: var(--s2); border: 1px dashed var(--line-strong); border-radius: 10px; background: var(--sunken); color: var(--grey); font-size: 13px; text-align: center; }
+.pcShot .pcShotLink { align-self: flex-start; margin: 0; font-size: 13px; }
+@media (min-width: 1024px) {
+  .pcNoPhoto { height: 200px; }
+}
+.pcEnd { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: #fff; }
+.pcEndNone { border-style: dashed; background: var(--sunken); }
+.pcEndNone .pcEndN { color: var(--grey); font-weight: 500; }
+.pcEndL { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--grey); }
+.pcEndN { font-size: 14px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+.pcEndS { font-size: 13px; color: var(--grey); overflow-wrap: anywhere; }
+.pcLink { position: relative; display: flex; align-items: center; justify-content: center; }
+.pcLink::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; border-top: 2px solid var(--ink); }
+.pcLinkBad::before { border-top: 2px dashed var(--bad); }
+.pcCable { position: relative; z-index: 1; max-width: 100%; padding: 2px 8px; border-radius: var(--r-pill); background: var(--ink); color: #fff; font-family: var(--mono); font-size: 12px; font-weight: 600; overflow-wrap: anywhere; text-align: center; }
+.pcLinkBad .pcCable { background: var(--bad); }
+.pc .pfList { margin-top: var(--s3); }
+.pcCap { margin-top: var(--s2); font-size: 13px; color: var(--grey); }
+.pcSteps { margin-top: var(--s4); }
+@container (max-width: 320px) {
+  .pcStrip { grid-template-columns: minmax(0, 1fr); }
+  .pcA { order: 1; }
+  .pcStripPhotos .pcShotA { order: 2; grid-row: auto; grid-column: auto; margin-bottom: var(--s2); }
+  .pcLink { order: 3; }
+  .pcZ { order: 4; }
+  .pcStripPhotos .pcShotZ { order: 5; grid-row: auto; grid-column: auto; margin-top: var(--s2); }
+  .pcLink { min-height: 40px; }
+  .pcLink::before { left: 50%; right: auto; top: 0; bottom: 0; border-top: 0; border-left: 2px solid var(--ink); }
+  .pcLinkBad::before { border-top: 0; border-left: 2px dashed var(--bad); }
+}
+
+/* A flag explained, in its sheet. */
+.fs { display: flex; flex-direction: column; }
+.fsOn { font-size: 13px; color: var(--grey); }
+.fsMeaning { margin: 0 0 var(--s3); font-size: 15px; }
+.fs .pcCols { margin-top: var(--s3); }
+@container (max-width: 320px) {
+  .fsMain .pfList > div { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 8px 0; }
+}
+.fsLabel { margin-top: var(--s4); font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--grey); }
+.fsTodo { margin-top: var(--s1); font-size: 15px; }
+
+/* The report's one download button and its menu. */
+.dlBar { display: flex; justify-content: flex-end; margin: 0 0 var(--s3); }
+.dlWrap { position: relative; }
+.dlBtn { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); font-size: 20px; cursor: pointer; }
+.dlBtn[aria-expanded="true"] { background: rgba(17, 17, 17, 0.05); }
+.dlScrim { position: fixed; inset: 0; z-index: 20; border: 0; background: transparent; }
+.dlMenu { position: absolute; top: 50px; right: 0; z-index: 21; display: flex; flex-direction: column; min-width: 220px; padding: 6px; border: 1px solid var(--line); border-radius: 12px; background: #fff; box-shadow: 0 10px 30px rgba(17, 17, 17, 0.14); }
+.dlMenu .dlItem { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; width: 100%; min-height: 48px; padding: 8px 12px; border-radius: 8px; text-decoration: none; color: var(--ink); border-bottom: 0; }
+.dlMenu .dlItem:active { background: rgba(17, 17, 17, 0.05); }
+.dlWord { font-size: 15px; font-weight: 600; }
+.dlSub { font-size: 12px; color: var(--grey); font-weight: 400; }
+
+/* Flags tab. */
+.flagsTab { display: flex; flex-direction: column; gap: var(--s3); }
+.flagCards { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.flagCard { display: flex; flex-direction: column; gap: 4px; width: 100%; min-height: var(--row); padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.flagCard:active { background: rgba(17, 17, 17, 0.03); }
+.flagTop { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.flagCard .flagWhat { font-size: 15px; font-weight: 600; }
+.flagCard .flagDetail { font-size: 13px; color: var(--grey); }
+.capHint { margin: 8px 0 0; font-size: 13px; color: var(--grey); }
+
+/* Port finder: one label, the kinds as pills when there are two or more, a field and Find. */
+.pf { display: flex; flex-direction: column; gap: 6px; margin: var(--s3) 0 0; }
+/* Type, number and Find in one compact bar. */
+.pfRow { display: flex; align-items: stretch; height: 44px; border: 1px solid var(--line-strong); border-radius: 12px; background: #fff; overflow: hidden; }
+.pfRow:focus-within { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.06); }
+.pfPick { position: relative; flex: none; max-width: 46%; display: flex; border-right: 1px solid var(--line-soft); background: #fafafa; }
+.pfPick::after { content: ''; position: absolute; right: 13px; top: 50%; width: 6px; height: 6px; margin-top: -5px; border-right: 1.6px solid var(--ink); border-bottom: 1.6px solid var(--ink); transform: rotate(45deg); pointer-events: none; }
+.pfSelect { width: 100%; min-width: 0; padding: 0 32px 0 14px; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; appearance: none; cursor: pointer; }
+.pfSelect:focus { outline: none; }
+.pfKind { flex: none; display: flex; align-items: center; padding: 0 14px; border-right: 1px solid var(--line-soft); background: #fafafa; font-size: 14px; font-weight: 600; color: var(--ink); }
+.pfInput { flex: 1; min-width: 0; padding: 0 14px; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 16px; font-variant-numeric: tabular-nums; }
+.pfInput:focus { outline: none; }
+.pfInput::placeholder { color: var(--grey); }
+.pfGo { flex: none; margin: 4px; padding: 0 18px; border: 0; border-radius: 9px; background: var(--ink); color: #fff; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.pfGo:active { opacity: 0.85; }
+/* Port blocks in the close-up sheet: chips. */
+.pfTypes { display: flex; gap: 8px; overflow-x: auto; }
+.pfType { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: var(--pill); padding: 0 14px; border: 1px solid var(--line-strong); border-radius: var(--r-pill); background: #fff; color: var(--ink); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+.pfType b { font-weight: 600; color: var(--grey); font-variant-numeric: tabular-nums; }
+.pfTypeOn { background: var(--ink); border-color: var(--ink); color: #fff; }
+.pfTypeOn b { color: rgba(255, 255, 255, 0.7); }
+
+/* The one-port close-up sheet. */
+.cuLine { margin: 0 0 var(--s3); font-size: 14px; color: var(--ink); }
+.cuActions { display: flex; flex-direction: column; gap: 10px; margin-top: var(--s3); }
+/* The dust cap the photo could not tell: one line and two small answers. */
+.pcCapAsk { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin-top: var(--s2); }
+.pcCapAsk .pcCap { margin: 0; }
+.pcCapErr { width: 100%; font-size: 13px; color: var(--bad); }
+.pcShotNote { font-size: 12.5px; line-height: 1.35; color: var(--grey); }
+
+/* The drift check of the chosen port, above its facts. */
+.pcDrift { margin: 12px 0; }
+
+/* One close-up line per device the rack photo could not read closely enough. */
+.cuRows {
+  margin-bottom: 16px;
+}
+
+.cuRow {
+  margin-top: 12px;
+}
+
+/* Flags of one kind only: one line instead of two chips that list the same. */
+.flagsOne { margin: 0; color: var(--grey); font-size: 14px; font-weight: 600; }

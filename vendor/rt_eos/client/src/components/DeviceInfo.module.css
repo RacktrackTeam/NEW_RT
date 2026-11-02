@@ -1,0 +1,52 @@
+.grey {
+  color: var(--grey);
+}
+
+.note {
+  padding: var(--s2) 0;
+  font-size: 14px;
+}
+
+.optics {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.optic {
+  padding: var(--s3) 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.optic:first-child {
+  border-top: 1px solid var(--line);
+}
+
+.opticT {
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.k {
+  display: inline-block;
+  min-width: 52px;
+  color: var(--grey);
+  font-size: 13px;
+}
+
+.sourced {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.src {
+  color: var(--grey);
+  font-size: 13px;
+}
+
+.srcWarn {
+  color: var(--warn);
+  font-size: 13px;
+}

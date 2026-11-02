@@ -1,0 +1,14 @@
+.pick {
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+}
+
+.confirm {
+  margin: 0 0 var(--s2);
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}

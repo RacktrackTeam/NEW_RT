@@ -1,0 +1,57 @@
+/* Site (board screen 15). Racks as pictures, people as rows. */
+
+.head {
+  margin-top: 0;
+  align-items: flex-end;
+}
+
+.picker {
+  max-width: 420px;
+  margin-bottom: var(--s6);
+}
+
+.thumbs {
+  margin-top: var(--s4);
+}
+
+.menu {
+  margin-top: var(--s3);
+  border-top: 1px solid var(--line);
+}
+
+.danger {
+  color: var(--bad);
+}
+
+.sentence {
+  margin: var(--s2) 0 var(--s4);
+}
+
+.or {
+  margin-top: var(--s6);
+}
+
+.lapOnly {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .lapOnly {
+    display: inline-flex;
+  }
+
+  .phoneOnly {
+    display: none;
+  }
+
+  .thumbs {
+    gap: var(--s6);
+  }
+}
+
+/* People first, the racks below them, on a phone and a laptop alike. */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s8);
+}

@@ -1,0 +1,151 @@
+/* Sign in - copied from RackTrack's LoginPage.module.css so the two apps
+   share one sign-in screen. Two differences, both because RT-EOS has no
+   index.css of RackTrack's: the type tokens are declared on .page, and the
+   field look that RackTrack hands back under #root.rt-auth-wide (a 1px
+   hairline, 6px radius, a charcoal border on focus, no glow) is written on
+   .input directly. Light theme only.
+
+   Login - one screen, one job.
+   Logo, name, two fields, one button, two soft circles behind.
+
+   It lives inside #root, which on a desktop is a 540px centred column (the
+   app's phone-in-the-middle layout) and on a phone is the screen. So every
+   size here is relative to THAT box, never to the viewport: the first version
+   used 18vw side padding, which on a 2000px screen was 360px a side inside a
+   540px column - the page collapsed to one word wide and vertical centring
+   pushed the logo off the top. #root scrolls; this page never clips. */
+
+/* One flat surface. No card, no tinted circles, nothing with an edge - the
+   first version drew a white panel on a slightly different ground and the
+   seam read as a box floating in the middle of the screen. The page paints
+   the whole viewport itself so there is no seam to see. */
+.page {
+  position: fixed; inset: 0;
+  width: 100%;
+  display: flex; flex-direction: column;
+  background: #ffffff;
+  color: #0c1420;
+  padding: max(20px, env(safe-area-inset-top, 0px)) 24px max(24px, env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  font-family: var(--font);
+  --fs-section: 15px;
+  --fs-item: 14px;
+  --fs-body: 13px;
+  --fs-sub: 12px;
+  --fw-body: 400;
+  --fw-label: 600;
+  --fw-title: 700;
+}
+
+/* Top-anchored, not centred: a short screen scrolls, it never crops.
+   Explicitly transparent - a global `main` rule paints a surface colour, and
+   against the page's white that seam is exactly the box that read as a card
+   floating in the middle of the screen. */
+.stack {
+  position: relative; z-index: 1;
+  flex: 1 0 auto;
+  display: flex; flex-direction: column; align-items: center;
+  width: 100%;
+  padding-top: clamp(28px, 9vh, 88px);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.logo {
+  width: 104px; height: 104px; object-fit: cover;
+  border-radius: 26px;
+  box-shadow: 0 8px 28px -12px rgba(12, 20, 32, 0.35);
+  margin-bottom: 16px;
+}
+.brand {
+  margin: 0;
+  font-size: 32px; font-weight: var(--fw-title); letter-spacing: -0.02em; line-height: 1;
+  color: inherit; text-align: center;
+}
+.tag { margin: 8px 0 0; font-size: var(--fs-item); color: #5c6878; text-align: center; }
+
+.form {
+  width: 100%;
+  max-width: 440px;
+  display: flex; flex-direction: column; gap: 12px;
+  margin-top: 32px;
+}
+.field { position: relative; width: 100%; }
+.input {
+  width: 100%;
+  min-height: 56px;
+  padding: 0 18px;
+  font-size: var(--fs-section);              /* 16px or iOS zooms the page on focus */
+  color: inherit;
+  background: #ffffff;
+  border: 1px solid #e1e3e6;
+  border-radius: 6px;
+  outline: none;
+  box-shadow: none;
+  transition: border-color .16s ease;
+  -webkit-appearance: none;
+}
+.input::placeholder { color: #8a94a0; }
+.input:hover { border-color: #c8ccd1; }
+.input:focus { border-color: #1a1d21; box-shadow: none; outline: none; }
+.inputPw { padding-right: 52px; }
+.eye {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  width: 40px; height: 40px; border: 0; border-radius: 10px;
+  background: transparent; color: #5c6878; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.err {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(192, 57, 43, 0.08); border: 1px solid rgba(192, 57, 43, 0.28);
+  color: #b0322a; font-size: var(--fs-body); line-height: 1.4;
+}
+
+.cta {
+  width: 100%;
+  min-height: 56px;
+  margin-top: 6px;
+  border: 0; border-radius: 16px;
+  background: #121212; color: #ffffff;
+  font-size: var(--fs-section); font-weight: var(--fw-title); letter-spacing: 0.01em;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.6);
+  transition: transform .08s, opacity .15s;
+}
+.cta:active { transform: scale(0.99); }
+.cta:disabled { opacity: .55; cursor: default; }
+.spinner {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.35); border-top-color: #fff;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.links {
+  margin-top: 22px;
+  display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+  font-size: var(--fs-body); color: #5c6878; text-align: center;
+}
+.links a { color: inherit; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.links a:hover { color: #1b5fd9; }
+.foot {
+  position: relative; z-index: 1;
+  text-align: center;
+  font-size: var(--fs-sub); line-height: 1.7; color: #8a94a0;
+  padding: 24px 8px 4px;
+  max-width: 440px; margin: 0 auto;
+}
+.foot a {
+  color: #1b5fd9; font-weight: var(--fw-label);
+  text-decoration: none;
+}
+.foot a:active { text-decoration: underline; }
+
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } .cta { transition: none; } }

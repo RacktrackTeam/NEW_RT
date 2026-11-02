@@ -1,0 +1,125 @@
+/* SFP modules: the slot line (type pill, speed, cages), then compact rows of
+   type pill, part number with distance and speed, price and Buy, one per
+   hairline. The app's tokens throughout. */
+.sfp {
+  min-width: 0;
+}
+
+.quiet {
+  padding: var(--s2) 0;
+}
+
+.slot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2);
+  margin: 0;
+  padding: var(--s2) 0;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: var(--t3);
+}
+
+.slotPill,
+.pill {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 var(--s2);
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-size: var(--t4);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.slotPill {
+  background: var(--ink);
+  color: #fff;
+}
+
+.slotSpeed {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.slotCount {
+  margin-left: auto;
+  color: var(--grey);
+  font-variant-numeric: tabular-nums;
+}
+
+.subLabel {
+  margin: var(--s4) 0 0;
+  padding-bottom: var(--s2);
+  border-bottom: 1px solid var(--line-soft);
+  font-size: var(--t3);
+  font-weight: 600;
+}
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto auto;
+  column-gap: var(--s3);
+  align-items: center;
+  padding: var(--s2) 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.type {
+  min-width: 0;
+}
+
+.name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.part {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  font-size: var(--t3);
+  line-height: 1.35;
+  color: var(--grey);
+}
+
+.price {
+  font-size: var(--t3);
+  font-weight: 500;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.buy {
+  justify-self: end;
+}
+
+.more {
+  display: inline-block;
+  margin-top: var(--s2);
+  padding: var(--s1) 0;
+  border: 0;
+  background: none;
+  font: 500 var(--t3) / 1.4 var(--font);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.more:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

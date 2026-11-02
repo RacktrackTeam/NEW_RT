@@ -1,0 +1,246 @@
+/* The topology, in the look of a network-planning tool: racks as clean
+   rounded frames, devices as white tiles, cables as smooth coloured curves
+   from port dot to port dot. White, hairline greys, three line colours. */
+.wrap {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  padding-bottom: 40px;
+  background: #ffffff;
+}
+
+.svg {
+  display: block;
+  margin: 0 auto;
+  font-family: var(--font, 'Geist', system-ui, sans-serif);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.frame {
+  fill: #ffffff;
+  stroke: #e2e5e8;
+  stroke-width: 1;
+}
+
+.titleRule {
+  stroke: #eef0f2;
+  stroke-width: 1;
+}
+
+.rackName {
+  fill: #1c232b;
+  font-weight: 600;
+}
+
+.rackUnits {
+  fill: #8d949a;
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ruler {
+  fill: #b2b8bd;
+  font-family: var(--mono, 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+.slot {
+  fill: none;
+  stroke: #e9ecef;
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.dev {
+  transition: opacity 0.15s ease;
+}
+
+.tap {
+  cursor: pointer;
+  outline: none;
+}
+
+.block {
+  fill: #ffffff;
+  stroke: #dde1e5;
+  stroke-width: 1;
+  transition: fill 0.15s ease, stroke 0.15s ease;
+}
+
+.block[data-unknown] {
+  fill: #f7f8f9;
+  stroke: #e6e9ec;
+}
+
+.block[data-tone='ok'] { fill: #eaf5ee; stroke: #bfdcc9; }
+.block[data-tone='warn'] { fill: #fcf3e3; stroke: #ecd3a6; }
+.block[data-tone='bad'] { fill: #fbe9e8; stroke: #e9bdb9; }
+
+.tap:hover .block,
+.tap:focus-visible .block {
+  stroke: #a9b0b6;
+}
+
+.devOn .block {
+  stroke: #1c232b;
+  stroke-width: 1.5;
+}
+
+.blockName {
+  fill: #1c232b;
+  font-weight: 600;
+}
+
+.blockGrey {
+  fill: #9aa1a7;
+  font-weight: 500;
+}
+
+.sub {
+  fill: #8d949a;
+  font-size: 10px;
+}
+
+.kind {
+  font-size: 8.5px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+}
+
+.cable {
+  cursor: pointer;
+  outline: none;
+  transition: opacity 0.15s ease;
+}
+
+.hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 14;
+}
+
+.line {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cable:hover .line,
+.cable:focus-visible .line {
+  stroke-width: 3;
+}
+
+.countBox {
+  fill: #ffffff;
+  stroke-width: 1;
+}
+
+.count {
+  font-size: 9px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.pill {
+  fill: #ffffff;
+  stroke: #d9dde1;
+  stroke-width: 1;
+}
+
+.tag {
+  fill: #4a535c;
+  font-weight: 500;
+}
+
+.tap:hover .pill,
+.tap:focus-visible .pill {
+  stroke: #a9b0b6;
+}
+
+.devOn .pill {
+  stroke: #1c232b;
+  stroke-width: 1.5;
+}
+
+.devOn .tag {
+  fill: #1c232b;
+  font-weight: 650;
+}
+
+.faded {
+  opacity: 0.32;
+}
+
+.fadedSoft {
+  opacity: 0.2;
+}
+
+.fadedCable {
+  opacity: 0.2;
+}
+
+/* Zoom: three quiet round buttons in the bottom-right corner. */
+.zoom {
+  position: absolute;
+  right: 4px;
+  bottom: 2px;
+  display: flex;
+  gap: 6px;
+}
+
+.zbtn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #e2e5e8;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: #4a535c;
+  font-size: 18px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zbtn:hover:not(:disabled) {
+  border-color: #c3c9ce;
+  color: #1c232b;
+}
+
+.zbtn:disabled {
+  color: #c3c9ce;
+  cursor: default;
+}
+
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 6px 0 0;
+  color: #6b737a;
+  font-size: 12px;
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lkey {
+  display: inline-block;
+  width: 16px;
+  height: 0;
+  border-top: 2px solid var(--k);
+  border-radius: 1px;
+}
+
+.lkeyDash {
+  border-top-style: dashed;
+}

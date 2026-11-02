@@ -1,7 +1,7 @@
 # Test set, ground truth and the zero-issue rule (owner, 2 Nov 2026)
 
 ## The test set: three videos
-/Volumes/Racktrack/one_racktrack_sources/samples/video/ holds vdo1.mp4, "WhatsApp Video 2026-10-26 at 21.43.13.mp4" and "WhatsApp Video 2026-10-26 at 23.19.19.mp4", each with its stitched rack picture. vdo1's rack is SP-HYD-RM01-R01-R1 (confirmed from its label on 30 Oct) and its stored run is samples/video/run_of_vdo1. Every feature is tested with all three videos, not only vdo1.
+/Volumes/Racktrack/racktrack-app-integration/samples/video/ holds vdo1.mp4, "WhatsApp Video 2026-10-26 at 21.43.13.mp4" and "WhatsApp Video 2026-10-26 at 23.19.19.mp4", each with its stitched rack picture. vdo1's rack is SP-HYD-RM01-R01-R1 (confirmed from its label on 30 Oct) and its stored run is samples/video/run_of_vdo1. Every feature is tested with all three videos, not only vdo1.
 
 ## Ground truth, in all three databases
 For each video there is one ground truth file: rack label, unit count, every device with its units, type, make, model, device id or label, serial and asset tag where readable, and its ports and cables where known. vdo1 starts from the NetBox export /Volumes/Racktrack/racktrack-app/data/ground_truth/SP-HYD-RM01-R01-R1/netbox_devices.csv (read only; 18 devices). For the two WhatsApp videos no ground truth exists: create it from the stitched picture and the run, check every row against the picture by eye, and mark the file "created 2 Nov 2026 from the video, to be confirmed by the owner".

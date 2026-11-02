@@ -1,0 +1,12 @@
+.q {
+  padding: var(--s3) 0 var(--s4);
+  border-bottom: 1px solid var(--line);
+}
+
+.q > p:first-child {
+  margin-bottom: var(--s1);
+}
+
+.q .yn {
+  margin-top: var(--s3);
+}

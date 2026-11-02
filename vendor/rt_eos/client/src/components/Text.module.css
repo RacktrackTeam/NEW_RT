@@ -1,0 +1,134 @@
+.big {
+  font-size: var(--t1);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+}
+
+.bigSub {
+  margin-top: var(--s1);
+  font-size: var(--t3);
+  color: var(--grey);
+}
+
+.g {
+  margin: var(--s1) 0 var(--s3);
+  font-size: var(--t3);
+  color: var(--grey);
+}
+
+.m0 {
+  margin: 0;
+}
+
+/* The section label: 12, 600, uppercase, grey. 16 above, 8 below. */
+.sl {
+  margin: var(--s4) 0 var(--s2);
+  font-size: var(--t4);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+
+.sl:first-child {
+  margin-top: 0;
+}
+
+.shead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s4);
+  margin: var(--s4) 0 var(--s2);
+}
+
+.sheadT {
+  font-size: var(--t4);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+
+.st2 {
+  margin-bottom: var(--s3);
+  font-size: var(--t-title);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.facts {
+  margin: 0;
+}
+
+.facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s4);
+  padding: 10px 0;
+}
+
+.facts > div + div {
+  border-top: 1px solid var(--line-soft);
+}
+
+.facts dt {
+  color: var(--grey);
+  font-size: var(--t3);
+  flex: none;
+  max-width: 45%;
+}
+
+.facts dd {
+  margin: 0;
+  text-align: right;
+  min-width: 0;
+}
+
+.empty {
+  padding: var(--s4) 0;
+}
+
+.empty p {
+  max-width: 52ch;
+  margin-bottom: var(--s4);
+  color: var(--grey);
+}
+
+.err {
+  margin-top: var(--s3);
+  font-size: var(--t3);
+  color: var(--bad);
+}
+
+.loading {
+  padding: var(--s6) 0;
+}
+
+.bar {
+  display: block;
+  width: 120px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--line-soft);
+  overflow: hidden;
+}
+
+.bar i {
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--ink);
+  animation: slide 1.1s ease-in-out infinite;
+}
+
+@keyframes slide {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(260%);
+  }
+}

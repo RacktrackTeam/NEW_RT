@@ -1,0 +1,336 @@
+/* Phone: the RackTrack bar - a white pill floating clear of the bottom edge,
+   held in from both sides by a soft shadow, icon over word, Scan raised in
+   Laptop: a white bar across the top with the app name, the five
+   places and the site. The current place is ink and heavier; nothing else. */
+.nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  padding: 0 12px calc(var(--nav-gap) + var(--safe-bottom));
+  pointer-events: none;
+}
+
+.brand,
+.end,
+.item.laptopOnly {
+  display: none;
+}
+
+.items {
+  display: flex;
+  align-items: stretch;
+  height: var(--nav-h);
+  padding: 0 4px;
+  border-radius: var(--r-pill);
+  background: #fff;
+  box-shadow: var(--nav-shadow);
+  pointer-events: auto;
+}
+
+.item {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: var(--grey2);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.18s;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 21px;
+}
+
+.icon :global(.appIcon) {
+  stroke-width: 1.8;
+}
+
+.word {
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.on {
+  color: var(--ink);
+}
+
+.on .icon :global(.appIcon) {
+  stroke-width: 2.4;
+}
+
+.on .word {
+  font-weight: 700;
+}
+
+/* A result's own tabs: buttons that look like the nav's links. Four tabs
+   and More share the pill; the tab list itself adds no box. */
+.tabNav .item {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+.tabs {
+  display: contents;
+}
+
+.tabNav .word {
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  /* One line per word: CONNECTIONS must not break in two. */
+  white-space: nowrap;
+}
+
+/* The More sheet: the screens that do not fit on the bar. */
+.moreList {
+  margin: var(--s2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.moreList li + li {
+  border-top: 1px solid var(--line);
+}
+
+.moreRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.moreIcon {
+  display: flex;
+  font-size: 20px;
+  color: var(--grey2);
+}
+
+.moreWord {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.moreOn .moreWord {
+  font-weight: 700;
+}
+
+.moreOn .moreIcon {
+  color: var(--ink);
+}
+
+.moreNow {
+  color: var(--grey);
+  font-size: 13px;
+}
+
+.moreChev {
+  color: var(--grey2);
+}
+
+@media (min-width: 1024px) {
+  .tabNav .word {
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+
+  /* On a laptop the sheet is a small card under the bar, not a side panel. */
+  .moreSheet.moreSheet {
+    top: 72px;
+    bottom: auto;
+    width: 300px;
+    padding: var(--s4) var(--s4) var(--s3);
+  }
+
+  .moreRow:hover {
+    background: var(--accent-soft);
+    border-radius: 8px;
+  }
+
+  .tabNav .item {
+    padding: 0 16px;
+  }
+
+  .tabNav .item:hover {
+    background: var(--accent-soft);
+  }
+
+  .tabNav .item.on,
+  .tabNav .item.on:hover {
+    background: #121212;
+    color: #fff;
+  }
+}
+
+@media (min-width: 1024px) {
+  .nav {
+    top: 0;
+    bottom: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--s8);
+    height: var(--nav-top);
+    padding: 0 var(--s8);
+    background: rgba(255, 255, 255, 0.92);
+    -webkit-backdrop-filter: saturate(160%) blur(14px);
+    backdrop-filter: saturate(160%) blur(14px);
+    box-shadow: 0 1px 0 var(--line), 0 2px 10px rgba(17, 17, 17, 0.04);
+    pointer-events: auto;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex: none;
+    color: var(--ink);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    text-decoration: none;
+  }
+
+  .brandLogo {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  .items {
+    height: auto;
+    gap: 2px;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  /* A laptop shows History as its own place and You at the right end. */
+  .item.laptopOnly {
+    display: flex;
+  }
+
+  .item.phoneOnly {
+    display: none;
+  }
+
+  .item {
+    flex: none;
+    flex-direction: row;
+    gap: 8px;
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 10px;
+  }
+
+  .item:hover {
+    color: var(--ink);
+    background: var(--accent-soft);
+  }
+
+  .icon {
+    font-size: 17px;
+  }
+
+  .word {
+    font-size: 14px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .on,
+  .on:hover {
+    background: #121212;
+    color: #fff;
+  }
+
+  .end {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    margin-left: auto;
+    min-width: 0;
+  }
+
+  .place {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .placeWord {
+    color: var(--grey);
+    font-weight: 500;
+  }
+
+  .me {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 12px 4px 4px;
+    border-radius: var(--r-pill);
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .me:hover,
+  .meOn {
+    background: var(--accent-soft);
+  }
+
+  .avatar {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #121212;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .meText {
+    display: grid;
+    line-height: 1.15;
+  }
+
+  .meName {
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+
+  .meRole {
+    color: var(--grey);
+    font-size: 12px;
+  }
+}

@@ -1,0 +1,26 @@
+.region {
+  position: fixed;
+  left: var(--s4);
+  right: var(--s4);
+  bottom: calc(var(--nav-bottom) + var(--s4) + var(--safe-bottom));
+  z-index: 60;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.toast {
+  width: 100%;
+  max-width: 520px;
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r);
+  background: var(--ink);
+  color: #fff;
+  font-size: var(--t3);
+}
+
+@media (min-width: 1024px) {
+  .region {
+    bottom: var(--s6);
+  }
+}

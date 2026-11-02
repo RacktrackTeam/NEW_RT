@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Cleartext HTTP is denied app-wide. The one exception is the RackTrack pilot
+  server on the office Wi-Fi (this Mac, 10.10.1.13), which the office Wi-Fi
+  build talks to over plain http; nothing else may use cleartext.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.10.1.13</domain>
+    </domain-config>
+</network-security-config>

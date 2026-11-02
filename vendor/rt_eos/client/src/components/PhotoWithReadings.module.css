@@ -1,0 +1,173 @@
+/* The stage sets how tall the photo may be through --photo-h. */
+.stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.frame {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+  flex: none;
+}
+
+/* Zoomed to a box: the frame keeps its size and clips; the layer inside is
+   enlarged. Outlines keep their width at any zoom (--k). */
+.focused {
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.layer {
+  position: relative;
+  transition: transform 0.35s ease;
+}
+
+.ov.ring {
+  z-index: 4;
+  border-width: calc(2.5px / var(--k, 1));
+  border-color: #fff;
+  box-shadow: 0 0 0 calc(2.5px / var(--k, 1)) #f79009, 0 0 0 calc(5px / var(--k, 1)) rgba(255, 255, 255, 0.55);
+  border-radius: calc(3px / var(--k, 1));
+}
+
+.ov.ring.bad {
+  border-color: #fff;
+  box-shadow: 0 0 0 calc(2.5px / var(--k, 1)) var(--on-photo-bad), 0 0 0 calc(5px / var(--k, 1)) rgba(255, 255, 255, 0.6);
+}
+
+/* Cut to one box (a device alone): the frame takes the box's shape and the
+   whole photo sits inside it, larger, so only the box shows. */
+.cropped {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--photo);
+}
+
+.cropLayer {
+  position: absolute;
+  transition: left 0.4s ease, top 0.4s ease, width 0.4s ease;
+}
+
+.cropLayer .cropImg {
+  width: 100%;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cropLayer,
+  .layer {
+    transition: none;
+  }
+}
+
+.img {
+  display: block;
+  max-width: 100%;
+  max-height: var(--photo-h, 70vh);
+  width: auto;
+  height: auto;
+  border-radius: 4px;
+  background: var(--photo);
+}
+
+.zoomed {
+  justify-content: flex-start;
+}
+
+.zoomed .img {
+  max-height: none;
+  max-width: none;
+  height: calc(var(--photo-h, 70vh) * 2);
+}
+
+.ov {
+  position: absolute;
+  padding: 0;
+  margin: 0;
+  border: calc(1.5px / var(--k, 1)) solid rgba(255, 255, 255, 0.9);
+  border-radius: 2px;
+  background: transparent;
+  line-height: 1;
+  text-align: left;
+}
+
+button.ov {
+  cursor: pointer;
+}
+
+.ov.bad {
+  border-color: var(--on-photo-bad);
+}
+
+.ov.warn {
+  border-color: var(--on-photo-warn);
+}
+
+.ov.ok {
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+.ov.sel {
+  z-index: 3;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 calc(1.5px / var(--k, 1)) var(--accent);
+}
+
+.tags {
+  position: absolute;
+  left: -1px;
+  top: -1px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  max-width: calc(100% + 2px);
+  pointer-events: none;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0 4px;
+  border-radius: 2px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 14px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.tbad {
+  color: var(--bad);
+}
+
+.twarn {
+  color: var(--warn);
+}
+
+.tok {
+  color: var(--ok);
+}
+
+.zoom {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+}

@@ -7,10 +7,14 @@ A video is the only way to scan. racktrack-app is the base and keeps its engine 
 
 ## Where things are
 - This work folder: /Volumes/Racktrack/racktrack-app-integration, branch rt-eos-integration, a copy of racktrack-app at tag before-rt-eos. Commit here. Never commit on main.
-- RT-EOS code to bring in, read only: /Volumes/Racktrack/one_racktrack_sources/rt_eos (commit c53b6177). Its node_modules are cached at _cache/rt_eos_node_modules/{server,client}, its Python packages at _cache/venv (python 3.10, torch 2.14, the same versions racktrack-app runs on today), its models at _cache/rt_eos_Models.
-- dark_mobile code for NetBox and CMDB only, read only: /Volumes/Racktrack/one_racktrack_sources/dark_mobile (server/lib/netbox, server/lib/rack_identity.js, server/lib/connection_profiles.js, servicenow/, server/mock_routes.js, client pages DriftPage, ConnectionsPage).
-- Sample videos and photos: /Volumes/Racktrack/one_racktrack_sources/samples (video/vdo1.mp4 with its stored run in video/run_of_vdo1, datacenter-rack-photos, cable-flag-test-photos). racktrack-app's own sample run is data/runs/91af02c09bbc in this folder.
+- RT-EOS code to bring in, read only: /Volumes/Racktrack/racktrack-app-integration/vendor/rt_eos (commit c53b6177). Its node_modules are cached at _cache/rt_eos_node_modules/{server,client}, its Python packages at _cache/venv (python 3.10, torch 2.14, the same versions racktrack-app runs on today), its models at models/rt_eos.
+- dark_mobile code for NetBox and CMDB only, read only: /Volumes/Racktrack/racktrack-app-integration/vendor/dark_mobile (server/lib/netbox, server/lib/rack_identity.js, server/lib/connection_profiles.js, servicenow/, server/mock_routes.js, client pages DriftPage, ConnectionsPage).
+- Sample videos and photos: /Volumes/Racktrack/racktrack-app-integration/samples (video/vdo1.mp4 with its stored run in video/run_of_vdo1, datacenter-rack-photos, cable-flag-test-photos). racktrack-app's own sample run is data/runs/91af02c09bbc in this folder.
 - The three live project folders /Volumes/Racktrack/racktrack-app, RT-EOS and dark_mobile are never edited. The pilot runs on RT-EOS.
+
+## Two rules above all (owner, 2 Nov 2026)
+- Alter and integrate, never rebuild. The three apps already hold every feature. Copy the existing code from vendor/rt_eos, vendor/dark_mobile and this repo's own engine, change only what the join needs, and wire it. Do not write a new version of something that exists.
+- This folder stands on its own. Nothing in it may read from /Volumes/Racktrack/RT-EOS, dark_mobile, racktrack-app, one_racktrack_sources or any other folder: copy what you need into this folder (code, models, samples) and point every path inside it. Before you finish, grep your code for /Volumes and /Users and remove every outside path.
 
 ## Hard rules
 1. Never write inside /Volumes/Racktrack/racktrack-app, RT-EOS, dark_mobile, racktrack_portal, one_racktrack or racktrack_docs. Never read a .secrets folder, a CREDENTIALS file, a TESTER file or another project's .env. port_agents/*/search_keys.env holds API keys: never print it, never commit it (it is ignored).

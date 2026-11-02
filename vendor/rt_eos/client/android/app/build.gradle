@@ -1,0 +1,88 @@
+apply plugin: 'com.android.application'
+
+// ── Release signing ─────────────────────────────────────────────────────────
+// Signing material is NEVER hardcoded and NEVER committed. Supply it via env
+// vars (CI) or gradle properties in ~/.gradle/gradle.properties (user-global,
+// OUTSIDE this repo). Keystore files match the repo-wide *.jks / *.keystore
+// ignore rules, so keep the keystore out of the tree in practice too.
+// When nothing is supplied, rtHasSigning is false: no signingConfig is attached,
+// `assembleRelease` produces an UNSIGNED apk, and ship-apk.sh refuses to upload.
+def rtKeystore  = System.getenv('RACKTRACK_KEYSTORE')          ?: project.findProperty('RACKTRACK_KEYSTORE')
+def rtStorePass = System.getenv('RACKTRACK_KEYSTORE_PASSWORD') ?: project.findProperty('RACKTRACK_KEYSTORE_PASSWORD')
+def rtKeyAlias  = System.getenv('RACKTRACK_KEY_ALIAS')         ?: project.findProperty('RACKTRACK_KEY_ALIAS')
+def rtKeyPass   = System.getenv('RACKTRACK_KEY_PASSWORD')      ?: project.findProperty('RACKTRACK_KEY_PASSWORD')
+def rtHasSigning = rtKeystore != null && !rtKeystore.toString().trim().isEmpty()
+
+android {
+    namespace "com.racktrack.app"
+    compileSdk rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "com.racktrack.eos"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 90
+        versionName "1.1"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    signingConfigs {
+        release {
+            if (rtHasSigning) {
+                storeFile file(rtKeystore)
+                storePassword rtStorePass
+                keyAlias rtKeyAlias
+                keyPassword rtKeyPass
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // Attach the release signing config only when a keystore was actually
+            // supplied. Absent it, the release apk is unsigned by design and
+            // ship-apk.sh's pre-build guard stops the build before it is uploaded.
+            if (rtHasSigning) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            output.outputFileName = "racktrack.apk"
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

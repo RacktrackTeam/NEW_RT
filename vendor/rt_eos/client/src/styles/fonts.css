@@ -1,0 +1,43 @@
+/* Geist and Geist Mono, self-hosted (latin), the RackTrack family's type. */
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/geist-400-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/geist-500-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/geist-600-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/geist-700-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/geist-mono-400-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/geist-mono-500-latin.woff2') format('woff2');
+}

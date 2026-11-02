@@ -1,0 +1,52 @@
+# Python requirements for the RT-EOS scan engine (pipeline/, with pipeline/switch_ocr/).
+#
+# These are loose (>=) floors for development. For a reproducible install use
+# the pinned file instead:  pip install -r requirements.lock.txt
+#
+# Build the environment on a Mac with Python 3.10:
+#     python3.10 -m venv .venv
+#     .venv/bin/pip install -r requirements.txt
+# The server finds .venv/bin/python by itself.
+
+# --- CV pipeline (pipeline/) ---
+opencv-python-headless>=4.9.0
+# numpy<2.0 is the authoritative constraint; requirements.lock.txt conforms to
+# it (pins 1.26.4). Do NOT lift the ceiling without re-validating the whole CV
+# stack against numpy 2.x's ABI break - easyocr in particular.
+numpy>=1.26.0,<2.0
+Pillow>=10.0.0
+# HEIC/HEIF and AVIF decoding for pipeline/normalize_image.py. Neither OpenCV
+# nor Pillow reads an iPhone HEIC without it; the wheels bundle libheif. 1.x
+# wheels need Pillow>=11.1, which the floor above allows.
+pillow-heif>=1.0,<2
+torch>=2.1.0
+torchvision>=0.16.0
+# Floor raised above the compromised ultralytics releases: 8.3.41 and 8.3.42
+# (Dec 2024) shipped a cryptominer on PyPI and were later yanked. The old
+# >=8.1.0 floor allowed them; >=8.3.43 cannot resolve to either.
+ultralytics>=8.3.43
+# Still required by pipeline/ocr_labels.py and pipeline/side_labels.py.
+# pipeline/ocr_devices.py no longer uses it - see switch_ocr below.
+easyocr>=1.7.1
+
+# --- Device-label OCR (pipeline/ocr_devices.py) ---
+# The switch_ocr package is vendored in this repo; these are its engines.
+# Without them ocr_devices.py raises on import rather than falling back:
+# a silent fall back to a weaker engine produces a confident WRONG inventory
+# (EasyOCR read this rack's D-Link as "Calb"), which is worse than a scan that
+# fails and can be retried. rapidocr is the lighter of the two backends and is
+# what switch_ocr selects by default.
+rapidocr>=2.0.0
+onnxruntime>=1.17
+
+# --- Vendor list (reference/Switch_Vendors_Websites.xlsx, read by pipeline/ocr_devices.py) ---
+openpyxl>=3.1.2
+
+# --- Device lookups: specifications (public vendor pages only) ---
+# switch_specs/ (the switch specification base and its datasheet lookup),
+# restored from RackTrack for the device card (server/lib/device_lookup.js).
+# It never connects to a device.
+requests>=2.31
+beautifulsoup4>=4.12
+# PDF datasheets (read only when a vendor publishes a PDF).
+pymupdf>=1.23

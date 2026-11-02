@@ -1,0 +1,174 @@
+.fld {
+  display: block;
+  margin-top: var(--s4);
+  min-width: 0;
+}
+
+.compact {
+  margin-top: 0;
+}
+
+.fl {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+
+.req {
+  color: var(--bad);
+  margin-left: 2px;
+}
+
+.in {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  min-height: var(--btn);
+  padding: 0 var(--s4);
+  border: 1px solid var(--field-line);
+  border-radius: var(--r);
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.in:hover {
+  border-color: rgba(17, 17, 17, 0.3);
+}
+
+.in:focus-within {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(18, 18, 18, 0.12);
+}
+
+.bad,
+.bad:focus-within {
+  border-color: var(--bad);
+  box-shadow: none;
+}
+
+.multi {
+  align-items: flex-start;
+  padding: var(--s3);
+}
+
+.control {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  min-height: 50px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: 16px; /* 16 stops iOS zooming into the field */
+  line-height: 1.4;
+}
+
+.multi .control {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.control::placeholder {
+  color: var(--grey);
+}
+
+.control:focus-visible {
+  outline: none;
+}
+
+.sel .control {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  padding-right: var(--s4);
+}
+
+.sel {
+  position: relative;
+}
+
+.caret {
+  position: absolute;
+  right: var(--s3);
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -5px;
+  border: solid var(--grey);
+  border-width: 0 1.4px 1.4px 0;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.sfx,
+.sfxL {
+  display: inline-flex;
+  align-items: center;
+  color: var(--grey);
+  font-size: var(--t3);
+  flex: none;
+}
+
+.srch {
+  margin-top: var(--s4);
+}
+
+.srch input[type='search']::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
+.hint {
+  display: block;
+  margin-top: var(--s1);
+  font-size: var(--t3);
+  color: var(--grey);
+}
+
+.err {
+  display: block;
+  margin-top: var(--s1);
+  font-size: var(--t3);
+  color: var(--bad);
+}
+
+.code {
+  display: flex;
+  gap: var(--s2);
+  margin-bottom: var(--s2);
+}
+
+.codeBox {
+  width: 46px;
+  height: 56px;
+  padding: 0;
+  border: 1px solid var(--field-line);
+  border-radius: var(--r);
+  background: #fff;
+  font-size: 22px;
+  text-align: center;
+}
+
+.codeBox:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* Pickers: the same white field across the full width */
+.sel {
+  width: 100%;
+}
+.sel .control {
+  width: 100%;
+  font-weight: 400;
+  color: var(--ink);
+  padding-right: 28px;
+}
+.fld:has(.sel) {
+  width: 100%;
+}

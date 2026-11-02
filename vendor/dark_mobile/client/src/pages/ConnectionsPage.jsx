@@ -1,0 +1,370 @@
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import styles from './ConnectionsPage.module.css';
+import { useConnections } from '../ConnectionsContext.jsx';
+import { TYPE_INFO } from '../utils/connectionsApi';
+import { apiUrl, authFetch } from '../utils/api';
+import ThemeToggle from '../components/ThemeToggle.jsx';
+import PageHeader from '../components/PageHeader.jsx';
+
+const DEFAULT_TYPE = 'servicenow';
+
+function typeLabel(type) {
+  return TYPE_INFO[type]?.label || type;
+}
+
+function emptySecretFor(type) {
+  const fields = TYPE_INFO[type]?.fields || [];
+  const out = {};
+  for (const f of fields) out[f.key] = '';
+  return out;
+}
+
+export default function ConnectionsPage() {
+  const navigate = useNavigate();
+  const {
+    profiles, active, supportedTypes, loading, error, refreshing, lastRefresh, orgScoped,
+    refresh, create, update, activate, remove, refreshActiveSource,
+  } = useConnections();
+
+  // Form state. When `editingId` is null, the form is in "create" mode.
+  const [formOpen, setFormOpen]     = useState(false);
+  const [editingId, setEditingId]   = useState(null);
+  const [name, setName]             = useState('');
+  const [type, setType]             = useState(DEFAULT_TYPE);
+  const [secret, setSecret]         = useState(emptySecretFor(DEFAULT_TYPE));
+  // Work out the type from the address, so nobody has to know what their
+  // system is called to connect to it. The answer fills the form; the Type
+  // list stays, so a person can always change it.
+  const [address, setAddress]       = useState('');
+  const [finding, setFinding]       = useState(false);
+  const [foundNote, setFoundNote]   = useState(null);
+  const findOut = async () => {
+    if (!address.trim() || finding) return;
+    setFinding(true);
+    setFoundNote(null);
+    try {
+      const r = await authFetch(apiUrl('/api/connections/detect'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: address.trim() }),
+      });
+      const body = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(body.error || 'That address could not be checked.');
+      setType(body.type);
+      setSecret({ ...emptySecretFor(body.type), ...(body.fields || {}) });
+      setFoundNote({ ok: true, text: `${typeLabel(body.type)} found.` });
+    } catch (e) {
+      setFoundNote({ ok: false, text: e.message });
+    } finally {
+      setFinding(false);
+    }
+  };
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError]   = useState(null);
+  const [openMenuFor, setOpenMenuFor] = useState(null);
+  // The server can carry one NetBox for everybody (its own env). When it does
+  // and this organisation has not added its own, the page says so, so nobody
+  // wonders where the export is going.
+  const [serverNetbox, setServerNetbox] = useState(null);
+  useEffect(() => {
+    let dead = false;
+    authFetch(apiUrl('/api/nb/netbox/health'))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((h) => { if (!dead && h && h.source === 'server-env') setServerNetbox(h); })
+      .catch(() => {});
+    return () => { dead = true; };
+  }, []);
+
+  // Close the ⋯ menu on any outside tap or Escape. Without this it stayed open
+  // until something else happened to close it, so the Edit/Delete panel sat
+  // over the page and followed you around. Same behaviour the Organizations
+  // console already had.
+  useEffect(() => {
+    if (openMenuFor == null) return;
+    const close = () => setOpenMenuFor(null);
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    document.addEventListener('click', close);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('click', close);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [openMenuFor]);
+
+  // Reset secret fields whenever the chosen type changes - different
+  // backends require different fields, so we don't want stale values.
+  useEffect(() => {
+    setSecret(emptySecretFor(type));
+  }, [type]);
+
+  const openCreateForm = () => {
+    setEditingId(null);
+    setName('');
+    setType(DEFAULT_TYPE);
+    setAddress('');
+    setFoundNote(null);
+    setSecret(emptySecretFor(DEFAULT_TYPE));
+    setFormError(null);
+    setFormOpen(true);
+  };
+
+  const openEditForm = (profile) => {
+    setEditingId(profile.id);
+    setName(profile.name);
+    setType(profile.type);
+    setSecret(emptySecretFor(profile.type)); // never preload secrets
+    setFormError(null);
+    setFormOpen(true);
+    setOpenMenuFor(null);
+  };
+
+  const closeForm = () => {
+    if (submitting) return;
+    setFormOpen(false);
+    setFormError(null);
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
+    setFormError(null);
+    try {
+      if (editingId) {
+        // Edit: send name always; send secret only if user typed in any
+        // field (otherwise the stored credentials are kept).
+        const hasSecret = Object.values(secret).some(v => String(v || '').length > 0);
+        await update(editingId, {
+          name,
+          secret: hasSecret ? secret : undefined,
+        });
+      } else {
+        await create({ name, type, secret });
+      }
+      setFormOpen(false);
+    } catch (err) {
+      setFormError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const onActivate = async (id) => {
+    setOpenMenuFor(null);
+    try { await activate(id); } catch (err) { alert(err.message); }
+  };
+
+  const onDelete = async (profile) => {
+    setOpenMenuFor(null);
+    if (!confirm(`Delete connection "${profile.name}"?`)) return;
+    try { await remove(profile.id); } catch (err) { alert(err.message); }
+  };
+
+  const inactive = useMemo(() =>
+    profiles.filter(p => !p.is_active), [profiles]);
+
+  const formFields = TYPE_INFO[type]?.fields || [];
+  const formHint   = TYPE_INFO[type]?.hint   || null;
+
+  return (
+    <div className={`page page-full ${styles.page}`}>
+      {/* ─── Header band ─── */}
+      <PageHeader title="Data sources" back={() => navigate(-1)} action={<ThemeToggle />} />
+
+      {error && <p className={styles.bad}>{error}</p>}
+      {refreshing && (
+        <p className={styles.note}>
+          <span className={styles.refreshSpinner}/>
+          Refreshing from {active?.name || 'the new connection'}
+        </p>
+      )}
+      {lastRefresh && !refreshing && (
+        lastRefresh.ok
+          ? <p className={styles.good}>Pulled {lastRefresh.count ?? '-'} incident{lastRefresh.count === 1 ? '' : 's'} from {lastRefresh.instance}.</p>
+          : <p className={styles.bad}>Refresh failed: {lastRefresh.error}</p>
+      )}
+
+      {/* One list. The connection in use is first and says so; the others
+          are one tap from becoming it. No cards, no dots, no menus: a name,
+          what kind of thing it is, and the two or three verbs that apply. */}
+      {profiles.length === 0 && !serverNetbox ? (
+        <div className={styles.empty}>
+          <p>Add your CMDB or NetBox once and every screen uses it.</p>
+        </div>
+      ) : (
+        <ul className={styles.rows}>
+          {serverNetbox && !profiles.some((p) => p.type === 'netbox') && (
+            <li className={`${styles.row} ${styles.rowActive}`}>
+              <div className={styles.rowMain}>
+                <span className={styles.rowName}>RackTrack NetBox</span>
+                <span className={styles.rowType}>
+                  NetBox · in use · included with RackTrack{serverNetbox.reachable === false ? ' · not reachable' : ''}
+                </span>
+              </div>
+            </li>
+          )}
+          {(orgScoped ? profiles : [...(active ? [active] : []), ...inactive]).map((p) => {
+            // The organisation keeps one connection in use per kind; a person
+            // keeps one in use overall. Either way, the row says which it is.
+            const isActive = orgScoped ? Boolean(p.is_active) : Boolean(active && p.id === active.id);
+            return (
+              <li key={p.id} className={`${styles.row} ${isActive ? styles.rowActive : ''}`}>
+                <div className={styles.rowMain}>
+                  <span className={styles.rowName}>{p.name}</span>
+                  <span className={styles.rowType}>
+                    {typeLabel(p.type)}{isActive ? ' · in use' : ''}
+                  </span>
+                </div>
+                <div className={styles.verbs}>
+                  {!isActive && !orgScoped && (
+                    <button type="button" onClick={() => onActivate(p.id)}>Use</button>
+                  )}
+                  {isActive && p.type === 'servicenow' && (
+                    <button type="button" disabled={refreshing}
+                      onClick={() => refreshActiveSource().catch(() => { /* shown above */ })}>
+                      {refreshing ? 'Refreshing…' : 'Refresh'}
+                    </button>
+                  )}
+                  <button type="button" onClick={() => openEditForm(p)}>Edit</button>
+                  <button type="button" className={styles.verbBad} onClick={() => onDelete(p)}>Delete</button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {/* ─── Add button ─── */}
+      <button type="button" className={styles.addMore} onClick={openCreateForm} disabled={loading}>
+        <span aria-hidden="true">+</span> Add a connection
+      </button>
+
+      {/* ─── Create / Edit form modal ─── */}
+      {formOpen && (
+        <div className={styles.modalBackdrop} onClick={closeForm}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <header className={styles.modalHead}>
+              <h2 className={styles.modalTitle}>
+                {editingId ? 'Edit connection' : 'Add a connection'}
+              </h2>
+              <button type="button" className={styles.modalClose}
+                onClick={closeForm} aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <line x1="18" y1="6"  x2="6"  y2="18"/>
+                  <line x1="6"  y1="6"  x2="18" y2="18"/>
+                </svg>
+              </button>
+            </header>
+
+            <form onSubmit={onSubmit} className={styles.form}>
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>Name</span>
+                <input
+                  type="text"
+                  className={styles.input}
+                  placeholder="e.g. My ServiceNow Dev"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </label>
+
+              {!editingId && (
+                <div className={styles.field}>
+                  <span className={styles.fieldLabel}>Address of your system</span>
+                  <div className={styles.findRow}>
+                    <input
+                      type="text"
+                      className={styles.input}
+                      placeholder="netbox.example.com or dev12345.service-now.com"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); findOut(); } }}
+                      autoComplete="off"
+                      spellCheck="false"
+                    />
+                    <button type="button" className={styles.findBtn} onClick={findOut}
+                      disabled={finding || !address.trim()}>
+                      {finding ? 'Checking' : 'Find out'}
+                    </button>
+                  </div>
+                  {foundNote && (
+                    <span className={foundNote.ok ? styles.fieldHint : styles.findError} role={foundNote.ok ? undefined : 'alert'}>
+                      {foundNote.text}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>Type</span>
+                <select
+                  className={styles.input}
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                  disabled={!!editingId}>
+                  {(supportedTypes.length ? supportedTypes : Object.keys(TYPE_INFO)).map(t => (
+                    <option key={t} value={t}>{typeLabel(t)}</option>
+                  ))}
+                </select>
+                {editingId && (
+                  <span className={styles.fieldHint}>
+                    Type cannot be changed.
+                  </span>
+                )}
+              </label>
+
+              {formFields.map(f => (
+                <label key={f.key} className={styles.field}>
+                  <span className={styles.fieldLabel}>
+                    {f.label}
+                    {f.required && <span className={styles.required}> *</span>}
+                  </span>
+                  <input
+                    type={f.type || 'text'}
+                    className={styles.input}
+                    placeholder={f.placeholder || ''}
+                    value={secret[f.key] || ''}
+                    onChange={(e) => setSecret({ ...secret, [f.key]: e.target.value })}
+                    required={!editingId && f.required}
+                    autoComplete="off"
+                    spellCheck="false"
+                  />
+                </label>
+              ))}
+
+              {editingId && (
+                <p className={styles.editHint}>
+                  Leave blank to keep the saved credentials.
+                </p>
+              )}
+
+              {formHint && !editingId && (
+                <p className={styles.editHint}>{formHint}</p>
+              )}
+
+              {formError && <div className={styles.formError}>{formError}</div>}
+
+              <div className={styles.formActions}>
+                <button
+                  type="button"
+                  className={styles.btnGhost}
+                  onClick={closeForm}
+                  disabled={submitting}>
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className={styles.btnPrimary}
+                  disabled={submitting}>
+                  {submitting ? 'Saving…' : (editingId ? 'Save changes' : 'Save & use')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

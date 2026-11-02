@@ -1,0 +1,16 @@
+/* The drift check of one port: one line, a dropdown only when something drifted. */
+.line { margin: 0; font-size: var(--t2); font-weight: 600; color: var(--ink); }
+.line summary { display: inline-flex; align-items: center; cursor: pointer; list-style: none; }
+.line summary::-webkit-details-marker { display: none; }
+.line summary::after { content: ''; width: 7px; height: 7px; margin-left: 10px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-3px); }
+.line[open] summary::after { transform: rotate(-135deg) translateY(-1px); }
+.line summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 4px; }
+p.line { display: flex; align-items: center; }
+
+.dot { flex: none; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: currentColor; }
+.ok { color: var(--ok); }
+.bad { color: var(--bad); }
+.none { color: var(--grey); font-weight: 500; }
+
+.list { margin: 6px 0 0; padding: 0 0 0 16px; list-style: none; display: flex; flex-direction: column; gap: 4px; font-weight: 400; color: var(--ink); }
+.list b { font-weight: 600; }

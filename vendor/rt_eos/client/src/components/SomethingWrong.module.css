@@ -1,0 +1,114 @@
+.side {
+  margin-bottom: var(--s3);
+}
+
+.choices {
+  display: grid;
+  gap: var(--s2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--row);
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.choice:active {
+  background: var(--accent-soft);
+}
+
+.choiceT {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.choiceS {
+  color: var(--grey);
+  font-size: 13px;
+}
+
+.step {
+  display: grid;
+  gap: var(--s3);
+}
+
+.block {
+  display: grid;
+  gap: var(--s2);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--line);
+}
+
+.blockT {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.now {
+  color: var(--grey);
+  font-weight: 400;
+}
+
+.row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--s2);
+}
+
+.row > button {
+  flex: none;
+  min-width: 0;
+}
+
+/* The grid's gap sets the rhythm: no field adds its own margin on top. */
+.step.step > *,
+.block.block > * {
+  margin-top: 0;
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.bad {
+  margin: 0;
+  color: var(--bad);
+  font-size: 13px;
+}
+
+.file {
+  display: flex;
+  align-items: center;
+  min-height: var(--btn);
+  padding: 0 var(--s4);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r);
+  color: var(--grey);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.file input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}

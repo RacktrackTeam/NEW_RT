@@ -1,0 +1,18 @@
+{
+  "appId": "com.racktrack.eos",
+  "appName": "RackTrack",
+  "webDir": "dist",
+  "overrideUserAgent": "RackTrack/1.0 (native app)",
+  "android": {
+    "overrideUserAgent": "RackTrack/1.0 (native app; Android)",
+    "allowMixedContent": true
+  },
+  "ios": {
+    "overrideUserAgent": "RackTrack/1.0 (native app; iOS)"
+  },
+  "plugins": {
+    "Keyboard": {
+      "resize": "native"
+    }
+  }
+}
