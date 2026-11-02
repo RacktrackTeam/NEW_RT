@@ -9,8 +9,8 @@ racktrack.py - use the RackTrack tools (RT-EOS repo) when they are available.
     datasheet link for a make/model, from its local database first (fast, ~64 models),
     then a live web lookup.
 
-Set RACKTRACK_REPO to the RT-EOS folder (default: an RT-EOS folder beside this project,
-else /Volumes/Racktrack/RT-EOS). Both the
+Set RACKTRACK_REPO to the RT-EOS folder (default: the RT-EOS copy inside this folder; never a
+folder outside it). Both the
 current layout (pipeline/switch_ocr, switch_specs) and the one before 8 October 2026
 (switch_ocr, Agent/Agent_scrap) are found. Without RT-EOS everything here returns None
 and callers fall back to map_any_switch's own OCR.
@@ -23,15 +23,15 @@ import sys
 from pathlib import Path
 
 def _find_repo():
-    """$RACKTRACK_REPO, else an RT-EOS folder beside this project (where switch-mapper's
-    .env points: ~/Downloads/RT-EOS), else the RackTrack volume."""
+    """$RACKTRACK_REPO (engine.sh sets it to this folder's rt_eos), else the RT-EOS copy inside this folder
+    (port_agents/switch_agent/RT-EOS, then rt_eos). Never a folder outside this one."""
     if os.environ.get("RACKTRACK_REPO"):
         return Path(os.environ["RACKTRACK_REPO"])
     here = Path(__file__).resolve().parent
-    for c in (here.parent / "RT-EOS", here / "RT-EOS", Path.home() / "Downloads" / "RT-EOS"):
+    for c in (here / "RT-EOS", here.parent.parent / "rt_eos"):
         if c.is_dir():
             return c
-    return Path("/Volumes/Racktrack/RT-EOS")
+    return here / "RT-EOS"
 
 
 REPO = _find_repo()

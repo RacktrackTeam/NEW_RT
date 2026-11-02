@@ -105,6 +105,30 @@ def verify(token):
     return out
 
 
+_NAMES = {"at": 0.0, "orgs": {}, "sites": {}}
+
+
+def place_names():
+    """({organization id: name}, {site id: name}) from the service's database (read only), kept for 30 seconds."""
+    import time
+    if time.time() - _NAMES["at"] < 30:
+        return _NAMES["orgs"], _NAMES["sites"]
+    path = _setting("RACKTRACK_AUTH_DB")
+    orgs, sites = {}, {}
+    if path and pathlib.Path(path).exists():
+        try:
+            c = sqlite3.connect(f"file:{path}?mode=ro", uri=True, timeout=5)
+            try:
+                orgs = {str(r[0]): r[1] for r in c.execute("SELECT id, name FROM organizations")}
+                sites = {str(r[0]): r[1] for r in c.execute("SELECT id, name FROM tenants WHERE organization_id IS NOT NULL")}
+            finally:
+                c.close()
+        except sqlite3.Error as ex:
+            print(f"[racktrack] organization and site names not read: {ex}")
+    _NAMES.update(at=time.time(), orgs=orgs, sites=sites)
+    return orgs, sites
+
+
 def org_online_lookups(org):
     """The organization's online lookups setting (RT-EOS lib/org_settings.js, organizations.online_lookups), read only.
     Off when the setting or the organization cannot be read."""
@@ -154,11 +178,13 @@ def run_dir(runs_root, job, p=None):
 
 
 def can_see(p, run):
-    """May this principal open this run? The stored demo (example-...) is open to anyone signed in."""
+    """May this principal open this run (or anything else carrying "org" and "site", such as a camera-guide take)?"""
     if p is None:
         return False
-    if str(run.get("id") or "").startswith("example-") or p["role"] == "owner":
+    if p["role"] == "owner":
         return True
+    if str(run.get("id") or "").startswith("example-"):     # the stored demo is the owner's office rack: the platform owner's only (rule 11)
+        return False
     if run.get("org") is None or str(run.get("org")) != str(p.get("org")):
         return False
     if p["role"] in ("org_admin", "org_owner"):

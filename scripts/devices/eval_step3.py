@@ -6,7 +6,7 @@ Methods (device_grouping.METHODS): pair model (teammate's updated approach), edg
 (teammate 3). Each runs twice per photo:
   * "app":   exactly as in the app - our units, the Ensemble's occupied / free / uncertain (uncertain = taken);
   * "truth": the hand labels say which units are taken, so only the grouping itself is judged.
-Ground truth: /Volumes/Racktrack/merged_updated_dataset_split/test (462 photos, device boxes drawn by hand).
+Ground truth: data/datasets/devices in this folder, the photos its manifest.csv marks as the test split (462 photos, device boxes drawn by hand).
 Grading (same as the teammate's train_evaluate.py): a unit belongs to the labelled box covering >= 40 % of it;
 ids 0 (closed panel) and 1 (empty) are free; a real device is "found exactly" when a predicted device has exactly
 its graded units. Every real device is also sorted into one case (kept whole / split / joined with another /

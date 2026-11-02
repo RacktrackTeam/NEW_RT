@@ -6,7 +6,7 @@ devices. Every planted row says so in Notes. The Z ends sit in a second rack (SP
 
 What the cable check should then show on the stored vdo1 run:
   SP-R1-U20-ACT  port 1 cabled (seen), port 2 planted on an empty port      -> Missing cable on port 2
-  SP-R1-U17-SW03 rows for 9, 11, 13, 15, 19, 21, not 23 (cabled)            -> Extra cable on port 23
+  SP-R1-U17-SW03 rows for every cabled port but 23 (the states the device page shows) -> Extra cable on port 23
   SP-R1-U18-SW04 rows for every cabled port but 24, and one on empty 21     -> Wrong port: 21 empty, 24 cabled
   CBL-PLANT-L1   SP-R1-U17-SW03 port 9, A-end label CBL-PLANT-L1-A          -> read on the D5 close-up: Wrong port in the A-Z check
 And the device rows: SP-R1-U15-SW02 serial PLANTED0001 and asset tag SP-AT-SW02 (the close-up reads others: Wrong serial,
@@ -35,10 +35,10 @@ def rows():
                     "Z_Rack_ID": OTHER, "Z_Device_ID": "SP-R2-U1-PP1", "Z_Device_Name": "SP-R2-U1-PP1", "Z_Port_Number": n, "Media_Type": "Cat6 UTP",
                     "Cable_Color": "Blue", "Expected_State": "Connected", "Notes": NOTE})
     add("SP-R1-U20-ACT", 1); add("SP-R1-U20-ACT", 2)
-    for p in (11, 13, 15, 19, 21):
+    for p in (3, 4, 6, 7, 8, 10, 11, 12, 13, 14, 15, 18, 19, 20, 21, 22, 24):     # D4's cabled ports as every screen reads them (source_db.screen_ports)
         add("SP-R1-U17-SW03", p)
     add("SP-R1-U17-SW03", 9, label="CBL-PLANT-L1", a_label="CBL-PLANT-L1-A")
-    for p in (1, 5, 7, 9, 11, 13, 15, 17, 19, 20, 21):
+    for p in (1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 20, 21):                          # D3's cabled ports but 24, and the empty 21
         add("SP-R1-U18-SW04", p)
     return out
 

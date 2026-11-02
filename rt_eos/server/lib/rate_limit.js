@@ -30,7 +30,7 @@ function keyOf(req) {
   return `ip:${req.ip || req.socket?.remoteAddress || 'unknown'}`;
 }
 
-function uploadLimiter({ rate = DEFAULT_RATE, burst = DEFAULT_BURST, keyFn } = {}) {
+function uploadLimiter({ rate = DEFAULT_RATE, burst = DEFAULT_BURST, keyFn, what = 'uploads' } = {}) {
   const buckets = new Map();
   const refillPerMs = rate / 60_000;
   const resolveKey = typeof keyFn === 'function' ? keyFn : keyOf;
@@ -61,7 +61,7 @@ function uploadLimiter({ rate = DEFAULT_RATE, burst = DEFAULT_BURST, keyFn } = {
       res.setHeader('X-RateLimit-Remaining', '0');
       return res.status(429).json({
         error: 'rate_limited',
-        message: `Too many uploads — retry in ${retryAfterSec}s`,
+        message: `Too many ${what} just now. Try again in ${retryAfterSec} s.`,
       });
     }
 

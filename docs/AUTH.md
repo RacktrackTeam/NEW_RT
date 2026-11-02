@@ -29,7 +29,7 @@ All five use the password in `data/auth/seed-password.txt`.
 | manager | site manager | Demo Organization | Hyderabad DC |
 | tech | technician | Demo Organization | Hyderabad DC |
 
-The proof adds a second organization (admin2, tech2, Pune DC) and a second site of the first organization (admin3, tech3, Chennai DC) with `node rt_eos/server/scripts/seed-auth.js --org ... --site ... --suffix 2`.
+The proof's fixtures (`tools/proof_auth.py --fixtures`, through `node rt_eos/server/scripts/seed-auth.js --org ... --site ... --suffix ...`) add Second Organization (admin2, tech2, orgowner2, manager2; Pune DC) and Test Organization with two sites: Test Hyderabad DC (admint, techt, orgownert, managert) and Test Chennai DC (admin3, tech3, orgowner3, manager3). The Demo Organization holds one stored run of our rack (dm1hyd000001, Hyderabad DC), so the five seeded accounts can walk it. The proof takes out the sign-up and invite accounts it makes when it ends.
 
 ## The five roles
 
@@ -75,6 +75,13 @@ Checked by name in: auth.js (requireRole, canManageOrg, canAccessSite, member ed
   - The platform owner sees every run.
   - Anyone else gets 404 for the run, its view, its report, its drift and its delete.
   - A run from before sign-in (`data/runs/<run>`) has no organization, so only the platform owner sees it.
+- Who may write (server/app.py ROLE_RULES; tests/test_engine_routes.py checks every role):
+  - Organization logins (save, test, remove), copying a database in and removing a copy: platform owner, organization owner, admin. Anyone else gets 403 with the reason; the logins and copies can still be read.
+  - Removing a scan: those, and a site manager for the scans of the site. A technician cannot.
+  - The platform rack reports (/racks-report, /api/racks-report, /models-overview): the platform owner only; everyone else gets 404.
+  - The stored demo run (example-vdo1) is the owner's office rack: the platform owner only.
+  - Camera-guide takes carry the sender's organization and site (owner.json, written at upload); a take is listed and opened only for those who may see that site's runs. Takes without one (the team folder) are the platform owner's.
+- No lookup leaves the machine: engine.sh sets SWITCH_MAPPER_WEB_SEARCH=0 and RACKTRACK_ONLINE_LOOKUPS=0. The specifications lookup reads only the local knowledge base unless RACKTRACK_ONLINE_LOOKUPS=1 and the organization's online lookups setting is on.
 - Database copies are per organization (`data/sources_by_org/<org>/sources.db`). So are workbook uploads (`data/sources/orgs/<org>/`) and connections (already keyed by organization; now by the signed-in person's organization). A run's drift is checked against its own organization's copies.
 
 ## Mail
@@ -111,7 +118,6 @@ RT-EOS's own server tests for these parts still pass: smoke, setup, setup mount,
 
 ## Not done yet
 
-- The camera-guide takes (`/api/captures`), close-ups and photos now need a session but are not yet split by organization.
 - The native app reaches the service at the engine's host on port 3302. A phone on another network needs `RT_AUTH_URL`, which the engine passes to the screens.
 - Social sign-in was not tried with real keys (no outside call allowed).
 

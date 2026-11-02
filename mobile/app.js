@@ -3,6 +3,8 @@
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  function quiet(what) { return function (e) { if (window.console) console.warn('RackTrack: ' + what + ' failed: ' + ((e && e.message) || e)); }; }   // a side call that may fail without stopping the screen, logged
+  function rackKey(x) { return [x.org == null ? '' : x.org, x.site == null ? '' : x.site, String(x.rack_id || x.id).toUpperCase()].join('|'); }   // one rack = its id within its organization and site
   var me = null, pollTimer = null, guideWatch = null, sweepStart = 0, toastTimer = null, mode = null;
   // inside the iOS / Android app (native/): the shell page that picks the server lives on the app's own origin
   var NATIVE = /RackTrackSweep/.test(navigator.userAgent), SHELL_URL = /Android/.test(navigator.userAgent) ? 'https://localhost/' : 'capacitor://localhost/';
@@ -84,12 +86,13 @@
     clearInterval(pollTimer); stopGuide();
     window.scrollTo(0, 0);
     if (name === 'home') loadHome(); else setTimeout(reveal, 0);
-    if (name === 'more') api('/api/video/history').then(function (rows) { var mine = rows.filter(function (x) { return !x.demo; }), n = mine.length; $('runs-count').textContent = n ? n + (n === 1 ? ' rack' : ' racks') : '';
-      var done = mine.filter(function (x) { return x.status === 'done' && x.summary; }); $('ps-racks').dataset.n = done.length; $('ps-units').dataset.n = done.reduce(function (t, x) { return t + (x.summary.units || 0); }, 0); $('ps-devs').dataset.n = done.reduce(function (t, x) { return t + (x.summary.devices || 0); }, 0); countUp($('ps-racks').parentNode.parentNode); }).catch(function () {});
+    if (name === 'more') api('/api/video/history').then(function (rows) { var mine = rows.filter(function (x) { return !x.demo; }), n = mine.length; $('runs-count').textContent = n ? n + (n === 1 ? ' scan' : ' scans') : '';
+      var done = mine.filter(function (x) { return x.status === 'done' && x.summary; }), racks = {}; done.forEach(function (x) { racks[rackKey(x)] = 1; });   // racks as Home counts them, not scans
+      $('ps-racks').dataset.n = Object.keys(racks).length; $('ps-units').dataset.n = done.reduce(function (t, x) { return t + (x.summary.units || 0); }, 0); $('ps-devs').dataset.n = done.reduce(function (t, x) { return t + (x.summary.devices || 0); }, 0); countUp($('ps-racks').parentNode.parentNode); }).catch(quiet('the Profile numbers'));
     if (name === 'history') loadHistory();
     if (name === 'connections') loadConnections();
     if (name === 'copies') loadCopies();
-    if (name === 'more') api('/api/sources/copies').then(function (d) { $('copies-count').textContent = d.copies.length ? d.copies.length + (d.copies.length === 1 ? ' copy' : ' copies') : ''; }).catch(function () {});
+    if (name === 'more') api('/api/sources/copies').then(function (d) { $('copies-count').textContent = d.copies.length ? d.copies.length + (d.copies.length === 1 ? ' copy' : ' copies') : ''; }).catch(quiet('the copies count'));
     if (name === 'sweep') openSweep();
     if (name === 'job') openJob(arg);
     if (name === 'result') { document.querySelector('[data-screen="result"]').dataset.tab = rtab; openResult(arg, rtab); }
@@ -111,10 +114,10 @@
     function call(p, body, method) {
       return fetch(url(p), { method: method || (body ? 'POST' : 'GET'), credentials: 'include', cache: 'no-store',
         headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined })
-        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) { var e = new Error(j.error || r.statusText); e.status = r.status; e.body = j; throw e; } return j; }); });
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) { var e = new Error((j.error === 'rate_limited' && j.message) || j.error || r.statusText); e.status = r.status; e.body = j; throw e; } return j; }); });
     }
     function where() { return fetch('/api/auth-service', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
-      base = j.url ? j.url.replace(/\/+$/, '') : location.protocol + '//' + location.hostname + ':' + (j.port || 3302); }).catch(function () {}); }
+      base = j.url ? j.url.replace(/\/+$/, '') : location.protocol + '//' + location.hostname + ':' + (j.port || 3302); }).catch(quiet('finding the sign-in service')); }
     function refresh() { return call('/api/auth/refresh', {}).then(function () { return true; }).catch(function () { return false; }); }
     function err(id, e) { $(id).textContent = e.message; $(id).hidden = false; }
     // after the service answers a sign-in: an admin whose organization is not set up yet goes to RT-EOS's first-run setup; a
@@ -186,7 +189,7 @@
     $('who').textContent = ini; $('av2').textContent = ini; $('av3').textContent = ini; $('who2').textContent = j.name; $('who3').textContent = j.name; $('site2').textContent = site; $('site3').textContent = site; $('site2').hidden = !site; $('site3').hidden = !site;
     AUTH.links(j.role);
   }
-  function signout() { AUTH.call('/api/auth/logout', {}).catch(function () {}).then(function () { me = null; go('signin'); }); }
+  function signout() { AUTH.call('/api/auth/logout', {}).catch(quiet('signing out')).then(function () { me = null; go('signin'); }); }
   $('signout').addEventListener('click', signout); $('signout2').addEventListener('click', signout);
   $('who').addEventListener('click', function () { go('more'); });
 
@@ -219,11 +222,11 @@
         clearInterval(pollTimer); pollTimer = setInterval(function () { if ((location.hash || '#home') === '#home') loadHome(); }, 5000); }
       // one row per rack: its latest run (with that run's compare state); earlier runs of the rack are listed on its result page
       var byRack = {}, order = [];
-      rows.filter(function (x) { return !x.demo && x.status !== 'running'; }).forEach(function (x) { var k = String(x.rack_id || x.id).toUpperCase();
+      rows.filter(function (x) { return !x.demo && x.status !== 'running'; }).forEach(function (x) { var k = rackKey(x);
         if (!byRack[k]) { byRack[k] = []; order.push(k); } byRack[k].push(x); });
       var list = order.map(function (k) { var g = byRack[k].slice().sort(function (a, b) { return (b.started || '').localeCompare(a.started || '') || (b.record ? 1 : 0) - (a.record ? 1 : 0); }); g[0]._scans = g.length; return g[0]; });
       $('home-racks').innerHTML = list.length ? '<div class="rktable"><div class="rkhead"><span>Rack</span><span>Last scan</span><span>Compared with</span><span>State</span><span></span></div>' + list.map(function (x) {
-        var href = (x.status === 'done' || x.partial) ? '#result/' + x.id : '#job/' + x.id, site = typeof x.site_name === 'string' ? x.site_name : typeof x.site === 'string' ? x.site : '';
+        var href = (x.status === 'done' || x.partial) ? '#result/' + x.id : '#job/' + x.id, site = [me && me.role === 'owner' ? x.org_name : null, x.site_name].filter(Boolean).join(' · ') || (x.org == null && me && me.role === 'owner' ? 'From before sign-in' : '');
         var rec = x.record ? esc(x.record.source) : x.status === 'done' ? 'Not compared yet' : '-';
         var st = x.status === 'failed' ? ['bad', 'Failed'] : x.differences == null ? (x.status === 'done' ? ['grey', 'Not compared'] : ['grey', 'Not finished']) : x.differences ? ['bad', pl(x.differences, 'difference')] : ['ok', 'No differences'];
         return '<a class="rkrow2" href="' + href + '"><span class="c-rack"><b>' + esc(x.rack_id || x.title || x.name) + '</b>' + (site ? '<small>' + esc(site) + '</small>' : '') + '</span>'
@@ -554,10 +557,10 @@
   function loadOtherScans(id) {                                         // the other scans of the same rack, newest first (Home lists a rack once)
     var el = $('res-others'); el.innerHTML = '';
     api('/api/video/history').then(function (rows) { var me_ = rows.filter(function (x) { return x.id === id; })[0]; if (!me_ || !me_.rack_id || RES.id !== id) return;
-      var others = rows.filter(function (x) { return x.id !== id && x.rack_id && x.rack_id.toUpperCase() === me_.rack_id.toUpperCase(); });
+      var others = rows.filter(function (x) { return x.id !== id && x.rack_id && rackKey(x) === rackKey(me_) && (x.started || '') <= (me_.started || ''); });   // the same rack of the same site, scanned before this one
       if (others.length) el.innerHTML = '<details class="card othscans"><summary>Earlier scans of this rack (' + others.length + ')</summary><ul class="dflines">' + others.map(function (x) { var s = x.summary || {};
         return '<li><b>' + esc(when(x.started)) + '</b> <span class="muted small">' + (s.devices != null ? pl(s.devices, 'device') + ' · ' + s.units + ' units · ' : '') + (x.record ? 'compared with ' + esc(x.record.source) + ', ' + (x.differences ? pl(x.differences, 'difference') : 'no differences') : 'not compared') + '</span> <a href="#result/' + encodeURIComponent(x.id) + '">Open</a></li>'; }).join('') + '</ul></details>';
-    }).catch(function () {});
+    }).catch(quiet('the earlier scans'));
   }
   function secTo(tab) { if (TABS[tab]) { if (RES.tab !== tab && RES.id) return go('result/' + RES.id + (tab === 'rack' ? '' : '/' + tab)); return window.scrollTo(0, 0); } var el = $('sec-' + tab); if (el) el.scrollIntoView({ block: 'start' }); }   // open a tab (the page scrolls to the top), or jump to a block inside the Report
   function portCells(ports, max) {
@@ -565,7 +568,7 @@
     var list = max ? ports.slice(0, max) : ports;
     return '<div class="cells">' + list.map(function (p, i) { return '<span class="cell ' + (p.status === 'connected' ? 'on' : p.status === 'empty' ? 'off' : 'na') + '" style="--i:' + i + '" title="Port ' + esc(p.id) + ': ' + esc(p.status || 'not sure') + '">' + esc(p.id) + '</span>'; }).join('') + (max && ports.length > max ? '<span class="cell more">+' + (ports.length - max) + '</span>' : '') + '</div>';
   }
-  function devName(d) { var L = d.layout || {}; return L.vendor ? esc(L.vendor) + (L.model ? ' ' + esc(L.model) : '') : (L.mapped ? 'make and model not read' : ''); }
+  function devName(d) { var L = d.layout || {}; return L.vendor ? esc(L.vendor) + (L.model ? ' ' + esc(L.model) : '') : L.vendor_read ? esc(L.vendor_read + (L.model_read ? ' ' + L.model_read : '')) + ', not confirmed' : (L.mapped ? 'make and model not read' : ''); }
   function renderResult(v, first) {
     var s = v.rack.summary || {}, devs = v.devices || [], named = devs.filter(function (d) { return d.kind && d.kind !== 'Other'; }).length, lay = devs.filter(function (d) { return d.layout && (d.layout.fitted || d.layout.auto); }).length;
     $('res-title').textContent = (v.rack_id && v.rack_id.id) || v.title || 'Rack';
@@ -581,7 +584,7 @@
     rk.innerHTML = v.rack_label ? (rid || rname ? (rid ? '<b class="mono">' + esc(rid) + '</b>' : '') + (rname ? '<span>' + esc(rname.replace(/\b(\w)(\w*)/g, function (m, a, b) { return a + b.toLowerCase(); })) + '</span>' : '')
         : '<span>Rack label not read · film the label at the top of the rack, close and sharp</span>')
       : '<span><i class="sig live"></i> Reading the rack label…</span>';
-    if (!v.rack_label && !v.rack_label_running && !RES.labelAsked) { RES.labelAsked = RES.id; api('/api/video/' + RES.id + '/rack-label', { method: 'POST' }).catch(function () {}); }
+    if (!v.rack_label && !v.rack_label_running && !RES.labelAsked) { RES.labelAsked = RES.id; api('/api/video/' + RES.id + '/rack-label', { method: 'POST' }).catch(quiet('reading the rack label')); }
     if (!v.rack_label) { clearTimeout(RES.labelT); RES.labelT = setTimeout(function () { if ((location.hash || '').indexOf('#result/' + RES.id) === 0) loadView(false); }, 12000); }
     // the elevation: RT-EOS's own Topology tab (2D diagram and 3D scene, mobile/rt/ built from RT-EOS by tools/rt-topology), fed this run as its "detail"
     var unum = function (s) { return parseInt(String(s).replace(/\D/g, ''), 10); };
@@ -592,7 +595,7 @@
       devices: devs.map(function (d) { var L = d.layout || {};
         return { deviceId: d.index, name: (L.vendor ? L.vendor + (L.model ? ' ' + L.model : '') : '') || 'D' + d.index, type: d.kind && d.kind !== 'Other' ? d.kind : 'unidentified',
           heightU: d.height, unitTop: unum(d.top), unitBottom: unum(d.bottom), make: L.vendor || null, model: L.model || null,
-          ports: (L.fitted || L.auto || L.mode === 'patchpanel' ? L.ports || [] : []).map(function (p) { return { portNo: p.id, kind: /^(sfp|qsfp|osfp|lc|sc|fc)$/.test(String(p.type || '')) ? 'sfp' : 'main', type: p.type, state: p.status, cableColor: p.cable_colour || null, cableConnector: p.cable_connector || null, cableType: p.cable_type || null }; }) }; }) };
+          ports: (L.ports || []).map(function (p) { return { portNo: p.id, kind: /^(sfp|qsfp|osfp|lc|sc|fc)$/.test(String(p.type || '')) ? 'sfp' : 'main', type: p.type, state: p.status, cableColor: p.cable_colour || null, cableConnector: p.cable_connector || null, cableType: p.cable_type || null }; }) }; }) };
     $('rt-legend').innerHTML = byKind(devs).map(function (g, i) { return '<span style="--k:' + g.colour + ';--i:' + i + '"><i></i>' + esc(g.kind) + '<b>' + g.devs.length + '</b></span>'; }).join('');   // the kinds and their colours, as the drawing uses them
     var mountRT = function () { if (!window.RTEOSTopology) return setTimeout(mountRT, 150);
       if (!$('rt-fit') && window.RTEOSTopology.classes) { var K = window.RTEOSTopology.classes, sty = document.createElement('style'); sty.id = 'rt-fit';   // the 2D drawing and the 3D scene fit the screen
@@ -633,7 +636,7 @@
     var on = ports.filter(function (p) { return p.status === 'connected'; }), off = ports.filter(function (p) { return p.status === 'empty'; }), unk = ports.filter(function (p) { return p.status !== 'connected' && p.status !== 'empty'; });
     var ids = function (l) { return l.map(function (p) { return p.id; }); }, which = function (l) { return l.length === ports.length ? 'all' : l.length ? '<small class="ids"> · ' + esc(ranges(ids(l))) + '</small>' : ''; };
     var row = function (k, val) { return '<span>' + k + '</span><b>' + val + '</b>'; }, kinds = Object.keys(byType).map(function (t) { return byType[t] + ' ' + esc(t); });
-    return row('Ports', (L.mode === 'patchpanel' && L.size_known === false ? ports.length + ' seen · size not sure' : L.mode === 'patchpanel' && L.n_ports > ports.length ? L.n_ports + ' · ' + ports.length + ' seen, ' + (L.n_ports - ports.length) + ' hidden' : ports.length + (kinds.length ? ' (' + kinds.join(' and ') + ')' : ''))) + row('Connected', on.length === ports.length ? 'all ' + on.length : on.length + which(on)) + row('Empty', off.length === ports.length ? 'all ' + off.length : off.length ? off.length + which(off) : '0') + (unk.length ? row('Not sure', unk.length + which(unk)) : '');
+    return row('Ports', (L.mode === 'patchpanel' && L.size_known === false ? ports.length + ' seen · size not sure' : L.mode === 'patchpanel' && L.n_ports > ports.length ? L.n_ports + ' · ' + ports.length + ' seen, ' + (L.n_ports - ports.length) + ' hidden' : ports.length + (kinds.length ? ' (' + kinds.join(' and ') + ')' : ''))) + ((L.combo || []).length ? row('Combo', L.combo.length + '<small class="ids"> · ports ' + esc(ranges(L.combo.map(function (c) { return c.of; }))) + ' also take an SFP module</small>') : '') + row('Connected', on.length === ports.length ? 'all ' + on.length : on.length + which(on)) + row('Empty', off.length === ports.length ? 'all ' + off.length : off.length ? off.length + which(off) : '0') + (unk.length ? row('Not sure', unk.length + which(unk)) : '');
   }
   // the specifications of the model, looked up when the dropdown opens (toggle does not bubble: listened to in capture)
   document.addEventListener('click', function (e) { var c = e.target.closest && e.target.closest('#cine'); if (!c) return; c.classList.remove('play'); void c.offsetWidth; c.classList.add('play'); });
@@ -690,7 +693,7 @@
   function cableHex(c) { return CABLE_HEX[String(c || '').toLowerCase()] || '#cfd4d0'; }
   function cableName(p) { var t = String(p.cable_type || '').replace(/_/g, '-').replace(/^RJ-45/i, 'RJ45'); return t || 'cable'; }   // "RJ_45 White" -> "RJ45 White"
   function portOverlay(d, L, P) {
-    var ports = (L.ports || []).filter(function (p) { return p.polygon && p.polygon.length >= 3; }); if (!P.cut || !ports.length) return null;
+    var ports = (L.ports || []).concat(L.combo || []).filter(function (p) { return p.polygon && p.polygon.length >= 3; }); if (!P.cut || !ports.length) return null;   // a combo port's SFP cage is drawn too
     var hs = ports.map(function (p) { var ys = p.polygon.map(function (q) { return q[1]; }); return Math.max.apply(null, ys) - Math.min.apply(null, ys); }).sort(function (a, b) { return a - b; }), fs = Math.max(6, hs[hs.length >> 1] * 0.55);
     var marks = ports.map(function (p, i) { var xs = p.polygon.map(function (q) { return q[0]; }), ys = p.polygon.map(function (q) { return q[1]; }), cx = xs.reduce(function (a, b) { return a + b; }, 0) / xs.length, top = Math.min.apply(null, ys);
       var pts = p.polygon.map(function (q) { return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' ');
@@ -716,7 +719,7 @@
     return '<section class="card dvports">' + (st.key === 'on' ? '' : '<div class="ph2"><b>Ports</b><span class="stat ' + st.key + '"><i></i>' + st.word + '</span></div>') + body + '</section>';
   }
   document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('.readall'); if (!b) return; b.disabled = true;
-    var ids = b.dataset.devs.split(','); Promise.all(ids.map(function (i) { return api('/api/video/' + RES.id + '/ports/' + i, { method: 'POST' }).catch(function () {}); }))
+    var ids = b.dataset.devs.split(','); Promise.all(ids.map(function (i) { return api('/api/video/' + RES.id + '/ports/' + i, { method: 'POST' }).catch(quiet('reading D' + i)); }))
       .then(function () { toast('Reading ' + ids.length + ' devices, about a minute each.'); if (RES.view) RES.view.pending_ports = true; watchPorts(); loadView(false); }); });
   function countUp(root) {                                              // the numbers run up to their value, the ring fills
     var t0 = performance.now(), els = [].slice.call(root.querySelectorAll('.num[data-n]'));
@@ -772,7 +775,7 @@
     var how = [];
     how.push(['Found on', d.units && d.units.length ? d.units.map(UP).join(', ') : UP(d.top)]);
     how.push(['Type', esc(d.kind_words || d.kind || 'Not sure')]);   // the words carry the picture's per cent (source_db.device_kind)   // the one kind and where it came from (server: source_db.device_kind)
-    if (L.ports_state || L.mapped) how.push(['Ports read', L.from === 'close-up' ? 'from a close photo' : L.fitted ? 'vendor layout fitted' : L.auto ? 'found and typed from the photo' : L.mode === 'patchpanel' ? 'patch panel reader' : L.ports_state === 'running' ? 'reading now' : 'not yet']);
+    if (L.ports_state || L.mapped) how.push(['Ports read', L.from === 'close-up' ? 'from a close photo' : L.fitted ? 'vendor layout fitted' : L.auto ? 'found and typed from the photo' : L.mode === 'patchpanel' ? 'patch panel reader' : L.ports_state === 'running' ? 'reading now' : ports.length ? 'from the video, no vendor layout' : 'not yet']);
     if (L.vendor_read || L.model_read) how.push(['Read on the panel', esc((L.vendor_read || '') + (L.model_read ? ' ' + L.model_read : '')) + (L.fitted ? '' : ' · not confirmed')]);
     var PD0 = L.port_detector || {};
     if (PD0.make_dropped) how.push(['Make', 'not read on this device. "' + esc(PD0.make_dropped) + '" is printed on the device next to it']);
@@ -868,7 +871,7 @@
     var UH = n > 30 ? 10 : 13, W = 300, L0 = 30, R0 = W - 8, H = n * UH + 8, byTop = {}; devs.forEach(function (d) { byTop[d.top] = d; });
     var rows = units.map(function (u, i) { var y = 4 + i * UH, s = st(u), d = byTop[u.unit];
       var tick = (unumOf(u.unit) % 5 === 0 || unumOf(u.unit) === 1 || i === 0) ? '<text class="eu" x="' + (L0 - 5) + '" y="' + (y + UH / 2) + '">' + UP(u.unit) + '</text>' : '';
-      if (d) { var g = kinds.filter(function (k) { return k.devs.indexOf(d) >= 0; })[0], hgt = d.height * UH - 2, mm = devName(d).replace(/<[^>]+>/g, ''); mm = mm && mm.indexOf('not read') < 0 ? mm : '';
+      if (d) { var g = kinds.filter(function (k) { return k.devs.indexOf(d) >= 0; })[0], hgt = d.height * UH - 2, mm = devName(d).replace(/<[^>]+>/g, ''); mm = mm && mm.indexOf('not read') < 0 && mm.indexOf('not confirmed') < 0 ? mm : '';
         return tick + '<g class="ed" data-dev="' + d.index + '" style="--i:' + i + '"><rect x="' + L0 + '" y="' + (y + 1) + '" width="' + (R0 - L0) + '" height="' + hgt + '" rx="3" fill="' + g.colour + '" fill-opacity=".14"/><rect x="' + L0 + '" y="' + (y + 1) + '" width="4" height="' + hgt + '" rx="2" fill="' + g.colour + '"/>'
           + '<text class="et" x="' + (L0 + 10) + '" y="' + (y + 1 + hgt / 2) + '">D' + d.index + (mm ? ' · ' + esc(mm) : d.kind && d.kind !== 'Other' ? ' · ' + esc(d.kind) : '') + '</text></g>'; }
       var covered = devs.some(function (d2) { return (d2.units || []).indexOf(u.unit) >= 0; }); if (covered) return tick;
@@ -876,12 +879,16 @@
     var elev = '<svg class="elev" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="The rack, top to bottom"><rect x="' + (L0 - 2) + '" y="2" width="' + (R0 - L0 + 4) + '" height="' + (H - 4) + '" rx="6" class="ef"/>' + rows + '</svg>';
     // the devices, top to bottom, in a table
     var table = devs.map(function (d) { var L = d.layout || {}, mm = L.vendor ? L.vendor + (L.model ? ' ' + L.model : '') : '', kind = d.kind && d.kind !== 'Other' ? d.kind : 'Not sure';
-      return '<tr data-dev="' + d.index + '"><td class="mono">' + URANGE(d.top, d.bottom, d.height) + '</td><td><b>D' + d.index + '</b><span class="kd">' + esc(kind) + '</span></td><td>' + (mm ? esc(mm) : L.mode === 'patchpanel' && L.panel ? esc(L.panel) + ' patch panel' + (L.n_ports ? '<span class="kd">' + L.n_ports + (L.size_known === false ? ' ports seen' : ' ports') + '</span>' : '') : L.vendor_read ? esc(L.vendor_read) + '<span class="kd">model not read</span>' : '<span class="kd">not read</span>') + '</td></tr>'; }).join('');   // a patch panel has no make and model to read: its type stands there (user, 2026-10-28)
+      return '<tr data-dev="' + d.index + '"><td class="mono">' + URANGE(d.top, d.bottom, d.height) + '</td><td><b>D' + d.index + '</b><span class="kd">' + esc(kind) + '</span></td><td>' + (mm ? esc(mm) : L.mode === 'patchpanel' && L.panel ? esc(L.panel) + ' patch panel' + (L.n_ports ? '<span class="kd">' + L.n_ports + (L.size_known === false ? ' ports seen' : ' ports') + '</span>' : '') : L.vendor_read ? esc(L.vendor_read + (L.model_read ? ' ' + L.model_read : '')) + '<span class="kd">' + (L.model_read ? 'read, not confirmed' : 'model not read') + '</span>' : '<span class="kd">not read</span>') + '</td></tr>'; }).join('');   // a patch panel has no make and model to read: its type stands there (user, 2026-10-28)
     // the free space as stretches
     var runs = [], cur = null; units.forEach(function (u) { var s = st(u); if (s === 'Free') { if (cur) { cur.bottom = u.unit; cur.n++; } else { cur = { top: u.unit, bottom: u.unit, n: 1 }; runs.push(cur); } } else cur = null; });
     var freeChips = runs.map(function (r) { return '<span class="fchip"><b>' + r.n + 'U</b> ' + URANGE(r.top, r.bottom, r.n) + '</span>'; }).join('');
     var look = units.filter(function (u) { return st(u) === 'Not sure'; }).map(function (u) { return '<button class="lrow" type="button" data-unit="' + u.unit + '"><span class="iu">' + UP(u.unit) + '</span><b>Not sure if in use</b><span class="arr">›</span></button>'; })
-      .concat(devs.filter(function (d) { return d.unsure || !d.kind || d.kind === 'Other'; }).map(function (d) { return '<button class="lrow" type="button" data-dev="' + d.index + '"><span class="iu">' + UP(d.top) + '</span><b>D' + d.index + ' · ' + (d.unsure ? 'device not sure' : 'type not sure') + '</b><span class="arr">›</span></button>'; }));
+      .concat(devs.map(function (d) { var ps = PORT_KINDS[d.kind] ? devState(d, v) : null, why = d.unsure ? 'device not sure' : !d.kind || d.kind === 'Other' ? 'type not sure'
+          : ps && ps.key === 'unc' ? (ps.panel ? 'no ports seen' : 'needs a close photo') : ps && ps.key === 'auto' ? 'model not read' : ps && ps.key === 'off' ? 'make and model not checked yet' : null;   // the device page's own state
+        return why ? '<button class="lrow" type="button" data-dev="' + d.index + '"><span class="iu">' + UP(d.top) + '</span><b>D' + d.index + ' · ' + why + '</b><span class="arr">›</span></button>' : null; }).filter(Boolean));
+    var unsurePorts = devs.reduce(function (t, d) { return t + ((d.layout || {}).ports || []).filter(function (p) { return p.status !== 'connected' && p.status !== 'empty'; }).length; }, 0);
+    if (unsurePorts) look.push('<a class="lrow" href="#tools/' + encodeURIComponent(v.id) + '/worklist"><span class="iu">Ports</span><b>' + pl(unsurePorts, 'port') + ' not sure: answer them in the Worklist</b><span class="arr">›</span></a>');
     $('rp-top').innerHTML = '<header class="rphead"><span class="eyebrow">Rack report</span><h2>' + esc(title) + '</h2><p class="muted">' + esc(v.title || '') + '</p><p class="rpline"><b>' + n + 'U</b> · <b>' + used + '</b> in use · <b class="free">' + free + '</b> free' + (unc ? ' · <b class="unc">' + unc + '</b> not sure' : '') + '</p></header>'
       + '<div class="rpcol b"><section class="card rpelev"><div class="rpkpis"><div><b>' + devs.length + '</b><span>devices</span></div><div><b>' + kinds.length + '</b><span>kinds</span></div><div><b>' + free + 'U</b><span>free</span></div><p class="muted small">' + esc(kindLine) + '</p></div>' + elev + '</section>'
       + '</div><div class="rpcol a"><span class="glabel">Devices, top to bottom</span><div class="card flush"><table class="rptable"><thead><tr><th>Unit</th><th>Device</th><th>Make and model</th></tr></thead><tbody>' + table + '</tbody></table></div></div><div class="rpcol c">'
@@ -1061,10 +1068,10 @@
     if (ports.length) { var on = ports.filter(function (p) { return p.status === 'connected'; }).length, cab = {};
       ports.forEach(function (p) { if (p.status === 'connected' && p.cable_type) { var k = cableName(p); cab[k] = (cab[k] || 0) + 1; } });
       var byT = {}; ports.forEach(function (p) { var t = typeName(p.type); byT[t] = (byT[t] || 0) + 1; }); var tk = Object.keys(byT);
-      parts.push((L.mode === 'patchpanel' && L.size_known === false ? ports.length + ' ports seen' : tk.length > 1 && tk.length <= 3 ? tk.map(function (t) { return byT[t] + ' ' + t; }).join(' + ') : ports.length + ' ports') + ' · ' + on + ' in use');
+      parts.push((L.mode === 'patchpanel' && L.size_known === false ? ports.length + ' ports seen' : tk.length > 1 && tk.length <= 3 ? tk.map(function (t) { return byT[t] + ' ' + t; }).join(' + ') : pl(ports.length, 'port')) + ' · ' + on + ' in use');
       var ks = Object.keys(cab).sort(function (a, b) { return cab[b] - cab[a]; }); if (ks.length) parts.push('cables: ' + ks.slice(0, 2).map(function (k) { var w = k.split(' '); return cab[k] + ' ' + (w[1] ? w.slice(1).join(' ').toLowerCase() + ' ' : '') + w[0]; }).join(', ') + (ks.length > 2 ? ' and more' : '')); }
     else if (PORT_KINDS[dv.kind]) parts.push(L.ports_state === 'running' ? 'reading the ports' : L.mapped ? 'no ports read' : 'ports not read yet');
-    if (!mm && L.vendor_read) parts.push(esc(L.vendor_read) + ' read on the panel');
+    if (!mm && L.vendor_read) parts.push(esc(L.vendor_read + (L.model_read ? ' ' + L.model_read : '')) + ' read on the panel, not confirmed');
     return esc(parts.join(' · ')).replace(/&amp;/g, '&');
   }
   document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-dvnav]'); if (!b) return; RES.navDir = b.textContent.trim().charAt(0) === '‹' ? 'back' : 'fwd'; selectDevice(parseInt(b.dataset.dvnav, 10)); });
@@ -1139,7 +1146,7 @@
       info = nav + '<span class="eyebrow">D' + dv.index + ' · ' + URANGE(dv.top, dv.bottom, dv.height) + '</span><h2 class="onet">' + esc(mm || (ps && ps.panel ? ps.title : dv.kind && dv.kind !== 'Other' ? dv.kind : 'Device')) + '</h2>'
         + '<div class="stat ' + (dv.unsure ? 'unc' : ps ? ps.key : 'on') + '"><i></i>' + (dv.unsure ? 'Needs a look' : ps ? ps.word : 'Checked') + '</div>'
         + '<p class="dvsum">' + summaryLine(dv, L, kind, mm) + '</p>'
-        + '<details class="dvmore"' + (web ? ' open' : '') + '><summary>Details</summary><div class="dfacts">' + row('Size', dv.height + 'U') + row('Type', esc(dv.kind_words || kind)) + (mm || (ps && ps.panel) ? '' : (L.vendor_read ? row('Make', esc(L.vendor_read) + ' <span class="kd">read, not confirmed</span>') : '') + row('Model', L.mapped ? 'Not read' : 'Not read yet'))
+        + '<details class="dvmore"' + (web ? ' open' : '') + '><summary>Details</summary><div class="dfacts">' + row('Size', dv.height + 'U') + row('Type', esc(dv.kind_words || kind)) + (mm || (ps && ps.panel) ? '' : (L.vendor_read ? row('Make', esc(L.vendor_read) + ' <span class="kd">read, not confirmed</span>') : '') + row('Model', L.model_read ? esc(L.model_read) + ' <span class="kd">read, not confirmed</span>' : L.mapped ? 'Not read' : 'Not read yet'))
         + (ps && ps.facts ? portFacts(L) : '') + '</div></details>';
       // the one picture: the port layout over the crop when identified (animated), else the crop
       below = ((L.fitted || L.mode === 'patchpanel') && portOverlay(dv, L, P)) || (L.fitted && P.overlay ? '<figure class="pshot cine one" id="cine" title="Tap to play again"><img class="c-base" src="' + (P.cut || dv.crop) + '" alt=""><img class="c-over" src="' + P.overlay + '" alt="D' + dv.index + '"><span class="c-scan"></span>' + '</figure>' : null)
@@ -1149,7 +1156,7 @@
         if (ps.key === 'on' && ps.panel) below += '';                                     // a patch panel: its type and its ports, no make and model (user, 2026-10-27)
         else if (ps.key === 'on') below += (L.fitted ? '' : L.auto ? '<p class="pline">Ports found.</p>' : '<p class="pline">No port drawing for this model yet.</p>') + '<div class="specblock" data-vendor="' + esc(ps.vendor || '') + '" data-model="' + esc(ps.model || '') + '" data-spec="' + esc(L.spec ? JSON.stringify(L.spec) : '') + '"><span class="glabel">Specifications</span><div class="specbody"><p class="muted small">Looking up…</p></div></div>' + (L.confirm ? closeupBtn(dv) : '');
         else if (ps.key === 'busy') below += '<p class="pline">Finding the make and model in the video, about a minute…</p>';
-        else if (ps.key === 'auto') below += '<p class="pline">Every port found and typed from the photo. ' + (L.vendor_read ? 'Make read: <b>' + esc(L.vendor_read) + '</b>, model not read. ' : 'The make and model were not read. ') + 'A close, sharp photo of the front gives the model and its ports.</p>' + closeupBtn(dv) + modelForm(dv);
+        else if (ps.key === 'auto') below += '<p class="pline">' + pl((L.ports || []).length, 'port') + ' found and typed from the video; a port out of view or hidden is not counted. ' + (L.vendor_read ? 'Make read: <b>' + esc(L.vendor_read) + '</b>, model not read. ' : 'The make and model were not read. ') + 'A close, sharp photo of the front gives the model and its ports.</p>' + closeupBtn(dv) + modelForm(dv);
         else if (ps.key === 'unc' && ps.panel) below += '<p class="pline">No port was seen on this panel: a sealed enclosure, or the ports are hidden. A sharp photo of the front shows them.</p>' + closeupBtn(dv);
         else if (ps.key === 'unc') below += '<p class="pline">' + (L.model_read ? 'Read once, not confirmed. ' : L.vendor_read ? 'The model was not read. ' : 'The make and model were not read. ') + 'A close, sharp photo of the front gives the model and its ports.</p>' + closeupBtn(dv) + modelForm(dv);
         else below += '<button class="btn primary readports" type="button" data-dev="' + dv.index + '"><svg class="ic"><use href="#i-refresh"/></svg>' + (L.ports_state === 'failed' ? 'Try again' : dv.kind === 'Patch Panel' ? 'Find the ports' : 'Find the make and model') + '</button>' + (dv.kind === 'Patch Panel' ? '' : modelForm(dv));
@@ -1228,7 +1235,7 @@
   lb.addEventListener('click', function () { lb.hidden = true; lbimg.src = ''; });
 
   // ---------------------------------------------------------------- start: who am I, then the splash goes; the service worker for the install
-  if ('serviceWorker' in navigator && !NATIVE) { navigator.serviceWorker.register('/sw.js').catch(function () {}); }
+  if ('serviceWorker' in navigator && !NATIVE) { navigator.serviceWorker.register('/sw.js').catch(quiet('the offline helper')); }
   try { $('si-user').value = localStorage.getItem('rt_user') || ''; } catch (e) {}
   var t0 = Date.now();
   function ready() { setTimeout(function () { $('splash').classList.add('gone'); setTimeout(function () { $('splash').hidden = true; }, 400); }, Math.max(0, 450 - (Date.now() - t0))); }

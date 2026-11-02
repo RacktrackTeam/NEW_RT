@@ -25,7 +25,7 @@ def test_workbook_match_and_no_drift_on_the_office_rack(sdb):
 
 
 def test_drift_rows(sdb):
-    result = {"rack": {"rows": [{"unit": f"u{n:02d}"} for n in range(1, 21)]}, "devices": [
+    result = {"ladder": {"units": 20}, "occupancy_frames": {"rows": [{"unit": f"u{n:02d}"} for n in range(1, 21)]}, "devices": [
         {"index": 1, "units": ["u10"], "type": "Switch", "layout": {"vendor": "D-Link", "model": "DGS-1210-52"}},
         {"index": 2, "units": ["u06", "u05"], "type": "Patch Panel", "layout": {}},
         {"index": 3, "units": ["u15"], "type": "Router", "layout": {}},
@@ -38,8 +38,8 @@ def test_drift_rows(sdb):
         {"name": "CM", "kind": "Cable Manager", "ru_start": 3, "ru_height": 1}]
     d = sdb.drift(result, record)
     kinds = sorted(x["type"] for x in d["rows"])
-    assert kinds == ["extra", "kind", "make", "missing", "moved"]
-    assert any("U1 to U20 only" in x["words"] for x in d["rows"])
+    assert kinds == ["extra", "kind", "make", "moved"]                 # the PDU at U24 sits above the 20 units the video read: not judged
+    assert any("PDU" in n and "U1 to U20 only" in n for n in d["notes"])
     assert any("CM" in n for n in d["notes"])
     json.dumps(d)
 

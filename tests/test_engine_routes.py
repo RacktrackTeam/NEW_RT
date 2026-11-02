@@ -156,3 +156,41 @@ def test_no_lookup_leaves_the_machine(eng):
     assert os.environ.get("SWITCH_MAPPER_WEB_SEARCH") == "0"
     sh = (ROOT / "engine.sh").read_text()
     assert "export SWITCH_MAPPER_WEB_SEARCH=0" in sh and "export RACKTRACK_ONLINE_LOOKUPS=0" in sh
+
+
+def test_stored_demo_is_the_platform_owners_only(eng):
+    import rt_session
+    tech = {"user": 5, "username": "tech", "role": "member", "org": 1, "site": 2}
+    assert rt_session.can_see(tech, {"id": "example-vdo1"}) is False
+    assert rt_session.can_see({"user": 1, "role": "owner", "org": None}, {"id": "example-vdo1"}) is True
+    app, client, _ = eng
+    tok = rt_session.CURRENT.set(tech)
+    try:
+        assert app.job_or_none("example-vdo1") is None
+    finally:
+        rt_session.CURRENT.reset(tok)
+    assert _as(client, "tech").get("/api/video/example-vdo1/view").status_code == 404
+
+
+def test_one_run_at_a_time_while_stitching(eng):
+    app, client, tmp = eng
+    _run(app, tmp, "busy1", 1, 2)["status"] = "running"            # stitching: the model lock is not held yet
+    try:
+        r = _as(client, "tech").post("/api/video", data={"sample": "vdo1"})
+        assert r.status_code == 409 and "one runs at a time" in r.json()["error"]
+    finally:
+        app.JOBS.pop("busy1")
+
+
+def test_camera_takes_stay_in_their_organization(eng, monkeypatch):
+    app, client, tmp = eng
+    import captures
+    monkeypatch.setitem(captures.SOURCES, "app", tmp / "captures"); monkeypatch.setitem(captures.SOURCES, "team", tmp / "team")
+    for name, owner in (("t1__a", {"org": 1, "site": 2}), ("t2__b", {"org": 2, "site": 3}), ("t3__c", None)):
+        d = tmp / "captures" / name; d.mkdir(parents=True)
+        (d / "video.mp4").write_bytes(b"0")
+        if owner:
+            (d / "owner.json").write_text(json.dumps(owner))
+    listed = lambda who: {t["folder"] for t in _as(client, who).get("/api/captures").json()["takes"]}
+    assert listed("tech") == {"t1__a"} and listed("tech2") == {"t2__b"} and listed("owner") == {"t1__a", "t2__b", "t3__c"}
+    assert _as(client, "tech").get("/api/captures/app/t2__b/video").status_code == 404

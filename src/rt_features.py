@@ -460,19 +460,13 @@ def _dev(result, index):
     return next((d for d in (result or {}).get("devices") or [] if d.get("index") == index), None)
 
 
-def _detail_ports(d):
-    """Every port of a device with what the video read on it: number, type, state, cable colour and connector, where on the rack picture."""
-    C, L = d.get("closeup") or {}, d.get("layout") or {}
-    src = C if (C.get("fitted") or C.get("auto")) else L
-    pd = {str(p.get("id")): p for p in ((C.get("port_details") if src is C else None) or L.get("port_details") or {}).get("ports") or []}
-    used = src.get("fitted") or src.get("auto") or src.get("mode") == "patchpanel"
-    raw = (src.get("ports") or []) if used else list(pd.values())
+def _detail_ports(d, ubox=None):
+    """Every port of a device with what the video read on it: number, type, state, cable colour and connector, where on the rack picture.
+    The same reading the result screen shows (source_db.screen_ports), so a port has one state everywhere. ubox: SDB.unit_boxes(result)."""
     out = []
-    for p in raw:
-        x = pd.get(str(p.get("id"))) or {}
-        out.append({"n": SDB._int(p.get("id")) if str(p.get("id") or "").strip().isdigit() else None, "id": p.get("id"), "type": SDB._s(p.get("type")),
-                    "state": p.get("status") or x.get("status"), "colour": p.get("cable_colour") or x.get("cable_colour"),
-                    "connector": p.get("cable_connector") or x.get("cable_connector"), "rack_polygon": p.get("rack_polygon"), "by": p.get("state_by")})
+    for p in SDB.screen_ports(d, ubox)["ports"]:
+        out.append({"n": SDB._int(p.get("id")) if str(p.get("id") or "").strip().isdigit() else None, "id": p.get("read_id"), "type": SDB._s(p.get("type")),
+                    "state": p.get("status"), "colour": p.get("cable_colour"), "connector": p.get("cable_connector"), "rack_polygon": p.get("rack_polygon"), "by": p.get("state_by")})
     return out
 
 
@@ -493,7 +487,7 @@ def find_port(result, record, cables, rack_key, index, port):
     d = _dev(result, index)
     if d is None:
         return None
-    ports = _detail_ports(d)
+    ports = _detail_ports(d, SDB.unit_boxes(result))
     p = next((x for x in ports if x["n"] == port), None)
     rec = next((r for r, s in pair_devices(result, record) if s["index"] == index), None)
     cab = None
@@ -507,7 +501,7 @@ def find_port(result, record, cables, rack_key, index, port):
     # where the port can be drawn: on the rack picture (a polygon the port finder placed there), or on the device's own crop (the box it read
     # there, which is all there is when the layout was not fitted), or nowhere (the ports were counted, not located)
     cut, cboxes = cut_boxes(d)
-    cbox = cboxes.get(str(port)) if p is not None else None
+    cbox = cboxes.get(str(p["id"])) if p is not None else None
     placed = "crop" if cbox and cut else "rack" if p and p.get("rack_polygon") else None
     return {"index": index, "device": (rec or {}).get("name") or f"D{index}", "kind": kind, "unit": SDB._units(*_span(d)), "port": port,
             "placed": placed, "crop_file": cut if placed == "crop" else None, "crop_box": cbox if placed == "crop" else None,
@@ -532,10 +526,10 @@ def _bbox(poly):
 def connections(result, record, drift_rows, cable_rows):
     """Per device: its problems (the drift and the cable rows that name it) and a port card (each port's state)."""
     name = {s["index"]: r.get("name") for r, s in pair_devices(result, record)}
-    out = []
+    out, ubox = [], SDB.unit_boxes(result)
     for d in (result or {}).get("devices") or []:
         i = d["index"]
-        ports = _detail_ports(d)
+        ports = _detail_ports(d, ubox)
         probs = [x for x in (drift_rows or []) + (cable_rows or []) if x.get("index") == i or str(x.get("device") or "").endswith(f"/ D{i}")]   # port rows name the device only
         st = {"connected": 0, "empty": 0, "unknown": 0}
         for p in ports:
@@ -553,7 +547,7 @@ LOW_DEVICE, PORTS_PER_DEVICE = 0.65, 8
 def worklist(result):
     """worklist.js on one run: a device whose kind was read below 65 per cent (and no person or faceplate settled it), and up to 8 ports
     per device whose state the video could not tell. Least sure first."""
-    items = []
+    items, ubox = [], SDB.unit_boxes(result)
     for d in (result or {}).get("devices") or []:
         k = SDB.device_kind(d)
         cl = d.get("classification") or {}
@@ -563,10 +557,10 @@ def worklist(result):
                           "confidence": round(prob, 2), "question": f"What is the device at {SDB._units(*_span(d))}?",
                           "why": f"The picture read {cl.get('class') or 'nothing sure'} at {round(100 * prob)} %.", "cut": None, "box": None})
         n = 0
-        for p in _detail_ports(d):
+        for p in _detail_ports(d, ubox):
             if p["n"] is None or p["state"] in ("connected", "empty"):
                 continue
-            items.append({"id": f"p{d['index']}-{p['n']}", "kind": "port", "index": d["index"], "port": p["n"], "unit": SDB._units(*_span(d)), "read": "not sure",
+            items.append({"id": f"p{d['index']}-{p['id'] if str(p['id']).isdigit() else p['n']}", "kind": "port", "index": d["index"], "port": p["n"], "unit": SDB._units(*_span(d)), "read": "not sure",
                           "confidence": 0.0, "question": f"Is there a cable in port {p['n']} of D{d['index']}?", "why": "The video could not tell whether a cable is plugged in.",
                           "cut": cut_boxes(d)[0], "box": cut_boxes(d)[1].get(str(p["id"])), "type": p["type"]})
             n += 1
@@ -621,7 +615,7 @@ def physical_layer(result, rack_id, label, record):
     name = {s["index"]: r.get("name") for r, s in pair_devices(result, record)}
     lab = (label or {}).get("id") or (label or {}).get("name") or {}
     counts = {"ports": 0, "connected": 0, "empty": 0, "unknown": 0, "cables_by_color": {}}
-    units, cables, labels_seen = {}, [], []
+    units, cables, labels_seen, ubox = {}, [], [], SDB.unit_boxes(result)
     for d in (result or {}).get("devices") or []:
         start, h = _span(d)
         key = ",".join(f"u{start + i:02d}" for i in range(h)) if start else "unplaced"
@@ -638,7 +632,7 @@ def physical_layer(result, rack_id, label, record):
                          "raw_text": ids.get("raw_text"), "source": "person" if L.get("typed") and not L.get("vendor") else ("faceplate" if L.get("vendor") else "not read")},
                  "serial": ids.get("serial") or d.get("serial"), "asset_tag": ids.get("asset_tag") or d.get("asset_tag")}
         ports = []
-        for p in _detail_ports(d):
+        for p in _detail_ports(d, ubox):
             if p["n"] is None:
                 continue
             stt = p["state"] if p["state"] in ("connected", "empty") else "unknown"
@@ -652,7 +646,7 @@ def physical_layer(result, rack_id, label, record):
         entry["port_count"] = len(ports); entry["ports"] = ports
         units.setdefault(key, []).append(entry)
     return {"schema": "racktrack-physical-layer/1", "rack_id": rack_id, "generated_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "source": "video", "units_count": int(((result or {}).get("rack") or {}).get("units") or 0), "devices_count": len((result or {}).get("devices") or []),
+            "source": "video", "units_count": SDB.units_read(result), "devices_count": len((result or {}).get("devices") or []),
             "rack": {"id": rack_id, "label": {"text": lab.get("text"), "conf": lab.get("confidence"), "source": "rack label read on the video" if lab else "not read"}, "name": lab.get("text")},
             "labels": {"devices": labels_seen},
             "units": [{"unit": k, "devices": v} for k, v in sorted(units.items(), key=lambda kv: -(SDB._unum(kv[0].split(",")[-1]) or 0))],

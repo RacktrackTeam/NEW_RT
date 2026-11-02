@@ -30,7 +30,7 @@ def env(tmp_path, monkeypatch):
     wb = tmp_path / "vdo1_planted.xlsx"
     subprocess.run([sys.executable, str(ROOT / "tools" / "plant_features_workbook.py"), str(wb)], check=True, capture_output=True)
     out = source_db.import_excel(wb)
-    assert out["cables"] == 19
+    assert out["cables"] == 32
     return source_db, rt_features, _vdo1()
 
 

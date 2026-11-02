@@ -479,7 +479,7 @@ def device_kind(d, when=None):
 
 def run_devices(result):
     """The run's devices as start unit, height, kind, make, model and serial (None where not read)."""
-    out = []
+    out, ubox = [], unit_boxes(result)
     for d in (result or {}).get("devices") or []:
         nums = [n for n in (_unum(u) for u in d.get("units") or []) if n is not None]
         if not nums:
@@ -487,25 +487,103 @@ def run_devices(result):
         L = d.get("layout") or {}
         kind = device_kind(d)["kind"]
         out.append({"index": d.get("index"), "ru_start": min(nums), "ru_height": len(nums), "kind": kind,
-                    "manufacturer": _s(L.get("vendor") or (L.get("typed") or {}).get("vendor")), "model": _s(L.get("model") or (L.get("typed") or {}).get("model")), "serial": _s(L.get("serial") or d.get("serial")), "ports": run_ports(d),
+                    "manufacturer": _s(L.get("vendor") or (L.get("typed") or {}).get("vendor")), "model": _s(L.get("model") or (L.get("typed") or {}).get("model")), "serial": _s(L.get("serial") or d.get("serial")), "ports": run_ports(d, ubox),
                     "asset_tag": _s(d.get("asset_tag") or (d.get("ids") or {}).get("asset_tag"))})     # wt/features: the asset tag a close-up read
     return out
 
 
-def run_ports(d):
-    """The device's ports as the result screen takes them (server/app.py lay_of: a close-up first, the fitted layout's ports, else the
-    port details), each as number, type, state and the dust cap where the cap model read one."""
+def units_read(result):
+    """How many units the video counted: the ladder's count (what the Rack, Layout and Report tabs show), else the highest unit read."""
+    r = result or {}
+    n = _int((r.get("ladder") or {}).get("units"))
+    if n:
+        return n
+    return max([_unum(u.get("unit")) or 0 for u in ((r.get("occupancy_frames") or {}).get("rows") or [])] + [0])
+
+
+def unit_boxes(result):
+    """{unit: box on the rack picture} from the run's unit rows, for screen_ports."""
+    return {u["unit"]: u["box"] for u in (((result or {}).get("occupancy_frames") or {}).get("rows") or []) if u.get("box")}
+
+
+def screen_ports(d, ubox=None):
+    """The ONE reading of a device's ports that every screen uses (the device page, the drift, the rack tools, the physical layer):
+    a close-up first, the fitted layout's (or the agent's auto mode's) ports, else the port details; a port boxed outside the
+    device's own outline or rows belongs to the neighbour and is dropped (user 2026-10-27); the state is RT-EOS's
+    port_connected_or_empty from the port details first (user 2026-10-27), else the layout's own when it is connected or empty;
+    the cable and the dust cap come from the port details. Returns {"ports", "src", "used", "used_c", "pd", "dropped"}; ubox is
+    unit_boxes(result) (no neighbour check without it)."""
     C, L = d.get("closeup") or {}, d.get("layout") or {}
-    src = C if (C.get("fitted") or C.get("auto")) else L
-    pd = ((C.get("port_details") if src is C else None) or L.get("port_details") or {})
-    used = src.get("fitted") or src.get("auto") or src.get("mode") == "patchpanel"
+    used_c = bool(C.get("fitted") or C.get("auto")); src = C if used_c else L
+    used = bool(src.get("fitted") or src.get("auto") or src.get("mode") == "patchpanel")
+    pd = (C.get("port_details") if used_c else None) or L.get("port_details") or {}
     raw = (src.get("ports") or []) if used else (pd.get("ports") or [])
-    cap = {p.get("id"): p.get("cap_state") for p in pd.get("ports") or [] if p.get("cap_state")}
-    out = []
+    ubox = ubox or {}
+    rows_y = [ubox[u] for u in (d.get("units") or []) if u in ubox]           # the device's own unit rows (its polygon can leak into the next unit)
+    poly = d.get("polygon") or []
+    if len(poly) >= 3 and raw and any(p.get("rack_polygon") for p in raw):   # inside the device's own outline, grown 30 % up and down (a tilted
+        import numpy as _np; import cv2                                       # device's port row slopes across the unit rows: 29 Oct 2026)
+        cy = sum(q[1] for q in poly) / len(poly)
+        grown = _np.array([[float(q[0]), cy + (float(q[1]) - cy) * 1.6] for q in poly], dtype=_np.float32)
+        inside = lambda p: cv2.pointPolygonTest(grown, (float(sum(q[0] for q in p["rack_polygon"]) / len(p["rack_polygon"])), float(sum(q[1] for q in p["rack_polygon"]) / len(p["rack_polygon"]))), False) >= 0
+        keep = [p for p in raw if not p.get("rack_polygon") or inside(p)]
+    elif rows_y and raw and any(p.get("rack_polygon") for p in raw):
+        y0, y1 = min(b[1] for b in rows_y), max(b[3] for b in rows_y); inset = 0.1 * (y1 - y0) / len(rows_y)
+        keep = [p for p in raw if not p.get("rack_polygon") or (y0 + inset <= sum(q[1] for q in p["rack_polygon"]) / len(p["rack_polygon"]) <= y1 - inset)]
+    else:
+        keep = raw
+    dropped = len(keep) < len(raw)
+    renumber = bool(src.get("auto")) and dropped                          # auto mode after a drop: the numbered ports count on without gaps
+    if dropped:
+        raw = keep; src = dict(src, pictures={k: v for k, v in (src.get("pictures") or {}).items() if k == "cut"})   # the mapper's picture still draws the neighbour's ports
+        if len(keep) < 2 and src.get("auto"):                # (almost) nothing of its own was found: no auto layout, the crop only
+            used = False; src = dict(src, auto=False, fitted=False); raw = []
+    known = {p.get("id"): p.get("status") for p in (pd.get("ports") or []) if p.get("status") in ("connected", "empty")}
+    detail = {p.get("id"): p for p in (pd.get("ports") or [])}
+    ports = []
     for p in raw:
+        e = detail.get(p.get("id")) or {}
+        ports.append({"id": p.get("id"), "type": p.get("type"), "status": known.get(p.get("id"), p.get("status") if p.get("status") in ("connected", "empty") else None),
+                      "cable_type": p.get("cable_type") or e.get("cable_type"), "cable_colour": p.get("cable_colour") or e.get("cable_colour"),
+                      "cable_connector": p.get("cable_connector") or e.get("cable_connector"), "polygon": p.get("polygon"), "rack_polygon": p.get("rack_polygon"),
+                      "cap_state": e.get("cap_state") or p.get("cap_state"), "cable_views": e.get("cable_views"), "state_by": p.get("state_by") or e.get("state_by"),
+                      "read_id": p.get("id")})
+    if renumber and used:
+        n = 0
+        for q in ports:
+            if isinstance(q.get("id"), int):
+                n += 1; q["id"] = n
+    combo = _combo_faces(src, ports) if src.get("fitted") else []
+    return {"ports": [q for q in ports if not q.get("combo_of")], "combo": combo, "src": src, "used": used, "used_c": used_c, "pd": pd, "dropped": dropped}
+
+
+def _combo_faces(src, ports):
+    """Combo ports: a model named for its port count (D-Link DGS-1210-52: 52 ports, of which the last 4 are combo) whose template
+    lists that many RJ45 ports AND the SFP cages numbered after them has counted the combo ports twice (56). The cages are the
+    second face of the last RJ45 ports: they are named 49F to 52F, marked combo_of, and left out of the port count."""
+    m = re.search(r"-(\d{2})[A-Z]{0,3}$", str(src.get("model") or "").strip(), re.I)
+    if not m:
+        return []
+    n = int(m.group(1))
+    rj = [q for q in ports if str(q.get("type") or "").lower() == "rj45" and isinstance(q.get("id"), int)]
+    cages = sorted((q for q in ports if str(q.get("type") or "").lower().startswith("sfp") and isinstance(q.get("id"), int)), key=lambda q: q["id"])
+    if not cages or len(rj) != n or max(q["id"] for q in rj) != n or any(q["id"] <= n for q in cages) or len(cages) >= n:
+        return []
+    for k, q in enumerate(cages):
+        q["combo_of"] = n - len(cages) + 1 + k; q["id"] = f"{q['combo_of']}F"
+    return cages
+
+
+def run_ports(d, ubox=None):
+    """The device's ports as the result screen shows them (screen_ports), each as number, type, state and the dust cap where the cap
+    model read one."""
+    out, sp = [], screen_ports(d, ubox)
+    for p in sp["ports"]:
         n = _int(p.get("id")) if str(p.get("id") or "").strip().isdigit() else None
         if n is not None:
-            out.append({"n": n, "type": _s(p.get("type")), "state": p.get("status"), "cap": p.get("cap_state") or cap.get(p.get("id"))})
+            out.append({"n": n, "type": _s(p.get("type")), "state": p.get("status"), "cap": p.get("cap_state")})
+    for p in sp["combo"]:                                  # a combo port's SFP face: the same number, kept for SFP advice, never judged twice
+        out.append({"n": p["combo_of"], "type": _s(p.get("type")), "state": p.get("status"), "cap": p.get("cap_state"), "combo": True})
     return out
 
 
@@ -529,7 +607,7 @@ def port_drift(name, dev, want):
     at = _units(dev["ru_start"], dev["ru_height"])
     for p in dev["ports"]:
         x = want.get(p["n"])
-        if not x:
+        if not x or p.get("combo"):
             continue
         checked += 1
         base = {"unit": at, "device": f"{name} / D{dev['index']}", "port": p["n"]}
@@ -566,12 +644,14 @@ def drift(result, record, ports=None):
     copy's PORT_INVENTORY) adds the port rows of each matched device."""
     rows, notes, ports_checked = [], [], 0
     seen = run_devices(result)
-    top = max([_unum(r.get("unit")) or 0 for r in ((result or {}).get("rack") or {}).get("rows") or []] + [0]) or None
+    top = units_read(result) or None                      # the units the video counted (the ladder), as the Rack tab shows them
     free = list(seen)
     wanted = []
     for r in record:
         if r.get("ru_start") is None:
             notes.append(f"{r.get('name')} has no unit in the record, so it is not checked.")
+        elif top and r["ru_start"] > top:                 # above the units the video reached: not seen, so not judged
+            notes.append(f"{r.get('name')} ({_units(r['ru_start'], r.get('ru_height'))}) is not checked: the video read U1 to U{top} only.")
         elif (r.get("kind") or "").lower() in NOT_SEEN_KINDS:
             notes.append(f"{r.get('name')} ({r.get('kind')}, {_units(r['ru_start'], r.get('ru_height'))}) is not checked: the video cannot tell this kind apart.")
         else:
@@ -585,9 +665,8 @@ def drift(result, record, ports=None):
     for r in wanted:
         if not any(p[0] is r for p in pairs):
             where = _units(r["ru_start"], r.get("ru_height"))
-            extra = f" The video covers U1 to U{top} only." if top and r["ru_start"] > top else ""
             rows.append({"type": "missing", "what": "Missing device", "unit": where, "device": r.get("name"), "record_name": r.get("name"), "record": f"{r.get('kind') or 'Device'} at {where}", "read": "nothing seen",
-                         "words": f"The record has {r.get('name')} at {where}; the video shows no device there.{extra}"})
+                         "words": f"The record has {r.get('name')} at {where}; the video shows no device there."})
     for s in free:
         where = _units(s["ru_start"], s["ru_height"])
         rows.append({"type": "extra", "what": "Extra device", "index": s["index"], "unit": where, "device": f"D{s['index']}", "record": "nothing", "read": f"{s['kind'] or 'a device'} at {where}",
@@ -637,9 +716,10 @@ def _metres(a, b):
     return 6371000 * 2 * math.asin(math.sqrt(h))
 
 
-def _share_rung(seen, rows, fits):
-    """dark_mobile's devicesRung on a list of read things: the share each rack holds, the rack it decides (or None) and why."""
-    ranked = sorted(({"rack_key": r["rack_key"], "which": [w for w in (fits(x, r) for x in seen) if w]} for r in rows), key=lambda x: -len(x["which"]))
+def _share_rung(seen, rows, fits, whole=None):
+    """dark_mobile's devicesRung on a list of read things: the share each rack holds, the rack it decides (or None) and why.
+    whole(r), when given, pairs every read thing of one rack at once (one record device per read thing) and returns the pairs."""
+    ranked = sorted(({"rack_key": r["rack_key"], "which": whole(r) if whole else [w for w in (fits(x, r) for x in seen) if w]} for r in rows), key=lambda x: -len(x["which"]))
     for x in ranked:
         x["fits"] = len(x["which"]); x["share"] = round(x["fits"] / len(seen), 2) if seen else 0.0
     top, second = (ranked + [None, None])[:2]
@@ -697,10 +777,21 @@ def identify(source, rack_id, result, position=None, label=None, rack_id_how=Non
     ids = [x for s_ in seen for x in (s_.get("serial"), s_.get("asset_tag")) if x]
     models = [s_["model"] for s_ in seen if s_.get("model")]
     recs = {r["rack_key"]: devices(source, r["rack_key"]) for r in rows}
-    def text_fit(t, r):
-        return next((f"{d.get('name')} ({t})" for d in recs[r["rack_key"]] if any(_same(t, d.get(k)) for k in ("name", "serial", "asset_tag", "model") if d.get(k))), None)
     things = ids + models
-    ranked3, one3, _ = _share_rung(things, rows, text_fit)
+    def same_as(t, d):
+        return any(_same(t, d.get(k)) for k in ("name", "serial", "asset_tag", "model") if d.get(k))
+    def text_fits(r):
+        """Each read device to one record device of this rack (two read devices never share one): among the record devices its
+        serial, asset tag or model fits, the one nearest its unit. Each of its texts that fits that device counts once."""
+        used, out = set(), []
+        for s_ in seen:
+            texts = [x for x in (s_.get("serial"), s_.get("asset_tag"), s_.get("model")) if x]
+            hits = [d for d in recs[r["rack_key"]] if id(d) not in used and any(same_as(t, d) for t in texts)]
+            if hits:
+                d = min(hits, key=lambda d: abs((d.get("ru_start") or 0) - (s_.get("ru_start") or 0)))
+                used.add(id(d)); out += [f"{d.get('name')} ({t})" for t in texts if same_as(t, d)]
+        return out
+    ranked3, one3, _ = _share_rung(things, rows, None, whole=text_fits)
     t3 = ranked3[0] if ranked3 else None
     steps.append({"n": 3, "title": "Device labels", "proof": ("Serial and asset tag: not read on any device. " if not ids else f"{pl(len(ids), 'serial or asset tag')} read. ")
                   + (f"{pl(len(models), 'model')} read on faceplates ({', '.join(models)}); {t3['fits']} of them are in {t3['rack_key']}." if models and t3 else "No model read on a faceplate."),

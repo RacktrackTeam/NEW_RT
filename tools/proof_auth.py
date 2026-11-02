@@ -79,18 +79,20 @@ def fixtures(auth):
     """admin2 / tech2 in a second organization (Pune DC), admin3 / tech3 in a second site of the first (Chennai DC), and the
     four stored runs: one per site of the first organization, one in the second organization, one from before sign-in."""
     env = dict(os.environ, RACKTRACK_AUTH_DB=settings()["RACKTRACK_AUTH_DB"], RT_SEED_PASSWORD=password(), RT_ENV_FILE=str(AUTH_DIR / ".env"))
-    # test runs live in test organizations only, never in the seeded Demo Organization the owner uses
+    # test runs live in test organizations; the Demo Organization gets one run of our rack (dm1hyd000001, Hyderabad DC) so the
+    # seeded tech, manager, admin and orgowner can walk the rack too (verify pass 1, finding 29)
     for org, site, suf in (("Test Organization", "Test Hyderabad DC", "t"), ("Second Organization", "Pune DC", "2"), ("Test Organization", "Test Chennai DC", "3")):
         subprocess.run(["node", "scripts/seed-auth.js", "--org", org, "--site", site, "--suffix", suf], cwd=ROOT / "rt_eos" / "server", env=env,
                        check=True, capture_output=True)
     ids = {}
-    for u in ("techt", "tech2", "tech3"):
+    for u in ("techt", "tech2", "tech3", "tech"):
         w = Who(auth, None, u)
         ids[u] = (w.user["organization_id"], w.user["tenant_id"])
     src = ROOT / "samples" / "video" / "run_of_vdo1"
     runs = ROOT / "data" / "runs"
     for rid, who, title in (("fx1hyd000001", "techt", "Test Hyderabad DC rack (Test Organization)"), ("fx1chn000001", "tech3", "Test Chennai DC rack (Test Organization)"),
-                            ("fx2pun000001", "tech2", "Pune DC rack (Second Organization)"), ("fxlegacy0001", None, "Run from before sign-in")):
+                            ("fx2pun000001", "tech2", "Pune DC rack (Second Organization)"), ("fxlegacy0001", None, "Run from before sign-in"),
+                            ("dm1hyd000001", "tech", "Hyderabad DC rack (Demo Organization)")):
         org, site = ids[who] if who else (None, None)
         d = runs / rid if org is None else runs / str(org) / str(site) / rid
         if d.exists():
@@ -314,6 +316,28 @@ def waiting_org(auth, engine):
     return None
 
 
+def cleanup():
+    """Take out what the proof made in the sign-in database (the sign-up and invite accounts and their organizations), so no
+    proof account is left behind (verify pass 1, finding 27). The fixtures (Test Organization, Second Organization) stay."""
+    import sqlite3
+    c = sqlite3.connect(settings()["RACKTRACK_AUTH_DB"], timeout=10)
+    try:
+        users = [r[0] for r in c.execute("SELECT id FROM users WHERE username GLOB 'neworg[0-9]*' OR username GLOB 'invited[0-9]*' OR username GLOB 'waiting[0-9]*'")]
+        orgs = [r[0] for r in c.execute("SELECT id FROM organizations WHERE name GLOB 'New Organization [0-9]*' OR name GLOB 'Waiting Organization [0-9]*'")]
+        q = lambda xs: ",".join("?" * len(xs))
+        with c:
+            if users:
+                for t in ("refresh_tokens", "revoked_tokens", "audit_log"):
+                    c.execute(f"DELETE FROM {t} WHERE user_id IN ({q(users)})", users)
+                c.execute(f"DELETE FROM users WHERE id IN ({q(users)})", users)
+            if orgs:
+                c.execute(f"DELETE FROM tenants WHERE organization_id IN ({q(orgs)})", orgs)
+                c.execute(f"DELETE FROM organizations WHERE id IN ({q(orgs)})", orgs)
+        print(f"cleanup: {len(users)} proof accounts and {len(orgs)} proof organizations taken out")
+    finally:
+        c.close()
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--auth", default="http://127.0.0.1:3302")
@@ -323,13 +347,16 @@ def main():
     a = ap.parse_args()
     if a.fixtures:
         return fixtures(a.auth)
-    test_no_session(a.engine)
-    test_runs(a.auth, a.engine)
-    test_copies_and_connections(a.auth, a.engine)
-    new_admin = test_pending(a.auth, a.engine)
-    test_forgot_and_invite(a.auth, a.engine)
-    if not a.no_shots:
-        shots(a.auth, a.engine, waiting_org(a.auth, a.engine), new_admin)
+    try:
+        test_no_session(a.engine)
+        test_runs(a.auth, a.engine)
+        test_copies_and_connections(a.auth, a.engine)
+        new_admin = test_pending(a.auth, a.engine)
+        test_forgot_and_invite(a.auth, a.engine)
+        if not a.no_shots:
+            shots(a.auth, a.engine, waiting_org(a.auth, a.engine), new_admin)
+    finally:
+        cleanup()
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "results.json").write_text(json.dumps({"when": time.strftime("%Y-%m-%d %H:%M"), "checks": RESULTS}, indent=1))
     bad = [r for r in RESULTS if not r["ok"]]

@@ -111,7 +111,7 @@ app.get('/api/assets/token', auth.requireAuth, (req, res) => {
 
 // Credential endpoints are throttled per account (app.js authLimit).
 const authLimit = uploadLimiter({
-  rate: 10, burst: 20,
+  rate: 10, burst: 20, what: 'sign-in attempts',
   keyFn: (req) => {
     const id = String(req.body?.username || req.body?.email || '').trim().toLowerCase();
     return id ? `auth:${id}` : `authip:${req.ip || req.socket?.remoteAddress || 'unknown'}`;

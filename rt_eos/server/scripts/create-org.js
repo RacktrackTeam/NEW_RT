@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Create a NEW organization (active) with an admin, a site, and N member
- * invites. ADDITIVE — does not touch existing orgs/users. Backs up auth.db.
+ * invites. ADDITIVE: does not touch existing orgs/users. Backs up auth.db.
  *
  *   Run:  cd server && node scripts/create-org.js "<Org Name>" [count] [<tunnelBase>]
  *     e.g. node scripts/create-org.js "THE TESTERS" 12 https://foo.trycloudflare.com
@@ -32,7 +32,9 @@ const hash = (pw) => bcrypt.hashSync(pw, 10);
 const owner = db.prepare("SELECT id FROM users WHERE role='owner' ORDER BY id LIMIT 1").get();
 const ownerId = owner ? owner.id : null;
 
-const ADMIN = { username: `${slugBase}-admin`, email: `admin@${slugBase}.test`, password: 'Admin@12345' };
+// No password in the code (rule 7): RT_SEED_PASSWORD, else a strong one generated here and shown once below.
+const ADMIN = { username: `${slugBase}-admin`, email: `admin@${slugBase}.test`,
+  password: process.env.RT_SEED_PASSWORD || `Rt-${crypto.randomBytes(6).toString('base64url')}a9Z` };
 const SITE  = { name: `${ORG_NAME} Site`, slug: `${slugBase}-site-${crypto.randomBytes(2).toString('hex')}` };
 const INVITE_TTL_MS = 90 * 24 * 60 * 60 * 1000;
 
@@ -71,13 +73,13 @@ const run = db.transaction(() => {
 const { orgId } = run();
 
 console.log(`\n=== Created org "${ORG_NAME}" (id ${orgId}, slug ${slug}, active) ===`);
-console.log(`Org Admin →  org: ${ORG_NAME}   username: ${ADMIN.username}   password: ${ADMIN.password}`);
-console.log(`Site      →  ${SITE.name}`);
+console.log(`Org Admin: org: ${ORG_NAME}   username: ${ADMIN.username}   password: ${ADMIN.password}`);
+console.log(`Site: ${SITE.name}`);
 console.log(`\n=== ${COUNT} member invite links ===`);
 for (const inv of invites) console.log(`${String(inv.n).padStart(2, '0')}. ${inv.link}`);
 
 // txt dump
-const out = `${ORG_NAME} — Member Invite Links (org: ${ORG_NAME})\nEach link works once; the person sets their own username + password.\n\n`
+const out = `${ORG_NAME} - Member Invite Links (org: ${ORG_NAME})\nEach link works once; the person sets their own username + password.\n\n`
   + invites.map(inv => `${String(inv.n).padStart(2, '0')}. ${inv.link}`).join('\n') + '\n';
 const outPath = path.join(__dirname, '..', '..', `${slugBase.toUpperCase()}_INVITES.txt`);
 fs.writeFileSync(outPath, out);

@@ -222,7 +222,7 @@
     api('/api/video/' + encodeURIComponent(run) + '/physical-layer').then(function (d) {
       var c = d.counts, devs = [];
       d.units.forEach(function (u) { u.devices.forEach(function (x) { devs.push(Object.assign({ unit: u.unit }, x)); }); });
-      root().innerHTML = head('Physical layer', 'The physical layer document of this rack, in the RT-EOS shape (schema ' + d.schema + '): every device with its label, make, model, serial and asset tag, every port with its state and the cable on it. Nothing is invented.', run)
+      root().innerHTML = head('Physical layer', 'The physical layer document of this rack: every device with its label, make, model, serial and asset tag, every port with its state and the cable on it. Nothing is invented.', run)
         + '<div class="card"><p><b>' + esc(d.rack_id) + '</b>, rack label ' + esc(d.rack.label.text || 'not read') + '. ' + d.units_count + ' units, ' + d.devices_count + ' devices. ' + c.ports + ' ports: ' + c.connected + ' cabled, ' + c.empty + ' empty, ' + c.unknown + ' unknown. ' + d.cables.length + ' cables with a colour or connector read.</p>'
         + '<div class="ft-btns"><a class="btn primary" href="/api/video/' + esc(run) + '/physical-layer.html" target="_blank" rel="noopener">Open the page to print</a><a class="btn" href="/api/video/' + esc(run) + '/physical-layer" download="physical-layer-' + esc(run) + '.json">Download the JSON</a></div></div>'
         + table(devs, [['Units', function (x) { return x.unit.toUpperCase().replace(/,/g, ', '); }], ['Device', function (x) { return x.device; }], ['Record', function (x) { return x.record_name; }], ['Kind', function (x) { return x.device_type; }],
@@ -243,7 +243,7 @@
 
   function topology(run) {
     api('/api/video/' + encodeURIComponent(run) + '/topology').then(function (detail) {
-      root().innerHTML = head('Topology', 'RT-EOS\'s topology of this rack: the devices read on the video and the cables the Excel matrix puts on their ports' + (detail.matrix ? ' (' + detail.cables_in_matrix + ' in the matrix)' : '; no matrix is copied in yet, so only the devices show') + '. Tap a device or a cable.', run)
+      root().innerHTML = head('Topology', 'The devices read on the video and the cables the Excel matrix puts on their ports' + (detail.matrix ? ' (' + detail.cables_in_matrix + ' in the matrix)' : '; the Excel copy has no cable rows for this rack, so only the devices show') + '. Tap a device or a cable.', run)
         + '<div class="rteos ft-topo" id="ft-topo"></div>';
       var mount = function () { if (!window.RTEOSTopology) return setTimeout(mount, 150); window.RTEOSTopology.mount($('ft-topo'), detail, function (o) { if (o && o.deviceId != null) location.hash = '#result/' + run + '/devices'; }); };
       mount();
@@ -301,7 +301,7 @@
       var xs = (r.items || []).filter(function (x) { return x.index === index; }); if (!xs.length || !box.isConnected) return;
       box.insertAdjacentHTML('beforeend', '<div class="card ft-sfp"><span class="eyebrow">SFP advice</span>' + xs.map(function (x) {
         return '<h2>' + x.count + ' ' + esc(x.port_type) + (x.count === 1 ? ' port' : ' ports') + '</h2><div class="ft-kv"><span>Optic</span><b>' + esc(x.suggestion.optic) + '</b></div><div class="ft-kv"><span>Cable</span><b>' + esc(x.suggestion.cable) + '</b></div>' + (x.suggestion.note ? '<p class="muted small">' + esc(x.suggestion.note) + '</p>' : ''); }).join('') + '</div>');
-    }).catch(function () {});
+    }).catch(function (e) { if (window.console) console.warn('RackTrack: SFP advice failed: ' + ((e && e.message) || e)); });
   }
   window.RTFEAT = { open: open, idsBlock: idsBlock, fillResult: fillResult, sfpInto: sfpInto };
 })();

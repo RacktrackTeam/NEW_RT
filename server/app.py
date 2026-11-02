@@ -255,15 +255,15 @@ def _save(j):
     keep = {k: j.get(k) for k in ("id", "status", "progress", "error", "started", "finished", "title", "name", "from_guide", "stride", "summary", "phase", "partial", "ports", "ports_error", "video_file", "rack_id", "video_md5", "video_probe", "db", "position", "org", "site")}
     try:
         (pathlib.Path(j["dir"]) / "status.json").write_text(json.dumps(keep, indent=1))
-    except OSError:
-        pass
+    except OSError as ex:
+        print(f"[racktrack] status of run {j.get('id')} not saved: {ex}", file=sys.stderr)
 
 
 def _summary(res):
     """The few numbers the history shows for a finished run."""
     try:
         s = res["occupancy_frames"]["summary"]; devs = res.get("devices") or []
-        kinds = sum(1 for d in devs if (d.get("classification") or {}).get("label") not in (None, "Other"))
+        kinds = sum(1 for d in devs if SDB.device_kind(d)["kind"] not in (None, "Other"))       # the one kind every screen shows
         used = lambda L: L.get("fitted") or L.get("auto")                 # a template fitted, or the agent's auto mode
         fitted = sum(1 for d in devs if used(d.get("layout") or {}) or used(d.get("closeup") or {}))
         return {"units": res["ladder"]["units"], "occupied": s["occupied"], "free": s["free"], "uncertain": s["uncertain"],
@@ -309,6 +309,9 @@ def load_runs():
 def job_or_none(job):
     """A run, or the stored demo run ("example-<name>") as a finished one."""
     if job.startswith("example-"):
+        me = rt_session.current()
+        if me is not None and not rt_session.can_see(me, {"id": job}):     # the stored demo is the platform owner's only
+            return None
         name = job[len("example-"):]; smp = SAMPLES.get(name)
         if smp is None or not (smp["run"] / "result.json").exists():
             return None
@@ -349,10 +352,13 @@ def run_job(job, video_path, truth_path=None):
         j.update(result=res, status="done", progress="done", phase="done", partial=False, finished=datetime.datetime.now().isoformat(timespec="seconds"), summary=_summary(res))
     except Exception as ex:  # noqa: BLE001
         msg = str(ex)
+        print(f"[racktrack] run {job} failed: {type(ex).__name__}: {msg}", file=sys.stderr)      # the technical detail goes to the log, not the screen
         if "no frame gave a ladder" in msg:
             msg = "No rack was found in this video: no frame showed rack units. Film the front of the rack from top to bottom, with the rack filling the picture."
-        elif not msg.startswith("the video could not be stitched"):
-            msg = f"{type(ex).__name__}: {msg}"
+        elif msg.startswith("the video could not be stitched"):
+            msg = "The video could not be joined into one rack picture. Film the rack slowly from top to bottom, with the whole width in view."
+        else:
+            msg = "The rack could not be read from this video. Try again, or film the rack again slowly from top to bottom."
         j.update(status="failed", error=msg, progress="failed", finished=datetime.datetime.now().isoformat(timespec="seconds"))
     _save(j)
     if j.get("status") == "done":
@@ -532,9 +538,22 @@ async def api_video(request: Request, video: UploadFile | None = File(None), sam
                     stride: int = Form(rack_video.STRIDE), lat: float | None = Form(None), lng: float | None = Form(None),
                     accuracy: float | None = Form(None)):   # wt/features: the phone's accuracy in metres (location.js)
     """Start a sweep: a video upload, a take from the camera guide (capture = "<source>/<folder>") or the stored sample."""
-    if MODEL_LOCK.locked():
-        running = [k for k, v in JOBS.items() if v.get("status") == "running"]
-        raise HTTPException(409, "Another rack is being read. Wait for it to finish; one runs at a time on this server." + (f" Running: {running[0]}" if running else ""))
+    with STATE_LOCK:                                   # one run at a time, stitching included (the model lock covers only the model part)
+        busy = MODEL_LOCK.locked() or any(v.get("status") == "running" and not v.get("partial") for v in JOBS.values()) or RUN_STARTING["n"]
+        if not busy:
+            RUN_STARTING["n"] = 1
+    if busy:
+        raise HTTPException(409, "Another rack is being read. Wait for it to finish; one runs at a time on this server.")
+    try:
+        return await _start_video(request, video, sample, capture, stride, lat, lng, accuracy)
+    finally:
+        RUN_STARTING["n"] = 0
+
+
+RUN_STARTING = {"n": 0}                    # a run being set up (its upload still arriving), so a second one waits
+
+
+async def _start_video(request, video, sample, capture, stride, lat, lng, accuracy):
     who = rt_session.name(request)
     job = hashlib.sha1(f"{datetime.datetime.now().isoformat()}{who}{sample}".encode()).hexdigest()[:12]
     me = rt_session.current()
@@ -543,7 +562,7 @@ async def api_video(request: Request, video: UploadFile | None = File(None), sam
     if capture:
         src, _, folder = capture.partition("/")
         td = CAP.take_dir(src, folder); t = CAP.read_take(src, td) if td else None
-        if t is None or not t["video"]:
+        if t is None or not t["video"] or not _take_visible(td):
             raise HTTPException(404, "That take is not there, or its video has not arrived yet.")
         video_path = d / t["video"]; shutil.copy(td / t["video"], video_path)
         if (td / "log.json").is_file():
@@ -584,7 +603,9 @@ async def api_video(request: Request, video: UploadFile | None = File(None), sam
 @app.get("/api/video/history")
 def api_video_history():
     """Every run on this server, newest first."""
-    rows = [dict(public_job(j), **_rack_state(j)) for j in JOBS.values() if rt_session.can_see(rt_session.current(), j)]       # the stored demo is not listed (user, 2026-10-27); it stays reachable as example-<name>
+    orgs, sites = rt_session.place_names()
+    rows = [dict(public_job(j), **_rack_state(j), org=j.get("org"), site=j.get("site"), org_name=orgs.get(str(j.get("org"))), site_name=sites.get(str(j.get("site"))))
+            for j in JOBS.values() if rt_session.can_see(rt_session.current(), j)]       # a rack is one rack within its organization and site       # the stored demo is not listed (user, 2026-10-27); it stays reachable as example-<name>
     rows.sort(key=lambda x: x["started"] or "", reverse=True)
     return rows
 
@@ -595,7 +616,8 @@ def _rack_state(j):
     if j.get("result") is not None and (j.get("db") or {}).get("source"):
         try:
             dv = drift_view(j)
-        except Exception:  # noqa: BLE001  a broken copy must not break Home
+        except Exception as ex:  # noqa: BLE001  a broken copy must not break Home
+            print(f"[racktrack] compare of run {j.get('id')} for Home failed: {type(ex).__name__}: {ex}", file=sys.stderr)
             return out
         if dv.get("match"):
             out["record"] = {"source": SDB.SOURCES[dv["source"]], "rack_key": dv["match"]["rack_key"], "how": dv["match"]["how"]}
@@ -622,51 +644,18 @@ def api_video_view(job: str):
     ubox = {u["unit"]: u["box"] for u in r["occupancy_frames"]["rows"] if u.get("box")}
     def lay_of(d):
         C = d.get("closeup") or {}; L = d.get("layout") or {}
-        used_c = C.get("fitted") or C.get("auto"); src = C if used_c else L
-        used = bool(src.get("fitted") or src.get("auto") or src.get("mode") == "patchpanel")   # a template fitted, the agent's auto mode, or the patch panel reader
-        pd = (C.get("port_details") if used_c else None) or L.get("port_details") or {}
-        port = lambda p: {"id": p.get("id"), "type": p.get("type"), "status": p.get("status"), "cable_type": p.get("cable_type"), "cable_colour": p.get("cable_colour"), "cable_connector": p.get("cable_connector"),
-                          "polygon": p.get("polygon")}                  # on the cut picture (pictures.cut): the app draws the outlines itself
-        raw = (src.get("ports") or []) if used else (pd.get("ports") or [])
-        # a port the mapper boxed outside the device's own rows belongs to the neighbour (the cut reaches a little above and
-        # below; user 2026-10-27: 'taken the ports which is not even that device'): such ports are dropped here
-        rows_y = [ubox[u] for u in (d.get("units") or []) if u in ubox]           # the device's own unit rows (its polygon can leak into the next unit)
-        poly = d.get("polygon") or []
-        if len(poly) >= 3 and raw and any(p.get("rack_polygon") for p in raw):   # inside the device's own outline, grown 30 % up and down (a tilted
-            import numpy as _np; import cv2                                       # device's port row slopes across the unit rows: 29 Oct 2026)
-            cy = sum(q[1] for q in poly) / len(poly)
-            grown = _np.array([[float(q[0]), cy + (float(q[1]) - cy) * 1.6] for q in poly], dtype=_np.float32)   # 30 % each way: less than a unit, so a neighbour's row stays out
-            inside = lambda p: cv2.pointPolygonTest(grown, (float(sum(q[0] for q in p["rack_polygon"]) / len(p["rack_polygon"])), float(sum(q[1] for q in p["rack_polygon"]) / len(p["rack_polygon"]))), False) >= 0
-            keep = [p for p in raw if not p.get("rack_polygon") or inside(p)]
-        elif rows_y and raw and any(p.get("rack_polygon") for p in raw):
-            y0, y1 = min(b[1] for b in rows_y), max(b[3] for b in rows_y); inset = 0.1 * (y1 - y0) / len(rows_y)
-            keep = [p for p in raw if not p.get("rack_polygon") or (y0 + inset <= sum(q[1] for q in p["rack_polygon"]) / len(p["rack_polygon"]) <= y1 - inset)]
-        else:
-            keep = raw
-        if True:
-            if len(keep) < len(raw):
-                raw = keep; src = dict(src, pictures={k: v for k, v in (src.get("pictures") or {}).items() if k == "cut"})   # the mapper's picture still draws the neighbour's ports
-                if len(keep) < 2 and src.get("auto"):                # (almost) nothing of its own was found: no auto layout, the crop only
-                    used = False; src = dict(src, auto=False, fitted=False); raw = []
-        known = {p.get("id"): p.get("status") for p in (pd.get("ports") or []) if p.get("status") in ("connected", "empty")}   # RT-EOS port_connected_or_empty decides (user, 2026-10-27)
-        detail = {p.get("id"): p for p in (pd.get("ports") or [])}                   # the cable on a connected port, the cap on an empty one (port details)
-        def with_detail(q):
-            e = detail.get(q.get("id")) or {}
-            return dict(q, cable_type=q.get("cable_type") or e.get("cable_type"), cable_colour=q.get("cable_colour") or e.get("cable_colour"),
-                        cable_connector=q.get("cable_connector") or e.get("cable_connector"), cap_state=e.get("cap_state"), cable_views=e.get("cable_views"))
-        ports = [with_detail(dict(port(p), status=known.get(p.get("id"), p.get("status") if p.get("status") in ("connected", "empty") else None))) for p in raw]
-        if src.get("auto") and len(raw) < len(src.get("ports") or []):   # auto mode after a drop: the numbered ports count on without gaps
-            n = 0
-            for p in ports:
-                if isinstance(p.get("id"), int):
-                    n += 1; p["id"] = n
+        sp = SDB.screen_ports(d, ubox)                     # the one reading of the ports every screen and tool uses (src/source_db.py)
+        src, used, used_c, pd = sp["src"], sp["used"], sp["used_c"], sp["pd"]
+        keep = ("id", "type", "status", "cable_type", "cable_colour", "cable_connector", "polygon", "cap_state", "cable_views")   # polygon: on the cut picture (pictures.cut)
+        ports = [{k: q.get(k) for k in keep} for q in sp["ports"]]
+        combo = [dict({k: q.get(k) for k in keep}, of=q["combo_of"]) for q in sp["combo"]]     # the SFP face of a combo port (49F to 52F), not counted again
         conf = src.get("identify_confidence") or {}
         T = L.get("typed") or {}
         return {"kind": L.get("kind"), "mode": L.get("mode"), "panel": L.get("panel"), "fitted": bool(src.get("fitted")), "auto": bool(src.get("auto")) and not src.get("fitted"), "vendor": (src.get("vendor") if used else None) or T.get("vendor"),
                 "model": (src.get("model") if src.get("fitted") else None) or T.get("model"), "vendor_read": L.get("vendor_read") or L.get("vendor"), "model_read": L.get("model_read"), "status": src.get("status"), "typed": L.get("typed"),
                 "confidence": conf or None, "confirm": bool(src.get("fitted")) and conf.get("model") is not None and float(conf.get("model") or 0) < 0.6,
                 "needs_back": bool(src.get("needs_back")), "suggested_device": src.get("suggested_device"),
-                "from": "close-up" if used_c else ("frames" if used else None), "ports": ports, "counts": pd.get("counts"),
+                "from": "close-up" if used_c else ("frames" if used else None), "ports": ports, "combo": combo, "counts": pd.get("counts"),
                 "n_ports": src.get("n_ports") if src.get("mode") == "patchpanel" else len(ports), "size_known": src.get("size_known", True), "spec": src.get("spec") if used else None, "port_detector": src.get("port_detector") or L.get("port_detector"), "frames_voted": pd.get("frames_voted"), "connected": sum(1 for p in ports if p.get("status") == "connected"),   # a panel's size counts its hidden ports
                 "pictures": {k: base + v for k, v in ((src.get("pictures") or {}) if used else {}).items() if isinstance(v, str)},
                 "portmap": base + pd["picture"] if pd.get("picture") else None, "mapped": bool(d.get("layout")),
@@ -865,6 +854,12 @@ async def capture_upload(request: Request):
         folder, part, final = CAP.upload_target(q.get("take", ""), q.get("tester", "unknown"), q.get("file", ""), length, parts, index, offset)
     except CAP.UploadError as ex:
         return JSONResponse({"error": str(ex)}, status_code=ex.status)
+    me = request.state.principal; mine = {"org": me.get("org"), "site": me.get("site"), "by": me.get("username")}
+    own = folder / "owner.json"
+    if own.exists() and (_take_owner(folder).get("org"), _take_owner(folder).get("site")) != (mine["org"], mine["site"]):
+        return JSONResponse({"error": "That take name is already in use. Send the take again."}, status_code=409)
+    if not own.exists():
+        own.write_text(json.dumps(mine))                 # the take belongs to the sender's organization and site
     from starlette.requests import ClientDisconnect
     got = 0
     try:
@@ -887,14 +882,28 @@ async def capture_upload(request: Request):
     return {"ok": True, "saved": f"{folder.name}/{final.name}", "take": f"app/{folder.name}"}
 
 
+def _take_owner(td):
+    """Who sent a camera-guide take: {"org", "site", "by"} from its owner.json (written at upload). A take without one (the team
+    folder, takes from before sign-in) has no organization, so only the platform owner sees it."""
+    try:
+        return json.loads((pathlib.Path(td) / "owner.json").read_text())
+    except (OSError, ValueError):
+        return {"org": None, "site": None}
+
+
+def _take_visible(td):
+    return rt_session.can_see(rt_session.current(), dict(_take_owner(td), id="take"))
+
+
 @app.get("/api/captures")
 def api_captures():
-    return {"takes": CAP.list_takes(), "team_folder": CAP.SOURCES["team"].is_dir()}
+    takes = [t for t in CAP.list_takes() if (td := CAP.take_dir(t.get("source") or "", t.get("folder") or "")) and _take_visible(td)]
+    return {"takes": takes, "team_folder": CAP.SOURCES["team"].is_dir() and rt_session.current().get("role") == "owner"}
 
 
 def _take_file(source, folder):
     td = CAP.take_dir(source, folder); t = CAP.read_take(source, td) if td else None
-    if t is None or not t["video"]:
+    if t is None or not t["video"] or not _take_visible(td):              # another organization's take is not there
         raise HTTPException(404, "No such take.")
     return td, t
 
@@ -948,7 +957,8 @@ def _read_panel_thread(job, index):
             rf.write_text(json.dumps(r, indent=1)); j["result"] = r; j["summary"] = _summary(r)
             j["ports"][str(index)] = "done"
     except Exception as ex:  # noqa: BLE001
-        j["ports"][str(index)] = "failed"; j.setdefault("ports_error", {})[str(index)] = f"{type(ex).__name__}: {ex}"
+        print(f"[racktrack] panel D{index} of {job} not read: {type(ex).__name__}: {ex}", file=sys.stderr)
+        j["ports"][str(index)] = "failed"; j.setdefault("ports_error", {})[str(index)] = "The panel could not be read."
     _save(j)
 
 
@@ -963,7 +973,8 @@ def _read_ports_thread(job, index, hint=None):
             j["ports"][str(index)] = "done" if dv.get("layout") else "none"
         _closeup_rebuild(j)
     except Exception as ex:  # noqa: BLE001
-        j["ports"][str(index)] = "failed"; j.setdefault("ports_error", {})[str(index)] = f"{type(ex).__name__}: {ex}"
+        print(f"[racktrack] D{index} of {job} not read: {type(ex).__name__}: {ex}", file=sys.stderr)
+        j["ports"][str(index)] = "failed"; j.setdefault("ports_error", {})[str(index)] = "The device could not be read."
     _save(j)
 
 
@@ -1266,7 +1277,8 @@ def occ_summary(rows):
     import occupancy
     try:
         return occupancy.summarize(rows)
-    except Exception:  # noqa: BLE001
+    except Exception as ex:  # noqa: BLE001
+        print(f"[racktrack] unit summary not made: {type(ex).__name__}: {ex}", file=sys.stderr)
         return None
 
 
@@ -1364,8 +1376,8 @@ def _closeup_rebuild(j):
             video_report.build(j["name"])
         else:
             video_report.build_from(j["dir"], pathlib.Path(j["dir"]) / "report", j["rack_path"], j["video_path"], j.get("title") or "Your rack", j.get("name") or j["id"])
-    except Exception:
-        pass
+    except Exception as ex:  # noqa: BLE001
+        print(f"[racktrack] report of run {j.get('id')} not rebuilt: {type(ex).__name__}: {ex}", file=sys.stderr)
 
 
 @app.post("/api/closeup")
@@ -1570,9 +1582,10 @@ async def api_sources_excel(workbook: UploadFile = File(...)):
     f.write_bytes(await workbook.read(50 * 1024 * 1024))
     try:
         report = SDB.validate_excel(f)
-    except Exception as e:                      # a broken or foreign file says why, in words
+    except Exception as e:                      # a broken or foreign file: plain words on screen, the detail in the log
         f.unlink(missing_ok=True)
-        raise HTTPException(400, f"The workbook could not be read: {e}")
+        print(f"[racktrack] workbook {workbook.filename} not read: {type(e).__name__}: {e}", file=sys.stderr)
+        raise HTTPException(400, "The workbook could not be read. Send the manager's source-of-truth workbook (.xlsx) with its RACK_INVENTORY and DEVICE_INVENTORY sheets.")
     report["upload"] = f.name
     return report
 
@@ -1587,7 +1600,8 @@ def api_sources_excel_import(body: dict = Body(...)):
     try:
         return SDB.import_excel(f)
     except Exception as e:
-        raise HTTPException(400, f"The workbook could not be imported: {e}")
+        print(f"[racktrack] workbook {name} not imported: {type(e).__name__}: {e}", file=sys.stderr)
+        raise HTTPException(400, "The workbook could not be imported. Read it again and check the report first.")
 
 
 @app.get("/api/sources/copies")
@@ -1669,7 +1683,21 @@ def api_connections_remove(kind: str):
     return {"connections": CONN.meta(_org())}
 
 
+def _copies_of(j):
+    """The organization whose database copies a run is compared with: its own (the platform's for a run from before sign-in)."""
+    return str(j["org"]) if j.get("org") is not None else "platform"
+
+
 def drift_view(j):
+    """The run against its record, in the run's own organization's copies, whoever asks (Home as the platform owner included)."""
+    tok = SDB.ORG.set(_copies_of(j))
+    try:
+        return _drift_view(j)
+    finally:
+        SDB.ORG.reset(tok)
+
+
+def _drift_view(j):
     """The run against its record: the chosen source, the matched rack (or the one a person picked), and the drift."""
     rid = (j.get("rack_id") or {}).get("id")
     have = SDB.racks()
@@ -1776,7 +1804,8 @@ def _features_sites(j):
     """The run's own site and its organization's other sites with their positions (the sign-in service's tenants, read only)."""
     try:
         return RTF.site_positions(rt_session._setting("RACKTRACK_AUTH_DB"), j.get("org"), j.get("site"))
-    except Exception:  # noqa: BLE001  no sites, no location step from them
+    except Exception as ex:  # noqa: BLE001  no sites, no location step from them
+        print(f"[racktrack] site positions not read: {type(ex).__name__}: {ex}", file=sys.stderr)
         return None, []
 
 
@@ -1816,6 +1845,15 @@ def _features_job(job):
 
 
 def _features_record(j):
+    """The run's record in its own organization's Excel copy (the matrix lives there)."""
+    tok = SDB.ORG.set(_copies_of(j))
+    try:
+        return _features_record_in(j)
+    finally:
+        SDB.ORG.reset(tok)
+
+
+def _features_record_in(j):
     """The run's record in the Excel copy (the matrix lives there): the rack matched by the run's rack id, its devices and its cables."""
     rid = (j.get("rack_id") or {}).get("id")
     db = j.get("db") or {}
@@ -1848,7 +1886,11 @@ def api_features_az(request: Request, body: dict = Body(...)):
     for side, j in (("a", a), ("z", z)):
         rid, key, result, record, _ = _features_record(j)
         views[side] = dict(RTF.run_view(result, record, key or rid), scanId=j["id"]); keys.append(key or rid)
-    cables = RTF.cables_for(keys)
+    tok = SDB.ORG.set(_copies_of(a))
+    try:
+        cables = RTF.cables_for(keys)
+    finally:
+        SDB.ORG.reset(tok)
     if not cables:
         raise HTTPException(409, "The Excel matrix has no cable in these racks. Copy the workbook with its A_Z_CONNECTION_MATRIX in first.")
     check = RTF.az_check(views["a"], views["z"], cables, rt_session.name(request))
@@ -1947,17 +1989,27 @@ def _features_read_again_thread(job):
     """Phase 2 again on every device (its ports, make and model with the current models), one at a time; what people gave and what
     close-ups read is put back afterwards."""
     j = JOBS[job]; rf = pathlib.Path(j["dir"]) / "result.json"
-    before = json.loads(rf.read_text()); kept = RTF.kept_before_read_again(before); answers = before.get("port_answers") or {}
-    devs = [(d["index"], SDB.device_kind(d)["kind"]) for d in before.get("devices") or []]
-    j["read_again"] = {"state": "running", "done": 0, "of": len(devs), "started": datetime.datetime.now().isoformat(timespec="seconds")}; _save(j)
-    for n, (i, kind) in enumerate(devs, start=1):
-        j.setdefault("ports", {})[str(i)] = "running"
-        (_read_panel_thread if kind == "Patch Panel" else _read_ports_thread)(job, i)
-        j["read_again"]["done"] = n; _save(j)
-    r = RTF.put_back(json.loads(rf.read_text()), kept, answers)
-    r["port_answers"] = answers
-    rf.write_text(json.dumps(r, indent=1)); j["result"] = r; j["summary"] = _summary(r)
-    j["read_again"].update(state="done", finished=datetime.datetime.now().isoformat(timespec="seconds")); _save(j)
+    j["read_again"] = {"state": "running", "done": 0, "of": 0, "started": datetime.datetime.now().isoformat(timespec="seconds")}; _save(j)
+    try:
+        before = json.loads(rf.read_text()); kept = RTF.kept_before_read_again(before); answers = before.get("port_answers") or {}
+        devs = [(d["index"], SDB.device_kind(d)["kind"]) for d in before.get("devices") or []]
+        j["read_again"]["of"] = len(devs); _save(j)
+        for n, (i, kind) in enumerate(devs, start=1):
+            j.setdefault("ports", {})[str(i)] = "running"
+            (_read_panel_thread if kind == "Patch Panel" else _read_ports_thread)(job, i)
+            j["read_again"]["done"] = n; _save(j)
+        r = RTF.put_back(json.loads(rf.read_text()), kept, answers)
+        r["port_answers"] = answers
+        rf.write_text(json.dumps(r, indent=1)); j["result"] = r; j["summary"] = _summary(r)
+        j["read_again"].update(state="done", finished=datetime.datetime.now().isoformat(timespec="seconds"))
+    except Exception as ex:  # noqa: BLE001  never left "running" for good
+        print(f"[racktrack] read again of {job} failed: {type(ex).__name__}: {ex}", file=sys.stderr)
+        j["read_again"].update(state="failed", finished=datetime.datetime.now().isoformat(timespec="seconds"), error="The rack could not be read again. Try again.")
+        for k, v in list((j.get("ports") or {}).items()):
+            if v == "running":
+                j["ports"][k] = "failed"
+    finally:
+        _save(j)
 
 
 @app.post("/api/video/{job}/read-again")
@@ -2007,7 +2059,7 @@ th{{color:#555;font-weight:600}}.wrap{{overflow-x:auto}}button{{font:inherit;pad
 <p>{c['ports']} ports: {c['connected']} cabled, {c['empty']} empty, {c['unknown']} unknown.</p><p><button onclick="print()">Print</button></p>
 <h2>Devices</h2><div class="wrap"><table><tr><th>Units</th><th>Device</th><th>Record</th><th>Kind</th><th>Make and model</th><th>Serial</th><th>Asset tag</th><th>Label</th><th>Ports</th></tr>{''.join(rows)}</table></div>
 <h2>Cables seen</h2><div class="wrap"><table><tr><th>Units</th><th>Kind</th><th>Port</th><th>Port type</th><th>Connector</th><th>Colour</th></tr>{cab or '<tr><td colspan="6">No cable colour or connector read.</td></tr>'}</table></div>
-<p style="margin-top:24px">Schema {e(doc['schema'])}. Nothing here is invented: a device with no label read has none, a port the video could not read is unknown.</p></body></html>"""
+<p style="margin-top:24px">Nothing here is invented: a device with no label read has none, a port the video could not read is unknown.</p></body></html>"""
     return Response(page, media_type="text/html", headers=NO_CACHE)
 
 
@@ -2031,16 +2083,16 @@ def api_features_topology(job: str):
             if not c.get(f"{e}_rack") or SDB._norm(c[f"{e}_rack"]) == SDB._norm(key):
                 ends[(SDB._norm(c.get(f"{e}_device")), RTF.port_no(c.get(f"{e}_port")))] = {"cableLabel": c.get("cable_label"), "cableType": c.get("cable_type"),
                                                                                             "other": {"device": c.get(f"{o}_device"), "port": c.get(f"{o}_port"), "rack": c.get(f"{o}_rack")}}
-    devices = []
+    devices, ubox = [], SDB.unit_boxes(result)
     for d in result.get("devices") or []:
         start, h = RTF._span(d); L = d.get("layout") or {}
         nm = name.get(d["index"])
         ports = [{"portNo": p["n"], "kind": "sfp" if re.match(r"^(sfp|qsfp|osfp|lc|sc|fc)", str(p["type"] or ""), re.I) else "main", "type": p["type"], "state": p["state"],
-                  "cableColor": p["colour"], "cableConnector": p["connector"], "expected": ends.get((SDB._norm(nm), p["n"]))} for p in RTF._detail_ports(d) if p["n"] is not None]
+                  "cableColor": p["colour"], "cableConnector": p["connector"], "expected": ends.get((SDB._norm(nm), p["n"]))} for p in RTF._detail_ports(d, ubox) if p["n"] is not None]
         devices.append({"deviceId": d["index"], "name": nm or (" ".join(x for x in (L.get("vendor"), L.get("model")) if x) or f"D{d['index']}"), "sheetName": nm,
                         "type": SDB.device_kind(d)["kind"] or "unidentified", "heightU": h or 1, "unitTop": (start + h - 1) if start else None, "unitBottom": start,
                         "make": L.get("vendor"), "model": L.get("model"), "ports": ports})
-    return {"scanId": job, "rackLabel": key or rid or j.get("title"), "unitsTotal": int((result.get("rack") or {}).get("units") or 0), "devices": devices,
+    return {"scanId": job, "rackLabel": key or rid or j.get("title"), "unitsTotal": SDB.units_read(result), "devices": devices,
             "matrix": bool(cables), "cables_in_matrix": len(cables)}
 # ====================================================================== end wt/features
 

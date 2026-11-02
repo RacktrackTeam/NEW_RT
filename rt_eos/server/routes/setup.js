@@ -57,7 +57,7 @@ router.get('/catalogue/vendors', wrap((req, res) => {
 
 // ── Organisation profile ────────────────────────────────────────────
 router.param('orgId', (req, res, next, raw) => {
-  if (!/^\d+$/.test(String(raw))) return res.status(400).json({ error: 'Invalid organisation id' });
+  if (!/^\d+$/.test(String(raw))) return res.status(400).json({ error: 'Invalid organization id' });
   const orgId = Number(raw);
   const level = profile.orgAccessLevel(req.user, orgId);
   if (!level) {
@@ -68,7 +68,7 @@ router.param('orgId', (req, res, next, raw) => {
     return res.status(404).json({ error: 'Organisation not found' });
   }
   if (level !== 'write') {
-    return res.status(403).json({ error: 'Only an organisation admin can see or change the organisation profile' });
+    return res.status(403).json({ error: 'Only an organization admin can see or change the organization profile' });
   }
   req.org = { orgId };
   next();
@@ -101,7 +101,7 @@ router.param('tenantId', (req, res, next, raw) => {
 
 function requireWrite(req, res, next) {
   if (req.setup?.level === 'write') return next();
-  return res.status(403).json({ error: 'Only a site manager or an organisation admin can change setup' });
+  return res.status(403).json({ error: 'Only a site manager or an organization admin can change setup' });
 }
 
 function spaceIdOf(req) {

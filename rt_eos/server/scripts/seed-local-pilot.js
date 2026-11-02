@@ -108,10 +108,13 @@ const TARGET = path.resolve(dbArg);
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const TECHS = ['mandar', 'shankar', 'srikanth', 'jaya', 'geethika', 'prasanna',
   'bushi', 'bargavi', 'krishna', 'thanmai', 'jahnavi', 'sravan'];
+// No password is written in the code (rule 7): every roster account gets RT_SEED_PASSWORD, which must be set.
+const SEED_PASSWORD = process.env.RT_SEED_PASSWORD;
+if (!SEED_PASSWORD) fail(`Set RT_SEED_PASSWORD to the password the roster accounts should get.\n${USAGE}`);
 const ROSTER = [
-  { username: 'owner', password: 'Owner@12345', email: 'owner@racktrack.local', role: 'owner' },
-  { username: 'barry', password: 'Barry@12345', email: 'barry@eos.local', role: 'site_manager' },
-  ...TECHS.map((u) => ({ username: u, password: `${cap(u)}@12345`, email: `${u}@eos.local`, role: 'member' })),
+  { username: 'owner', password: SEED_PASSWORD, email: 'owner@racktrack.local', role: 'owner' },
+  { username: 'barry', password: SEED_PASSWORD, email: 'barry@eos.local', role: 'site_manager' },
+  ...TECHS.map((u) => ({ username: u, password: SEED_PASSWORD, email: `${u}@eos.local`, role: 'member' })),
 ];
 const ROSTER_NAMES = new Set(ROSTER.map((r) => r.username));
 
