@@ -32,3 +32,6 @@ native/ios/App/App.xcworkspace/xcuserdata/
 # API keys for the port agents, never in git
 search_keys.env
 *.env
+
+# Work-area caches (venv, node_modules, model copies)
+_cache/
