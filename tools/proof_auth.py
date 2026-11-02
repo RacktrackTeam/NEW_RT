@@ -79,16 +79,17 @@ def fixtures(auth):
     """admin2 / tech2 in a second organization (Pune DC), admin3 / tech3 in a second site of the first (Chennai DC), and the
     four stored runs: one per site of the first organization, one in the second organization, one from before sign-in."""
     env = dict(os.environ, RACKTRACK_AUTH_DB=settings()["RACKTRACK_AUTH_DB"], RT_SEED_PASSWORD=password(), RT_ENV_FILE=str(AUTH_DIR / ".env"))
-    for org, site, suf in (("Second Organization", "Pune DC", "2"), ("Demo Organization", "Chennai DC", "3")):
+    # test runs live in test organizations only, never in the seeded Demo Organization the owner uses
+    for org, site, suf in (("Test Organization", "Test Hyderabad DC", "t"), ("Second Organization", "Pune DC", "2"), ("Test Organization", "Test Chennai DC", "3")):
         subprocess.run(["node", "scripts/seed-auth.js", "--org", org, "--site", site, "--suffix", suf], cwd=ROOT / "rt_eos" / "server", env=env,
                        check=True, capture_output=True)
     ids = {}
-    for u in ("tech", "tech2", "tech3"):
+    for u in ("techt", "tech2", "tech3"):
         w = Who(auth, None, u)
         ids[u] = (w.user["organization_id"], w.user["tenant_id"])
     src = ROOT / "samples" / "video" / "run_of_vdo1"
     runs = ROOT / "data" / "runs"
-    for rid, who, title in (("fx1hyd000001", "tech", "Hyderabad DC rack (Demo Organization)"), ("fx1chn000001", "tech3", "Chennai DC rack (Demo Organization)"),
+    for rid, who, title in (("fx1hyd000001", "techt", "Test Hyderabad DC rack (Test Organization)"), ("fx1chn000001", "tech3", "Test Chennai DC rack (Test Organization)"),
                             ("fx2pun000001", "tech2", "Pune DC rack (Second Organization)"), ("fxlegacy0001", None, "Run from before sign-in")):
         org, site = ids[who] if who else (None, None)
         d = runs / rid if org is None else runs / str(org) / str(site) / rid
@@ -144,7 +145,7 @@ def seen(w):
 
 
 def test_runs(auth, engine):
-    tech, admin, admin2, owner = (Who(auth, engine, u) for u in ("tech", "admin", "admin2", "owner"))
+    tech, admin, admin2, owner = (Who(auth, engine, u) for u in ("techt", "admint", "admin2", "owner"))
     check("a technician sees only their site's runs", seen(tech) == {"fx1hyd000001"}, f"tech sees {sorted(seen(tech))}")
     codes = {r: [tech.e("GET", f"/api/video/{r}").status_code, tech.e("GET", f"/api/video/{r}/view").status_code,
                  tech.e("GET", f"/video-report/{r}/index.html").status_code, tech.e("GET", f"/api/video/{r}/drift").status_code] for r in FX}
@@ -157,12 +158,12 @@ def test_runs(auth, engine):
     check("the second organization's admin sees only its own run", seen(admin2) == {"fx2pun000001"}, f"admin2 sees {sorted(seen(admin2))}")
     check("the platform owner sees every run", seen(owner) == set(FX), f"owner sees {sorted(seen(owner))}")
     me = tech.e("GET", "/api/me").json()
-    check("the engine knows the person from the session", me.get("name") == "tech" and me.get("role") == "member" and me.get("site_name") == "Hyderabad DC", json.dumps(me))
+    check("the engine knows the person from the session", me.get("name") == "techt" and me.get("role") == "member" and me.get("site_name") == "Test Hyderabad DC", json.dumps(me))
 
 
 # ------------------------------------------------------------------ 3 copies and connections per organization
 def test_copies_and_connections(auth, engine):
-    admin, admin2 = Who(auth, engine, "admin"), Who(auth, engine, "admin2")
+    admin, admin2 = Who(auth, engine, "admint"), Who(auth, engine, "admin2")
     wb = ROOT / "modules" / "sources" / "ground_truth" / "vdo1.xlsx"
     with open(wb, "rb") as f:
         rep = admin.e("POST", "/api/sources/excel", files={"workbook": ("vdo1.xlsx", f, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}).json()
@@ -228,16 +229,16 @@ def test_forgot_and_invite(auth, engine):
         check("the reset password signs in", True)
     except requests.HTTPError as e:
         check("the reset password signs in", False, str(e))
-    admin = Who(auth, engine, "admin")
+    admin = Who(auth, engine, "admint")
     stamp = str(int(time.time()))[-6:]
-    inv = admin.a("POST", f"/api/sites/{Who(auth, engine, 'tech').user['tenant_id']}/invites", json={"email": f"invited{stamp}@demo.local", "role": "member"})
+    inv = admin.a("POST", f"/api/sites/{Who(auth, engine, 'techt').user['tenant_id']}/invites", json={"email": f"invited{stamp}@demo.local", "role": "member"})
     code = (inv.json().get("invite") or {}).get("code")
     j = Who(auth, engine)
     look = j.a("GET", f"/api/invites/{code}")
     acc = j.a("POST", f"/api/invites/{code}/accept", json={"username": f"invited{stamp}", "password": password()})
     me = j.e("GET", "/api/me")
     check("an invite link is accepted and opens the engine on the invited site", inv.status_code == 200 and look.status_code == 200 and acc.status_code == 200
-          and me.status_code == 200 and me.json().get("site_name") == "Hyderabad DC", f"{inv.status_code} {look.status_code} {acc.status_code} {me.status_code}")
+          and me.status_code == 200 and me.json().get("site_name") == "Test Hyderabad DC", f"{inv.status_code} {look.status_code} {acc.status_code} {me.status_code}")
     prov = j.a("GET", "/api/auth/providers")
     check("Google, Apple and Facebook sign-in are gone (no provider route, the owner's order of 2 Nov)", prov.status_code == 404, str(prov.status_code))
 
@@ -267,13 +268,13 @@ def shots(auth, engine, pending_user, new_admin=None):
             pg.goto(engine + "/app/#forgot"); pg.wait_for_selector("#fg-email", state="visible"); snap(pg, "forgot")
             ctx.close()
 
-            ctx, pg = page_for(); sign_in(pg, "tech"); pg.wait_for_selector('[data-screen="home"]:not([hidden])'); snap(pg, "tech_home")
+            ctx, pg = page_for(); sign_in(pg, "techt"); pg.wait_for_selector('[data-screen="home"]:not([hidden])'); snap(pg, "tech_home")
             pg.goto(engine + "/app/#history"); snap(pg, "tech_history")
             hist = pg.inner_text('[data-screen="history"]')
             pg.goto(engine + "/app/#more"); pg.wait_for_selector("#org-links:not([hidden])"); snap(pg, "tech_profile")
             tech_links = pg.inner_text("#org-links"); ctx.close()
 
-            ctx, pg = page_for(); sign_in(pg, "admin"); pg.wait_for_selector('[data-screen="home"]:not([hidden])')
+            ctx, pg = page_for(); sign_in(pg, "admint"); pg.wait_for_selector('[data-screen="home"]:not([hidden])')
             pg.goto(engine + "/app/#more"); pg.wait_for_selector("#org-links:not([hidden])"); snap(pg, "admin_profile")
             admin_links = pg.inner_text("#org-links")
             for path, name in (("/org/settings", "org_organization"), ("/org/site", "org_sites_people"), ("/org/you", "org_settings")):

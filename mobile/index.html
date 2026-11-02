@@ -15,7 +15,7 @@
 <link rel="preload" href="/app/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/app/app.css?v=127">
 <link rel="stylesheet" href="/app/rt/rt-topology.css?v=12">
-<link rel="stylesheet" href="/app/flow.css?v=4">
+<link rel="stylesheet" href="/app/flow.css?v=5">
 <style>
 /* the Drift tab: the database the run is checked against, the matched record, the differences */
 #df-top { display:flex; flex-direction:column; gap:12px; width:100%; }
@@ -279,7 +279,7 @@
     <header class="rsh" id="sec-diff"><span class="rsn">4</span><div><h2>Differences</h2><p class="muted">What the video shows that the record does not, and the other way round, after you Continue. Nothing is ever written back to the database. Next: the report.</p></div></header>
     <div class="rpart" id="res-diff"><div id="diff-top"><p class="muted small">Compare against a database in step 3 first.</p></div></div>
     <header class="rsh" id="sec-report"><span class="rsn">5</span><div><h2>Report</h2><p class="muted">The rack on one page to keep or share: units, devices, free space and, once compared, the differences.</p></div></header>
-    <div class="rpart" id="res-report"><div id="rp-cmp"></div><div id="rp-top"></div></div>
+    <div class="rpart" id="res-report"><div id="rp-cmp"></div><div id="rp-top"></div><div id="res-others"></div></div>
   </section>
 
   <!-- more -->
@@ -362,6 +362,6 @@
 <div id="lb" hidden><img id="lbimg" alt=""><span>tap to close</span></div>
 <script src="/app/topology.js?v=1"></script>
 <script src="/app/rt/rt-topology.js?v=12" defer></script>
-<script src="/app/app.js?v=149"></script>
+<script src="/app/app.js?v=151"></script>
 </body>
 </html>

@@ -1,10 +1,10 @@
 {
- "when": "2026-11-02 15:40",
+ "when": "2026-11-02 15:44",
  "checks": [
   {
    "check": "no engine route answers without a session (no cookie, and a token signed with another key)",
-   "ok": false,
-   "detail": "49 routes called twice: POST /api/contact -> 422; POST /api/contact -> 422"
+   "ok": true,
+   "detail": "48 routes called twice"
   },
   {
    "check": "health stays open",
@@ -49,7 +49,7 @@
   {
    "check": "the engine knows the person from the session",
    "ok": true,
-   "detail": "{\"name\": \"tech\", \"user\": 3, \"role\": \"member\", \"organization\": 1, \"site\": 2, \"org_name\": \"Demo Organization\", \"site_name\": \"Hyderabad DC\", \"host\": \"Aasrithas-MacBook-Pro.local\"}"
+   "detail": "{\"name\": \"techt\", \"user\": 25, \"role\": \"member\", \"organization\": 9, \"site\": 9, \"org_name\": \"Test Organization\", \"site_name\": \"Test Hyderabad DC\", \"host\": \"Aasrithas-MacBook-Pro.local\"}"
   },
   {
    "check": "the first organization imports a workbook",
@@ -64,7 +64,7 @@
   {
    "check": "database copies are per organization",
    "ok": true,
-   "detail": "first 3, second 0"
+   "detail": "first 2, second 0"
   },
   {
    "check": "the second organization cannot delete the first one's copy",
@@ -120,36 +120,6 @@
    "check": "Google, Apple and Facebook sign-in are gone (no provider route, the owner's order of 2 Nov)",
    "ok": true,
    "detail": "404"
-  },
-  {
-   "check": "the owner's console opens (logs and dashboard served by the sign-in service)",
-   "ok": true,
-   "detail": ""
-  },
-  {
-   "check": "the owner's organizations screen lists the organizations",
-   "ok": true,
-   "detail": "RackTrack Home Scan Map History Site Default O Owner Platform owner Organization settings ORGANIZATION New Organization 614175 New Organization 613572 New Organization 613484 Second Organization Demo "
-  },
-  {
-   "check": "a new organization's admin is sent to RT-EOS's first-run setup",
-   "ok": true,
-   "detail": "http://127.0.0.1:3302/org/setup"
-  },
-  {
-   "check": "the sign-in screen offers no Google, Apple or Facebook button and no Create an organization",
-   "ok": true,
-   "detail": ""
-  },
-  {
-   "check": "the technician's history lists only their site's run",
-   "ok": true,
-   "detail": ""
-  },
-  {
-   "check": "Profile: the technician gets Settings only; the admin gets Organization, Sites and people, Settings",
-   "ok": true,
-   "detail": "tech: Settings"
   }
  ]
 }

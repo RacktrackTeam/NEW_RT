@@ -91,3 +91,7 @@ body:not(.signed) main { min-height:100vh; display:flex; flex-direction:column; 
 /* Home: the list uses the width it has */
 .screen[data-screen="home"] > * { max-width:none !important; width:100%; }
 .screen[data-screen="home"] .phead { align-items:flex-end; }
+.phero { background:#fff !important; color:var(--ink) !important; border:1px solid var(--line) !important; }
+.phero .pwho b, .phero b { color:var(--ink) !important; } .phero .avatar.big { background:var(--sunken) !important; color:var(--ink) !important; }
+.pstats > div { box-shadow:none !important; border:1px solid var(--line) !important; background:#fff !important; border-radius:12px !important; }
+#res-others:empty { display:none; }

@@ -204,13 +204,17 @@
       $('now-card').hidden = !running;
       if (running) { var n = stepOf(running.progress, running.status); $('now-title').textContent = running.partial ? 'Rack read, ports next' : 'Reading a rack'; $('now-step').textContent = running.partial ? '' : 'step ' + n + ' of 15'; $('now-card').href = (running.partial ? '#result/' : '#job/') + running.id;
         clearInterval(pollTimer); pollTimer = setInterval(function () { if ((location.hash || '#home') === '#home') loadHome(); }, 5000); }
-      var list = rows.filter(function (x) { return !x.demo && x.status !== 'running'; });
+      // one row per rack: its latest run (with that run's compare state); earlier runs of the rack are listed on its result page
+      var byRack = {}, order = [];
+      rows.filter(function (x) { return !x.demo && x.status !== 'running'; }).forEach(function (x) { var k = String(x.rack_id || x.id).toUpperCase();
+        if (!byRack[k]) { byRack[k] = []; order.push(k); } byRack[k].push(x); });
+      var list = order.map(function (k) { var g = byRack[k].slice().sort(function (a, b) { return (b.started || '').localeCompare(a.started || '') || (b.record ? 1 : 0) - (a.record ? 1 : 0); }); g[0]._scans = g.length; return g[0]; });
       $('home-racks').innerHTML = list.length ? '<div class="card flush">' + list.map(function (x) {
         var href = (x.status === 'done' || x.partial) ? '#result/' + x.id : '#job/' + x.id, s = x.summary || {};
         var rec = x.record ? esc(x.record.source) + ': ' + esc(x.record.rack_key) + (x.record.how === 'exact' ? ', exact' : x.record.how === 'close' ? ', close' : x.record.how === 'picked' ? ', picked' : '') : x.status === 'done' ? 'Not compared yet' : esc(x.error || 'Not finished');
         var diff = x.differences == null ? '' : '<span class="chip ' + (x.differences ? 'part' : 'done') + '">' + (x.differences ? pl(x.differences, 'difference') : 'No differences') + '</span>';
         return '<a class="rkrow" href="' + href + '"><span class="thumb">' + thumb(x) + '<svg class="ic"><use href="#i-rack"/></svg></span><span class="t"><b>' + esc(x.rack_id || x.title || x.name) + '</b>'
-          + '<small>Scanned ' + esc(when(x.started)) + (s.devices != null ? ' · ' + pl(s.devices, 'device') + ' · ' + s.units + ' units' : '') + '</small><small class="rkrec">' + rec + '</small></span><span class="side2">' + diff + '<svg class="ic chev"><use href="#i-next"/></svg></span></a>'; }).join('') + '</div>'
+          + '<small>' + (x._scans > 1 ? x._scans + ' scans, last ' : 'Scanned ') + esc(when(x.started)) + (s.devices != null ? ' · ' + pl(s.devices, 'device') + ' · ' + s.units + ' units' : '') + '</small><small class="rkrec">' + rec + '</small></span><span class="side2">' + diff + '<svg class="ic chev"><use href="#i-next"/></svg></span></a>'; }).join('') + '</div>'
         : '<div class="card waitcard"><b>No racks yet</b><p class="muted small">Scan a rack to begin: record it with the camera or upload a video.</p><a class="btn primary" href="#sweep">Scan a rack</a></div>';
     }).catch(function (e) { $('home-racks').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
@@ -525,13 +529,22 @@
     var fresh = RES.id !== id;
     if (fresh) { RES.sel = null; RES.view = null; RES.pick = null; RES.labelAsked = null; RES.cmp = null; RES.cmpSrc = null; RES.diffMode = null; $('df-top').innerHTML = ''; $('diff-top').innerHTML = ''; $('rp-cmp').innerHTML = ''; }
     RES.id = id; clearInterval(RES.timer); remember(id);
-    RES.tab = tab; Object.keys(TABS).forEach(function (k) { $('res-' + k).hidden = false; }); $('res-elevation').hidden = false; $('res-eyebrow').textContent = TABS[tab]; $('rep-full').hidden = NATIVE;   // every step on one page
+    RES.tab = tab; Object.keys(TABS).forEach(function (k) { $('res-' + k).hidden = false; }); $('res-elevation').hidden = false; $('res-eyebrow').textContent = 'Result'; $('rep-full').hidden = NATIVE;   // every step on one page
     loadView(true);
     watchPorts();
     if (fresh || !RES.cmp) loadDrift();
+    if (fresh) loadOtherScans(id);
   }
   function loadView(first) {
     api('/api/video/' + RES.id + '/view').then(function (v) { RES.view = v; renderResult(v, first); if (first) secTo(RES.tab); }).catch(function (e) { toast(e.message); if (first) go('job/' + RES.id); });
+  }
+  function loadOtherScans(id) {                                         // the other scans of the same rack, newest first (Home lists a rack once)
+    var el = $('res-others'); el.innerHTML = '';
+    api('/api/video/history').then(function (rows) { var me_ = rows.filter(function (x) { return x.id === id; })[0]; if (!me_ || !me_.rack_id || RES.id !== id) return;
+      var others = rows.filter(function (x) { return x.id !== id && x.rack_id && x.rack_id.toUpperCase() === me_.rack_id.toUpperCase(); });
+      if (others.length) el.innerHTML = '<details class="card othscans"><summary>Earlier scans of this rack (' + others.length + ')</summary><ul class="dflines">' + others.map(function (x) { var s = x.summary || {};
+        return '<li><b>' + esc(when(x.started)) + '</b> <span class="muted small">' + (s.devices != null ? pl(s.devices, 'device') + ' · ' + s.units + ' units · ' : '') + (x.record ? 'compared with ' + esc(x.record.source) + ', ' + (x.differences ? pl(x.differences, 'difference') : 'no differences') : 'not compared') + '</span> <a href="#result/' + encodeURIComponent(x.id) + '">Open</a></li>'; }).join('') + '</ul></details>';
+    }).catch(function () {});
   }
   function secTo(tab) { if (!tab || tab === 'rack') return window.scrollTo(0, 0); var el = $('sec-' + tab); if (el) el.scrollIntoView({ block: 'start' }); }   // jump to a step of the result page
   function portCells(ports, max) {
@@ -542,7 +555,7 @@
   function devName(d) { var L = d.layout || {}; return L.vendor ? esc(L.vendor) + (L.model ? ' ' + esc(L.model) : '') : (L.mapped ? 'make and model not read' : ''); }
   function renderResult(v, first) {
     var s = v.rack.summary || {}, devs = v.devices || [], named = devs.filter(function (d) { return d.kind && d.kind !== 'Other'; }).length, lay = devs.filter(function (d) { return d.layout && (d.layout.fitted || d.layout.auto); }).length;
-    $('res-title').textContent = v.title || 'Rack';
+    $('res-title').textContent = (v.rack_id && v.rack_id.id) || v.title || 'Rack';
     // the result has no header: the top bar names the tab
     $('res-pending').hidden = true;
     applyFit(); drawLayer(v, LAY, first); renderReport(v); renderRackSide(v); renderRackAsk(v);
