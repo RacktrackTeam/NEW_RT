@@ -28,6 +28,9 @@ CREATE TABLE IF NOT EXISTS src_devices (copy_id INTEGER, source TEXT, rack_key T
   model TEXT, serial TEXT, asset_tag TEXT, ru_start INTEGER, ru_height INTEGER, imported_at TEXT, PRIMARY KEY (copy_id, rack_key, device_key));
 CREATE TABLE IF NOT EXISTS src_ports (copy_id INTEGER, source TEXT, rack_key TEXT, device_key TEXT, port_number INTEGER, port_name TEXT, port_type TEXT,
   expected_occupied TEXT, expected_dust_cap TEXT);
+CREATE TABLE IF NOT EXISTS src_confirmed (org TEXT, rack_label TEXT, source TEXT, rack_key TEXT, by TEXT, on_ TEXT, PRIMARY KEY (org, rack_label, source));
+CREATE TABLE IF NOT EXISTS src_corrections (org TEXT, rack_label TEXT, ru_start INTEGER, kind TEXT, vendor TEXT, model TEXT, by TEXT, on_ TEXT,
+  PRIMARY KEY (org, rack_label, ru_start));
 """
 ACTIVE = "copy_id = (SELECT MAX(x.copy_id) FROM src_racks x WHERE x.source = {t}.source AND x.rack_key = {t}.rack_key)"
 
@@ -445,7 +448,7 @@ def run_devices(result):
         L = d.get("layout") or {}
         kind = device_kind(d)["kind"]
         out.append({"index": d.get("index"), "ru_start": min(nums), "ru_height": len(nums), "kind": kind,
-                    "manufacturer": _s(L.get("vendor")), "model": _s(L.get("model")), "serial": _s(L.get("serial") or d.get("serial")), "ports": run_ports(d)})
+                    "manufacturer": _s(L.get("vendor") or (L.get("typed") or {}).get("vendor")), "model": _s(L.get("model") or (L.get("typed") or {}).get("model")), "serial": _s(L.get("serial") or d.get("serial")), "ports": run_ports(d)})
     return out
 
 
@@ -580,7 +583,7 @@ def drift(result, record, ports=None):
 # The rungs and thresholds of the rack identity ladders in rt_eos/server/lib/rack_identity.js and vendor/dark_mobile/server/lib/rack_identity.js
 # (identifyFromEvidence: a location narrows, a label names, the devices rung needs MIN_DEVICES, a MIN_SHARE and no rack within TIE_MARGIN).
 # Each step leaves a set of racks; the first step that leaves exactly one names the rack; the later steps only agree or disagree.
-MIN_DEVICES, MIN_SHARE, TIE_MARGIN, NEAR_M = 3, 0.6, 0.1, 300
+MIN_DEVICES, MIN_SHARE, TIE_MARGIN, NEAR_M, VERIFY_AT = 3, 0.6, 0.1, 300, 0.7
 
 
 def _metres(a, b):
@@ -601,10 +604,14 @@ def _share_rung(seen, rows, fits):
     return ranked, (top["rack_key"] if decides else None), tied
 
 
-def identify(source, rack_id, result, position=None, label=None):
+def identify(source, rack_id, result, position=None, label=None, rack_id_how=None, confirmed=None):
     """The rack for a run in one source's copy, step by step. Returns {"steps": [...], "rack_key", "state", "words"}; each step has a
     title, its proof in words, the racks it leaves and its outcome."""
     rows, steps = racks(source), []
+    # 0 a person confirmed the record for this rack label before (this run or an earlier one)
+    if confirmed and any(r["rack_key"] == confirmed["rack_key"] for r in rows):
+        steps.append({"n": 0, "title": "Confirmed before", "proof": f"Confirmed by {confirmed['by']} on {str(confirmed['on_'])[:10]}: {rack_id} is {confirmed['rack_key']}.",
+                      "left": [confirmed["rack_key"]], "outcome": "one"})
     # 1 location: the run's phone position against each rack's site position
     placed = [r for r in rows if r.get("lat") is not None and r.get("lng") is not None]
     if not position or position.get("lat") is None:
@@ -638,35 +645,167 @@ def identify(source, rack_id, result, position=None, label=None):
     steps.append({"n": 3, "title": "Device labels", "proof": ("Serial and asset tag: not read on any device. " if not ids else f"{pl(len(ids), 'serial or asset tag')} read. ")
                   + (f"{pl(len(models), 'model')} read on faceplates ({', '.join(models)}); {t3['fits']} of them are in {t3['rack_key']}." if models and t3 else "No model read on a faceplate."),
                   "left": [one3] if one3 else None, "outcome": "one" if one3 else "none", "ranked": ranked3[:3]})
-    # 4 the layout: devices at their units with the same kind (and model where both are read), a last resort and a tie-breaker
+    # 4 the rack height: the units the video counted cannot be more than the rack holds
+    n_units = int(((result or {}).get("ladder") or {}).get("units") or 0)
+    fits_h = [r for r in rows if r.get("height_ru") and r["height_ru"] >= n_units]
+    if not n_units or not any(r.get("height_ru") for r in rows):
+        steps.append({"n": 4, "title": "Rack height", "proof": "No unit count or no rack heights to compare.", "left": None, "outcome": "skipped"})
+    else:
+        steps.append({"n": 4, "title": "Rack height", "proof": f"The video counted {n_units} units; {pl(len(fits_h), 'rack')} in this copy can hold that many.",
+                      "left": [r["rack_key"] for r in fits_h], "outcome": "one" if len(fits_h) == 1 else "narrowed" if fits_h else "none"})
+    # 5 the rack number inside device labels read on the video (R1 in SP-R1-U17-SW03; rack_identity.js rackNumberInLabel and rackNumberOf)
+    dev_labels = [x for d in ((result or {}).get("devices") or []) for x in (d.get("label_read"), (d.get("layout") or {}).get("label_read")) if x]   # device labels the OCR read (none kept by the runs today)
+    nums = {n for n in (_rack_number_in_label(t) for t in dev_labels) if n is not None}
+    if not dev_labels:
+        steps.append({"n": 5, "title": "Rack number in device labels", "proof": "No device label was read in the video.", "left": None, "outcome": "skipped"})
+    else:
+        hit = [r for r in rows if len(nums) == 1 and next(iter(nums)) in (_rack_number_of(r.get("label")), _rack_number_of(r.get("name")))]
+        steps.append({"n": 5, "title": "Rack number in device labels", "proof": f"Device labels read: {', '.join(dev_labels[:5])}; rack number {', '.join(map(str, sorted(nums))) or 'none'}.",
+                      "left": [r["rack_key"] for r in hit] or None, "outcome": "one" if len(hit) == 1 else "narrowed" if hit else "none"})
+    # 6 the layout: devices at their units with the same kind (and model where both are read), a last resort and a tie-breaker
     kinded = [x for x in seen if x["kind"]]
     def lay_fit(x, r):
         hit = next((d for d in recs[r["rack_key"]] if d.get("ru_start") == x["ru_start"] and d.get("kind") and _norm(d["kind"]) == _norm(x["kind"])
                     and not (x["model"] and d.get("model") and not _same(x["model"], d["model"]))), None)
         return f"{hit.get('name')} at U{x['ru_start']}" if hit else None
     ranked4, one4, tied4 = _share_rung(kinded, rows, lay_fit)
-    steps.append({"n": 4, "title": "Layout", "proof": "; ".join(f"{x['rack_key']}: {x['fits']} of {len(kinded)}" for x in ranked4[:3]) + " devices at the same units with the same kind",
+    steps.append({"n": 6, "title": "Layout", "proof": "; ".join(f"{x['rack_key']}: {x['fits']} of {len(kinded)}" for x in ranked4[:3]) + " devices at the same units with the same kind",
                   "left": [one4] if one4 else None, "outcome": "one" if one4 else "tied" if tied4 else "none", "ranked": ranked4[:3]})
     # the first step that leaves exactly one rack names it; the others agree or disagree
     first = next((st for st in steps if st["outcome"] == "one" and st["left"] and len(st["left"]) == 1), None)
     key = first["left"][0] if first else None
-    others = [st for st in steps if st is not first and st["outcome"] == "one" and st["n"] > 1]
+    others = [st for st in steps if st is not first and st["outcome"] == "one" and st["n"] > 1 and st["n"] != 4]   # the height only narrows; the location only narrows unless first
     against = [st for st in others if st["left"][0] != key]
     lay = next((x for x in ranked4 if x["rack_key"] == key), None)
-    if not key:
-        state, words = "pick", "No step named one rack. Pick the record."
+    top = []
+    if not key:                                  # no step named one rack: the top 3 by the steps that did fire, else ask
+        left = set.intersection(*[set(st["left"]) for st in steps if st.get("left") and st["outcome"] in ("narrowed", "one")] or [keys]) or keys
+        score = {k: 0.0 for k in left}
+        for st in steps:
+            for x in st.get("ranked") or []:
+                if x["rack_key"] in score:
+                    score[x["rack_key"]] += x["share"]
+        for k in sorted(score, key=lambda k: -score[k])[:3]:
+            why = [f"step {st['n']}: {x['fits']} of {len(kinded) if st['n'] == 6 else len(things)}" for st in steps for x in st.get("ranked") or [] if x["rack_key"] == k and x["fits"]]
+            top.append({"rack_key": k, "why": "; ".join(why) or "left in by the steps above"})
+        if top and any(score.values()):
+            state, words = "pick", "No step named one rack. The three closest are below: pick one."
+        else:
+            top, state, words = [], "ask", "Which rack is this? No rack in this copy fits. Search the copy's racks, or type the rack's name."
     else:
         words = f"Step {first['n']} named one rack: {key}."
         for st in others:
             got = next((x for x in st.get("ranked") or [] if x["rack_key"] == key), None)
-            n_of = f", {got['fits']} of {len(kinded) if st['n'] == 4 else len(things)}" if got else ""
+            n_of = f", {got['fits']} of {len(kinded) if st['n'] == 6 else len(things)}" if got else ""
             words += f" Step {st['n']} " + (f"agrees{n_of}." if st["left"][0] == key else f"points to {st['left'][0]}.")
-        if lay and not any(st["n"] == 4 for st in others) and first["n"] != 4:
-            words += f" Step 4: {lay['fits']} of {len(kinded)} devices fit."
-        state = "confirm" if against else "verified" if others else "confirm"
-        words += " Verified." if state == "verified" else " Please confirm the record or pick another."
-    return {"steps": steps, "rack_key": key, "state": state, "words": words, "named_by": first["n"] if first else None}
+        if lay and not any(st["n"] == 6 for st in others) and first["n"] != 6:
+            words += f" Step 6: {lay['fits']} of {len(kinded)} devices fit."
+    # each step's confidence that this is the rack, with its reason; the overall one as the RT-EOS ladder scores: the strongest step
+    # decides, each agreeing step raises it (1 - (1 - a)(1 - b)), a step that points elsewhere lowers it
+    overall = None
+    if key:
+        person = bool(rack_id_how) and any(w in str(rack_id_how).lower() for w in ("verified", "confirmed", "typed", "picked"))
+        for st in steps:
+            st["conf"], st["agrees"] = None, None
+            if st["outcome"] in ("skipped",) or st["n"] == 4:
+                continue
+            if st["n"] == 0:
+                st["conf"], st["agrees"], st["why"] = 1.0, True, st["proof"]
+            elif st["n"] == 1 and st["left"]:
+                inn = key in st["left"]; st["agrees"] = inn
+                st["conf"] = (0.6 / len(st["left"])) if inn else 0.6
+                st["why"] = f"{pl(len(st['left']), 'rack')} near the phone" + ("" if inn else f", and {key} is not one of them")
+            elif st["n"] == 2 and st["left"]:
+                c = 0.95 if person else max(0.5, float(lab.get("confidence") or 0.5)) if lab else 0.5
+                st["conf"] = round(c * (1.0 if st.get("how") == "exact" else 0.9), 2); st["agrees"] = st["left"][0] == key
+                st["why"] = (f"read {lab['text']} at {lab.get('confidence')} confidence" if lab else "no label text read") + (", confirmed by a person" if person else "") \
+                    + (", exact match" if st.get("how") == "exact" else ", match with separators ignored") + ", no other rack has this label"
+            elif st.get("ranked"):
+                own = next((x for x in st["ranked"] if x["rack_key"] == key), None); nxt = next((x for x in st["ranked"] if x["rack_key"] != key), None)
+                n_all = len(kinded) if st["n"] == 6 else len(things)
+                if own and n_all:
+                    st["conf"] = round(own["share"] * (1.0 if st["n"] == 6 else 0.8), 2)          # a model read is not unique to one rack
+                    st["agrees"] = st["outcome"] != "one" or st["left"][0] == key
+                    if not st["agrees"] and nxt:
+                        st["conf"] = round(nxt["share"] * (1.0 if st["n"] == 6 else 0.8), 2)    # how strongly it points elsewhere
+                    st["why"] = f"{own['fits']} of {n_all} " + ("devices at the same units" if st["n"] == 6 else "reads found in this rack") + (f"; the next best rack fits {nxt['fits']} of {n_all}" if nxt else "; no other rack to compare")
+                    if st["agrees"] is False:
+                        st["why"] = f"points to {st['left'][0]}: " + st["why"]
+        lead = max([st for st in steps if st.get("conf") and st.get("agrees")], key=lambda st: st["conf"], default=None)
+        if lead:
+            miss = 1.0
+            for st in steps:
+                if st.get("conf") and st.get("agrees") and st["outcome"] == "one":
+                    miss *= 1 - st["conf"]
+            overall = 1 - min(miss, 1 - lead["conf"])
+            for st in steps:
+                if st.get("conf") and st.get("agrees") is False:
+                    overall *= 1 - st["conf"]
+            overall = round(1.0 if first["n"] == 0 and not against else min(overall, 0.99), 2)
+        state = "verified" if overall is not None and overall >= VERIFY_AT and not against else "confirm"
+        words += f" Verified, {round(100 * overall)} %." if state == "verified" else f" {round(100 * (overall or 0))} %: please confirm the record or pick another."
+    return {"steps": steps, "rack_key": key, "state": state, "words": words, "named_by": first["n"] if first else None, "top": top, "confidence": overall}
+
+
+def _rack_number_of(name):
+    m = re.search(r"(?:\brack|r)[\s_-]?0*(\d+)\s*$", str(name or ""), re.I)
+    return int(m.group(1)) if m else None
+
+
+def _rack_number_in_label(text):
+    found = [int(m.group(1)) for m in re.finditer(r"(?:^|[^A-Z0-9])R0*(\d{1,3})(?=$|[^0-9])", str(text or ""), re.I)]
+    return found[0] if len(found) == 1 else None
 
 
 def pl(n, w):
     return f"{n} {w}{'' if n == 1 else 's'}"
+
+
+# ------------------------------------------------------------------ what people confirmed, kept for the next scan of the same rack
+def confirm_rack(org, rack_label, source, rack_key, by):
+    if not rack_label or not rack_key:
+        return
+    with _db() as c:
+        c.execute("INSERT OR REPLACE INTO src_confirmed VALUES (?,?,?,?,?,?)", (org, rack_label, source, rack_key, by, datetime.datetime.now().isoformat(timespec="minutes")))
+
+
+def confirmed(org, rack_label, source):
+    if not rack_label:
+        return None
+    with _db() as c:
+        x = c.execute("SELECT * FROM src_confirmed WHERE org=? AND rack_label=? AND source=?", (org, rack_label, source)).fetchone()
+        return dict(x) if x else None
+
+
+def save_correction(org, rack_label, ru_start, by, **what):
+    """A person's correction of a device's kind, make or model, kept by rack label and unit for the next run of that rack."""
+    if not rack_label or ru_start is None:
+        return
+    with _db() as c:
+        old = c.execute("SELECT * FROM src_corrections WHERE org=? AND rack_label=? AND ru_start=?", (org, rack_label, ru_start)).fetchone()
+        row = dict(old) if old else {"kind": None, "vendor": None, "model": None}
+        row.update({k: v for k, v in what.items() if k in ("kind", "vendor", "model")})
+        c.execute("INSERT OR REPLACE INTO src_corrections VALUES (?,?,?,?,?,?,?,?)", (org, rack_label, ru_start, row["kind"], row["vendor"], row["model"], by,
+                                                                                    datetime.datetime.now().isoformat(timespec="minutes")))
+
+
+def with_corrections(org, rack_label, result):
+    """The run with the corrections people made on earlier runs of the same rack, where this run has none of its own (a copy)."""
+    if not rack_label or not result:
+        return result
+    with _db() as c:
+        corr = {x["ru_start"]: dict(x) for x in c.execute("SELECT * FROM src_corrections WHERE org=? AND rack_label=?", (org, rack_label))}
+    if not corr:
+        return result
+    out = dict(result, devices=[])
+    for d in result.get("devices") or []:
+        nums = [n for n in (_unum(u) for u in d.get("units") or []) if n is not None]
+        k = corr.get(min(nums)) if nums else None
+        if k:
+            d = dict(d)
+            if k["kind"] and not d.get("kind_override"):
+                d["kind_override"] = {"kind": k["kind"], "by": f"{k['by']} (an earlier scan)", "when": k["on_"], "carried": True}
+            if (k["vendor"] or k["model"]) and not ((d.get("layout") or {}).get("vendor") or (d.get("layout") or {}).get("typed")):
+                d["layout"] = dict(d.get("layout") or {}, typed={"vendor": k["vendor"], "model": k["model"], "by": f"{k['by']} (an earlier scan)", "when": k["on_"]})
+        out["devices"].append(d)
+    return out

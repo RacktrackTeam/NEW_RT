@@ -74,9 +74,9 @@ def test_identify_ladder_on_the_office_run(sdb):
     run = ROOT / "data" / "runs" / "91af02c09bbc"
     result, label = json.loads((run / "result.json").read_text()), json.loads((run / "rack_label.json").read_text())
     out = sdb.identify("netbox", "SP-HYD-RM01-R01-R1", result, None, label)
-    assert [s["outcome"] for s in out["steps"]] == ["skipped", "one", "one", "one"]
+    assert [s["outcome"] for s in out["steps"]] == ["skipped", "one", "one", "narrowed", "skipped", "one"]
     assert out["rack_key"] == "SP-HYD-RM01-R01-R1" and out["named_by"] == 2 and out["state"] == "verified"
-    assert "Step 4 agrees, 10 of 10." in out["words"]
+    assert "Step 6 agrees, 10 of 10." in out["words"]
     # a phone position at the office leaves one rack at step 1; the label then agrees
     near = sdb.identify("netbox", "SP-HYD-RM01-R01-R1", result, {"lat": 17.4487, "lng": 78.3909}, label)
     assert near["named_by"] == 1 and near["steps"][0]["proof"].startswith("1 rack within 300 m")
@@ -86,3 +86,23 @@ def test_identify_ladder_on_the_office_run(sdb):
     # a wrong label that names another rack: the later steps disagree and the person is asked
     wrong = sdb.identify("netbox", "NETWORK RACK 2", result, None, None)
     assert wrong["named_by"] == 2 and wrong["state"] == "confirm" and "points to SP-HYD-RM01-R01-R1" in wrong["words"]
+    # nothing named: the WhatsApp run of NETWORK RACK 1 with no label and units off by one gets the top matches, or a question
+    r2 = json.loads((ROOT / "data" / "runs" / "28c3c52cd91e" / "result.json").read_text())
+    none = sdb.identify("netbox", None, r2, None, None)
+    assert none["rack_key"] is None and none["state"] in ("pick", "ask")
+    assert sdb._rack_number_in_label("SP-R1-U17-SW03") == 1 and sdb._rack_number_in_label("SP-HYD-RM01-R01-R2") is None
+    assert sdb._rack_number_of("SP-HYD-RM01-R01-R1") == 1
+
+
+def test_confirmations_and_corrections_are_kept(sdb):
+    _three_racks(sdb)
+    run = ROOT / "data" / "runs" / "91af02c09bbc"
+    result = json.loads((run / "result.json").read_text())
+    sdb.confirm_rack("default", "SP-HYD-RM01-R01-R1", "netbox", "SP-HYD-RM01-R01-R1", "Aasritha")
+    out = sdb.identify("netbox", "SP-HYD-RM01-R01-R1", result, None, None, None, sdb.confirmed("default", "SP-HYD-RM01-R01-R1", "netbox"))
+    assert out["named_by"] == 0 and out["confidence"] == 1.0 and out["steps"][0]["proof"].startswith("Confirmed by Aasritha on ")
+    sdb.save_correction("default", "SP-HYD-RM01-R01-R1", 13, "Aasritha", kind="Router", vendor="Cisco", model="C1111")
+    fixed = sdb.with_corrections("default", "SP-HYD-RM01-R01-R1", result)
+    d6 = next(d for d in fixed["devices"] if d["index"] == 6)
+    assert sdb.device_kind(d6)["kind"] == "Router" and "an earlier scan" in sdb.device_kind(d6)["words"]
+    assert next(d for d in result["devices"] if d["index"] == 6).get("kind_override") is None       # the stored run is not changed

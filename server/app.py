@@ -522,7 +522,7 @@ def api_video_view(job: str):
     j = job_or_none(job)
     if j is None or j.get("result") is None:
         raise HTTPException(404, "No result yet.")
-    r = j["result"]; base = f"/api/video/{job}/file/"
+    r = SDB.with_corrections(ORG, (j.get("rack_id") or {}).get("id"), j["result"]); base = f"/api/video/{job}/file/"   # corrections made on earlier scans of this rack
     ubox = {u["unit"]: u["box"] for u in r["occupancy_frames"]["rows"] if u.get("box")}
     def lay_of(d):
         C = d.get("closeup") or {}; L = d.get("layout") or {}
@@ -1176,6 +1176,8 @@ def api_set_model(job: str, index: int, body: ModelFix, request: Request):
         raise HTTPException(404, "No such device.")
     hint = {"vendor": body.vendor.strip(), "model": body.model.strip(), "by": read_session(request.cookies.get("rt_session"))["name"],
             "when": datetime.datetime.now().isoformat(timespec="seconds")}
+    SDB.save_correction(ORG, (j.get("rack_id") or {}).get("id"), SDB._unum(min(dv.get("units") or ["u0"], key=lambda u: SDB._unum(u) or 0)), hint["by"],
+                        vendor=hint["vendor"] or None, model=hint["model"] or None)
     if SDB.device_kind(dv)["kind"] not in PORT_KINDS:
         # no reader for this kind (a patch panel, a server...): the name is kept as typed, nothing is mapped
         rf = pathlib.Path(j["dir"]) / "result.json"; r = json.loads(rf.read_text())
@@ -1213,6 +1215,7 @@ def api_fix_kind(job: str, index: int, body: KindFix, request: Request):
         dev.pop("kind_override", None)
     else:
         dev["kind_override"] = {"kind": body.kind, "by": read_session(request.cookies.get("rt_session"))["name"], "when": datetime.datetime.now().isoformat(timespec="seconds")}
+        SDB.save_correction(ORG, (j.get("rack_id") or {}).get("id"), SDB._unum(min(dev.get("units") or ["u0"], key=lambda u: SDB._unum(u) or 0)), dev["kind_override"]["by"], kind=body.kind)
     rf.write_text(json.dumps(r, indent=1))
     if job in JOBS:
         JOBS[job]["result"] = r
@@ -1549,17 +1552,20 @@ def drift_view(j):
         return out
     out["label"] = rack_label_of(j)
     out["rack_id_how"] = (j.get("rack_id") or {}).get("source")
-    out["identify"] = SDB.identify(source, rid, j.get("result"), j.get("position"), out["label"])     # the ladder: location, label, device labels, layout
+    result = SDB.with_corrections(ORG, rid, j.get("result"))
+    out["identify"] = SDB.identify(source, rid, result, j.get("position"), out["label"], out["rack_id_how"], SDB.confirmed(ORG, rid, source))     # the ladder: location, label, device labels, layout
     if db.get("rack_key") and db.get("source") == source and any(r["rack_key"] == db["rack_key"] for r in out["candidates"]):
         out["match"] = {"rack_key": db["rack_key"], "how": "picked", "why": f"Picked by {db.get('by') or 'a person'}."}
     elif out["identify"]["rack_key"]:
         k = out["identify"]["rack_key"]
-        out["match"] = SDB.match(source, rid) if out["identify"]["named_by"] == 2 else {"rack_key": k, "how": "ladder", "why": out["identify"]["words"]}
+        out["match"] = (SDB.match(source, rid) if out["identify"]["named_by"] == 2 else
+                        {"rack_key": k, "how": "confirmed", "why": out["identify"]["steps"][0]["proof"]} if out["identify"]["named_by"] == 0 else
+                        {"rack_key": k, "how": "ladder", "why": out["identify"]["words"]})
     out["chosen"] = bool(db.get("source"))
     out["confirmed"] = bool(db.get("confirmed")) and db.get("source") == source
     if out["match"]:
         out["record"] = SDB.devices(source, out["match"]["rack_key"])
-        out["drift"] = SDB.drift(j.get("result"), out["record"], SDB.ports(source, out["match"]["rack_key"]) if source == "excel" else None)
+        out["drift"] = SDB.drift(result, out["record"], SDB.ports(source, out["match"]["rack_key"]) if source == "excel" else None)
     return out
 
 
@@ -1600,7 +1606,10 @@ def api_video_database(job: str, request: Request, body: dict = Body(...)):
     j["db"] = {"source": source, "rack_key": body.get("rack_key") or None, "confirmed": bool(body.get("confirmed")), "by": read_session(request.cookies.get("rt_session"))["name"],
                "on": datetime.datetime.now().isoformat(timespec="minutes")}
     _save(j)
-    return drift_view(j)
+    dv = drift_view(j)
+    if body.get("confirmed") and dv.get("match"):        # kept for the next scan of this rack (step 0 of the identification)
+        SDB.confirm_rack(ORG, dv["rack_id"], source, dv["match"]["rack_key"], j["db"]["by"])
+    return dv
 
 
 @app.exception_handler(HTTPException)
