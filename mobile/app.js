@@ -8,11 +8,13 @@
   var NATIVE = /RackTrackSweep/.test(navigator.userAgent), SHELL_URL = /Android/.test(navigator.userAgent) ? 'https://localhost/' : 'capacitor://localhost/';
 
   // ---------------------------------------------------------------- api
-  function api(path, opts) {
+  function api(path, opts, again) {
     opts = opts || {};
     return fetch(path, Object.assign({ credentials: 'same-origin', cache: 'no-store' }, opts)).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (j) {
+        if (r.status === 401 && !again) return AUTH.refresh().then(function (ok) { if (ok) return api(path, opts, true); me = null; go('signin'); throw new Error('Sign in first.'); });
         if (r.status === 401) { me = null; go('signin'); throw new Error('Sign in first.'); }
+        if (r.status === 403 && j.org_status) { me = null; go('pending'); throw new Error(j.error); }
         if (!r.ok) throw new Error(j.error || j.detail || r.statusText);
         return j;
       });
@@ -55,8 +57,8 @@
     if (name === 'report') { if (arg) return go('result/' + arg + '/report'); if (LAST) return go('result/' + LAST + '/report'); toast('The report appears here once a video has been analysed.'); return go('home'); }
     var rtab = name === 'result' ? (TABS[arg2] ? arg2 : 'rack') : null;
     if (rtab) { var order = Object.keys(TABS), was = order.indexOf(RES.tab || 'rack'), now = order.indexOf(rtab); document.body.dataset.dir = now > was ? 'fwd' : now < was ? 'back' : 'same'; RES.tab = rtab; }   // the tab's content slides in from the side it came from
-    if (!me && name !== 'signin') { name = 'signin'; }
-    if (me && name === 'signin') { name = 'home'; }
+    if (!me && !AUTH_SCREENS[name]) { name = 'signin'; }
+    if (me && AUTH_SCREENS[name]) { name = 'home'; }
     document.querySelectorAll('.screen').forEach(function (s) { s.hidden = s.dataset.screen !== name; });
     document.body.classList.toggle('on-home', name === 'home');                  // the home page is white, like racktrack.ai
     var tab = name === 'job' ? 'sweep' : (name === 'history' || name === 'models' || name === 'connections' || name === 'copies') ? 'more' : name;
@@ -83,22 +85,96 @@
     if (name === 'sweep') openSweep();
     if (name === 'job') openJob(arg);
     if (name === 'result') openResult(arg, rtab);
+    if (name === 'invite') AUTH.openInvite(arg);
+    if (name === 'forgot') AUTH.openForgot();
   }
   window.addEventListener('hashchange', route);
   $('back').addEventListener('click', function () { if (location.hash.indexOf('#result/') === 0) return go('history'); if (history.length > 1) history.back(); else go('home'); });
 
-  // ---------------------------------------------------------------- sign in
-  $('signin').addEventListener('submit', function (e) {
-    e.preventDefault(); $('si-err').hidden = true;
-    api('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: $('si-name').value }) })
-      .then(function (j) { me = j; setWho(j); try { localStorage.setItem('rt_name', j.name); } catch (x) {} go('home'); })
-      .catch(function (err) { $('si-err').textContent = err.message; $('si-err').hidden = false; });
-  });
+  // ---------------------------------------------------------------- sign in (racktrack-app sign-in)
+  // RT-EOS's sign-in service (auth.sh, rt_eos/server/auth_service.js) signs the session: these screens call it directly and it sets
+  // the rt_access cookie on this host, which the engine reads. Its own screens (organization, sites and people, settings, the
+  // platform owner's console, the first-run setup) are RT-EOS's React screens at <service>/org/, sharing the same cookie.
+  var AUTH_SCREENS = { signin: 1, forgot: 1, invite: 1, pending: 1 };
+  var AUTH = (function () {
+    var base = location.protocol + '//' + location.hostname + ':3302';
+    function url(p) { return base + p; }
+    function call(p, body, method) {
+      return fetch(url(p), { method: method || (body ? 'POST' : 'GET'), credentials: 'include', cache: 'no-store',
+        headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) { var e = new Error(j.error || r.statusText); e.status = r.status; e.body = j; throw e; } return j; }); });
+    }
+    function where() { return fetch('/api/auth-service', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
+      base = j.url ? j.url.replace(/\/+$/, '') : location.protocol + '//' + location.hostname + ':' + (j.port || 3302); }).catch(function () {}); }
+    function refresh() { return call('/api/auth/refresh', {}).then(function () { return true; }).catch(function () { return false; }); }
+    function err(id, e) { $(id).textContent = e.message; $(id).hidden = false; }
+    // after the service answers a sign-in: an admin whose organization is not set up yet goes to RT-EOS's first-run setup; a
+    // technician never does (RT-EOS decides needsSetup); an organization still waiting shows the waiting screen
+    function landed() {
+      return call('/api/auth/me').then(function (j) {
+        var u = j.user || {};
+        if (u.organization && u.organization.status && u.organization.status !== 'active' && u.role !== 'owner') { me = null; return go('pending'); }
+        if (u.role === 'org_admin' && u.setup && u.setup.needsSetup) { location.href = url('/org/setup'); return; }
+        return api('/api/me').then(function (m) { me = m; setWho(m); go('home'); });
+      });
+    }
+    $('signin').addEventListener('submit', function (e) {
+      e.preventDefault(); $('si-err').hidden = true;
+      call('/api/auth/login', { username: $('si-user').value.trim(), password: $('si-pass').value })
+        .then(function () { $('si-pass').value = ''; try { localStorage.setItem('rt_user', $('si-user').value.trim()); } catch (x) {} return landed(); })
+        .catch(function (x) { err('si-err', x); });
+    });
+    $('si-new').addEventListener('click', function (e) { e.preventDefault(); location.href = url('/org/login'); });
+    function social() {     // Google, Apple and Facebook only when the service has their keys
+      call('/api/auth/providers').then(function (j) {
+        var list = (j.providers || []).filter(function (p) { return /google|apple|facebook/i.test(p.id || p); });
+        $('si-social').innerHTML = list.map(function (p) { var id = p.id || p; return '<a class="btn big block" href="' + esc(url('/api/auth/oauth/' + encodeURIComponent(id) + '/start?return=' + encodeURIComponent(location.origin + '/app/'))) + '">Continue with ' + esc(p.name || (id.charAt(0).toUpperCase() + id.slice(1))) + '</a>'; }).join('');
+        $('si-social').hidden = !list.length;
+      }).catch(function () { $('si-social').hidden = true; });
+    }
+    var fgStep = 1;
+    function openForgot() { fgStep = 1; $('fg-step2').hidden = true; $('fg-go').textContent = 'Send the code'; $('fg-err').hidden = true; $('fg-lead').textContent = 'Enter the email on your account. We send a code to it.'; }
+    $('forgot').addEventListener('submit', function (e) {
+      e.preventDefault(); $('fg-err').hidden = true;
+      var email = $('fg-email').value.trim();
+      if (fgStep === 1) return call('/api/auth/forgot-password', { email: email }).then(function () {
+        fgStep = 2; $('fg-step2').hidden = false; $('fg-go').textContent = 'Set the new password'; $('fg-lead').textContent = 'If the email is on an account, a code is on its way. It is valid for one minute.'; $('fg-code').focus();
+      }).catch(function (x) { err('fg-err', x); });
+      call('/api/auth/reset-password', { email: email, code: $('fg-code').value.trim(), password: $('fg-pass').value })
+        .then(function () { toast('Password changed. Sign in with the new one.'); $('fg-pass').value = ''; go('signin'); })
+        .catch(function (x) { err('fg-err', x); });
+    });
+    var ivCode = null;
+    function openInvite(code) {
+      ivCode = code; $('invite').hidden = true; $('iv-err').hidden = true; $('iv-lead').textContent = 'Checking the invite...';
+      call('/api/invites/' + encodeURIComponent(code || '')).then(function (j) {
+        var i = j.invite || {}; $('iv-lead').textContent = 'You are invited to ' + (i.site || 'a site') + (i.organization ? ' of ' + i.organization : '') + (i.email ? ', as ' + i.email : '') + '.'; $('invite').hidden = false;
+      }).catch(function () { $('iv-lead').textContent = 'This invite is not valid any more. Ask for a new one.'; });
+    }
+    $('invite').addEventListener('submit', function (e) {
+      e.preventDefault(); $('iv-err').hidden = true;
+      call('/api/invites/' + encodeURIComponent(ivCode) + '/accept', { username: $('iv-user').value.trim(), password: $('iv-pass').value })
+        .then(function () { return landed(); }).catch(function (x) { err('iv-err', x); });
+    });
+    $('pd-check').addEventListener('click', function () { refresh().then(function () { return landed(); }).catch(function () { toast('Still waiting for approval.'); }); });
+    $('pd-out').addEventListener('click', function () { signout(); });
+    function links(role) {     // Profile: the RT-EOS organization screens, by role (as RT-EOS's own routes allow them)
+      var L = [];
+      if (role === 'owner') L.push(['/org/console', 'Platform console', 'Organizations waiting, activity']);
+      if (role === 'owner' || role === 'org_admin') L.push(['/org/settings', 'Organization', 'Profile, sites, data settings']);
+      if (role === 'owner' || role === 'org_admin' || role === 'site_manager') L.push(['/org/site', 'Sites and people', 'People, roles, invites']);
+      L.push(['/org/you', 'Settings', 'Your account']);
+      $('org-links').innerHTML = L.map(function (x) { return '<a class="grow" href="' + esc(url(x[0])) + '"><svg class="ic"><use href="#i-server"/></svg><span>' + esc(x[1]) + '</span><em>' + esc(x[2]) + '</em><span class="arr">→</span></a>'; }).join('');
+      $('org-links').hidden = false; $('org-label').hidden = false;
+    }
+    return { url: url, call: call, where: where, refresh: refresh, landed: landed, social: social, openForgot: openForgot, openInvite: openInvite, links: links };
+  })();
   function setWho(j) {
-    var site = (j.site && j.site !== 'RackTrack') ? j.site : '', ini = (j.name || '?').trim().charAt(0).toUpperCase();
+    var site = j.site_name || '', ini = (j.name || '?').trim().charAt(0).toUpperCase();
     $('who').textContent = ini; $('av2').textContent = ini; $('av3').textContent = ini; $('who2').textContent = j.name; $('who3').textContent = j.name; $('site2').textContent = site; $('site3').textContent = site; $('site2').hidden = !site; $('site3').hidden = !site;
+    AUTH.links(j.role);
   }
-  function signout() { api('/api/logout', { method: 'POST' }).then(function () { me = null; go('signin'); }); }
+  function signout() { AUTH.call('/api/auth/logout', {}).catch(function () {}).then(function () { me = null; go('signin'); }); }
   $('signout').addEventListener('click', signout); $('signout2').addEventListener('click', signout);
   $('who').addEventListener('click', function () { go('more'); });
 
@@ -1068,11 +1144,22 @@
 
   // ---------------------------------------------------------------- start: who am I, then the splash goes; the service worker for the install
   if ('serviceWorker' in navigator && !NATIVE) { navigator.serviceWorker.register('/sw.js').catch(function () {}); }
-  try { $('si-name').value = localStorage.getItem('rt_name') || ''; } catch (e) {}
+  try { $('si-user').value = localStorage.getItem('rt_user') || ''; } catch (e) {}
   var t0 = Date.now();
   function ready() { setTimeout(function () { $('splash').classList.add('gone'); setTimeout(function () { $('splash').hidden = true; }, 400); }, Math.max(0, 450 - (Date.now() - t0))); }
-  fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+  // racktrack-app sign-in: find the sign-in service, then ask the engine who is signed in (a short session is renewed once)
+  function whoAmI(again) {
+    return fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' }).then(function (r) {
+      if (r.status === 401 && !again) return AUTH.refresh().then(function (ok) { return ok ? whoAmI(true) : null; });
+      if (r.status === 403) return { pending: true };
+      return r.ok ? r.json() : null;
+    });
+  }
+  AUTH.where().then(function () { AUTH.social(); return whoAmI(); }).then(function (j) {
     me = (j && j.name) ? j : null; if (me) setWho(me);
-    if (!location.hash || location.hash === '#signin') location.hash = me ? '#home' : '#signin'; route(); ready();
+    var h = location.hash.slice(1).split('/')[0];
+    if (j && j.pending) location.hash = '#pending';
+    else if (!location.hash || h === 'signin' || (me && AUTH_SCREENS[h])) location.hash = me ? '#home' : '#signin';
+    route(); ready();
   }).catch(function () { route(); ready(); });
 })();

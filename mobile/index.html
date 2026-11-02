@@ -94,18 +94,61 @@
 </header>
 
 <main id="view">
-  <!-- sign in -->
+  <!-- sign in (racktrack-app sign-in: RT-EOS's sign-in service, auth.sh; the screens below call it, the engine trusts its session) -->
   <section class="screen" data-screen="signin" hidden>
     <div class="auth">
       <img class="logo big" src="/app/img/logo-192.png" alt="">
-      <h1>Welcome to RackTrack</h1>
+      <h1>Sign in to RackTrack</h1>
       <p class="muted">Film a rack once. Every unit, device and port is read for you.</p>
       <form class="card form" id="signin">
-        <label>Your name<input id="si-name" autocomplete="name" placeholder="First name" maxlength="40" required></label>
-        <button class="btn primary big block" type="submit">Continue</button>
+        <label>Email or username<input id="si-user" autocomplete="username" maxlength="120" required></label>
+        <label>Password<input id="si-pass" type="password" autocomplete="current-password" maxlength="200" required></label>
+        <button class="btn primary big block" type="submit">Sign in</button>
         <p class="err" id="si-err" hidden></p>
+        <div class="si-social" id="si-social" hidden></div>
+        <p class="si-links"><a href="#forgot">Forgot password?</a> <span class="muted">·</span> <a id="si-new" href="#">Create an organization</a></p>
       </form>
       <p class="muted small" id="si-server" hidden></p>
+    </div>
+  </section>
+  <section class="screen" data-screen="forgot" hidden>
+    <div class="auth">
+      <h1>Reset your password</h1>
+      <p class="muted" id="fg-lead">Enter the email on your account. We send a code to it.</p>
+      <form class="card form" id="forgot">
+        <label>Email<input id="fg-email" type="email" autocomplete="email" maxlength="120" required></label>
+        <div id="fg-step2" hidden>
+          <label>Code from the email<input id="fg-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6"></label>
+          <label>New password<input id="fg-pass" type="password" autocomplete="new-password" maxlength="200"></label>
+          <p class="muted small">At least 8 characters, with an upper and a lower case letter, a digit and a symbol.</p>
+        </div>
+        <button class="btn primary big block" type="submit" id="fg-go">Send the code</button>
+        <p class="err" id="fg-err" hidden></p>
+        <p class="si-links"><a href="#signin">Back to sign in</a></p>
+      </form>
+    </div>
+  </section>
+  <section class="screen" data-screen="invite" hidden>
+    <div class="auth">
+      <h1>Join your team</h1>
+      <p class="muted" id="iv-lead">Checking the invite...</p>
+      <form class="card form" id="invite" hidden>
+        <label>Choose a username<input id="iv-user" autocomplete="username" maxlength="32" required></label>
+        <label>Choose a password<input id="iv-pass" type="password" autocomplete="new-password" maxlength="200" required></label>
+        <p class="muted small">At least 8 characters, with an upper and a lower case letter, a digit and a symbol.</p>
+        <button class="btn primary big block" type="submit">Join</button>
+        <p class="err" id="iv-err" hidden></p>
+      </form>
+    </div>
+  </section>
+  <section class="screen" data-screen="pending" hidden>
+    <div class="auth">
+      <h1>Waiting for approval</h1>
+      <p class="muted" id="pd-lead">Your organization is set up. The RackTrack team approves every new organization before it can scan. You can sign in again once it is approved.</p>
+      <div class="card form">
+        <button class="btn primary big block" type="button" id="pd-check">Check again</button>
+        <button class="btn big block" type="button" id="pd-out">Sign out</button>
+      </div>
     </div>
   </section>
 
@@ -248,6 +291,8 @@
       <button class="grow" id="install-btn" type="button"><svg class="ic"><use href="#i-phone"/></svg><span>Install on the phone</span><em>How to</em><span class="arr">→</span></button>
     </div>
     <span class="glabel a4" id="install-label" hidden></span><div id="install-row" hidden></div>
+    <span class="glabel a4" id="org-label" hidden>Organization</span>
+    <div class="card group a4" id="org-links" hidden></div>
     <span class="glabel a4">Account</span>
     <div class="card group a4">
       <button class="grow danger" id="signout" type="button"><svg class="ic"><use href="#i-out"/></svg><span>Sign out</span></button>
@@ -304,6 +349,6 @@
 <div id="lb" hidden><img id="lbimg" alt=""><span>tap to close</span></div>
 <script src="/app/topology.js?v=1"></script>
 <script src="/app/rt/rt-topology.js?v=12" defer></script>
-<script src="/app/app.js?v=145"></script>
+<script src="/app/app.js?v=146"></script>
 </body>
 </html>
