@@ -34,7 +34,7 @@
     el.textContent = t; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.hidden = true; }, 3200); }
 
   // ---------------------------------------------------------------- routing: #signin #home #history #sweep #job/<id> #result/<id> #report/<id> #more #models
-  var DETAIL = { job: 'Run', result: 'Result', history: 'History', models: 'Models and accuracy', connections: 'Connections' };
+  var DETAIL = { job: 'Run', result: 'Result', history: 'History', models: 'Models and accuracy', connections: 'Connections', copies: 'Database copies' };
   // the result's bar: Main is the rack read from the data; the other four show the report's steps in groups
   var TABS = { rack: 'Rack', devices: 'Devices', elevation: 'Layout', report: 'Report', drift: 'Drift' };   // ports live on each device (user, 2026-10-27: one place per device)
   var KINDS = ['Switch', 'Router', 'Firewall', 'Gateway', 'Patch Panel', 'Server', 'Storage unit', 'PDU', 'UPS', 'Other'];
@@ -59,7 +59,7 @@
     if (me && name === 'signin') { name = 'home'; }
     document.querySelectorAll('.screen').forEach(function (s) { s.hidden = s.dataset.screen !== name; });
     document.body.classList.toggle('on-home', name === 'home');                  // the home page is white, like racktrack.ai
-    var tab = name === 'job' ? 'sweep' : (name === 'history' || name === 'models' || name === 'connections') ? 'more' : name;
+    var tab = name === 'job' ? 'sweep' : (name === 'history' || name === 'models' || name === 'connections' || name === 'copies') ? 'more' : name;
     var rn = $('rnav'), wide = window.matchMedia('(min-width:1000px)').matches;             // web layout: the result's tabs sit at the top of the page, not in a bar at the bottom (user, 2026-10-29)
     if (!rn._home) { rn._home = rn.parentNode; rn._next = rn.nextSibling; }
     if (wide && rtab) { if (!rn.classList.contains('inpage')) { document.querySelector('[data-screen="result"]').insertBefore(rn, $('res-pending')); rn.classList.add('inpage'); } }
@@ -78,6 +78,8 @@
       var done = mine.filter(function (x) { return x.status === 'done' && x.summary; }); $('ps-racks').dataset.n = done.length; $('ps-units').dataset.n = done.reduce(function (t, x) { return t + (x.summary.units || 0); }, 0); $('ps-devs').dataset.n = done.reduce(function (t, x) { return t + (x.summary.devices || 0); }, 0); countUp($('ps-racks').parentNode.parentNode); }).catch(function () {});
     if (name === 'history') loadHistory();
     if (name === 'connections') loadConnections();
+    if (name === 'copies') loadCopies();
+    if (name === 'more') api('/api/sources/copies').then(function (d) { $('copies-count').textContent = d.copies.length ? d.copies.length + (d.copies.length === 1 ? ' copy' : ' copies') : ''; }).catch(function () {});
     if (name === 'sweep') openSweep();
     if (name === 'job') openJob(arg);
     if (name === 'result') openResult(arg, rtab);
@@ -851,6 +853,18 @@
     var t = b.closest('form').dataset.cn;
     if (b.hasAttribute('data-cntest')) { b.disabled = true; b.textContent = 'Testing...'; return api('/api/connections/' + t + '/test', { method: 'POST' }).then(renderConnections).catch(function (er) { toast(er.message); loadConnections(); }); }
     api('/api/connections/' + t, { method: 'DELETE' }).then(function (d) { toast('Login removed. The local test copy is used again.'); renderConnections(d); }).catch(function (er) { toast(er.message); }); });
+  // Database copies (Profile): every copy with its source, version, time and counts; the active ones marked; delete
+  function loadCopies() { api('/api/sources/copies').then(renderCopies).catch(function (e) { $('cp-list').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
+  function renderCopies(d) {
+    if (!d.copies.length) { $('cp-list').innerHTML = '<div class="card"><p class="muted">No copy yet. Read a workbook or copy NetBox or the CMDB in from a run\'s Drift tab.</p></div>'; return; }
+    $('cp-list').innerHTML = '<div class="card flush"><table class="dftable cptable"><thead><tr><th>Source</th><th>Version</th><th>Copied</th><th class="num">Racks</th><th class="num">Devices</th><th class="num wide">Ports</th><th class="wide">From</th><th>State</th><th></th></tr></thead><tbody>'
+      + d.copies.map(function (c) { return '<tr data-copy="' + c.id + '"' + (c.active ? ' class="on"' : '') + '><td><b>' + esc(d.sources[c.source] || c.source) + '</b></td><td class="mono">v' + c.version + '</td><td class="mono small">' + esc(c.imported_at.replace('T', ' ').slice(0, 16)) + '</td>'
+        + '<td class="num">' + c.racks + '</td><td class="num">' + c.devices + '</td><td class="num wide">' + (c.ports || 0) + '</td><td class="wide small muted">' + esc(String(c.file || '').replace(/^workbook_[0-9a-f]{8}_/, '')) + '</td>'
+        + '<td>' + (c.active ? '<span class="cpon">Active</span>' : '<span class="muted small">Older</span>') + '</td><td><button class="btn danger" type="button" data-cpdel="' + c.id + '">Delete</button></td></tr>'; }).join('') + '</tbody></table></div>';
+  }
+  document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-cpdel]'); if (!b) return;
+    if (!confirm('Delete this copy? Runs checked against it use the copy before it, if there is one.')) return;
+    api('/api/sources/copies/' + b.dataset.cpdel, { method: 'DELETE' }).then(function (d) { toast('Copy deleted.'); renderCopies(d); }).catch(function (er) { toast(er.message); }); });
   // the Devices tab shows ONE thing: a device or a unit (RES.pick), or the list to choose one from
   function selectDevice(i, auto) {
     RES.pick = { kind: 'dev', id: i }; RES.sel = i;

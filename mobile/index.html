@@ -30,6 +30,9 @@
 .wbrep { display:flex; flex-direction:column; gap:10px; border-top:1px solid var(--line, #e5e7eb); padding-top:12px; margin-top:4px; }
 .wbkinds { display:flex; flex-wrap:wrap; gap:6px 16px; margin:0; padding:0; list-style:none; font-size:13px; }
 .wbtable { max-height:none; } .wbtable td:first-child { white-space:nowrap; }
+.cptable td.num { text-align:right; font-variant-numeric:tabular-nums; } .cptable tr.on td { background:#f8fafc; }
+.cpon { display:inline-block; padding:2px 8px; border-radius:3px; font-size:12px; font-weight:600; background:#ecfdf3; color:#166534; }
+@media (max-width:600px) { .cptable .wide { display:none; } }
 .cnlist { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:14px; width:100%; }
 .cnform { display:flex; flex-direction:column; gap:10px; } .cnform label { display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--t2); }
 .cnstate { display:inline-block; padding:2px 8px; border-radius:3px; font-size:12px; font-weight:600; background:#f3f4f6; color:var(--t2); }
@@ -237,6 +240,7 @@
     <span class="glabel a3">Databases</span>
     <div class="card group a3">
       <a class="grow" href="#connections"><svg class="ic"><use href="#i-server"/></svg><span>Connections</span><em>NetBox, ServiceNow</em><span class="arr">→</span></a>
+      <a class="grow" href="#copies"><svg class="ic"><use href="#i-history"/></svg><span>Database copies</span><em id="copies-count"></em><span class="arr">→</span></a>
     </div>
     <span class="glabel a3">RackTrack</span>
     <div class="card group a3">
@@ -255,6 +259,12 @@
   <section class="screen" data-screen="connections" hidden>
     <div class="phead"><div><h1>Connections</h1><p class="muted">The logins RackTrack uses to copy your NetBox and ServiceNow records in. Passwords and tokens are kept encrypted and never shown again. With no login saved, the local test copy is used.</p></div></div>
     <div id="cn-list" class="cnlist"></div>
+  </section>
+
+  <!-- every copy of a database read into ours (Excel, NetBox, CMDB): version, time, counts, the active one marked -->
+  <section class="screen" data-screen="copies" hidden>
+    <div class="phead"><div><h1>Database copies</h1><p class="muted">Every time a workbook, NetBox or the CMDB is copied in, a new copy is kept. The newest copy of each rack is the one checked. Deleting a copy brings the one before it back.</p></div></div>
+    <div id="cp-list"></div>
   </section>
 
   <section class="screen" data-screen="models" hidden>
