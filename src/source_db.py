@@ -6,6 +6,7 @@ Three sources fill one table set in data/sources.db (racks and devices, each row
   cmdb    ServiceNow's Table API, read from the local ServiceNow mock (modules/sources/mock/servicenow.js)
 Nothing is ever written back to a source. Nothing here calls an outside system.
 """
+import contextvars
 import datetime
 import json
 import os
@@ -32,9 +33,20 @@ CREATE TABLE IF NOT EXISTS src_ports (copy_id INTEGER, source TEXT, rack_key TEX
 ACTIVE = "copy_id = (SELECT MAX(x.copy_id) FROM src_racks x WHERE x.source = {t}.source AND x.rack_key = {t}.rack_key)"
 
 
+# racktrack-app sign-in: each organization has its own copies. The engine sets ORG for the request being served
+# (server/app.py); with no organization set (tests, scripts) the one shared file is used, as before.
+ORG = contextvars.ContextVar("source_db_org", default=None)
+
+
+def db_path():
+    org = ORG.get()
+    return DB if org is None else DB.parent / "sources_by_org" / re.sub(r"[^A-Za-z0-9_-]", "_", str(org)) / DB.name
+
+
 def _db():
-    DB.parent.mkdir(parents=True, exist_ok=True)
-    c = sqlite3.connect(DB); c.row_factory = sqlite3.Row
+    path = db_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    c = sqlite3.connect(path); c.row_factory = sqlite3.Row
     if c.execute("SELECT 1 FROM sqlite_master WHERE name='src_racks'").fetchone() and \
             "copy_id" not in [r[1] for r in c.execute("PRAGMA table_info(src_racks)")]:
         c.executescript("DROP TABLE src_racks; DROP TABLE IF EXISTS src_devices;")   # the first layout had no copies: its rows are copied in again
