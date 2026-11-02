@@ -42,3 +42,16 @@ def test_drift_rows(sdb):
     assert any("U1 to U20 only" in x["words"] for x in d["rows"])
     assert any("CM" in n for n in d["notes"])
     json.dumps(d)
+
+
+def test_drift_uses_the_kind_the_result_screen_shows(sdb):
+    """The make and model step's kind (layout.kind) wins over the classifier, as on the result screen; a person's correction wins over both."""
+    result = {"devices": [
+        {"index": 1, "units": ["u20"], "classification": {"label": "Switch"}, "layout": {"ok": True, "kind": "router", "status": "not_mapped", "model_read": "ACX-09CW2A"}},
+        {"index": 2, "units": ["u19"], "classification": {"label": "Other"}, "layout": {"ok": True, "kind": "firewall", "status": "mapped_auto"}},
+        {"index": 3, "units": ["u18"], "classification": {"label": "Switch"}, "layout": {"ok": True, "kind": "router", "status": "not_mapped"}},
+        {"index": 4, "units": ["u17"], "kind_override": {"kind": "Server"}, "layout": {"ok": True, "kind": "switch", "fitted": True}}]}
+    kinds = {d["index"]: d["kind"] for d in sdb.run_devices(result)}
+    assert kinds == {1: "Router", 2: "Firewall", 3: "Switch", 4: "Server"}
+    record = [{"name": "R", "kind": "Router", "ru_start": 20, "ru_height": 1}, {"name": "F", "kind": "Firewall", "ru_start": 19, "ru_height": 1}]
+    assert not [r for r in sdb.drift(result, record)["rows"] if r["type"] == "kind"]

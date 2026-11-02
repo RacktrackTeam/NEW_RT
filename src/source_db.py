@@ -99,50 +99,59 @@ CMDB_KIND = {"cmdb_ci_ip_switch": "Switch", "cmdb_ci_netgear": "Patch Panel", "c
              "cmdb_ci_router": "Router", "cmdb_ci_pdu": "PDU", "cmdb_ci_storage_device": "Storage unit"}
 
 
-def _get(base, path):
+def _get(base, path, headers=None):
     """GET a JSON page from a local mock. Only this machine is ever called: never a real NetBox or ServiceNow."""
     import urllib.parse, urllib.request
     host = urllib.parse.urlparse(base).hostname
     if host not in ("127.0.0.1", "localhost"):
         raise ValueError("Only the local mocks are read today, never a real system.")
     try:
-        with urllib.request.urlopen(base.rstrip("/") + path, timeout=15) as r:
+        with urllib.request.urlopen(urllib.request.Request(base.rstrip("/") + path, headers=headers or {}), timeout=15) as r:
             return json.loads(r.read().decode())
     except OSError as e:
-        raise ConnectionError(f"The mock at {base} does not answer ({e}). Start it with sources.sh.")
+        raise ConnectionError(f"{base} does not answer ({e}).")
 
 
-def import_netbox():
-    """NetBox's REST API (dcim/racks and dcim/devices), from the local NetBox mock."""
-    rk = _get(NETBOX_URL, "/api/dcim/racks/?limit=1000")["results"]
+def _login(org, type_, default):
+    """The organization's saved login (src/connections.py), else the local mock with no login."""
+    import connections
+    lg = connections.resolve(org, type_) if org else None
+    return (lg["address"], connections.headers(type_, lg["secret"])) if lg else (default, None)
+
+
+def import_netbox(org=None):
+    """NetBox's REST API (dcim/racks and dcim/devices), through the organization's saved login, else the local NetBox mock."""
+    base, hd = _login(org, "netbox", NETBOX_URL)
+    rk = _get(base, "/api/dcim/racks/?limit=1000", hd)["results"]
     racks = [{"rack_key": r["name"], "name": r["name"], "label": r.get("facility_id") or r["name"], "height_ru": _int(r.get("u_height"))} for r in rk]
     devices = []
-    for d in _get(NETBOX_URL, "/api/dcim/devices/?limit=10000")["results"]:
+    for d in _get(base, "/api/dcim/devices/?limit=10000", hd)["results"]:
         if not d.get("rack"):
             continue
         ty = d.get("device_type") or {}
         devices.append({"rack_key": d["rack"]["name"], "device_key": d["name"], "name": d["name"], "role": (d.get("role") or {}).get("name"),
                         "manufacturer": _s((ty.get("manufacturer") or {}).get("name")), "model": _s(ty.get("model")), "serial": _s(d.get("serial")),
                         "asset_tag": _s(d.get("asset_tag")), "ru_start": _int(d.get("position")), "ru_height": _int(ty.get("u_height"))})
-    return _store("netbox", racks, devices, NETBOX_URL)
+    return _store("netbox", racks, devices, base)
 
 
-def import_cmdb():
-    """ServiceNow's Table API (cmdb_ci_rack, cmdb_rel_ci and the device classes in cmdb_ci), from the local ServiceNow mock."""
-    rk = _get(SERVICENOW_URL, "/api/now/table/cmdb_ci_rack?sysparm_limit=10000")["result"]
+def import_cmdb(org=None):
+    """ServiceNow's Table API (cmdb_ci_rack, cmdb_rel_ci and the device classes in cmdb_ci), through the saved login, else the local mock."""
+    base, hd = _login(org, "cmdb", SERVICENOW_URL)
+    rk = _get(base, "/api/now/table/cmdb_ci_rack?sysparm_limit=10000", hd)["result"]
     racks = [{"rack_key": r["name"], "name": r["name"], "label": r["name"], "height_ru": _int(r.get("rack_units"))} for r in rk]
     rack_of = {r["sys_id"]: r["name"] for r in rk}
-    child_rack = {x["child"]["value"]: rack_of[x["parent"]["value"]] for x in _get(SERVICENOW_URL, "/api/now/table/cmdb_rel_ci?sysparm_limit=100000")["result"]
+    child_rack = {x["child"]["value"]: rack_of[x["parent"]["value"]] for x in _get(base, "/api/now/table/cmdb_rel_ci?sysparm_limit=100000", hd)["result"]
                   if x["parent"]["value"] in rack_of}
     devices = []
-    for d in _get(SERVICENOW_URL, "/api/now/table/cmdb_ci?sysparm_limit=100000&sysparm_display_value=true")["result"]:
+    for d in _get(base, "/api/now/table/cmdb_ci?sysparm_limit=100000&sysparm_display_value=true", hd)["result"]:
         if d.get("sys_id") not in child_rack:
             continue
         devices.append({"rack_key": child_rack[d["sys_id"]], "device_key": d["name"], "name": d["name"], "role": _s(d.get("short_description")),
                         "kind": CMDB_KIND.get(d.get("sys_class_name")) or _kind(d.get("short_description")), "manufacturer": _s(d.get("manufacturer")),
                         "model": _s(d.get("model_id")), "serial": _s(d.get("serial_number")), "asset_tag": _s(d.get("asset_tag")),
                         "ru_start": _int(d.get("u_position")), "ru_height": _int(d.get("u_height"))})
-    return _store("cmdb", racks, devices, SERVICENOW_URL)
+    return _store("cmdb", racks, devices, base)
 
 
 def racks(source=None):
@@ -186,6 +195,18 @@ def _unum(u):
     return int(m.group()) if m else None
 
 
+LAYOUT_KIND = {"router": "Router", "switch": "Switch", "firewall": "Firewall", "gateway": "Gateway"}
+
+
+def layout_kind(L):
+    """The kind the make and model step identified (what the result screen shows), when that step read the device."""
+    if not L or not L.get("ok") or L.get("error"):
+        return None
+    if not (L.get("fitted") or L.get("auto") or L.get("vendor_read") or L.get("model_read") or str(L.get("status") or "").startswith("mapped")):
+        return None
+    return LAYOUT_KIND.get(str(L.get("kind") or "").strip().lower())
+
+
 def run_devices(result):
     """The run's devices as start unit, height, kind, make, model and serial (None where not read)."""
     out = []
@@ -194,7 +215,7 @@ def run_devices(result):
         if not nums:
             continue
         L = d.get("layout") or {}
-        kind = (d.get("kind_override") or {}).get("kind") or d.get("type") or (d.get("classification") or {}).get("label")
+        kind = (d.get("kind_override") or {}).get("kind") or layout_kind(L) or d.get("type") or (d.get("classification") or {}).get("label")
         out.append({"index": d.get("index"), "ru_start": min(nums), "ru_height": len(nums), "kind": None if kind in (None, "", "Other", "Not sure") else kind,
                     "manufacturer": _s(L.get("vendor")), "model": _s(L.get("model")), "serial": _s(L.get("serial") or d.get("serial"))})
     return out
