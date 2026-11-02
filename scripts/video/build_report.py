@@ -41,7 +41,7 @@ esc = html.escape
 
 # ---------------------------------------------------------------- small html helpers
 def pill(status):
-    c, n = STATUS.get(status, ("", status or "–"))
+    c, n = STATUS.get(status, ("", status or "-"))
     return f'<span class="pill {c}">{esc(n)}</span>'
 
 
@@ -84,7 +84,7 @@ def stitch_card(st):
             ("Blurry frames", f'{100 * cap.get("blur_share", 0):.0f} %', "8 % or fewer"),
             ("Sideways drift", f'{100 * cap.get("sideways_fw", 0):.0f} % of the frame width', "under 40 %"),
             ("Weakest match", f'{st.get("min_pair_inliers")} matched points', "30 or more"),
-            ("Straightened", {"corrected": "yes", "parallel": "already straight", "not_found": "no vertical edges found", "off": "off"}.get(st.get("vertical_status"), "–")
+            ("Straightened", {"corrected": "yes", "parallel": "already straight", "not_found": "no vertical edges found", "off": "off"}.get(st.get("vertical_status"), "-")
              + (f', tilt left {st["residual_tilt_deg"]:+.2f}°' if st.get("residual_tilt_deg") is not None else ""), "")] if cap else []
     tbl = ('<details class="irest"><summary>The numbers</summary><div class="tw"><table><thead><tr><th>Measured</th><th>On this video</th><th>Good when</th></tr></thead><tbody>'
            + "".join(f'<tr><td>{esc(a_)}</td><td class="n">{esc(b_)}</td><td class="muted">{esc(c_)}</td></tr>' for a_, b_, c_ in meas) + "</tbody></table></div></details>") if meas else ""
@@ -128,7 +128,7 @@ def dev_type(d):
         return '<span class="pill unc">unsure</span>' + (f' <span class="muted">the finder suggests {esc(d["type_hint"])}</span>' if d.get("type_hint") else "")
     if d.get("type"):
         return f'{esc(d["type"])} <span class="muted">{round(100 * d["type_confidence"])} % · {d["type_votes"]} votes</span>'
-    return "–"
+    return "-"
 
 
 def sentences(text):
@@ -195,7 +195,7 @@ def vs(img_points, frm_points):
 
 def best_cell(d):
     if d is None or d.get("best_frame") is None:
-        return "–"
+        return "-"
     return f'<span class="bf"><img src="pics/section_D{d["index"]}.jpg" alt="D{d["index"]} in frame {d["best_frame"]}" loading="lazy"><b>frame {d["best_frame"]}</b></span>'
 
 
@@ -608,22 +608,22 @@ def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=N
         f'<div class="vs"><div class="m img"><b>Why the rack image missed it</b><ul>{li(w1)}</ul></div><div class="m frm"><b>How the frames fixed it</b><ul>{li(w2)}</ul></div></div></article>'
         for kind, what, units, c1, c2, w1, w2 in findings)
     ladder_story = cards_
-    frame_rows = [(n(f["frame"]), n(f["quality"]), n(f'{f["rack_y"][0]}–{f["rack_y"][1]}'), n(f["units"]), n(f'{f["pitch_on_rack"]} px'), n(f'{f["occupied"]} · {f["free"]} · {f["uncertain"]}'), n(f["boxes"])) for f in r["frames"]]
+    frame_rows = [(n(f["frame"]), n(f["quality"]), n(f'{f["rack_y"][0]}-{f["rack_y"][1]}'), n(f["units"]), n(f'{f["pitch_on_rack"]} px'), n(f'{f["occupied"]} · {f["free"]} · {f["uncertain"]}'), n(f["boxes"])) for f in r["frames"]]
     T["step1"] = (
-        ccards([("Units", lad["units"], rack["units"], ""), ("Unit height", f'{lh[0]}–{lh[1]} px', f'{rh[0]}–{rh[1]} px', ""),
+        ccards([("Units", lad["units"], rack["units"], ""), ("Unit height", f'{lh[0]}-{lh[1]} px', f'{rh[0]}-{rh[1]} px', ""),
                 ("Unit pitch", f'{lad["pitch_px"]:.0f} px', f'{rack["pitch_px"]:.0f} px', ""), ("Unit lines voted", lad["votes"], None, f'from {lad["frames"]} frames'),
                 ("Lines filled in", lad["inserted"], None, "where no frame drew one")])
         + '<section class="card block"><div class="pair">'
-        + fig("pics/rack_units_rackonly.jpg", "Rack image alone", f'{rack["units"]} units · {rh[0]}–{rh[1]} px tall')
-        + fig("pics/rack_units.jpg", "From the frames", f'{lad["units"]} units · {lh[0]}–{lh[1]} px tall')
+        + fig("pics/rack_units_rackonly.jpg", "Rack image alone", f'{rack["units"]} units · {rh[0]}-{rh[1]} px tall')
+        + fig("pics/rack_units.jpg", "From the frames", f'{lad["units"]} units · {lh[0]}-{lh[1]} px tall')
         + "</div>"
         + "</section>"
         + '<section class="card block"><h2>Why ' + str(rack['units']) + ' and not ' + str(lad['units']) + '</h2>' + eq + '<div class="ladwrap">' + ladder_svg(rack["rows"], rows)
         + '<div class="ladtext">' + ladder_story + "</div></div>"
-        + vs([f"One ladder fitted once on the stitched image, pitch {rack['pitch_px']:.0f} px.", f"{rack['units']} units, {rh[0]}–{rh[1]} px tall.",
+        + vs([f"One ladder fitted once on the stitched image, pitch {rack['pitch_px']:.0f} px.", f"{rack['units']} units, {rh[0]}-{rh[1]} px tall.",
               "Where the stitching ghosts or stretches the rails, units merge or are missed."],
              [f"Every one of the {lad['frames']} frames gets its own ladder, as a real photo.", f"Their {lad['votes']} unit lines are mapped onto the rack image and voted.",
-              f"{lad['units']} units, {lh[0]}–{lh[1]} px tall" + (f", {lad['inserted']} filled in at the local pitch." if lad["inserted"] else ".")])
+              f"{lad['units']} units, {lh[0]}-{lh[1]} px tall" + (f", {lad['inserted']} filled in at the local pitch." if lad["inserted"] else ".")])
         + "</section>")
     # Step 2
     changed_units = [u for u in rows if u["changed"]]
@@ -700,7 +700,7 @@ def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=N
         + "<h2>Devices</h2>"
         + '<p class="muted hint">Each chip is a frame whose detector box shaped the device. Click a row for the two full messages.</p>'
         + '<div class="evs">' + "".join(ev_row(
-            f'<span class="u">{dot(d["index"])}D{d["index"]}</span><span class="rs"><b>{esc(d["top"].upper())}{" – " + esc(d["bottom"].upper()) if d["height"] > 1 else ""}</b> · {d["height"]}U</span>'
+            f'<span class="u">{dot(d["index"])}D{d["index"]}</span><span class="rs"><b>{esc(d["top"].upper())}{" - " + esc(d["bottom"].upper()) if d["height"] > 1 else ""}</b> · {d["height"]}U</span>'
             f'<span class="chips">{"".join(chip(f_, "box", "its detector box shaped this device") for f_ in d.get("frames_shape") or []) or "<span class=muted>no frame box owns it</span>"}</span>'
             f'<span class="sv">{best_cell(d)}{"" if d["same_span_as_rack"] else " <b class=chg>not on the rack image</b>"}</span>',
             two_msgs(d.get("why_image"), "<ul>" + "".join(f"<li>{esc(x)}</li>" for x in sentences(d["reason"])) + "</ul>")) for d in devices) + "</div>"
@@ -755,7 +755,7 @@ def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=N
     for d in devices:
         tfs = d.get("top_frames") or []
         figs = "".join(f'<figure><img src="pics/{t["file"]}" alt="{esc(d["label"])} frame {t["frame"]}" loading="lazy"><figcaption><b>{["1st", "2nd", "3rd", "4th", "5th"][t["rank"] - 1]}</b> · frame {t["frame"]} · sharpness {t["score"]:.2f}</figcaption></figure>' for t in tfs if t.get("file"))
-        blocks.append(f'<div class="devframes"><header>{dot(d["index"])}<b>{esc(d["label"])}</b><span>{esc(d["top"].upper())}{" – " + esc(d["bottom"].upper()) if d["height"] > 1 else ""} · {len(tfs)} best frame{"s" if len(tfs) != 1 else ""}</span></header><div class="thumbs crops">{figs or "<p class=muted>no mapped frame holds the whole device</p>"}</div></div>')
+        blocks.append(f'<div class="devframes"><header>{dot(d["index"])}<b>{esc(d["label"])}</b><span>{esc(d["top"].upper())}{" - " + esc(d["bottom"].upper()) if d["height"] > 1 else ""} · {len(tfs)} best frame{"s" if len(tfs) != 1 else ""}</span></header><div class="thumbs crops">{figs or "<p class=muted>no mapped frame holds the whole device</p>"}</div></div>')
     T["best"] = ('<section class="card block"><h2>The five best frames of every device</h2>'
                  + '<p class="plain">For every device found, every frame of the video is checked: a frame counts only when the whole device is inside it, and the frames that count are ranked by how sharp the device itself is. These are the five sharpest, at least 10 frames apart, so they are five different views. The first one is the picture of the device used everywhere else in this report.</p>'
                  + "".join(blocks) + "</section>")
@@ -787,8 +787,8 @@ def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=N
     for d in devices:
         sec = next((s_ for s_ in r["sections"] if s_["device"] == d["index"]), None)
         more = "".join(f"<li>{esc(x)}</li>" for x in sentences(d["reason"]))
-        dcards.append(f'<article class="dev2" style="border-top-color:{PAL[(d["index"] - 1) % len(PAL)]}"><header>{dot(d["index"])}<b>D{d["index"]}</b><span>{esc(d["top"].upper())}{" – " + esc(d["bottom"].upper()) if d["height"] > 1 else ""} · {d["height"]}U</span>'
-                      f'<em>best frame {d["best_frame"] if d["best_frame"] is not None else "–"}</em></header>'
+        dcards.append(f'<article class="dev2" style="border-top-color:{PAL[(d["index"] - 1) % len(PAL)]}"><header>{dot(d["index"])}<b>D{d["index"]}</b><span>{esc(d["top"].upper())}{" - " + esc(d["bottom"].upper()) if d["height"] > 1 else ""} · {d["height"]}U</span>'
+                      f'<em>best frame {d["best_frame"] if d["best_frame"] is not None else "-"}</em></header>'
                       + (f'<img src="pics/{sec["file"]}" alt="D{d["index"]}" loading="lazy">' if sec else "")
                       + f'<ul class="three"><li><i class="ico j"></i>{esc(join_line(d))}</li><li><i class="ico t"></i>{esc(edge_line(d, True))}</li><li><i class="ico b"></i>{esc(edge_line(d, False))}</li></ul>'
                       + f'<p class="rk {"same" if d["same_span_as_rack"] else "diff"}">{esc(rack_line(d))}</p>'
@@ -815,8 +815,8 @@ def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=N
         named = sum(1 for d in cl_ if d["classification"]["label"] != "Other")
         same_rk = sum(1 for d in cl_ if (d["classification"].get("rack") or {}).get("label") == d["classification"]["label"])
         rows_k = "".join(
-            f'<tr><td class="n"><span class="u">{dot(d["index"])}D{d["index"]}</span><span class="muted kf">{esc(d["top"].upper())}{" – " + esc(d["bottom"].upper()) if d["height"] > 1 else ""} · {d["height"]}U</span></td>'
-            f'<td>{kchip(d["classification"]["rack"]["label"], d["classification"]["rack"]["prob"]) if d["classification"].get("rack") else "<span class=muted>–</span>"}</td>'
+            f'<tr><td class="n"><span class="u">{dot(d["index"])}D{d["index"]}</span><span class="muted kf">{esc(d["top"].upper())}{" - " + esc(d["bottom"].upper()) if d["height"] > 1 else ""} · {d["height"]}U</span></td>'
+            f'<td>{kchip(d["classification"]["rack"]["label"], d["classification"]["rack"]["prob"]) if d["classification"].get("rack") else "<span class=muted>-</span>"}</td>'
             f'<td><div class="k3">{"".join(kframe(d, x) for x in d["classification"]["frames"])}</div></td>'
             f'<td>{kchip(d["classification"]["label"], d["classification"]["prob"])}<span class="muted kf">from {kfrom(d["classification"])}</span>'
             f'{"" if (d["classification"].get("rack") or {}).get("label") == d["classification"]["label"] else "<b class=chg kf>differs from the rack image</b>"}</td></tr>'
@@ -828,7 +828,7 @@ def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=N
             + '<section class="card block"><h2>How we pick a device\'s best frames</h2>'
             + f'<p class="plain">Every frame of the video is checked for every device, not only the {len(r["frames"])} frames used for the rack. A frame passes three checks, and the frames that pass are ranked by one number:</p>'
             + '<div class="kform"><span><b>Found</b>the frame matches the rack around the device: at least 30 agreeing points</span><em>→</em>'
-            + '<span><b>Whole</b>the device lies at least 20 px inside the frame, at 0.5–2× its size on the rack</span><em>→</em>'
+            + '<span><b>Whole</b>the device lies at least 20 px inside the frame, at 0.5-2× its size on the rack</span><em>→</em>'
             + '<span><b>Sharpness</b>edge strength of the device\'s own area divided by its contrast, so a bright frame is not mistaken for a sharp one</span><em>=</em>'
             + f'<span class="kres"><b>Top {RV.TOP_FRAMES}</b>the sharpest, at least 10 frames apart: five different views</span></div>'
             + f'<p class="plain">Each of the {NUM.get(RV.CLS_FRAMES, RV.CLS_FRAMES)} frames is cut along the device\'s shape and classified. The answer kept is the #1 frame\'s; a lower one speaks only when every frame above it said "Other". '
@@ -977,8 +977,8 @@ def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=N
         st = STAT.get(p.get("status"), STAT["unknown"])
         more = (f'{esc(p.get("cable_connector") or "")} cable, {esc(p.get("cable_colour") or "")} <span class="muted">({round(100 * (p.get("cable_confidence") or 0))} %)</span>'
                 if p.get("cable_type") else (f'dust cap: {esc(p["cap_state"])}' if p.get("cap_state") else ""))
-        return (f'<tr><td class="n">{p["id"]}</td><td>{esc((p.get("type") or "").upper())}</td><td>{esc(p.get("spec") or "–")}</td>'
-                f'<td><span class="pill {st[0]}">{st[1]}</span></td><td>{more or "<span class=muted>–</span>"}</td></tr>')
+        return (f'<tr><td class="n">{p["id"]}</td><td>{esc((p.get("type") or "").upper())}</td><td>{esc(p.get("spec") or "-")}</td>'
+                f'<td><span class="pill {st[0]}">{st[1]}</span></td><td>{more or "<span class=muted>-</span>"}</td></tr>')
     def ports_block(d):
         P_ = PDL(d)
         if not P_.get("ports"):
@@ -1023,11 +1023,11 @@ def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=N
     cu = "".join(f'<li>{esc(u["unit"].upper())}: {pill(u["rack_status"])} on the rack image, {pill(u["status"])} from the frames <span class="muted">{esc(u["decided_by"])}</span></li>' for u in changed_units) or "<li>none</li>"
     cs = "".join(f'<li>{esc(s["above"].upper())} / {esc(s["below"].upper())}: {"same device" if s["rack_p_new_device"] >= 0.5 else "new device"} on the rack image, {"new device" if s["new_device"] else "same device"} from the frames <span class="muted">{esc(s["decided_by"])}</span></li>' for s in seams if s["changed"]) or "<li>none</li>"
     diff_dev = [d for d in devices if not d["same_span_as_rack"]]
-    cd = "".join(f'<li>{dot(d["index"])}{esc(d["label"])} over {esc(d["top"].upper())}{" – " + esc(d["bottom"].upper()) if d["height"] > 1 else ""}: no device with this span on the rack image</li>' for d in diff_dev) or "<li>none</li>"
+    cd = "".join(f'<li>{dot(d["index"])}{esc(d["label"])} over {esc(d["top"].upper())}{" - " + esc(d["bottom"].upper()) if d["height"] > 1 else ""}: no device with this span on the rack image</li>' for d in diff_dev) or "<li>none</li>"
     T["compare"] = (
         '<section class="card block"><h2>Rack image alone and frames, side by side</h2>'
         + table(["", "Rack image alone", "From the frames", "What the frames changed"], [
-            ("Units", n(f'{rack["units"]} · {rh[0]}–{rh[1]} px'), n(f'{lad["units"]} · {lh[0]}–{lh[1]} px'), f'{abs(lad["units"] - rack["units"])} unit{"s" if abs(lad["units"] - rack["units"]) != 1 else ""} {"more" if lad["units"] > rack["units"] else "fewer"}; heights spread {rh[1] - rh[0]} px on the rack image, {lh[1] - lh[0]} px from the frames'),
+            ("Units", n(f'{rack["units"]} · {rh[0]}-{rh[1]} px'), n(f'{lad["units"]} · {lh[0]}-{lh[1]} px'), f'{abs(lad["units"] - rack["units"])} unit{"s" if abs(lad["units"] - rack["units"]) != 1 else ""} {"more" if lad["units"] > rack["units"] else "fewer"}; heights spread {rh[1] - rh[0]} px on the rack image, {lh[1] - lh[0]} px from the frames'),
             ("Occupancy", n(f'{ro["occupied"]} · {ro["free"]} · {ro["uncertain"]}'), n(f'{os_["occupied"]} · {os_["free"]} · {os_["uncertain"]}'), f'{of["changed"]} units changed; {ro["uncertain"]} uncertain became {os_["uncertain"]}'),
             ("Devices", n(f'{len(rack["devices"])}'), n(f'{len(devices)}'), f'{r["changed_seams"]} seams changed; {len(diff_dev)} device{"s" if len(diff_dev) != 1 else ""} with a span the rack image did not have')])
         + '<div class="bars">' + bars("From the frames", {"occupied": os_["occupied"], "unoccupied": os_["free"], "uncertain": os_["uncertain"]}) + bars("Rack image alone", {"occupied": ro["occupied"], "unoccupied": ro["free"], "uncertain": ro["uncertain"]}) + "</div></section>"
@@ -1160,7 +1160,7 @@ def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=N
               + "".join(f'<div class="frow"><span class="u">{esc(s_["above"].upper())}/{esc(s_["below"].upper())}</span>{seam_chips(s_)}</div>' for s_ in ex_seams)
               + '<p class="muted">red: a detector box over the unit · purple: one box over both units</p></div>'
               + '<div class="farrow">→</div>'
-              + f'<div class="fcol"><h4>The result</h4>{img("pics/how_result.jpg", "the device on the rack")}<p><b>{esc(ex["label"])}</b> over {esc(ex["top"].upper())}{" – " + esc(ex["bottom"].upper()) if ex["height"] > 1 else ""}, '
+              + f'<div class="fcol"><h4>The result</h4>{img("pics/how_result.jpg", "the device on the rack")}<p><b>{esc(ex["label"])}</b> over {esc(ex["top"].upper())}{" - " + esc(ex["bottom"].upper()) if ex["height"] > 1 else ""}, '
               + (f'every unit occupied by {ex_units[0]["frames_device"]} of {ex_units[0]["frames_voting"]} frames' if ex_units else "") + (f', held together by {ex_seams[0]["frames_voting"]} frames' if ex_seams else "") + "</p></div></div>")
     # the four rules, each with a real example from this rack
     def rrow(no, q, rule_txt, example_html, answer):
@@ -1202,7 +1202,7 @@ def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=N
     tf = (ex.get("top_frames") or [])[:5]
     fs_ = ex.get("frame_search") or {}
     ex4 = '<div class="rbest">' + "".join(f'<figure><img src="pics/{t["file"]}" alt="frame {t["frame"]}" loading="lazy"><figcaption><b>{["1st", "2nd", "3rd", "4th", "5th"][i]}</b> · frame {t["frame"]} · sharpness {t["score"]:.2f}</figcaption></figure>' for i, t in enumerate(tf) if t.get("file")) + "</div>"
-    ex4 += (f'<p>Device D{ex["index"]}: {fs_.get("eligible", "–")} of the video\'s {fs_.get("scanned", "–")} frames show the whole device; they are ranked from the sharpest down. A frame that cuts the device off is never used.</p>')
+    ex4 += (f'<p>Device D{ex["index"]}: {fs_.get("eligible", "-")} of the video\'s {fs_.get("scanned", "-")} frames show the whole device; they are ranked from the sharpest down. A frame that cuts the device off is never used.</p>')
     ans4 = '<p><b>Five best frames for every device</b>; the 1st is its picture in this report.</p>'
     rules_html = ('<div class="rrows">'
                   + rrow(1, "Units: which unit lines are real?", "Every frame draws its own unit lines. A line is kept if most of the frames that see that spot drew it.", ex1, ans1)
@@ -1307,8 +1307,8 @@ def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=N
         f'A {vf["seconds"]:.1f} s video, {vf["w"]}×{vf["h"]} px at {vf["fps"]:.0f} frames per second, filmed top to bottom. Nothing else is given.',
         '<div class="front">' + front_fig("pics/input_video.jpg", "The first frame of the video", f'{vf["frames"]} frames')
         + ccards([("Length", f'{vf["seconds"]:.1f} s', None, f'{vf["frames"]} frames'), ("Frame size", f'{vf["w"]}×{vf["h"]}', None, "pixels"),
-                  ("Bit rate", f'{cap_["mbit_s"]} Mbit/s' if cap_.get("mbit_s") else "–", None, "as filmed"),
-                  ("Camera speed", f'{cap_["motion_px_per_frame"]} px' if cap_.get("motion_px_per_frame") else "–", None, "per frame, downwards")]) + "</div>"
+                  ("Bit rate", f'{cap_["mbit_s"]} Mbit/s' if cap_.get("mbit_s") else "-", None, "as filmed"),
+                  ("Camera speed", f'{cap_["motion_px_per_frame"]} px' if cap_.get("motion_px_per_frame") else "-", None, "per frame, downwards")]) + "</div>"
         + more('<section class="card block"><h2>What the video must be</h2><p class="plain">One slow sweep from the top of the rack to the bottom, the phone upright, both rails in the picture, no stops and no going back up. '
                'The phone guide in Rack Sweep checks speed, direction, distance, steadiness and light while filming; a video that comes in any other way is checked by the stitcher instead (step 2).</p>'
                + (f'<p class="plain">The video was turned {esc(st["upright"]["turned"])} before anything else, because it was filmed sideways (picture motion {st["upright"]["motion"]}).</p>' if (st.get("upright") or {}).get("turned") else "")
@@ -1320,8 +1320,8 @@ def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=N
     steps.append(step(2, "quality", "Quality: pass or not", q_res,
         '<div class="front">' + ccards([("Verdict", "Pass" if q_ok else "Check", None, "from the stitcher's capture checks"),
                                         ("Warnings", len(warns), None, "speed, overlap, blur, resolution, drift"),
-                                        ("Sharp frames found", st.get("keyframes_used") or "–", None, f'of {st["frames_read"]} read' if st.get("frames_read") else ""),
-                                        ("Alignment", f'{st["min_pair_inliers"]} points' if st.get("min_pair_inliers") else "–", None, "weakest pair of frames")])
+                                        ("Sharp frames found", st.get("keyframes_used") or "-", None, f'of {st["frames_read"]} read' if st.get("frames_read") else ""),
+                                        ("Alignment", f'{st["min_pair_inliers"]} points' if st.get("min_pair_inliers") else "-", None, "weakest pair of frames")])
         + (('<ul class="snotes">' + "".join(f'<li><b>{esc(WARN_NAME.get(w.get("code"), (w.get("name") or w.get("code") or "").replace("_", " ").capitalize()))}</b><span>{esc(w.get("text") or "")}</span></li>' for w in warns) + "</ul>") if warns else "")
         + "</div>"
         + more('<section class="card block"><h2>What is checked, and what happens on a fail</h2><ul class="list rules">'
@@ -1336,9 +1336,9 @@ def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=N
     steps.append(step(3, "stitch", "Stitched rack picture",
         f'One straight picture of the whole rack, {rack_wh[0]}×{rack_wh[1]} px' + (f', joined from {st["keyframes_used"]} sharp frames in {st["seconds"]:.0f} s' if st.get("keyframes_used") else "") + '. Every later result is drawn on it.',
         '<div class="front two">' + front_fig("pics/input_rack.jpg", "The stitched rack picture", "the canvas for every step")
-        + '<div>' + ccards([("Size", f'{rack_wh[0]}×{rack_wh[1]}', None, "pixels"), ("Frames joined", st.get("keyframes_used") or "–", None, "the sharpest, in order"),
-                           ("Straightened", (st.get("vertical_status") or "–"), None, f'{st["horizontal_correction_deg"]:.1f}° corrected' if st.get("horizontal_correction_deg") is not None else ""),
-                           ("Time", f'{st["seconds"]:.0f} s' if st.get("seconds") else "–", None, "stitching")]) + "</div></div>"
+        + '<div>' + ccards([("Size", f'{rack_wh[0]}×{rack_wh[1]}', None, "pixels"), ("Frames joined", st.get("keyframes_used") or "-", None, "the sharpest, in order"),
+                           ("Straightened", (st.get("vertical_status") or "-"), None, f'{st["horizontal_correction_deg"]:.1f}° corrected' if st.get("horizontal_correction_deg") is not None else ""),
+                           ("Time", f'{st["seconds"]:.0f} s' if st.get("seconds") else "-", None, "stitching")]) + "</div></div>"
         + more(stitch_card(st) + '<section class="card block"><h2>How it is stitched</h2><p class="plain">The sharpest frames are picked along the video, aligned on the rack plane by their matching points, joined along seams that avoid cutting through devices, then straightened and cropped to the cabinet. The settings are fixed for every video, so two videos of the same rack give the same picture.</p></section>', "Read more: how the stitching works and what it measured")))
     # 4 frames
     steps.append(step(4, "frames", "Frames",
@@ -1364,7 +1364,7 @@ def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=N
         + more(rest_of("step3") + T.get("why", ""), "Read more: how a device's span is decided, and why each device is what it is")))
     # 8 device classification
     kc_ = lambda lbl, pr: f'<span class="kc{" oth" if lbl == "Other" else ""}"><b>{esc(lbl)}</b> {round(100 * pr)} %</span>'
-    cl_rows = "".join(f'<tr><td class="n">{dot(d["index"])}D{d["index"]}</td><td>{esc(d["top"].upper())}{" – " + esc(d["bottom"].upper()) if d["height"] > 1 else ""} · {d["height"]}U</td>'
+    cl_rows = "".join(f'<tr><td class="n">{dot(d["index"])}D{d["index"]}</td><td>{esc(d["top"].upper())}{" - " + esc(d["bottom"].upper()) if d["height"] > 1 else ""} · {d["height"]}U</td>'
                       f'<td>{kc_(d["classification"]["label"], d["classification"]["prob"])}</td><td class="muted">{kfrom(d["classification"])}</td></tr>' for d in cl_all)
     named_ = sum(1 for d in cl_all if d["classification"]["label"] != "Other")
     steps.append(step(8, "classify", "Device classification",
@@ -1410,7 +1410,7 @@ def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=N
         C = d.get("closeup") or {}; s3 = (esc(f'{C.get("vendor") or ""} {C.get("model") or ""}'.strip()) or "nothing read") if C else "none"
         got = (f'{esc(I["vendor"])} {esc(I["model"])}' if I["fitted"] else
                (f'<span class="muted">{esc(I["vendor_read"])} read, no model: not confirmed</span>' if I["vendor_read"] else '<span class="muted">nothing confirmed</span>'))
-        by = {1: "rack crop", 2: "best frames", 3: "close-up"}.get(I["source"] or I["make_source"], "–")
+        by = {1: "rack crop", 2: "best frames", 3: "close-up"}.get(I["source"] or I["make_source"], "-")
         return f'<tr><td class="n">{dot(d["index"])}D{d["index"]}</td><td>{esc(d["top"].upper())} · {kind_of(d)}</td><td>{s1}</td><td>{s2}</td><td>{s3}</td><td><b>{got}</b></td><td class="muted">{by}</td></tr>'
     def ask_block(d):
         """Ask for a close-up of this device: why (too small, or the model was not read), where it is in the rack, the upload."""

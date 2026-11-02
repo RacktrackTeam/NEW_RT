@@ -394,6 +394,27 @@ def layout_kind(L):
     return LAYOUT_KIND.get(str(L.get("kind") or "").strip().lower())
 
 
+def device_kind(d):
+    """The one kind of a device everywhere in the app (Devices list, device page, rack view, report, drift, the JSON routes), in this
+    order: a person's correction, then the make and model step (the faceplate read), then the classifier (the picture). Returns
+    {"kind", "from" (corrected, faceplate, picture or None), "picture" (the classifier's label), "words" (the source in plain words)}."""
+    cl = (d or {}).get("classification") or {}
+    pic = cl.get("label") or (d or {}).get("type")
+    pic_known = pic if pic not in (None, "", "Other", "Not sure") else None
+    ov = ((d or {}).get("kind_override") or {})
+    if ov.get("kind"):
+        kind, src, words = ov["kind"], "corrected", f"{ov['kind']}, set by {ov.get('by') or 'a person'}"
+    elif layout_kind((d or {}).get("layout")):
+        kind, src, words = layout_kind(d["layout"]), "faceplate", f"{layout_kind(d['layout'])}, from the faceplate"
+    elif pic_known and not ((d or {}).get("unsure") and (cl.get("prob") or 0) < 0.7):
+        return {"kind": pic_known, "from": "picture", "picture": pic, "words": f"{pic_known}, from the picture"}
+    else:
+        return {"kind": None, "from": None, "picture": pic, "words": "Not sure: the picture could not tell" + (f" (best guess {pic})" if pic_known else "")}
+    if pic_known and _norm(pic_known) != _norm(kind):
+        words += f"; the picture said {pic_known}"
+    return {"kind": kind, "from": src, "picture": pic, "words": words}
+
+
 def run_devices(result):
     """The run's devices as start unit, height, kind, make, model and serial (None where not read)."""
     out = []
@@ -402,8 +423,8 @@ def run_devices(result):
         if not nums:
             continue
         L = d.get("layout") or {}
-        kind = (d.get("kind_override") or {}).get("kind") or layout_kind(L) or d.get("type") or (d.get("classification") or {}).get("label")
-        out.append({"index": d.get("index"), "ru_start": min(nums), "ru_height": len(nums), "kind": None if kind in (None, "", "Other", "Not sure") else kind,
+        kind = device_kind(d)["kind"]
+        out.append({"index": d.get("index"), "ru_start": min(nums), "ru_height": len(nums), "kind": kind,
                     "manufacturer": _s(L.get("vendor")), "model": _s(L.get("model")), "serial": _s(L.get("serial") or d.get("serial")), "ports": run_ports(d)})
     return out
 
@@ -451,7 +472,7 @@ def port_drift(name, dev, want):
         base = {"unit": at, "device": f"{name} / D{dev['index']}", "port": p["n"]}
         wf, gf = port_family(x.get("port_type")), port_family(p["type"])
         if wf and gf and wf != gf:
-            rows.append({**base, "type": "port_type", "what": "Wrong port type", "record": x["port_type"], "read": p["type"],
+            rows.append({**base, "type": "port_type", "what": "Wrong port type", "record": x["port_type"], "read": p["type"].upper(),
                          "words": f"Port {p['n']} of {name} is {x['port_type']} in the record; the video reads {p['type'].upper()}."})
         occ = x.get("expected_occupied")
         if occ == "Yes" and p["state"] == "empty":

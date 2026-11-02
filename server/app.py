@@ -377,7 +377,7 @@ def public_job(j, with_result=False):
         r = j["result"]; st = r.get("stitch") or {}
         out["stitch"] = {k: st.get(k) for k in ("image_size", "keyframes_used", "seconds", "warnings", "upright")}
         out["devices"] = [{"index": d["index"], "top": d["top"], "bottom": d["bottom"], "height": d["height"],
-                           "kind": (d.get("classification") or {}).get("label"), "layout": bool((d.get("layout") or {}).get("fitted") or (d.get("closeup") or {}).get("fitted"))}
+                           "kind": SDB.device_kind(d)["kind"], "layout": bool((d.get("layout") or {}).get("fitted") or (d.get("closeup") or {}).get("fitted"))}
                           for d in r.get("devices") or []]
     return out
 
@@ -562,9 +562,8 @@ def api_video_view(job: str):
                 "ports_state": (j.get("ports") or {}).get(str(d["index"])) or ("done" if d.get("layout") else None),
                 "seconds": d.get("layout_seconds")}
     devices = [{"index": d["index"], "top": d["top"], "bottom": d["bottom"], "height": d["height"], "units": d.get("units"), "polygon": d.get("polygon"),
-                "kind": (d.get("kind_override") or {}).get("kind") or ((d.get("classification") or {}).get("label") if not d.get("unsure") or ((d.get("classification") or {}).get("prob") or 0) >= 0.7 else None),
-                "prob": None if d.get("kind_override") else (d.get("classification") or {}).get("prob"), "unsure": bool(d.get("unsure")),
-                "kind_from": "corrected" if d.get("kind_override") else ((d.get("classification") or {}).get("source") or "frames"), "kind_model": (d.get("classification") or {}).get("label"), "corrected_by": (d.get("kind_override") or {}).get("by"), "crop": f"/api/video/{job}/crop/{d['index']}" + _crop_ver(j, d["index"]),   # the crop with nothing drawn on it (api_device_crop); a new cut gets a new link
+                **_kind_of(d),
+                "prob": None if d.get("kind_override") else (d.get("classification") or {}).get("prob"), "unsure": bool(d.get("unsure")), "kind_model": (d.get("classification") or {}).get("label"), "corrected_by": (d.get("kind_override") or {}).get("by"), "crop": f"/api/video/{job}/crop/{d['index']}" + _crop_ver(j, d["index"]),   # the crop with nothing drawn on it (api_device_crop); a new cut gets a new link
                 "frames": [base + t["file"] for t in d.get("top_frames") or [] if t.get("file")],
                 "views": [f"/api/video/{job}/crop/{d['index']}" + _crop_ver(j, d["index"])] + [f"/api/video/{job}/crop/{d['index']}/{n}" for n in range(1, min(3, len(d.get("top_frames") or [])))],   # clean cuts, nothing drawn
                 "layout": lay_of(d)} for d in r.get("devices") or []]
@@ -578,6 +577,12 @@ def api_video_view(job: str):
             "units": units, "devices": devices, "times_s": r.get("times_s"), "report": f"/video-report/{job}/index.html",
             "rack_label": rack_label_of(j), "rack_label_running": job in RACK_LABEL_RUNNING,
             "rack_id": j.get("rack_id"), "rack_id_options": rack_id_options(j)}
+
+
+def _kind_of(d):
+    """The device's one kind for the screens (src/source_db.py device_kind) and where it came from, in plain words."""
+    k = SDB.device_kind(d)
+    return {"kind": k["kind"], "kind_from": k["from"], "kind_words": k["words"]}
 
 
 @app.delete("/api/video/{job}")
@@ -1156,7 +1161,7 @@ def api_set_model(job: str, index: int, body: ModelFix, request: Request):
         raise HTTPException(404, "No such device.")
     hint = {"vendor": body.vendor.strip(), "model": body.model.strip(), "by": read_session(request.cookies.get("rt_session"))["name"],
             "when": datetime.datetime.now().isoformat(timespec="seconds")}
-    if ((dv.get("kind_override") or {}).get("kind") or (dv.get("classification") or {}).get("label")) not in PORT_KINDS:
+    if SDB.device_kind(dv)["kind"] not in PORT_KINDS:
         # no reader for this kind (a patch panel, a server...): the name is kept as typed, nothing is mapped
         rf = pathlib.Path(j["dir"]) / "result.json"; r = json.loads(rf.read_text())
         for d in r["devices"]:
@@ -1211,7 +1216,7 @@ def api_read_ports(job: str, index: int):
     dv = next((d for d in (j.get("result") or {}).get("devices") or [] if d["index"] == index), None)
     if dv is None:
         raise HTTPException(404, "No such device.")
-    kind = (dv.get("kind_override") or {}).get("kind") or (dv.get("classification") or {}).get("label")   # a corrected kind counts
+    kind = SDB.device_kind(dv)["kind"]   # the one kind (a correction, then the faceplate, then the picture)
     if kind not in PORT_KINDS and not (kind == "Patch Panel" and patch_panels.available()):
         return {"state": "none", "detail": "Not a switch, router, firewall, gateway or patch panel: no ports to read."}
     ports = j["ports"] = j.get("ports") or {}             # status.json keeps "ports": null until the first read

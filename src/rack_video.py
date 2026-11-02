@@ -1967,7 +1967,7 @@ def devices_from(rows, new_dev, taken, fa, rack_types, rack_devices, regs_used, 
         def by_text(rd):
             b = rd.get("decided_by") or ""
             return "its seams by the detector's boxes" if b == "model" else "its seams by the logic" if b == "logic" else "the only occupied unit in its run"
-        why_image = ("The rack image alone drew " + " and ".join(f"{rd['label']} over its units {rd['top'].upper()}{'–' + rd['bottom'].upper() if rd['height'] > 1 else ''} ({by_text(rd)})" for rd in over) + " here."
+        why_image = ("The rack image alone drew " + " and ".join(f"{rd['label']} over its units {rd['top'].upper()}{'-' + rd['bottom'].upper() if rd['height'] > 1 else ''} ({by_text(rd)})" for rd in over) + " here."
                      if over else "The rack image alone drew no device here: its units there were free, or its ladder had no unit here.")
         inner = [by_below[rows[k]["unit"]] for k in d[1:] if rows[k]["unit"] in by_below]
         why = []

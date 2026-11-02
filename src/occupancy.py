@@ -1,9 +1,9 @@
 """Rack occupancy pipeline.
 
-1. Rows   — the RT-EOS unit ladder (src/unit_grid.py, identical to RT-EOS pipeline/detection.py)
+1. Rows   - the RT-EOS unit ladder (src/unit_grid.py, identical to RT-EOS pipeline/detection.py)
             reads every rack row from weights/rack_unit_finder.pt, numbered u01 at the BOTTOM.
-2. Crop   — each row is cut out and squashed to 224x224, exactly like the training crops.
-3. Classify — the chosen approach returns P(occupied) per row.
+2. Crop   - each row is cut out and squashed to 224x224, exactly like the training crops.
+3. Classify - the chosen approach returns P(occupied) per row.
 """
 import json
 import os
@@ -142,7 +142,7 @@ class YoloClsApproach(Approach):
     INFO = {
         "yolov8m_cls": ("YOLOv8m-cls (fine-tuned CNN)", "YOLOv8m",
                         "A YOLOv8m classification network fine-tuned end-to-end on the training crops. "
-                        "It learns task-specific cues — bezels, LEDs, ports, drive bays versus cable runs, "
+                        "It learns task-specific cues - bezels, LEDs, ports, drive bays versus cable runs, "
                         "shelves, blank panels and open space."),
         "yolo11s_cls": ("YOLO11s-cls (fine-tuned CNN)", "YOLO11s",
                         "The smaller YOLO11s classification network, fine-tuned on the same crops."),
@@ -188,7 +188,7 @@ class EmbedApproach(Approach):
         if self._clf is None:
             import joblib
             from train_embed import load_backbone
-            # joblib pickle of our own locally trained sklearn head — trusted artefact.
+            # joblib pickle of our own locally trained sklearn head - trusted artefact.
             self._clf = joblib.load(self.weights)["clf"]
             self._embed = load_backbone(self.kind)[1]
         if not crops:
@@ -213,7 +213,7 @@ class ClassicalApproach(Approach):
     def predict(self, crops):
         if self._clf is None:
             import joblib
-            # joblib pickle of our own locally trained sklearn model — trusted artefact.
+            # joblib pickle of our own locally trained sklearn model - trusted artefact.
             self._clf = joblib.load(self.weights)["clf"]
         if not crops:
             return np.zeros(0)
@@ -407,8 +407,8 @@ def annotate(img: Image.Image, rows, show=None, spotlight=None, fit=None) -> Ima
     """Draw rows on the photo.
 
     show      : set of unit labels to draw (None = all). Rows not in it are not drawn at all.
-    spotlight : one unit label — the photo is dimmed everywhere except that row, nothing else drawn.
-    fit       : (x1,y1,x2,y2) of a suggested placement — spotlighted in blue.
+    spotlight : one unit label - the photo is dimmed everywhere except that row, nothing else drawn.
+    fit       : (x1,y1,x2,y2) of a suggested placement - spotlighted in blue.
     """
     base = img.convert("RGBA")
     W, H = base.size
@@ -456,7 +456,7 @@ def annotate(img: Image.Image, rows, show=None, spotlight=None, fit=None) -> Ima
 
 
 def row_strip(img: Image.Image, box, pad_frac: float = 0.25) -> Image.Image:
-    """The row as it looks in the photo — native aspect, a little context above and below."""
+    """The row as it looks in the photo - native aspect, a little context above and below."""
     x1, y1, x2, y2 = box
     ph = (y2 - y1) * pad_frac
     return img.crop((max(0, x1), max(0, int(y1 - ph)), min(img.width, x2), min(img.height, int(y2 + ph))))

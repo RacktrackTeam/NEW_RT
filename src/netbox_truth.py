@@ -103,7 +103,7 @@ def score(truth, rows, devices):
         span = list(range(t["u_from"], t["u_to"] + 1))
         m = next((d for d in devices if sorted(_unum(x) for x in d["units"]) == span), None)
         ours_type = m.get("type") if m else None
-        dev_rows.append({"name": t["name"], "role": t["role"], "units": f"U{t['u_from']}" + (f"–U{t['u_to']}" if t["height"] > 1 else ""),
+        dev_rows.append({"name": t["name"], "role": t["role"], "units": f"U{t['u_from']}" + (f"-U{t['u_to']}" if t["height"] > 1 else ""),
                          "height": t["height"], "truth_type": t["type"], "no_class": t["no_class"], "found": m is not None,
                          "ours": None if m is None else f"D{m['index']} · {m['height']}U" + (f" · {ours_type}" if ours_type else ""),
                          "type_right": None if (m is None or t["type"] is None) else ours_type == t["type"]})

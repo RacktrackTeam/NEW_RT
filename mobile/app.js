@@ -478,7 +478,7 @@
     // the elevation: RT-EOS's own Topology tab (2D diagram and 3D scene, mobile/rt/ built from RT-EOS by tools/rt-topology), fed this run as its "detail"
     var unum = function (s) { return parseInt(String(s).replace(/\D/g, ''), 10); };
     var cards = {}; devs.forEach(function (d) { var ps = PORT_KINDS[d.kind] ? devState(d, v) : null, L = d.layout || {}, ports = L.ports || [], on = ports.filter(function (p) { return p.status === 'connected'; }).length, off = ports.filter(function (p) { return p.status === 'empty'; }).length;
-      cards[d.index] = { crop: d.crop, unit: UP(d.top) + (d.height > 1 ? '–' + UP(d.bottom).replace('U', '') : ''), size: d.height + 'U', kind: d.kind && d.kind !== 'Other' ? d.kind : 'Not sure', state: ps ? ps.word : null, stateKey: ps ? ps.key : null,
+      cards[d.index] = { crop: d.crop, unit: URANGE(d.top, d.bottom, d.height), size: d.height + 'U', kind: d.kind && d.kind !== 'Other' ? d.kind : 'Not sure', state: ps ? ps.word : null, stateKey: ps ? ps.key : null,
         ports: ps && ps.facts && ports.length ? ports.length + ' ports · ' + on + ' connected' + (off ? ' · ' + off + ' empty' : '') + (ports.length - on - off ? ' · ' + (ports.length - on - off) + ' not sure' : '') : null }; });
     var RLb = v.rack_label || {}, detail = { scanId: v.id, cards: cards, rackLabel: (RLb.id && RLb.id.text) || (RLb.name && RLb.name.text) || v.title || 'This rack', unitsTotal: v.rack.units,
       devices: devs.map(function (d) { var L = d.layout || {};
@@ -630,10 +630,10 @@
     var big = runs.length ? Math.max.apply(null, runs.map(function (r) { return r.n; })) : 0;
     var html = '<div class="card sidecard"><span class="glabel">This rack</span><div class="sidekpis"><div><b>' + units.length + 'U</b><span>units</span></div><div><b>' + used + '</b><span>in use</span></div><div><b class="free">' + free + '</b><span>free</span></div>' + (unc ? '<div><b class="unc">' + unc + '</b><span>not sure</span></div>' : '') + (big ? '<div><b class="free">' + big + 'U</b><span>largest free</span></div>' : '') + '</div>'
       + '<div class="ubar sideubar">' + units.map(function (u, i) { var k = st(u); return '<i class="' + (k === 'Free' ? 'free' : k === 'Not sure' ? 'unc' : '') + '" style="--i:' + i + '" data-unit="' + u.unit + '" title="' + UP(u.unit) + ' · ' + k.toLowerCase() + '"></i>'; }).join('') + '</div><div class="ubarcap"><span>' + UP(units[0] ? units[0].unit : 'U1') + '</span><span>' + UP(units.length ? units[units.length - 1].unit : '') + '</span></div>'
-      + '<span class="glabel">Free space</span>' + (runs.length ? '<div class="fchips">' + runs.map(function (r) { return '<span class="fchip"><b>' + r.n + 'U</b> ' + UP(r.top) + (r.n > 1 ? '–' + UP(r.bottom).replace('U', '') : '') + '</span>'; }).join('') + '</div>' : '<p class="sideline">No free unit.</p>') + '</div>';
+      + '<span class="glabel">Free space</span>' + (runs.length ? '<div class="fchips">' + runs.map(function (r) { return '<span class="fchip"><b>' + r.n + 'U</b> ' + URANGE(r.top, r.bottom, r.n) + '</span>'; }).join('') + '</div>' : '<p class="sideline">No free unit.</p>') + '</div>';
     html += '<div class="card sidecard"><span class="glabel">Devices · ' + devs.length + '</span><p class="sideline">' + Object.keys(kinds).sort(function (a, b) { return kinds[b] - kinds[a]; }).map(function (k) { return kinds[k] + ' ' + esc(k.toLowerCase()); }).join(' · ') + '</p>'
       + '<div class="sidelist">' + devs.map(function (d) { var L = d.layout || {}, mm = L.vendor && L.model ? L.vendor + ' ' + L.model : L.mode === 'patchpanel' && L.panel ? L.panel + ' patch panel' : L.vendor ? L.vendor : '';
-        return '<button class="srow" type="button" data-dev="' + d.index + '"><span class="iu">' + UP(d.top) + (d.height > 1 ? '–' + UP(d.bottom).replace('U', '') : '') + '</span><b>D' + d.index + '</b><span class="sk">' + esc(d.kind && d.kind !== 'Other' ? d.kind : 'Not sure') + (mm ? ' · ' + esc(mm) : '') + '</span>' + (L.ports && L.ports.length ? '<span class="sp">' + L.ports.length + (L.ports.length === 1 ? ' port' : ' ports') + '</span>' : '') + '</button>'; }).join('') + '</div></div>';
+        return '<button class="srow" type="button" data-dev="' + d.index + '"><span class="iu">' + URANGE(d.top, d.bottom, d.height) + '</span><b>D' + d.index + '</b><span class="sk">' + esc(d.kind && d.kind !== 'Other' ? d.kind : 'Not sure') + (mm ? ' · ' + esc(mm) : '') + '</span>' + (L.ports && L.ports.length ? '<span class="sp">' + L.ports.length + (L.ports.length === 1 ? ' port' : ' ports') + '</span>' : '') + '</button>'; }).join('') + '</div></div>';
     el.innerHTML = html; [].forEach.call(el.children, function (c, i) { c.style.setProperty('--i', i); }); [].forEach.call(el.querySelectorAll('.srow'), function (c, i) { c.style.setProperty('--i', Math.min(i, 24)); });
     if (el.dataset.counted !== v.id) { el.dataset.counted = v.id; [].forEach.call(el.querySelectorAll('.sidekpis b'), function (b) { var m = b.textContent.match(/^(\d+)(.*)$/); if (!m) return; var to = +m[1], suf = m[2], t0 = performance.now(), dur = 700;
       var tick = function (t) { var k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); b.textContent = Math.round(to * e) + suf; if (k < 1) requestAnimationFrame(tick); }; b.textContent = '0' + suf; requestAnimationFrame(tick); }); }
@@ -663,7 +663,7 @@
     if (frames.length) html += '<div class="card sidecard"><span class="glabel">Seen in the video</span><div class="sideframes">' + frames.map(function (f, i) { return '<img src="' + f + '" alt="D' + d.index + ' view ' + (i + 1) + '" loading="lazy" onerror="imgRetry(this)">'; }).join('') + '</div><p class="sideline">The sharpest views of this device, used for the reading. Click a picture to see it large.</p></div>';
     var how = [];
     how.push(['Found on', d.units && d.units.length ? d.units.map(UP).join(', ') : UP(d.top)]);
-    if (d.kind) how.push(['Type', esc(d.kind) + (d.prob != null && !d.unsure ? ' · ' + Math.round(d.prob * 100) + ' %' : d.unsure ? ' · not sure' : '')]);
+    how.push(['Type', esc(d.kind_words || d.kind || 'Not sure') + (d.kind_from === 'picture' && d.prob != null ? ' · ' + Math.round(d.prob * 100) + ' %' : '')]);   // the one kind and where it came from (server: source_db.device_kind)
     if (L.ports_state || L.mapped) how.push(['Ports read', L.from === 'close-up' ? 'from a close photo' : L.fitted ? 'vendor layout fitted' : L.auto ? 'found and typed from the photo' : L.mode === 'patchpanel' ? 'patch panel reader' : L.ports_state === 'running' ? 'reading now' : 'not yet']);
     if (L.vendor_read || L.model_read) how.push(['Read on the panel', esc((L.vendor_read || '') + (L.model_read ? ' ' + L.model_read : '')) + (L.fitted ? '' : ' · not confirmed')]);
     var PD0 = L.port_detector || {};
@@ -768,10 +768,10 @@
     var elev = '<svg class="elev" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="The rack, top to bottom"><rect x="' + (L0 - 2) + '" y="2" width="' + (R0 - L0 + 4) + '" height="' + (H - 4) + '" rx="6" class="ef"/>' + rows + '</svg>';
     // the devices, top to bottom, in a table
     var table = devs.map(function (d) { var L = d.layout || {}, mm = L.vendor ? L.vendor + (L.model ? ' ' + L.model : '') : '', kind = d.kind && d.kind !== 'Other' ? d.kind : 'Not sure';
-      return '<tr data-dev="' + d.index + '"><td class="mono">' + UP(d.top) + (d.height > 1 ? '–' + UP(d.bottom).replace('U', '') : '') + '</td><td><b>D' + d.index + '</b><span class="kd">' + esc(kind) + '</span></td><td>' + (mm ? esc(mm) : L.mode === 'patchpanel' && L.panel ? esc(L.panel) + ' patch panel' + (L.n_ports ? '<span class="kd">' + L.n_ports + (L.size_known === false ? ' ports seen' : ' ports') + '</span>' : '') : L.vendor_read ? esc(L.vendor_read) + '<span class="kd">model not read</span>' : '<span class="kd">not read</span>') + '</td></tr>'; }).join('');   // a patch panel has no make and model to read: its type stands there (user, 2026-10-28)
+      return '<tr data-dev="' + d.index + '"><td class="mono">' + URANGE(d.top, d.bottom, d.height) + '</td><td><b>D' + d.index + '</b><span class="kd">' + esc(kind) + '</span></td><td>' + (mm ? esc(mm) : L.mode === 'patchpanel' && L.panel ? esc(L.panel) + ' patch panel' + (L.n_ports ? '<span class="kd">' + L.n_ports + (L.size_known === false ? ' ports seen' : ' ports') + '</span>' : '') : L.vendor_read ? esc(L.vendor_read) + '<span class="kd">model not read</span>' : '<span class="kd">not read</span>') + '</td></tr>'; }).join('');   // a patch panel has no make and model to read: its type stands there (user, 2026-10-28)
     // the free space as stretches
     var runs = [], cur = null; units.forEach(function (u) { var s = st(u); if (s === 'Free') { if (cur) { cur.bottom = u.unit; cur.n++; } else { cur = { top: u.unit, bottom: u.unit, n: 1 }; runs.push(cur); } } else cur = null; });
-    var freeChips = runs.map(function (r) { return '<span class="fchip"><b>' + r.n + 'U</b> ' + UP(r.top) + (r.n > 1 ? '–' + UP(r.bottom).replace('U', '') : '') + '</span>'; }).join('');
+    var freeChips = runs.map(function (r) { return '<span class="fchip"><b>' + r.n + 'U</b> ' + URANGE(r.top, r.bottom, r.n) + '</span>'; }).join('');
     var look = units.filter(function (u) { return st(u) === 'Not sure'; }).map(function (u) { return '<button class="lrow" type="button" data-unit="' + u.unit + '"><span class="iu">' + UP(u.unit) + '</span><b>Not sure if in use</b><span class="arr">›</span></button>'; })
       .concat(devs.filter(function (d) { return d.unsure || !d.kind || d.kind === 'Other'; }).map(function (d) { return '<button class="lrow" type="button" data-dev="' + d.index + '"><span class="iu">' + UP(d.top) + '</span><b>D' + d.index + ' · ' + (d.unsure ? 'device not sure' : 'type not sure') + '</b><span class="arr">›</span></button>'; }));
     $('rp-top').innerHTML = '<header class="rphead"><span class="eyebrow">Rack report</span><h2>' + esc(title) + '</h2><p class="muted">' + esc(v.title || '') + '</p><p class="rpline"><b>' + n + 'U</b> · <b>' + used + '</b> in use · <b class="free">' + free + '</b> free' + (unc ? ' · <b class="unc">' + unc + '</b> not sure' : '') + '</p></header>'
@@ -798,7 +798,7 @@
     if (d.match) h += '<p><b>' + esc(d.match.rack_key) + '</b> ' + (d.match.how === 'exact' ? 'matched exactly' : d.match.how === 'close' ? 'matched' : 'chosen') + '. <span class="muted">' + esc(d.match.why) + '</span></p>';
     else if (src) h += '<p class="err">No record in ' + esc(d.sources[src]) + ' matches this rack id. Pick one below.</p>';
     if (d.candidates.length) h += '<div class="dfrow"><label class="muted small" for="df-pick">Use another record</label><select id="df-pick"><option value="">Match by rack id</option>'
-      + d.candidates.map(function (r) { return '<option value="' + esc(r.rack_key) + '"' + (d.match && d.match.how === 'picked' && d.match.rack_key === r.rack_key ? ' selected' : '') + '>' + esc(r.rack_key) + (r.label && r.label !== r.rack_key ? ' (' + esc(r.label) + ')' : '') + ' - ' + r.devices + ' devices</option>'; }).join('') + '</select></div>';
+      + d.candidates.map(function (r) { return '<option value="' + esc(r.rack_key) + '"' + (d.match && d.match.how === 'picked' && d.match.rack_key === r.rack_key ? ' selected' : '') + '>' + esc(r.rack_key) + (r.label && r.label !== r.rack_key ? ' (' + esc(r.label) + ')' : '') + ' - ' + pl(r.devices, 'device') + '</option>'; }).join('') + '</select></div>';
     h += '</div>';
     if (d.drift) { var rows = d.drift.rows;
       h += '<span class="glabel">Drift</span><div class="card"><p><b>' + rows.length + '</b> ' + (rows.length === 1 ? 'difference' : 'differences') + ' · ' + d.drift.checked + ' devices compared' + (d.drift.ports_checked ? ' · ' + d.drift.ports_checked + ' ports compared' : '') + ' · ' + d.drift.video_devices + ' in the video · ' + d.drift.record_devices + ' in the record</p></div>';
@@ -812,9 +812,10 @@
   document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('#df-top [data-dfsrc], #df-top [data-dfimp], #df-xlsx'); if (!t) return;
     if (t.dataset.dfsrc) return setDb({ source: t.dataset.dfsrc });
     var done = function (src) { return function (r) { toast(r.devices + ' devices copied in from ' + r.racks + (r.racks === 1 ? ' rack' : ' racks')); return setDb({ source: src }); }; };
-    if (t.dataset.dfimp) return api('/api/sources/' + t.dataset.dfimp + '/import', { method: 'POST' }).then(done(t.dataset.dfimp)).catch(function (er) { toast(er.message); });
+    if (t.dataset.dfimp) { t.disabled = true; t.textContent = 'Copying...'; return api('/api/sources/' + t.dataset.dfimp + '/import', { method: 'POST' }).then(done(t.dataset.dfimp)).catch(function (er) { toast(er.message + ' Nothing was copied; the copy from before is still the one checked.'); loadDrift(); }); }
     var f = $('df-file').files[0]; if (!f) return toast('Choose the workbook first.');
-    var fd = new FormData(); fd.append('workbook', f); upload('/api/sources/excel', fd, function () {}).then(renderWbReport).catch(function (er) { toast(er.message); }); });
+    $('df-report').innerHTML = '<p class="muted small">Reading ' + esc(f.name) + '...</p>';
+    var fd = new FormData(); fd.append('workbook', f); upload('/api/sources/excel', fd, function () {}).then(renderWbReport).catch(function (er) { $('df-report').innerHTML = ''; toast(er.message); }); });
   // the workbook's validation report (RT-EOS's checks), shown before anything is imported; Import makes a new Excel copy
   function pl(n, w) { return n + ' ' + w + (n === 1 ? '' : 's'); }
   function renderWbReport(r) {
@@ -822,9 +823,11 @@
     var h = '<div class="wbrep"><p><b>' + esc(r.file.replace(/^workbook_[0-9a-f]{8}_/, '')) + '</b>: ' + pl(c.racks, 'rack') + ', ' + pl(c.devices, 'device') + ', ' + pl(c.ports, 'port') + ', ' + pl(c.cables, 'cable') + '. '
       + (c.problems ? '<b class="' + (c.errors ? 'err' : '') + '">' + c.problems + (c.problems === 1 ? ' problem' : ' problems') + '</b> (' + c.errors + ' errors, ' + c.warnings + ' warnings).' : '<span class="dfok">No problems found.</span>') + '</p>';
     if (kinds.length) h += '<ul class="wbkinds">' + kinds.map(function (k) { return '<li><b>' + r.by_kind[k] + '</b> ' + esc(k) + '</li>'; }).join('') + '</ul>';
-    if (c.problems) h += '<table class="dftable wbtable"><thead><tr><th>Sheet</th><th>Row</th><th>Problem</th></tr></thead><tbody>' + r.problems.slice(0, MAX).map(function (x) {
-      return '<tr data-wblevel="' + x.level + '"><td class="mono small">' + esc(x.sheet) + '</td><td class="mono">' + (x.row_no || '') + '</td><td><span class="' + (x.level === 'error' ? 'err' : '') + '">' + (x.level === 'error' ? 'Error' : 'Warning') + '</span><p>' + esc(x.reason) + '</p></td></tr>'; }).join('') + '</tbody></table>'
-      + (r.problems.length > MAX ? '<p class="muted small">And ' + (r.problems.length - MAX) + ' more.</p>' : '');
+    var groups = [], byKey = {};
+    r.problems.forEach(function (x) { var k = x.sheet + '|' + x.level + '|' + x.reason; if (!byKey[k]) { byKey[k] = { x: x, rows: [] }; groups.push(byKey[k]); } if (x.row_no) byKey[k].rows.push(x.row_no); });
+    if (c.problems) h += '<table class="dftable wbtable"><thead><tr><th>Sheet</th><th>Rows</th><th>Problem</th></tr></thead><tbody>' + groups.slice(0, MAX).map(function (g) { var x = g.x;
+      return '<tr data-wblevel="' + x.level + '"><td class="mono small">' + esc(x.sheet) + '</td><td class="mono">' + esc(ranges(g.rows)) + '</td><td><span class="' + (x.level === 'error' ? 'err' : '') + '">' + (x.level === 'error' ? 'Error' : 'Warning') + (g.rows.length > 1 ? ' on ' + g.rows.length + ' rows' : '') + '</span><p>' + esc(x.reason) + '</p></td></tr>'; }).join('') + '</tbody></table>'
+      + (groups.length > MAX ? '<p class="muted small">And ' + (groups.length - MAX) + ' more.</p>' : '');
     h += '<div class="dfrow">' + (r.blocking ? '<p class="err">This workbook cannot be imported until the missing sheets and columns are added.</p>' : '<button class="btn primary" type="button" id="df-import" data-upload="' + esc(r.upload) + '">Import</button>') + '<button class="btn" type="button" id="df-cancel">Cancel</button></div></div>';
     $('df-report').innerHTML = h;
   }
@@ -882,6 +885,7 @@
   function watchPorts() { clearInterval(RES.timer); RES.timer = setInterval(function () { if ((location.hash || '').indexOf('#result/' + RES.id) === 0) { if (RES.view && RES.view.pending_ports) loadView(false); } else clearInterval(RES.timer); }, 6000); }
   function renderDevice() { renderOne(); }
   var UP = function (s) { return String(s).toUpperCase().replace(/^U0/, 'U'); };
+  function URANGE(top, bottom, n) { if (!(n > 1)) return UP(top); var a = UP(bottom), b = UP(top).replace('U', ''); return a + '-' + b; }   // U10-11: low to high, plain hyphen, as the drift writes it
   function devOfUnit(v, name) { return (v.devices || []).filter(function (d) { return (d.units || []).indexOf(name) >= 0; })[0]; }
   function unitState(v, x) { return x.status === 'uncertain' ? 'Not sure' : devOfUnit(v, x.unit) || x.status === 'occupied' ? 'In use' : 'Free'; }   // not sure stays not sure, with a device on it too (user, 2026-10-30)
   // the clearer of two crops: the device's best frame, or its cut from the stitched rack (sharpness = variance of the Laplacian)
@@ -924,9 +928,9 @@
       $('dv-list').classList.remove('in'); $('dv-list').innerHTML = wantUnits ? units.map(function (x) { var d = devOfUnit(v, x.unit), st = unitState(v, x);
           return '<button class="prow" type="button" data-unit="' + x.unit + '"><span class="iu">' + UP(x.unit) + '</span><span class="pt"><b class="' + (st === 'Free' ? 'free' : st === 'Not sure' ? 'unc' : '') + '">' + st + '</b>' + (d ? '<small>D' + d.index + ' · ' + esc(devName(d).replace(/<[^>]+>/g, '') || d.kind || 'device') + '</small>' : '') + '</span><span class="arr">›</span></button>'; }).join('')
         : byKind(devs).map(function (g) { return kindHead(g) + g.devs.map(function (d) { var mm = devName(d).replace(/<[^>]+>/g, ''); mm = mm && mm.indexOf('not read') < 0 && mm.indexOf('reading') < 0 ? mm : '';
-          var ur = UP(d.top) + (d.height > 1 ? '–' + UP(d.bottom).replace('U', '') : ''), kindName = d.kind && d.kind !== 'Other' ? d.kind : 'Not sure';
-          if (!PORT_KINDS[d.kind]) return '<button class="prow" type="button" data-dev="' + d.index + '"><img class="pthumb" src="' + d.crop + '" alt="" loading="lazy"><span class="pt"><b>' + esc(mm || kindName) + '</b><small>' + ur + ' · D' + d.index + ' · ' + d.height + 'U</small></span><span class="arr">›</span></button>';
-          var st = devState(d, v); return '<button class="prow" type="button" data-dev="' + d.index + '"><img class="pthumb" src="' + d.crop + '" alt="" loading="lazy"><span class="pt"><b>' + esc(st.key === 'on' ? st.title : 'D' + d.index) + '</b><small>' + ur + ' · D' + d.index + '</small></span><span class="stat ' + st.key + '"><i></i>' + st.word + '</span><span class="arr">›</span></button>'; }).join(''); }).join('');
+          var ur = URANGE(d.top, d.bottom, d.height), kindName = d.kind && d.kind !== 'Other' ? d.kind : 'Not sure';
+          if (!PORT_KINDS[d.kind]) return '<button class="prow" type="button" data-dev="' + d.index + '"><img class="pthumb" src="' + d.crop + '" alt="" loading="lazy"><span class="pt"><b>' + esc(mm || kindName) + '</b><small>' + ur + ' · D' + d.index + ' · ' + d.height + 'U' + (d.kind_from === 'faceplate' || d.kind_from === 'corrected' ? ' · ' + esc(d.kind_words) : '') + '</small></span><span class="arr">›</span></button>';
+          var st = devState(d, v); return '<button class="prow" type="button" data-dev="' + d.index + '"><img class="pthumb" src="' + d.crop + '" alt="" loading="lazy"><span class="pt"><b>' + esc(st.key === 'on' ? st.title : 'D' + d.index) + '</b><small>' + ur + ' · D' + d.index + ' · ' + esc(d.kind_words || kindName) + '</small></span><span class="stat ' + st.key + '"><i></i>' + st.word + '</span><span class="arr">›</span></button>'; }).join(''); }).join('');
       [].forEach.call($('dv-list').children, function (el, i) { el.style.setProperty('--i', i); }); requestAnimationFrame(function () { $('dv-list').classList.add('in'); });
       return;
     }
@@ -977,10 +981,10 @@
       var prev = at > 0 ? devs[at - 1] : null, next = at < devs.length - 1 ? devs[at + 1] : null;
       var nav = '<div class="dvnav">' + (prev ? '<button class="link" type="button" data-dvnav="' + prev.index + '">‹ D' + prev.index + '</button>' : '<span></span>') + '<span class="dvpos">' + (at + 1) + ' of ' + devs.length + '</span>' + (next ? '<button class="link" type="button" data-dvnav="' + next.index + '">D' + next.index + ' ›</button>' : '<span></span>') + '</div>';
       var web = document.body.classList.contains('web');
-      info = nav + '<span class="eyebrow">D' + dv.index + ' · ' + UP(dv.top) + (dv.height > 1 ? '–' + UP(dv.bottom).replace('U', '') : '') + '</span><h2 class="onet">' + esc(mm || (ps && ps.panel ? ps.title : dv.kind && dv.kind !== 'Other' ? dv.kind : 'Device')) + '</h2>'
+      info = nav + '<span class="eyebrow">D' + dv.index + ' · ' + URANGE(dv.top, dv.bottom, dv.height) + '</span><h2 class="onet">' + esc(mm || (ps && ps.panel ? ps.title : dv.kind && dv.kind !== 'Other' ? dv.kind : 'Device')) + '</h2>'
         + '<div class="stat ' + (dv.unsure ? 'unc' : ps ? ps.key : 'on') + '"><i></i>' + (dv.unsure ? 'Needs a look' : ps ? ps.word : 'Checked') + '</div>'
         + '<p class="dvsum">' + summaryLine(dv, L, kind, mm) + '</p>'
-        + '<details class="dvmore"' + (web ? ' open' : '') + '><summary>Details</summary><div class="dfacts">' + row('Size', dv.height + 'U') + row('Type', kind) + (mm || (ps && ps.panel) ? '' : (L.vendor_read ? row('Make', esc(L.vendor_read) + ' <span class="kd">read, not confirmed</span>') : '') + row('Model', L.mapped ? 'Not read' : 'Not read yet'))
+        + '<details class="dvmore"' + (web ? ' open' : '') + '><summary>Details</summary><div class="dfacts">' + row('Size', dv.height + 'U') + row('Type', esc(dv.kind_words || kind)) + (mm || (ps && ps.panel) ? '' : (L.vendor_read ? row('Make', esc(L.vendor_read) + ' <span class="kd">read, not confirmed</span>') : '') + row('Model', L.mapped ? 'Not read' : 'Not read yet'))
         + (ps && ps.facts ? portFacts(L) : '') + '</div></details>';
       // the one picture: the port layout over the crop when identified (animated), else the crop
       below = ((L.fitted || L.mode === 'patchpanel') && portOverlay(dv, L, P)) || (L.fitted && P.overlay ? '<figure class="pshot cine one" id="cine" title="Tap to play again"><img class="c-base" src="' + (P.cut || dv.crop) + '" alt=""><img class="c-over" src="' + P.overlay + '" alt="D' + dv.index + '"><span class="c-scan"></span>' + '</figure>' : null)
