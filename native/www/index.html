@@ -30,7 +30,7 @@
   <p id="lead">Connecting to your RackTrack server…</p>
   <div class="spin" id="spin"></div>
   <form class="card" id="form" hidden>
-    <label>Server address<input id="addr" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="http://10.0.0.5:8600"></label>
+    <label>Server address<input id="addr" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="http://10.0.0.5:8700"></label>
     <span class="hint">The address of the Mac running RackTrack, on the same network as this phone. Ask your administrator.</span>
     <button type="submit">Connect</button>
     <button class="soft" type="button" id="anyway" hidden>Open it anyway</button>
@@ -44,7 +44,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var KEY = 'rt_server', change = /[?&]change=1/.test(location.search), saved = null;
   try { saved = localStorage.getItem(KEY); } catch (e) {}
-  function clean(u) { u = (u || '').trim().replace(/\/+$/, ''); if (u && !/^https?:\/\//i.test(u)) u = 'http://' + u; if (u && !/:\d+$/.test(u.replace(/^https?:\/\//i, ''))) u += ':8600'; return u; }
+  function clean(u) { u = (u || '').trim().replace(/\/+$/, ''); if (u && !/^https?:\/\//i.test(u)) u = 'http://' + u; if (u && !/:\d+$/.test(u.replace(/^https?:\/\//i, ''))) u += ':8700'; return u; }
   function open(u) { try { localStorage.setItem(KEY, u); } catch (e) {} location.replace(u + '/app/'); }
   function showForm(msg) { $('spin').hidden = true; $('form').hidden = false; $('lead').textContent = 'Connect to the RackTrack server to sweep a rack.'; if (msg) { $('err').textContent = msg; $('err').hidden = false; $('anyway').hidden = false; } }
   // reachable? an opaque request is enough: it fails only when nothing answers
