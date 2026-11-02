@@ -1,0 +1,168 @@
+{
+ "vendor": "WatchGuard",
+ "model": "M400",
+ "device": "firewall",
+ "description": "",
+ "summary": "8x RJ45 | 0x SFP | 2 named port type(s): USB, Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.guardsite.co.uk/images/Firebox/M400-M500/M400-M500-details.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1468,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   525,
+   44,
+   582,
+   97
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    540,
+    59,
+    67,
+    61
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    610,
+    59,
+    66,
+    60
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    680,
+    60,
+    65,
+    60
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    749,
+    60,
+    66,
+    61
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    820,
+    60,
+    66,
+    61
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    890,
+    62,
+    65,
+    60
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    958,
+    64,
+    68,
+    62
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1027,
+    67,
+    66,
+    60
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    479,
+    54,
+    57,
+    33
+   ]
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    479,
+    87,
+    56,
+    32
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    406,
+    61,
+    65,
+    58
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 0,
+  "2": 1,
+  "3": 1,
+  "4": 1,
+  "5": 1,
+  "6": 1,
+  "7": 1,
+  "8": 1,
+  "USB": 1,
+  "USB 2": 1,
+  "Console": 0
+ },
+ "chassis_aligned": 1,
+ "saved_quality": 0.695,
+ "saved_label": "internet/panel_search",
+ "saved_at": "2026-10-22 20:43"
+}

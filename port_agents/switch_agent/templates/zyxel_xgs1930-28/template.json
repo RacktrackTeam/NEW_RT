@@ -1,0 +1,314 @@
+{
+ "vendor": "Zyxel",
+ "model": "XGS1930-28",
+ "description": "",
+ "summary": "24x RJ45 (ports 1-24) | 2x SFP (25, 26) | detected automatically",
+ "image": "front.png",
+ "image_source": "Zyxel_XGS1930-28.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   11,
+   1826,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   417,
+   45,
+   751,
+   118
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    427,
+    56,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    427,
+    111,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    485,
+    55,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    485,
+    111,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    543,
+    55,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    543,
+    111,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    601,
+    55,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    601,
+    111,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    659,
+    55,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    659,
+    111,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    717,
+    55,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    717,
+    110,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    815,
+    55,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    815,
+    111,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    874,
+    55,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    874,
+    111,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    931,
+    55,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    931,
+    111,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 19,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    989,
+    55,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 20,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    989,
+    111,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1047,
+    55,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1047,
+    111,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 23,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1106,
+    55,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 24,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1106,
+    110,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 25,
+   "type": "sfp",
+   "poe": false,
+   "box": [
+    1414,
+    132,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 26,
+   "type": "sfp",
+   "poe": false,
+   "box": [
+    1605,
+    120,
+    52,
+    42
+   ]
+  }
+ ]
+}

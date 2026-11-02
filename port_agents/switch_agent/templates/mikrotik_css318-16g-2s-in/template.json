@@ -1,0 +1,226 @@
+{
+ "vendor": "MikroTik",
+ "model": "CSS318-16G-2S+IN",
+ "description": "",
+ "summary": "16x RJ45 (ports 1-16) | 2x SFP (17, 18) | detected automatically",
+ "image": "front.png",
+ "image_source": "/Users/sprintparkaiml/Downloads/port_overlay 2/switch_template_agent/template_store/images/MIKROTIK/CSS318-16G-2S_IN/780d42f7a0fe4389.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   717,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   -7,
+   22,
+   564,
+   128
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    5,
+    33,
+    56,
+    47
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    6,
+    86,
+    57,
+    45
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    63,
+    34,
+    58,
+    48
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    66,
+    86,
+    57,
+    45
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    122,
+    35,
+    60,
+    47
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    125,
+    88,
+    59,
+    45
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    185,
+    36,
+    62,
+    48
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    184,
+    88,
+    66,
+    47
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    294,
+    37,
+    61,
+    46
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    294,
+    90,
+    62,
+    45
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    360,
+    38,
+    57,
+    46
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    359,
+    91,
+    57,
+    45
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    420,
+    38,
+    60,
+    48
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    420,
+    92,
+    57,
+    44
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    482,
+    39,
+    66,
+    50
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    480,
+    91,
+    65,
+    48
+   ]
+  },
+  {
+   "id": 17,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    573,
+    99,
+    66,
+    45
+   ]
+  },
+  {
+   "id": 18,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    648,
+    100,
+    66,
+    45
+   ]
+  }
+ ]
+}

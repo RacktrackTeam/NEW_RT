@@ -1,0 +1,228 @@
+{
+ "vendor": "Palo Alto Networks",
+ "model": "PA-820",
+ "device": "firewall",
+ "description": "",
+ "summary": "7x RJ45 | 8x SFP | 1 named port type(s): USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://greenline.pro/wp-content/uploads/2024/01/pa820-cover-640x712.webp",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1369,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   154,
+   30,
+   497,
+   113
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    164,
+    40,
+    48,
+    45
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    164,
+    88,
+    49,
+    43
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    211,
+    41,
+    47,
+    44
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    212,
+    89,
+    47,
+    42
+   ]
+  },
+  {
+   "id": 5,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    278,
+    42,
+    49,
+    42
+   ]
+  },
+  {
+   "id": 6,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    278,
+    89,
+    50,
+    44
+   ]
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    326,
+    44,
+    49,
+    42
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    325,
+    89,
+    51,
+    44
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    398,
+    43,
+    49,
+    43
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    396,
+    89,
+    52,
+    44
+   ]
+  },
+  {
+   "id": 11,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    445,
+    43,
+    50,
+    44
+   ]
+  },
+  {
+   "id": 12,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    445,
+    88,
+    50,
+    45
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    513,
+    41,
+    54,
+    44
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    512,
+    88,
+    55,
+    46
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    586,
+    40,
+    55,
+    45
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    656,
+    75,
+    31,
+    59
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 4,
+  "2": 4,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "7": 4,
+  "8": 4,
+  "9": 4,
+  "10": 4,
+  "11": 4,
+  "12": 4,
+  "13": 4,
+  "14": 4,
+  "15": 4,
+  "USB": 4
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.867,
+ "saved_label": "internet/image_search",
+ "saved_at": "2026-10-22 21:49"
+}

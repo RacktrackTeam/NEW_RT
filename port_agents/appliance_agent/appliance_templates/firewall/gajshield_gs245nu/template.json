@@ -1,0 +1,132 @@
+{
+ "vendor": "GajShield",
+ "model": "GS245NU",
+ "device": "firewall",
+ "description": "",
+ "summary": "5x RJ45 | 0x SFP | 2 named port type(s): Console, USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.gajshield.com/images/appliances/GS245nu/245nu_Front_Web.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   736,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   343,
+   78,
+   270,
+   71
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    353,
+    88,
+    51,
+    45
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    402,
+    90,
+    47,
+    41
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    448,
+    90,
+    47,
+    41
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    494,
+    90,
+    52,
+    44
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    549,
+    88,
+    55,
+    52
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    266,
+    44,
+    54,
+    42
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    267,
+    86,
+    49,
+    21
+   ]
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    265,
+    110,
+    55,
+    27
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 1,
+  "2": 1,
+  "3": 1,
+  "4": 1,
+  "5": 1,
+  "Console": 1,
+  "USB": 1,
+  "USB 2": 1
+ },
+ "chassis_aligned": 1,
+ "saved_quality": 0.941,
+ "saved_label": "official/vendor page www.gajshield.com:  <img src=\"/images/appliances/GS245nu/245nu_Back_W",
+ "saved_at": "2026-10-22 21:45"
+}

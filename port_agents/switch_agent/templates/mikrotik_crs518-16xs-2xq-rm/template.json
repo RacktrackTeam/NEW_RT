@@ -1,0 +1,252 @@
+{
+ "vendor": "MikroTik",
+ "model": "CRS518-16XS-2XQ-RM",
+ "description": "",
+ "summary": "0x RJ45 | 18x SFP | front panel cut from the vendor photo, ports found by the RackTrack port models",
+ "image": "front.png",
+ "image_source": "https://cdn.mikrotik.com/web-assets/rb_images/2196_lg.webp",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1674,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    70,
+    88,
+    90,
+    58
+   ]
+  },
+  {
+   "id": 2,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    168,
+    88,
+    89,
+    58
+   ]
+  },
+  {
+   "id": 3,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    286,
+    35,
+    66,
+    51
+   ]
+  },
+  {
+   "id": 4,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    286,
+    93,
+    67,
+    52
+   ]
+  },
+  {
+   "id": 5,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    365,
+    36,
+    68,
+    52
+   ]
+  },
+  {
+   "id": 6,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    366,
+    93,
+    66,
+    51
+   ]
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    445,
+    37,
+    66,
+    50
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    445,
+    93,
+    66,
+    51
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    525,
+    36,
+    64,
+    50
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    524,
+    92,
+    67,
+    51
+   ]
+  },
+  {
+   "id": 11,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    605,
+    36,
+    65,
+    49
+   ]
+  },
+  {
+   "id": 12,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    605,
+    91,
+    65,
+    51
+   ]
+  },
+  {
+   "id": 13,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    686,
+    37,
+    62,
+    48
+   ]
+  },
+  {
+   "id": 14,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    683,
+    91,
+    67,
+    52
+   ]
+  },
+  {
+   "id": 15,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    765,
+    36,
+    64,
+    50
+   ]
+  },
+  {
+   "id": 16,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    762,
+    93,
+    68,
+    51
+   ]
+  },
+  {
+   "id": 17,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    845,
+    36,
+    62,
+    50
+   ]
+  },
+  {
+   "id": 18,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    843,
+    91,
+    65,
+    52
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    1039,
+    74,
+    45,
+    71
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    946,
+    39,
+    67,
+    50
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    943,
+    90,
+    68,
+    52
+   ]
+  }
+ ]
+}

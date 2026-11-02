@@ -1,0 +1,188 @@
+{
+ "vendor": "Juniper",
+ "model": "SRX4100",
+ "device": "firewall",
+ "description": "",
+ "summary": "0x RJ45 | 10x SFP | 2 named port type(s): USB, Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.juniper.net/assets/img/products/image-library/srx-series/srx4100/srx4100-right-high.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1380,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    511,
+    100,
+    53,
+    42
+   ]
+  },
+  {
+   "id": 2,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    575,
+    98,
+    53,
+    45
+   ]
+  },
+  {
+   "id": 3,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    715,
+    97,
+    48,
+    41
+   ]
+  },
+  {
+   "id": 4,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    761,
+    96,
+    45,
+    40
+   ]
+  },
+  {
+   "id": 5,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    804,
+    96,
+    45,
+    40
+   ]
+  },
+  {
+   "id": 6,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    846,
+    94,
+    48,
+    41
+   ]
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    948,
+    92,
+    47,
+    41
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    992,
+    92,
+    44,
+    40
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1033,
+    91,
+    44,
+    40
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1075,
+    89,
+    45,
+    41
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    398,
+    85,
+    30,
+    56
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    327,
+    38,
+    58,
+    50
+   ]
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    397,
+    33,
+    31,
+    54
+   ]
+  }
+ ],
+ "labels_read": [
+  "MGMT",
+  "CONSOLE"
+ ],
+ "chassis_votes": {
+  "1": 0,
+  "2": 2,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "7": 4,
+  "8": 4,
+  "9": 4,
+  "10": 4,
+  "USB": 4,
+  "Console": 4,
+  "USB 2": 4
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.915,
+ "saved_label": "template agent (official/sitemap_page)",
+ "saved_at": "2026-10-19 16:45"
+}

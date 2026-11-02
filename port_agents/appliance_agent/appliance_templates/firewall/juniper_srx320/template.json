@@ -1,0 +1,147 @@
+{
+ "vendor": "Juniper",
+ "model": "SRX320",
+ "device": "firewall",
+ "description": "",
+ "summary": "6x RJ45 | 2x SFP | 1 named port type(s): Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.juniper.net/documentation/us/en/quick-start/srx320/srx320-day-one-plus.pdf#page2-img46",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1194,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   439,
+   41,
+   413,
+   89
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    453,
+    56,
+    69,
+    61
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    521,
+    56,
+    64,
+    58
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    583,
+    56,
+    65,
+    59
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    646,
+    56,
+    65,
+    59
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    709,
+    56,
+    64,
+    59
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    771,
+    56,
+    68,
+    61
+   ]
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    999,
+    67,
+    72,
+    57
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1095,
+    67,
+    73,
+    58
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    313,
+    57,
+    76,
+    64
+   ],
+   "name": "CONSOLE"
+  }
+ ],
+ "labels_read": [
+  "CONSOLE"
+ ],
+ "chassis_votes": {
+  "1": 4,
+  "2": 4,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "7": 4,
+  "8": 4,
+  "Console": 4
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.921,
+ "saved_label": "official/vendor data sheet srx320-day-one-plus.pdf p2",
+ "saved_at": "2026-10-19 16:41"
+}

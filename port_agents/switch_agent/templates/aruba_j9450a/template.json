@@ -1,0 +1,292 @@
+{
+ "vendor": "Aruba",
+ "model": "J9450A",
+ "description": "",
+ "summary": "24x RJ45 (ports 1-24) | detected automatically",
+ "image": "front.png",
+ "image_source": "https://img.ricardostatic.ch/images/3c41324e-10b1-47ac-b690-59f4b507aa0e/t_1000x750/hp-procurve-1810g-24-switch-j9450a",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1208,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   294,
+   24,
+   664,
+   133
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    306,
+    37,
+    60,
+    54
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    308,
+    95,
+    57,
+    51
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    363,
+    37,
+    55,
+    54
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    363,
+    94,
+    56,
+    52
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    416,
+    38,
+    54,
+    53
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    416,
+    93,
+    54,
+    51
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    468,
+    38,
+    54,
+    52
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    468,
+    93,
+    54,
+    52
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    520,
+    37,
+    54,
+    52
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    520,
+    93,
+    53,
+    51
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    571,
+    38,
+    57,
+    52
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    571,
+    93,
+    54,
+    51
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    644,
+    38,
+    55,
+    51
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    645,
+    92,
+    53,
+    49
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    696,
+    38,
+    53,
+    52
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    697,
+    92,
+    52,
+    49
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    745,
+    37,
+    52,
+    52
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    746,
+    91,
+    52,
+    49
+   ]
+  },
+  {
+   "id": 19,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    795,
+    37,
+    52,
+    52
+   ]
+  },
+  {
+   "id": 20,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    795,
+    90,
+    52,
+    49
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    844,
+    37,
+    51,
+    52
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    844,
+    90,
+    51,
+    50
+   ]
+  },
+  {
+   "id": 23,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    892,
+    37,
+    55,
+    52
+   ]
+  },
+  {
+   "id": 24,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    892,
+    90,
+    55,
+    50
+   ]
+  }
+ ]
+}

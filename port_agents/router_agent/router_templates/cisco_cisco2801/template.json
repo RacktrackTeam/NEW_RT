@@ -1,0 +1,78 @@
+{
+ "vendor": "Cisco",
+ "model": "CISCO2801",
+ "device": "router",
+ "description": "",
+ "summary": "2x RJ45 | 0x SFP | 3 named port type(s): USB, Console, Aux | built from the vendor image by the router mapper",
+ "image": "front.png",
+ "image_source": "https://www.ittelo.ru/upload/resize_cache/iblock/138/550_370_1/138fd8389d7e0ced2c5b81c536738939.JPG",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1572,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    220,
+    43,
+    54,
+    47
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    222,
+    93,
+    52,
+    41
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    110,
+    74,
+    41,
+    65
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    273,
+    44,
+    54,
+    46
+   ]
+  },
+  {
+   "id": "Aux",
+   "type": "aux",
+   "poe": null,
+   "box": [
+    274,
+    94,
+    52,
+    42
+   ]
+  }
+ ],
+ "labels_read": []
+}

@@ -1,0 +1,150 @@
+{
+ "vendor": "Cisco",
+ "model": "ASA5506-X",
+ "device": "firewall",
+ "description": "",
+ "summary": "10x RJ45 | 0x SFP | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.cisco.com/c/en/us/td/docs/security/asa/hw/maintenance/5506xguide/b_Install_Guide_5506/b_Install_Guide_5506_chapter_01.pdf#page5-img390",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   505,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    4,
+    84,
+    52,
+    43
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    56,
+    86,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    107,
+    85,
+    52,
+    43
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    159,
+    85,
+    52,
+    43
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    211,
+    85,
+    50,
+    43
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    262,
+    85,
+    52,
+    43
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    315,
+    85,
+    50,
+    42
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    366,
+    85,
+    54,
+    43
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    442,
+    42,
+    58,
+    45
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    442,
+    95,
+    56,
+    44
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 2,
+  "2": 2,
+  "3": 2,
+  "4": 2,
+  "5": 2,
+  "6": 2,
+  "7": 2,
+  "8": 2,
+  "9": 2,
+  "10": 2
+ },
+ "chassis_aligned": 2,
+ "saved_quality": 0.6,
+ "saved_label": "official/vendor document b_Install_Guide_5506_chapter_01.pdf p5",
+ "saved_at": "2026-10-21 12:05",
+ "ignore_regions_note": "cleared 24 Oct: the region ran past the image edge, so it never masked anything in the tested runs; cleared to keep the tested behaviour now that regions are clipped (review #22)"
+}

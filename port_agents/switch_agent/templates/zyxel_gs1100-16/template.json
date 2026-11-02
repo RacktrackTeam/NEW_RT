@@ -1,0 +1,205 @@
+{
+ "vendor": "Zyxel",
+ "model": "GS1100-16",
+ "description": "",
+ "summary": "16x RJ45 (ports 1-16) | detected automatically",
+ "image": "front.png",
+ "image_source": "7d91cdedc27c504e.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-even",
+ "match_regions": [
+  [
+   0,
+   0,
+   820,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   179,
+   21,
+   528,
+   153
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    199,
+    89,
+    54,
+    44
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    191,
+    33,
+    54,
+    47
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    251,
+    90,
+    51,
+    46
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    244,
+    35,
+    51,
+    47
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    300,
+    92,
+    53,
+    46
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    294,
+    36,
+    52,
+    49
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    351,
+    95,
+    60,
+    49
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    346,
+    37,
+    59,
+    51
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    432,
+    100,
+    64,
+    51
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    432,
+    39,
+    61,
+    52
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    494,
+    103,
+    63,
+    51
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    494,
+    39,
+    63,
+    55
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    556,
+    106,
+    66,
+    51
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    556,
+    41,
+    67,
+    54
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    621,
+    109,
+    74,
+    54
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    621,
+    43,
+    76,
+    57
+   ]
+  }
+ ],
+ "numbering_read": true
+}

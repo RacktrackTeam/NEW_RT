@@ -1,0 +1,166 @@
+{
+ "vdo1.mp4": {
+  "output_path": "/Users/mandar/workspace/Projects/VdoStitching_Frame/integration/output/vdo1_rack.png",
+  "video_path": "/Users/mandar/workspace/Projects/VdoStitching_Frame/integration/sample_vdo/vdo1.mp4",
+  "image_size": [
+   1205,
+   2184
+  ],
+  "frames_read": 317,
+  "keyframes_used": 36,
+  "min_pair_inliers": 68,
+  "vertical_straightened": true,
+  "vertical_status": "corrected",
+  "horizontal_correction_deg": 2.63,
+  "residual_tilt_deg": -0.09,
+  "seconds": 10.3,
+  "warnings": [
+   "W02 LOW_RESOLUTION: The video is 1280x720. Small port numbers and labels need at least 1080p. Film at 1080p or higher.",
+   "W12 RACK_BOTTOM_CUT: The bottom of the cabinet is at the edge of the stitched area. Keep filming until the base of the cabinet is well in view."
+  ],
+  "warning_codes": [
+   "W02",
+   "W12"
+  ],
+  "capture": {
+   "duration_s": 12.646,
+   "frames": 317,
+   "fps": 24.989,
+   "width": 1280,
+   "height": 720,
+   "speed_median_fh_s": 0.172,
+   "speed_p95_fh_s": 0.305,
+   "overlap_min": 0.799,
+   "overlap_median": 0.954,
+   "blur_share": 0.0,
+   "scale_ratio": 1.551,
+   "sideways_fw": 0.084,
+   "roll_range_deg": 7.812,
+   "min_pair_inliers": 68,
+   "exposure_max_gain": 0.223,
+   "exposure_clipped_pairs": 2,
+   "exposure_clipped_share": 0.057,
+   "sharpness_median": 60.271
+  }
+ },
+ "vdo2.MOV": {
+  "output_path": "/Users/mandar/workspace/Projects/VdoStitching_Frame/integration/output/vdo2_rack.png",
+  "video_path": "/Users/mandar/workspace/Projects/VdoStitching_Frame/integration/sample_vdo/vdo2.MOV",
+  "image_size": [
+   1614,
+   3500
+  ],
+  "frames_read": 257,
+  "keyframes_used": 33,
+  "min_pair_inliers": 27,
+  "vertical_straightened": true,
+  "vertical_status": "corrected",
+  "horizontal_correction_deg": 5.81,
+  "residual_tilt_deg": 0.01,
+  "seconds": 19.1,
+  "warnings": [
+   "W03 MOVING_TOO_FAST: The camera moved at 0.35 screen-heights per second (limit 0.25). Slow down: aim for 0.10 or less, about 10 s per screen height.",
+   "W10 WEAK_ALIGNMENT: Two neighbouring frames matched on only 27 features (limit 30). The stitch may be fragile; film more slowly, with more light and sharper frames."
+  ],
+  "warning_codes": [
+   "W03",
+   "W10"
+  ],
+  "capture": {
+   "duration_s": 8.538,
+   "frames": 257,
+   "fps": 29.982,
+   "width": 1920,
+   "height": 1080,
+   "speed_median_fh_s": 0.345,
+   "speed_p95_fh_s": 0.526,
+   "overlap_min": 0.765,
+   "overlap_median": 0.937,
+   "blur_share": 0.0,
+   "scale_ratio": 1.418,
+   "sideways_fw": 0.044,
+   "roll_range_deg": 12.373,
+   "min_pair_inliers": 27,
+   "exposure_max_gain": 0.343,
+   "exposure_clipped_pairs": 2,
+   "exposure_clipped_share": 0.062,
+   "sharpness_median": 45.665
+  }
+ },
+ "vdo3_60fps.MOV": {
+  "output_path": "/Users/mandar/workspace/Projects/VdoStitching_Frame/integration/output/vdo3_60fps_rack.png",
+  "video_path": "/Users/mandar/workspace/Projects/VdoStitching_Frame/integration/sample_vdo/vdo3_60fps.MOV",
+  "image_size": [
+   1376,
+   2768
+  ],
+  "frames_read": 923,
+  "keyframes_used": 36,
+  "min_pair_inliers": 47,
+  "vertical_straightened": true,
+  "vertical_status": "corrected",
+  "horizontal_correction_deg": 8.79,
+  "residual_tilt_deg": -0.0,
+  "seconds": 19.5,
+  "warnings": [],
+  "warning_codes": [],
+  "capture": {
+   "duration_s": 19.465,
+   "frames": 923,
+   "fps": 47.367,
+   "width": 1920,
+   "height": 1080,
+   "speed_median_fh_s": 0.09,
+   "speed_p95_fh_s": 0.183,
+   "overlap_min": 0.782,
+   "overlap_median": 0.956,
+   "blur_share": 0.0,
+   "scale_ratio": 1.522,
+   "sideways_fw": 0.076,
+   "roll_range_deg": 8.925,
+   "min_pair_inliers": 47,
+   "exposure_max_gain": 0.192,
+   "exposure_clipped_pairs": 3,
+   "exposure_clipped_share": 0.086,
+   "sharpness_median": 48.771
+  }
+ },
+ "vdo4_30fps.MOV": {
+  "output_path": "/Users/mandar/workspace/Projects/VdoStitching_Frame/integration/output/vdo4_30fps_rack.png",
+  "video_path": "/Users/mandar/workspace/Projects/VdoStitching_Frame/integration/sample_vdo/vdo4_30fps.MOV",
+  "image_size": [
+   1773,
+   2996
+  ],
+  "frames_read": 795,
+  "keyframes_used": 35,
+  "min_pair_inliers": 158,
+  "vertical_straightened": true,
+  "vertical_status": "corrected",
+  "horizontal_correction_deg": 9.65,
+  "residual_tilt_deg": 0.12,
+  "seconds": 19.6,
+  "warnings": [],
+  "warning_codes": [],
+  "capture": {
+   "duration_s": 26.482,
+   "frames": 795,
+   "fps": 29.983,
+   "width": 1920,
+   "height": 1080,
+   "speed_median_fh_s": 0.071,
+   "speed_p95_fh_s": 0.132,
+   "overlap_min": 0.852,
+   "overlap_median": 0.945,
+   "blur_share": 0.0,
+   "scale_ratio": 1.554,
+   "sideways_fw": 0.041,
+   "roll_range_deg": 14.158,
+   "min_pair_inliers": 158,
+   "exposure_max_gain": 0.225,
+   "exposure_clipped_pairs": 1,
+   "exposure_clipped_share": 0.029,
+   "sharpness_median": 57.348
+  }
+ }
+}

@@ -1,0 +1,226 @@
+{
+ "vendor": "Ubiquiti",
+ "model": "SWITCH16150M",
+ "description": "",
+ "summary": "16x RJ45 (ports 1-16) | 2x SFP (17, 18) | detected automatically",
+ "image": "front.png",
+ "image_source": "d920cdd52be1c6a0.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1588,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   928,
+   26,
+   486,
+   131
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    941,
+    40,
+    60,
+    52
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    942,
+    92,
+    58,
+    52
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1000,
+    40,
+    58,
+    52
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1000,
+    92,
+    58,
+    52
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1057,
+    40,
+    56,
+    53
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1057,
+    92,
+    57,
+    53
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1113,
+    40,
+    58,
+    53
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1114,
+    92,
+    57,
+    53
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1172,
+    41,
+    59,
+    52
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1173,
+    93,
+    56,
+    52
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1230,
+    41,
+    57,
+    52
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1230,
+    92,
+    58,
+    53
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1286,
+    40,
+    58,
+    53
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1286,
+    91,
+    57,
+    53
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1342,
+    40,
+    60,
+    52
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1342,
+    92,
+    59,
+    53
+   ]
+  },
+  {
+   "id": 17,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1472,
+    37,
+    66,
+    54
+   ]
+  },
+  {
+   "id": 18,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1472,
+    97,
+    66,
+    51
+   ]
+  }
+ ]
+}

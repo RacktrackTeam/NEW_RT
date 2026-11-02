@@ -1,0 +1,204 @@
+{
+ "vendor": "TRENDnet",
+ "model": "TEG-S16DG",
+ "description": "",
+ "summary": "16x RJ45 (ports 1-16) | detected automatically",
+ "image": "front.png",
+ "image_source": "988a7cab34d0ceb0.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1125,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   539,
+   25,
+   540,
+   131
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    552,
+    37,
+    62,
+    52
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    552,
+    93,
+    61,
+    51
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    612,
+    37,
+    58,
+    51
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    611,
+    92,
+    59,
+    51
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    668,
+    37,
+    58,
+    51
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    667,
+    93,
+    59,
+    51
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    725,
+    38,
+    62,
+    51
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    723,
+    93,
+    62,
+    51
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    833,
+    37,
+    63,
+    51
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    833,
+    94,
+    63,
+    50
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    896,
+    37,
+    58,
+    51
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    893,
+    93,
+    58,
+    51
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    952,
+    38,
+    57,
+    51
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    949,
+    93,
+    59,
+    51
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1008,
+    38,
+    61,
+    52
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1006,
+    93,
+    61,
+    51
+   ]
+  }
+ ]
+}

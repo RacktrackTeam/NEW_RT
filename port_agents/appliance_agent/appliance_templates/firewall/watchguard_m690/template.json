@@ -1,0 +1,336 @@
+{
+ "vendor": "WatchGuard",
+ "model": "M690",
+ "device": "firewall",
+ "description": "",
+ "summary": "18x RJ45 | 4x SFP | 2 named port type(s): USB, Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.watchguard.com/help/docs/help-center/en-US/Content/en-US/Hardware-Guides/Images/M290-690/stacked_fireboxes.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   924,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   352,
+   48,
+   370,
+   139
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    359,
+    55,
+    36,
+    32
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    359,
+    148,
+    36,
+    32
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    394,
+    56,
+    34,
+    31
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    394,
+    149,
+    35,
+    31
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    428,
+    56,
+    35,
+    32
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    428,
+    149,
+    34,
+    31
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    461,
+    56,
+    34,
+    31
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    461,
+    149,
+    34,
+    31
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    494,
+    56,
+    35,
+    31
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    494,
+    149,
+    35,
+    31
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    528,
+    56,
+    35,
+    31
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    528,
+    149,
+    34,
+    31
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    562,
+    55,
+    35,
+    33
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    562,
+    148,
+    35,
+    32
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    595,
+    56,
+    36,
+    33
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    595,
+    149,
+    35,
+    31
+   ]
+  },
+  {
+   "id": 17,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    636,
+    27,
+    37,
+    33
+   ]
+  },
+  {
+   "id": 18,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    636,
+    62,
+    37,
+    30
+   ]
+  },
+  {
+   "id": 19,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    637,
+    119,
+    35,
+    33
+   ]
+  },
+  {
+   "id": 20,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    636,
+    154,
+    35,
+    26
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    678,
+    119,
+    37,
+    34
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    678,
+    154,
+    35,
+    26
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    318,
+    50,
+    34,
+    18
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    272,
+    55,
+    39,
+    33
+   ]
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    318,
+    143,
+    34,
+    18
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 0,
+  "2": 0,
+  "3": 0,
+  "4": 0,
+  "5": 0,
+  "6": 0,
+  "7": 0,
+  "8": 0,
+  "9": 0,
+  "10": 0,
+  "11": 0,
+  "12": 0,
+  "13": 0,
+  "14": 0,
+  "15": 0,
+  "16": 0,
+  "17": 0,
+  "18": 0,
+  "19": 0,
+  "20": 0,
+  "21": 0,
+  "22": 0,
+  "USB": 0,
+  "Console": 0,
+  "USB 2": 0
+ },
+ "chassis_aligned": 0,
+ "saved_quality": 0.72,
+ "saved_label": "official/vendor page www.watchguard.com: Front view of the Firebox M290, M390, M590, M690",
+ "saved_at": "2026-10-22 21:32"
+}

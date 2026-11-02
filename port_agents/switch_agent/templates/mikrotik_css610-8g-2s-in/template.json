@@ -1,0 +1,139 @@
+{
+ "vendor": "MikroTik",
+ "model": "CSS610-8G-2S+IN",
+ "description": "",
+ "summary": "8x RJ45 (ports 1-8) | 2x SFP (9, 10) | detected automatically",
+ "image": "front.png",
+ "image_source": "mikrotik_css610-8g-2s-in_5c57c8076818.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-even",
+ "match_regions": [
+  [
+   0,
+   0,
+   696,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   300,
+   26,
+   255,
+   124
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    311,
+    90,
+    60,
+    50
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    316,
+    39,
+    53,
+    46
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    372,
+    91,
+    55,
+    47
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    372,
+    40,
+    55,
+    45
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    429,
+    91,
+    56,
+    47
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    431,
+    39,
+    53,
+    45
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    484,
+    91,
+    60,
+    48
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    487,
+    37,
+    57,
+    47
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    550,
+    94,
+    63,
+    48
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    612,
+    94,
+    64,
+    48
+   ]
+  }
+ ],
+ "numbering_read": true
+}

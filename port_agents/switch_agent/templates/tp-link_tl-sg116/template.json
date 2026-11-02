@@ -1,0 +1,204 @@
+{
+ "vendor": "TP-Link",
+ "model": "TL-SG116",
+ "description": "",
+ "summary": "16x RJ45 (ports 1-16) | detected automatically",
+ "image": "front.png",
+ "image_source": "1e530ecff7e2270c.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1457,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   66,
+   33,
+   1344,
+   114
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    84,
+    52,
+    86,
+    75
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    168,
+    53,
+    82,
+    72
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    249,
+    54,
+    82,
+    71
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    329,
+    53,
+    84,
+    74
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    414,
+    53,
+    82,
+    73
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    494,
+    55,
+    82,
+    72
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    574,
+    53,
+    82,
+    74
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    656,
+    52,
+    82,
+    76
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    739,
+    53,
+    82,
+    74
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    820,
+    54,
+    81,
+    73
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    900,
+    53,
+    82,
+    74
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    981,
+    53,
+    83,
+    76
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1064,
+    54,
+    82,
+    74
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1145,
+    54,
+    82,
+    73
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1224,
+    53,
+    82,
+    75
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1307,
+    51,
+    86,
+    78
+   ]
+  }
+ ]
+}

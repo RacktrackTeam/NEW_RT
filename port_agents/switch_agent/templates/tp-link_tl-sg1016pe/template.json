@@ -1,0 +1,209 @@
+{
+ "vendor": "TP-Link",
+ "model": "TL-SG1016PE",
+ "description": "",
+ "summary": "16x RJ45 (ports 1-16) | 1x SFP (17) | detected automatically",
+ "image": "front.png",
+ "image_source": "TP-Link_TL-SG1016PE.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   555,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    2,
+    37,
+    56,
+    51
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    2,
+    93,
+    57,
+    48
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    55,
+    37,
+    55,
+    51
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    56,
+    94,
+    56,
+    48
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    108,
+    36,
+    56,
+    51
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    108,
+    95,
+    56,
+    47
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    161,
+    36,
+    59,
+    52
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    162,
+    92,
+    56,
+    50
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    257,
+    36,
+    61,
+    53
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    255,
+    92,
+    63,
+    50
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    314,
+    36,
+    55,
+    51
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    314,
+    95,
+    56,
+    46
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    366,
+    36,
+    58,
+    52
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    368,
+    95,
+    55,
+    46
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    420,
+    36,
+    59,
+    50
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    420,
+    94,
+    59,
+    47
+   ]
+  },
+  {
+   "id": 17,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    159,
+    94,
+    60,
+    48
+   ]
+  }
+ ],
+ "ignore_regions_note": "cleared 24 Oct: the region ran past the image edge, so it never masked anything in the tested runs; cleared to keep the tested behaviour now that regions are clipped (review #22)"
+}

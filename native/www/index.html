@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>RackTrack</title>
+<style>
+  :root { --ink:#111827; --t2:#5b6475; --sunken:#eef2f7; --blue:#1d4ed8; --grad:linear-gradient(180deg,#2f6fed 0%,#1d4ed8 100%); }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; } [hidden] { display:none !important; }
+  html, body { height:100%; margin:0; } body { background:#f7f9fc; color:var(--ink); font:15px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap { min-height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:calc(24px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom)); text-align:center; }
+  .mark { width:64px; height:64px; border-radius:18px; background:var(--grad); color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(29,78,216,.25); }
+  .mark svg { width:34px; height:34px; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+  h1 { font-size:24px; letter-spacing:-.02em; margin:14px 0 0; } p { margin:0; color:var(--t2); max-width:34ch; }
+  .card { width:100%; max-width:400px; margin-top:16px; background:#fff; border-radius:16px; padding:20px; box-shadow:0 1px 2px rgba(17,17,17,.04), 0 4px 14px rgba(17,17,17,.06); display:flex; flex-direction:column; gap:12px; text-align:left; }
+  label { font-size:13px; font-weight:600; display:flex; flex-direction:column; gap:7px; }
+  input { font:16px inherit; font-family:inherit; padding:13px 15px; border:0; border-radius:12px; background:var(--sunken); color:var(--ink); box-shadow:inset 1px 1px 3px rgba(17,17,17,.07); }
+  input:focus { outline:2px solid var(--blue); outline-offset:1px; }
+  button { font:600 15px inherit; font-family:inherit; min-height:50px; border:0; border-radius:999px; background:var(--grad); color:#fff; cursor:pointer; box-shadow:0 2px 6px rgba(29,78,216,.22), 0 8px 20px rgba(29,78,216,.16); }
+  button.soft { background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(17,17,17,.04), 0 4px 14px rgba(17,17,17,.06); }
+  .err { color:#ba1a1a; font-weight:600; font-size:13px; } .hint { font-size:12px; color:var(--t2); }
+  .spin { width:22px; height:22px; border-radius:999px; border:3px solid var(--sunken); border-top-color:var(--blue); animation:s .8s linear infinite; margin-top:18px; } @keyframes s { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="mark"><svg viewBox="0 0 24 24"><rect x="4.5" y="3" width="15" height="18" rx="1.8"/><rect x="7.2" y="6.1" width="9.6" height="2.7" rx=".7"/><rect x="7.2" y="10.7" width="9.6" height="2.7" rx=".7"/><rect x="7.2" y="15.3" width="9.6" height="2.7" rx=".7"/></svg></span>
+  <h1>RackTrack</h1>
+  <p id="lead">Connecting to your RackTrack server…</p>
+  <div class="spin" id="spin"></div>
+  <form class="card" id="form" hidden>
+    <label>Server address<input id="addr" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="http://10.0.0.5:8600"></label>
+    <span class="hint">The address of the Mac running RackTrack, on the same network as this phone. Ask your administrator.</span>
+    <button type="submit">Connect</button>
+    <button class="soft" type="button" id="anyway" hidden>Open it anyway</button>
+    <button class="soft" type="button" id="back" hidden>Back</button>
+    <p class="err" id="err" hidden></p>
+  </form>
+</div>
+<script src="config.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var KEY = 'rt_server', change = /[?&]change=1/.test(location.search), saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  function clean(u) { u = (u || '').trim().replace(/\/+$/, ''); if (u && !/^https?:\/\//i.test(u)) u = 'http://' + u; if (u && !/:\d+$/.test(u.replace(/^https?:\/\//i, ''))) u += ':8600'; return u; }
+  function open(u) { try { localStorage.setItem(KEY, u); } catch (e) {} location.replace(u + '/app/'); }
+  function showForm(msg) { $('spin').hidden = true; $('form').hidden = false; $('lead').textContent = 'Connect to the RackTrack server to sweep a rack.'; if (msg) { $('err').textContent = msg; $('err').hidden = false; $('anyway').hidden = false; } }
+  // reachable? an opaque request is enough: it fails only when nothing answers
+  function reach(u) {
+    return Promise.race([fetch(u + '/api/health', { mode: 'no-cors', cache: 'no-store' }), new Promise(function (_, rej) { setTimeout(function () { rej(new Error('timeout')); }, 6000); })]);
+  }
+  function tryOpen(u) {
+    $('err').hidden = true; $('anyway').hidden = true; $('spin').hidden = false;
+    reach(u).then(function () { open(u); }).catch(function () { showForm('No answer from ' + u + '. Check the address, that the server is running, and that this phone is on the same network.'); });
+  }
+  $('addr').value = saved || window.RT_DEFAULT_SERVER || '';
+  $('form').addEventListener('submit', function (e) { e.preventDefault(); var u = clean($('addr').value); if (!u) return; $('addr').value = u; tryOpen(u); });
+  $('anyway').addEventListener('click', function () { var u = clean($('addr').value); if (u) open(u); });
+  $('back').hidden = !(change && saved); $('back').addEventListener('click', function () { open(saved); });
+  var start = saved || window.RT_DEFAULT_SERVER;
+  if (start && !change) tryOpen(clean(start)); else showForm();
+})();
+</script>
+</body>
+</html>

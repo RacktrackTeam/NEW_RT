@@ -1,0 +1,387 @@
+{
+ "vendor": "Fortinet",
+ "model": "FortiADC 1200F",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "10x RJ45 | 16x SFP | 2 named port type(s): Console, USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.avfirewalls.co.uk/images/FortiADC/fad-1200F.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1332,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   58,
+   39,
+   479,
+   120
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    69,
+    54,
+    60,
+    48
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    71,
+    102,
+    55,
+    45
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    314,
+    50,
+    55,
+    48
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    315,
+    100,
+    54,
+    47
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    368,
+    50,
+    52,
+    49
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    368,
+    100,
+    52,
+    48
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    420,
+    51,
+    51,
+    48
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    420,
+    100,
+    53,
+    48
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    471,
+    51,
+    55,
+    49
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    471,
+    100,
+    54,
+    49
+   ]
+  },
+  {
+   "id": 11,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    588,
+    53,
+    53,
+    47
+   ]
+  },
+  {
+   "id": 12,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    586,
+    108,
+    54,
+    42
+   ]
+  },
+  {
+   "id": 13,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    639,
+    53,
+    47,
+    47
+   ]
+  },
+  {
+   "id": 14,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    640,
+    108,
+    46,
+    39
+   ]
+  },
+  {
+   "id": 15,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    683,
+    54,
+    48,
+    46
+   ]
+  },
+  {
+   "id": 16,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    684,
+    106,
+    46,
+    41
+   ]
+  },
+  {
+   "id": 17,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    728,
+    53,
+    52,
+    47
+   ]
+  },
+  {
+   "id": 18,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    730,
+    107,
+    52,
+    43
+   ]
+  },
+  {
+   "id": 19,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    844,
+    106,
+    55,
+    42
+   ]
+  },
+  {
+   "id": 20,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    896,
+    107,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 21,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    955,
+    106,
+    53,
+    42
+   ]
+  },
+  {
+   "id": 22,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1006,
+    107,
+    52,
+    42
+   ]
+  },
+  {
+   "id": 23,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1114,
+    104,
+    55,
+    45
+   ]
+  },
+  {
+   "id": 24,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1166,
+    104,
+    52,
+    44
+   ]
+  },
+  {
+   "id": 25,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1224,
+    104,
+    54,
+    44
+   ]
+  },
+  {
+   "id": 26,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1276,
+    105,
+    52,
+    44
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    5,
+    43,
+    54,
+    48
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    6,
+    116,
+    52,
+    30
+   ],
+   "name": "USB"
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    7,
+    90,
+    50,
+    25
+   ]
+  }
+ ],
+ "labels_read": [
+  "USB"
+ ],
+ "chassis_votes": {
+  "1": 0,
+  "2": 0,
+  "3": 0,
+  "4": 0,
+  "5": 0,
+  "6": 0,
+  "7": 0,
+  "8": 0,
+  "9": 0,
+  "10": 0,
+  "11": 0,
+  "12": 0,
+  "13": 0,
+  "14": 0,
+  "15": 0,
+  "16": 0,
+  "17": 0,
+  "18": 0,
+  "19": 0,
+  "20": 0,
+  "21": 0,
+  "22": 0,
+  "23": 0,
+  "24": 0,
+  "25": 0,
+  "26": 0,
+  "Console": 0,
+  "USB": 0,
+  "USB 2": 0
+ },
+ "chassis_aligned": 0,
+ "saved_quality": 0.475,
+ "saved_label": "template agent (internet/image_search)",
+ "saved_at": "2026-10-16 18:18"
+}

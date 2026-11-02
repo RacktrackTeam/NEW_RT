@@ -1,0 +1,168 @@
+{
+ "vendor": "Palo Alto Networks",
+ "model": "PA-220",
+ "device": "firewall",
+ "description": "",
+ "summary": "8x RJ45 | 1x SFP | 2 named port type(s): USB, Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.enbitcon.de/media/d0/15/1a/1671721830/pa220-cover.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   640,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1,
+    38,
+    51,
+    47
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    0,
+    92,
+    52,
+    46
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    52,
+    39,
+    50,
+    45
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    52,
+    91,
+    50,
+    46
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    100,
+    39,
+    52,
+    46
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    102,
+    92,
+    51,
+    45
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    151,
+    40,
+    57,
+    46
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    151,
+    91,
+    58,
+    48
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    477,
+    111,
+    23,
+    29
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    341,
+    103,
+    60,
+    32
+   ],
+   "name": "USB"
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    221,
+    91,
+    69,
+    49
+   ],
+   "name": "CONSOLE"
+  }
+ ],
+ "labels_read": [
+  "CONSOLE",
+  "CONSOLE",
+  "USB"
+ ],
+ "chassis_votes": {
+  "1": 4,
+  "2": 4,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "7": 4,
+  "8": 4,
+  "9": 0,
+  "USB": 4,
+  "Console": 4
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.823,
+ "saved_label": "internet/image_search",
+ "saved_at": "2026-10-16 15:05",
+ "ignore_regions_note": "cleared 24 Oct: the region ran past the image edge, so it never masked anything in the tested runs; cleared to keep the tested behaviour now that regions are clipped (review #22)"
+}

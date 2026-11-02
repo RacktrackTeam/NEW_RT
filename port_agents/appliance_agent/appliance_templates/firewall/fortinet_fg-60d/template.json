@@ -1,0 +1,173 @@
+{
+ "vendor": "Fortinet",
+ "model": "FG-60D",
+ "device": "firewall",
+ "description": "",
+ "summary": "10x RJ45 | 0x SFP | 1 named port type(s): USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.dev74.com/image/cache/catalog/prodotti/Firewall-VPN-FORTiNET-FG-60D-550x550.png.webp",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   722,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   82,
+   48,
+   647,
+   91
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    96,
+    63,
+    68,
+    63
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    161,
+    64,
+    60,
+    58
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    220,
+    65,
+    60,
+    58
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    278,
+    65,
+    62,
+    58
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    334,
+    66,
+    66,
+    60
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    409,
+    66,
+    69,
+    61
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    476,
+    65,
+    62,
+    60
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    535,
+    66,
+    61,
+    58
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    593,
+    66,
+    61,
+    59
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    650,
+    65,
+    66,
+    60
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    50,
+    57,
+    36,
+    65
+   ],
+   "name": "USB"
+  }
+ ],
+ "labels_read": [
+  "USB",
+  "WAN2",
+  "WAN"
+ ],
+ "chassis_votes": {
+  "1": 1,
+  "2": 1,
+  "3": 1,
+  "4": 1,
+  "5": 1,
+  "6": 1,
+  "7": 1,
+  "8": 1,
+  "9": 1,
+  "10": 1,
+  "USB": 1
+ },
+ "chassis_aligned": 1,
+ "saved_quality": 0.701,
+ "saved_label": "internet/panel_search",
+ "saved_at": "2026-10-22 20:49"
+}

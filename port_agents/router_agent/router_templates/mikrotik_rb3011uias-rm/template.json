@@ -1,0 +1,172 @@
+{
+ "vendor": "MikroTik",
+ "model": "RB3011UiAS-RM",
+ "device": "router",
+ "description": "",
+ "summary": "10x RJ45 | 1x SFP | built from the vendor image by the router mapper",
+ "image": "front.png",
+ "image_source": "https://cdn.mikrotik.com/web-assets/product_files/ID121.2_RB3011UiAS-RM_DOC_220918.pdf#page1-img6",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1980,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   237,
+   36,
+   759,
+   101
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    169,
+    67,
+    73,
+    58
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    253,
+    54,
+    64,
+    66
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    316,
+    55,
+    60,
+    64
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    374,
+    54,
+    61,
+    64
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    431,
+    55,
+    60,
+    64
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    488,
+    54,
+    69,
+    67
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    676,
+    52,
+    67,
+    69
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    742,
+    55,
+    60,
+    64
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    799,
+    54,
+    60,
+    65
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    856,
+    53,
+    60,
+    66
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    914,
+    53,
+    66,
+    68
+   ]
+  }
+ ],
+ "labels_read": [
+  "SFP",
+  "ET0",
+  "ET9"
+ ],
+ "chassis_votes": {
+  "1": 4,
+  "2": 4,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "7": 4,
+  "8": 4,
+  "9": 4,
+  "10": 4,
+  "11": 4
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.989,
+ "saved_label": "official/vendor document ID121.2_RB3011UiAS-RM_DOC_220918.pdf p1",
+ "saved_at": "2026-10-23 19:06"
+}

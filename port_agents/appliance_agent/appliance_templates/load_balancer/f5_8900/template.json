@@ -1,0 +1,348 @@
+{
+ "vendor": "F5",
+ "model": "8900",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "16x RJ45 | 10x SFP | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://techdocs.f5.com/kb/global/manual_images/MAN-0330-03_v1/img_8900_front_num.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1392,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   206,
+   32,
+   385,
+   117
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    217,
+    43,
+    49,
+    47
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    218,
+    93,
+    48,
+    44
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    265,
+    44,
+    46,
+    46
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    265,
+    93,
+    45,
+    45
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    309,
+    45,
+    46,
+    45
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    309,
+    93,
+    46,
+    45
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    354,
+    46,
+    46,
+    44
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    354,
+    93,
+    46,
+    45
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    398,
+    46,
+    46,
+    44
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    398,
+    94,
+    46,
+    45
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    443,
+    46,
+    46,
+    45
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    443,
+    95,
+    46,
+    44
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    487,
+    46,
+    46,
+    45
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    487,
+    95,
+    45,
+    43
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    531,
+    46,
+    46,
+    45
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    532,
+    95,
+    49,
+    45
+   ]
+  },
+  {
+   "id": 17,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    608,
+    45,
+    49,
+    45
+   ]
+  },
+  {
+   "id": 18,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    606,
+    94,
+    52,
+    46
+   ]
+  },
+  {
+   "id": 19,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    656,
+    46,
+    48,
+    45
+   ]
+  },
+  {
+   "id": 20,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    656,
+    94,
+    49,
+    49
+   ]
+  },
+  {
+   "id": 21,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    702,
+    45,
+    48,
+    46
+   ]
+  },
+  {
+   "id": 22,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    702,
+    94,
+    49,
+    50
+   ]
+  },
+  {
+   "id": 23,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    748,
+    46,
+    50,
+    45
+   ]
+  },
+  {
+   "id": 24,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    748,
+    96,
+    51,
+    49
+   ]
+  },
+  {
+   "id": 25,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    809,
+    44,
+    56,
+    47
+   ]
+  },
+  {
+   "id": 26,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    808,
+    95,
+    58,
+    54
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 2,
+  "2": 2,
+  "3": 2,
+  "4": 2,
+  "5": 2,
+  "6": 2,
+  "7": 2,
+  "8": 2,
+  "9": 2,
+  "10": 2,
+  "11": 2,
+  "12": 2,
+  "13": 2,
+  "14": 2,
+  "15": 2,
+  "16": 2,
+  "17": 2,
+  "18": 2,
+  "19": 2,
+  "20": 2,
+  "21": 2,
+  "22": 2,
+  "23": 2,
+  "24": 2,
+  "25": 2,
+  "26": 2
+ },
+ "chassis_aligned": 2,
+ "saved_quality": 0.76,
+ "saved_label": "official/vendor page techdocs.f5.com: Front view of the 8900 platform",
+ "saved_at": "2026-10-22 20:32"
+}

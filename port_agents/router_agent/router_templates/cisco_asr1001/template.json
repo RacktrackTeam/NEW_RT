@@ -1,0 +1,117 @@
+{
+ "vendor": "Cisco",
+ "model": "ASR1001",
+ "device": "router",
+ "description": "",
+ "summary": "2x RJ45 | 4x SFP | 2 named port type(s): USB, Console | built from the vendor image by the router mapper",
+ "image": "front.png",
+ "image_source": "https://it-market.com/media/47/d5/c5/1719737159/76b474225e9c376bd4c6bcf6ee1cb0b6.jpg?ts=1738567614",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1940,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    399,
+    59,
+    69,
+    67
+   ],
+   "name": "CON"
+  },
+  {
+   "id": "Aux",
+   "type": "aux",
+   "poe": null,
+   "box": [
+    466,
+    58,
+    74,
+    68
+   ],
+   "name": "AUX"
+  },
+  {
+   "id": 1,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    743,
+    69,
+    78,
+    58
+   ]
+  },
+  {
+   "id": 2,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    843,
+    68,
+    79,
+    57
+   ]
+  },
+  {
+   "id": 3,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    943,
+    68,
+    81,
+    56
+   ]
+  },
+  {
+   "id": 4,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1045,
+    68,
+    77,
+    56
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    185,
+    52,
+    38,
+    72
+   ]
+  },
+  {
+   "id": "Console 2",
+   "type": "console",
+   "poe": null,
+   "box": [
+    305,
+    56,
+    82,
+    71
+   ]
+  }
+ ],
+ "labels_read": [
+  "USB",
+  "CON",
+  "AUX"
+ ]
+}

@@ -1,0 +1,103 @@
+{
+ "vendor": "TP-Link",
+ "model": "TL-R470T+",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "5x RJ45 | 0x SFP | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://static.tp-link.com/TL-R470T%2B_UN_6.-0_01_large_1548724634730v.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   744,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   229,
+   38,
+   377,
+   99
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    245,
+    53,
+    79,
+    67
+   ],
+   "name": "WAN"
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    326,
+    55,
+    67,
+    62
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    395,
+    55,
+    61,
+    60
+   ],
+   "name": "WAN/LAN"
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    456,
+    55,
+    65,
+    63
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    522,
+    54,
+    70,
+    68
+   ],
+   "name": "LAN"
+  }
+ ],
+ "labels_read": [
+  "WAN",
+  "WAN/LAN",
+  "LAN"
+ ],
+ "chassis_votes": {
+  "1": 3,
+  "2": 3,
+  "3": 3,
+  "4": 3,
+  "5": 2
+ },
+ "chassis_aligned": 3,
+ "saved_quality": 0.88,
+ "saved_label": "official/vendor page www.omadanetworks.com: Load Balance Broadband Router 1",
+ "saved_at": "2026-10-22 21:09"
+}

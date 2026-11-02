@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#e9ece8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="RackTrack">
+<meta name="color-scheme" content="light">
+<title>RackTrack</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/app/img/logo-96.png">
+<link rel="apple-touch-icon" href="/app/img/logo-192.png">
+<link rel="preload" href="/app/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/app/app.css?v=127">
+<link rel="stylesheet" href="/app/rt/rt-topology.css?v=12">
+</head>
+<body>
+<!-- icons: drawn once, used everywhere with <use> -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19z"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 4v4h4"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="12.5" height="12" rx="2.5"/><path d="m15.5 10.5 5.5-3v9l-5.5-3z"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M21 20H3"/></symbol>
+    <symbol id="n-home" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21v-9h6v9"/></symbol>
+    <symbol id="n-camera" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></symbol>
+    <symbol id="n-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.7"/><path d="M4.8 20c0-3.7 3.2-5.8 7.2-5.8s7.2 2.1 7.2 5.8"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18.5" cy="12" r="1.3"/></symbol>
+    <symbol id="i-rack" viewBox="0 0 24 24"><rect x="4.5" y="3" width="15" height="18" rx="1.8"/><rect x="7.2" y="6.1" width="9.6" height="2.7" rx=".7"/><rect x="7.2" y="10.7" width="9.6" height="2.7" rx=".7"/><rect x="7.2" y="15.3" width="9.6" height="2.7" rx=".7"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+    <symbol id="i-guide" viewBox="0 0 24 24"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8"/><path d="M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8"/><path d="M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16"/><path d="M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M4 16v2.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V16"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="6.5" rx="2"/><rect x="3.5" y="13.5" width="17" height="6.5" rx="2"/><path d="M7.5 7.3h.01M7.5 16.8h.01"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></symbol>
+    <symbol id="i-out" viewBox="0 0 24 24"><path d="M14 4h4.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H14"/><path d="M10 16.5 5.5 12 10 7.5"/><path d="M5.5 12H15"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6.5 3h7l4 4v12.5A1.5 1.5 0 0 1 16 21H6.5A1.5 1.5 0 0 1 5 19.5v-15A1.5 1.5 0 0 1 6.5 3z"/><path d="M13 3v4.5h4.5"/><path d="M8.5 12.5h7M8.5 16h5"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11.5a8 8 0 0 0-14.3-4.6L4 9"/><path d="M4 4.5V9h4.5"/><path d="M4 12.5a8 8 0 0 0 14.3 4.6L20 15"/><path d="M20 19.5V15h-4.5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 6.5h15"/><path d="M9.5 6.5V4.5h5v2"/><path d="M6.5 6.5l1 13a1.5 1.5 0 0 0 1.5 1.4h6a1.5 1.5 0 0 0 1.5-1.4l1-13"/></symbol>
+  </defs>
+</svg>
+
+<div class="splash" id="splash"><div class="splash-in"><img class="logo big" src="/app/img/logo-192.png" alt=""><b>RackTrack</b></div></div>
+
+<div class="shell">
+<aside class="side" id="side" hidden>
+  <div class="sidetop"><a class="brand" href="#home" aria-label="Home"><img class="logo" src="/app/img/logo-96.png" alt=""><div><b>RackTrack</b><small id="site2" hidden></small></div></a>
+    <button class="sidetog" id="side-tog" type="button" aria-label="Close the menu" title="Close the menu"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button></div>
+  <nav class="snav">
+    <a href="#home" data-nav="home" title="Home"><svg class="ic"><use href="#i-home"/></svg><span class="lbl">Home</span></a>
+    <a href="#sweep" data-nav="sweep" title="Scan"><svg class="ic"><use href="#i-video"/></svg><span class="lbl">Scan</span></a>
+    <a href="#more" data-nav="more" title="Profile"><svg class="ic"><use href="#i-user"/></svg><span class="lbl">Profile</span></a>
+  </nav>
+  <div class="sfoot"><span class="avatar" id="av2"></span><div><b id="who2"></b><button class="link" id="signout2" type="button">Sign out</button></div></div>
+</aside>
+
+<div class="content">
+<header class="top" id="top" hidden>
+  <button class="iconbtn back" id="back" type="button" aria-label="Back" hidden>‹</button>
+  <a class="markbtn" id="topmark" href="#home" aria-label="Home"><img class="logo" src="/app/img/logo-96.png" alt=""></a>
+  <div class="toptxt"><b class="toptitle" id="toptitle">RackTrack</b><small class="topsub" id="topsub" hidden></small></div>
+  <button class="avatar" id="who" type="button" aria-label="Profile"></button>
+  <span class="topspacer" id="topspacer" hidden></span>
+</header>
+
+<main id="view">
+  <!-- sign in -->
+  <section class="screen" data-screen="signin" hidden>
+    <div class="auth">
+      <img class="logo big" src="/app/img/logo-192.png" alt="">
+      <h1>Welcome to RackTrack</h1>
+      <p class="muted">Film a rack once. Every unit, device and port is read for you.</p>
+      <form class="card form" id="signin">
+        <label>Your name<input id="si-name" autocomplete="name" placeholder="First name" maxlength="40" required></label>
+        <button class="btn primary big block" type="submit">Continue</button>
+        <p class="err" id="si-err" hidden></p>
+      </form>
+      <p class="muted small" id="si-server" hidden></p>
+    </div>
+  </section>
+
+  <!-- home -->
+  <section class="screen rthome" data-screen="home" hidden>
+    <!-- racktrack.ai's front door (RT-EOS HomePage): one photo of a whole cabled rack, a title, one line, one button, all on one left edge -->
+    <div class="rh">
+      <figure class="rh-photo"><img src="/app/img/home-rack.jpg?v=1" alt="A rack of switches and patch panels, fully cabled"><span class="leds" aria-hidden="true"><i style="--x:88%;--y:4%;--d:0s"></i><i style="--x:90%;--y:22%;--d:.8s"></i><i style="--x:89%;--y:39%;--d:1.6s"></i><i style="--x:90%;--y:55%;--d:.4s"></i><i style="--x:88%;--y:73%;--d:1.2s"></i><i style="--x:12%;--y:47%;--d:2s"></i></span></figure>
+      <div class="rh-text">
+        <p class="rh-eyebrow" id="greet-sub"></p>
+        <h1 class="rh-title" id="h-words"><span>Know</span> <span>what's</span> <span>really</span> <span>in</span> <span>the</span> <span>rack</span></h1>
+        <p class="rh-sub">Film the rack once. RackTrack finds every unit and device, reads the makes, models and ports, and shows what is free.</p>
+        <a class="rh-live" id="now-card" href="#" hidden><i class="sig live"></i><span id="now-title">Reading your rack</span><span class="mono" id="now-step"></span></a>
+        <div class="rh-actions"><a class="rh-btn" href="#sweep"><svg class="ic"><use href="#n-camera"/></svg>Scan a rack</a><a class="rh-second" href="#history">My racks</a></div>
+        <p class="rh-tally" id="tally" hidden></p>
+        <ul class="rh-reads" aria-label="What a scan reads"><li>Rack units and free space</li><li>Devices and their types</li><li>Makes, models and ports</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- history -->
+  <section class="screen" data-screen="history" hidden>
+    <div class="phead"><div><h1>History</h1><p class="muted">Every rack read on this server, newest first.</p></div>
+      <button class="btn ghost" id="hist-refresh" type="button">Refresh</button></div>
+    <div id="hist" class="runs"><p class="muted">Loading…</p></div>
+  </section>
+
+  <!-- sweep: two ways in, the camera (the guided capture) or an upload -->
+  <section class="screen scanpage" data-screen="sweep" hidden>
+    <div class="swh a1"><h1>Scan a rack</h1><p class="muted">Film the rack top to bottom, or pick a video of it. Video only.</p></div>
+    <div class="scanbody a2" id="sw-choices">
+      <div class="upcard dropzone" id="dropzone" role="button" tabindex="0" aria-label="Pick a video">
+        <div class="dz-idle" id="dz-idle">
+          <span class="up-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4.5 4.5 0 0 1-.5-9 6 6 0 0 1 11.5 1.5A3.5 3.5 0 0 1 17.5 18H7z"/><path d="M12 13v7M9 16l3-3 3 3"/></svg></span>
+          <b>Tap to pick a video</b><small>MP4 or MOV · one pass, top to bottom</small>
+          <span class="or">or</span>
+          <button class="btn mini ink" id="sw-camera" type="button">Open camera</button>
+        </div>
+        <div class="dz-pick" id="dz-pick" hidden><video id="dz-video" muted playsinline preload="metadata"></video><div class="dz-meta"><b id="dz-name"></b><small id="dz-info"></small><button class="link" id="dz-clear" type="button">Choose another</button></div></div>
+      </div>
+      <div class="scanfoot a3"><button class="btn primary big" id="vsend" type="button" disabled><i class="sig"></i>Analyse</button></div>
+      <div class="rules a3" id="sw-tips"><span class="glabel">How to film</span>
+        <ul class="rulelist">
+          <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18h2"/></svg></i><div><b>Hold the phone upright</b><small>The rack fills the picture</small></div></li>
+          <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v18M18 3v18"/><path d="M9 7h6M9 12h6M9 17h6"/></svg></i><div><b>Keep both rails in view</b><small>Left and right rails inside the frame</small></div></li>
+          <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16"/><path d="M7 15l5 5 5-5"/></svg></i><div><b>Glide slowly, top to bottom</b><small>One pass, 20 to 60 seconds</small></div></li>
+        </ul>
+      </div>
+      <button id="sw-upload" type="button" hidden></button>
+      <input type="file" id="vcam" accept="video/*" capture="environment" hidden>
+      <input type="file" id="vfile" accept="video/*" hidden>
+    </div>
+    <div class="modepanel" id="sw-guide" hidden>
+      <button class="link swback" type="button">‹ Camera or upload</button>
+      <div class="guide"><iframe id="guide" title="camera guide" allow="camera; microphone; accelerometer; gyroscope; magnetometer; autoplay; fullscreen; screen-wake-lock"></iframe></div>
+      <p class="muted small">When the guide says "Sent", the analysis starts by itself.</p>
+    </div>
+    <div class="card sendcard" id="sw-send" hidden>
+      <span class="filechip" id="vfile-name" hidden></span>
+      <div class="upbar" id="upbar" hidden><div class="bar"><i id="up-bar"></i></div><span class="muted small" id="up-txt"></span></div>
+    </div>
+    <p class="err" id="v-err" hidden></p>
+  </section>
+
+  <!-- the run -->
+  <section class="screen" data-screen="job" hidden>
+    <div class="phead"><div><span class="eyebrow">Run</span><h1 id="job-title">Analysing</h1></div><a class="btn primary" id="job-open" href="#" hidden>Open the result</a></div>
+    <div class="story">
+      <aside class="storyrail">
+        <div class="card progcard">
+          <div class="row between"><span class="chip run" id="job-state">Running</span><span class="muted small mono" id="job-time">0 s</span></div>
+          <div class="stepnow"><span class="big" id="job-stepn">1</span><span class="muted">of 15</span></div>
+          <b id="job-stepname">Input</b>
+          <div class="bar"><i id="job-bar"></i></div>
+          <p id="job-progress" class="muted small prog">queued</p>
+          <p class="err" id="job-err" hidden></p>
+        </div>
+        <details class="card stepsbox" id="steps-box"><summary>All 15 steps</summary><ol class="steps" id="job-steps"></ol></details>
+        <button class="btn danger" id="job-del" type="button" hidden><svg class="ic"><use href="#i-trash"/></svg><span>Remove this run</span></button>
+      </aside>
+      <div class="stage">
+        <figure class="card stagepic" id="stage-pic" hidden><img id="stage-img" alt=""><figcaption><b id="stage-cap"></b><span class="muted small" id="stage-sub"></span></figcaption></figure>
+        <div class="card waitcard" id="stage-wait"><span class="dropic"><svg class="ic"><use href="#i-rack"/></svg></span><b>The rack builds up here</b><p class="muted small">The stitched picture first, then the units, then what is full and free, then every device. The result opens as soon as the devices are in.</p></div>
+        <div class="filmstrip" id="filmstrip"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- the result: four tabs in the bottom bar (Rack, Devices, Elevation, Report) -->
+  <section class="screen" data-screen="result" hidden>
+    <span id="res-eyebrow" hidden></span><span id="res-title" hidden></span><span id="res-sub" hidden></span><a id="rep-full" href="#" hidden></a>
+    <div class="card note" id="res-pending" hidden><span class="dot run"></span><div><b>Ports are being read in the background.</b><p class="muted small">Makes, models and ports fill in when done. Everything else is final.</p></div></div>
+    <div class="rpart" id="res-rack">
+      <div class="card rkask" id="rk-ask" hidden></div>
+      <a class="nextstrip" id="rk-next" href="#" hidden></a>
+      <div class="rkid" id="rk-id" hidden></div>
+      <div class="seg" id="lay-seg" role="tablist"><span class="segknob" id="segknob"></span>
+        <button type="button" role="tab" data-lay="units">Units</button><button type="button" role="tab" data-lay="space">Space</button><button type="button" role="tab" data-lay="devices">Devices</button><button type="button" role="tab" data-lay="kinds">Types</button>
+      </div>
+      <figure class="rackshot" id="rackshot"><div class="rackinner" id="rackinner"><img id="res-rack-plain" alt="The rack"><canvas id="res-rack-flat" hidden></canvas><svg id="lay-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg></div><div class="lchips" id="lay-chips"></div></figure>
+      <div class="caprow" id="caprow"><p class="laycap" id="lay-cap"></p><button class="link fittog" id="fit-tog" type="button">Zoom in</button></div>
+      <aside class="webside" id="rack-side"></aside>
+    </div>
+    <div class="rpart" id="res-devices" hidden>
+      <div id="dv-pick"><p class="glabel" id="dv-pick-title">Choose a device</p><div class="card flush plist2" id="dv-list"></div></div>
+      <div id="dv-one" hidden>
+        <div class="card onecard" id="res-dev"></div>
+        <aside class="webside" id="dev-side"></aside>
+        <div class="oneacts"><button class="btn primary big" id="dv-another" type="button">Pick another device</button><button class="btn ghost big" id="dv-rack" type="button">Back to the rack</button></div>
+      </div>
+    </div>
+    <div class="rpart" id="res-elevation" hidden>
+      <div class="elegend" id="rt-legend"></div>
+      <div class="rteos" id="rt-topo"></div>
+    </div>
+    <div class="rpart" id="res-report" hidden>
+      <div id="rp-top"></div>
+    </div>
+  </section>
+
+  <!-- more -->
+  <section class="screen" data-screen="more" hidden>
+    <div class="card phero a1"><span class="avatar big" id="av3"></span><div class="pwho"><span class="eyebrow">Signed in</span><b id="who3"></b><span class="muted small" id="site3" hidden></span></div></div>
+    <div class="pstats a2"><div><b class="num" id="ps-racks" data-n="0">0</b><span>racks read</span></div><div><b class="num" id="ps-units" data-n="0">0</b><span>units</span></div><div><b class="num" id="ps-devs" data-n="0">0</b><span>devices</span></div></div>
+    <span class="glabel a3">Your racks</span>
+    <div class="card group a3">
+      <a class="grow" href="#history"><svg class="ic"><use href="#i-history"/></svg><span>My racks</span><em id="runs-count"></em><span class="arr">→</span></a>
+    </div>
+    <span class="glabel a3">RackTrack</span>
+    <div class="card group a3">
+      <a class="grow" href="#models"><svg class="ic"><use href="#i-chart"/></svg><span>How accurate it is</span><span class="arr">→</span></a>
+      <button class="grow" id="install-btn" type="button"><svg class="ic"><use href="#i-phone"/></svg><span>Install on the phone</span><em>How to</em><span class="arr">→</span></button>
+    </div>
+    <span class="glabel a4" id="install-label" hidden></span><div id="install-row" hidden></div>
+    <span class="glabel a4">Account</span>
+    <div class="card group a4">
+      <button class="grow danger" id="signout" type="button"><svg class="ic"><use href="#i-out"/></svg><span>Sign out</span></button>
+    </div>
+    <p class="muted small pfoot a4">RackTrack reads a rack from one video: its units, devices, makes, models and ports.</p>
+  </section>
+
+  <section class="screen" data-screen="models" hidden>
+    <div class="phead"><div><h1>How accurate it is</h1><p class="muted">How well each step scores on our test photos.</p></div></div>
+    <div class="card flush mtable">
+      <div class="mrow"><div><b>Unit detection</b><small>YOLO unit detector and an end check</small></div><span class="acc">98.1 %</span></div>
+      <div class="mrow"><div><b>Unit occupancy</b><small>Five classifiers, averaged</small></div><span class="acc">99.4 %</span></div>
+      <div class="mrow"><div><b>Device detection</b><small>DEIMv2 detector and a boundary check</small></div><span class="acc">95.3 %</span></div>
+      <div class="mrow"><div><b>Device classification</b><small>ConvNeXt-Tiny and DINOv2-B; a device is named only when both agree, else left for a person</small></div><span class="acc">99.2 %</span></div>
+      <div class="mrow"><div><b>Make and model</b><small>Panel reading and vendor catalogues</small></div><span class="acc na">not measured</span></div>
+      <div class="mrow"><div><b>Port layout</b><small>Port detector and vendor templates</small></div><span class="acc na">not measured</span></div>
+    </div>
+  </section>
+</main>
+</div>
+</div>
+
+<!-- the result's own bar: it replaces the app bar while a result is open -->
+<nav class="bottom" id="rnav" hidden>
+  <div class="pill">
+    <a href="#" data-rtab="rack"><svg class="ic"><use href="#i-rack"/></svg><span>Rack</span></a>
+    <a href="#" data-rtab="devices"><svg class="ic"><use href="#i-guide"/></svg><span>Devices</span></a>
+    <a href="#" data-rtab="elevation"><svg class="ic"><use href="#i-chart"/></svg><span>Layout</span></a>
+    <a href="#" data-rtab="report"><svg class="ic"><use href="#i-doc"/></svg><span>Report</span></a>
+  </div>
+</nav>
+<nav class="bottom" id="nav" hidden>
+  <div class="pill">
+    <a href="#home" data-nav="home"><svg class="ic"><use href="#n-home"/></svg><span>Home</span></a>
+    <a href="#sweep" data-nav="sweep"><svg class="ic"><use href="#n-camera"/></svg><span>Scan</span></a>
+    <a href="#more" data-nav="more"><svg class="ic"><use href="#n-person"/></svg><span>Profile</span></a>
+  </div>
+</nav>
+<div class="zoomov" id="dv-zoomov" hidden></div>
+<div class="rteos" id="rt-analysing"></div>
+<div id="lb" hidden><img id="lbimg" alt=""><span>tap to close</span></div>
+<script src="/app/topology.js?v=1"></script>
+<script src="/app/rt/rt-topology.js?v=12" defer></script>
+<script src="/app/app.js?v=144"></script>
+</body>
+</html>

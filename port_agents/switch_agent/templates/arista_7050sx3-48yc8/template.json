@@ -1,0 +1,373 @@
+{
+ "vendor": "Arista",
+ "model": "7050SX3-48YC8",
+ "description": "",
+ "summary": "32x SFP (1, 2, 4, 3, 6, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 17, 20, 19, 21, 22, 23, 24, 26, 25, 28, 27, 29, 30, 32, 31) | detected automatically",
+ "image": "front.png",
+ "image_source": "Arista_7050SX3-48YC8.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1867,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    10,
+    30,
+    65,
+    51
+   ]
+  },
+  {
+   "id": 2,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    10,
+    94,
+    64,
+    52
+   ]
+  },
+  {
+   "id": 4,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    74,
+    34,
+    59,
+    47
+   ]
+  },
+  {
+   "id": 3,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    73,
+    95,
+    62,
+    51
+   ]
+  },
+  {
+   "id": 6,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    135,
+    35,
+    62,
+    48
+   ]
+  },
+  {
+   "id": 5,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    134,
+    95,
+    63,
+    51
+   ]
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    195,
+    35,
+    63,
+    48
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    257,
+    34,
+    62,
+    50
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    319,
+    34,
+    66,
+    47
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    392,
+    35,
+    62,
+    42
+   ]
+  },
+  {
+   "id": 11,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    638,
+    92,
+    62,
+    50
+   ]
+  },
+  {
+   "id": 12,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    848,
+    34,
+    84,
+    44
+   ]
+  },
+  {
+   "id": 13,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1104,
+    36,
+    61,
+    44
+   ]
+  },
+  {
+   "id": 14,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1167,
+    36,
+    61,
+    45
+   ]
+  },
+  {
+   "id": 15,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1167,
+    95,
+    61,
+    49
+   ]
+  },
+  {
+   "id": 16,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1228,
+    35,
+    65,
+    46
+   ]
+  },
+  {
+   "id": 18,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1293,
+    35,
+    59,
+    45
+   ]
+  },
+  {
+   "id": 17,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1292,
+    94,
+    60,
+    49
+   ]
+  },
+  {
+   "id": 20,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1352,
+    37,
+    59,
+    44
+   ]
+  },
+  {
+   "id": 19,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1350,
+    94,
+    61,
+    48
+   ]
+  },
+  {
+   "id": 21,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1410,
+    36,
+    67,
+    45
+   ]
+  },
+  {
+   "id": 22,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1481,
+    35,
+    67,
+    46
+   ]
+  },
+  {
+   "id": 23,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1481,
+    94,
+    69,
+    51
+   ]
+  },
+  {
+   "id": 24,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1548,
+    35,
+    62,
+    49
+   ]
+  },
+  {
+   "id": 26,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1609,
+    34,
+    59,
+    48
+   ]
+  },
+  {
+   "id": 25,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1606,
+    94,
+    62,
+    51
+   ]
+  },
+  {
+   "id": 28,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1668,
+    35,
+    60,
+    47
+   ]
+  },
+  {
+   "id": 27,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1666,
+    94,
+    62,
+    50
+   ]
+  },
+  {
+   "id": 29,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1728,
+    33,
+    61,
+    46
+   ]
+  },
+  {
+   "id": 30,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1728,
+    91,
+    65,
+    55
+   ]
+  },
+  {
+   "id": 32,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1794,
+    33,
+    64,
+    49
+   ]
+  },
+  {
+   "id": 31,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1792,
+    90,
+    68,
+    57
+   ]
+  }
+ ]
+}

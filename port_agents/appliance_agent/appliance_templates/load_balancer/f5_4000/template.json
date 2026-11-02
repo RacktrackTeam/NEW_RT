@@ -1,0 +1,192 @@
+{
+ "vendor": "F5",
+ "model": "4000s",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "11x RJ45 | 2x SFP | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://nwrusa.com/cdn/shop/products/F5_F5-BIG-LTM-4000S_REFURB_2_1200x1200.jpg?v=1575698448",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1598,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   47,
+   27,
+   425,
+   124
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    58,
+    39,
+    64,
+    55
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    151,
+    50,
+    57,
+    44
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    158,
+    98,
+    58,
+    44
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    251,
+    48,
+    55,
+    46
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    260,
+    96,
+    50,
+    45
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    304,
+    48,
+    52,
+    46
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    310,
+    95,
+    50,
+    44
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    354,
+    48,
+    51,
+    45
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    360,
+    95,
+    50,
+    44
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    404,
+    48,
+    53,
+    44
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    409,
+    94,
+    52,
+    45
+   ]
+  },
+  {
+   "id": 12,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    517,
+    97,
+    56,
+    43
+   ]
+  },
+  {
+   "id": 13,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    572,
+    97,
+    56,
+    42
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 2,
+  "2": 2,
+  "3": 2,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "7": 4,
+  "8": 3,
+  "9": 3,
+  "10": 4,
+  "11": 4,
+  "12": 3,
+  "13": 2
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.696,
+ "saved_label": "template agent (internet/image_search)",
+ "saved_at": "2026-10-24 22:30"
+}

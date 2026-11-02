@@ -1,0 +1,204 @@
+{
+ "vendor": "Palo Alto Networks",
+ "model": "PA-415-5G",
+ "device": "firewall",
+ "description": "",
+ "summary": "9x RJ45 | 2x SFP | 2 named port type(s): USB, Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.paloaltonetworks.com/blog/wp-content/uploads/2023/11/PA_415_5G_HeroL.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1044,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   287,
+   30,
+   350,
+   118
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    234,
+    39,
+    52,
+    45
+   ]
+  },
+  {
+   "id": 2,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    234,
+    89,
+    52,
+    41
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    299,
+    41,
+    52,
+    44
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    298,
+    86,
+    53,
+    44
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    363,
+    41,
+    56,
+    46
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    364,
+    88,
+    56,
+    45
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    430,
+    43,
+    57,
+    45
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    432,
+    89,
+    55,
+    46
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    498,
+    44,
+    58,
+    46
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    499,
+    91,
+    56,
+    48
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    565,
+    46,
+    62,
+    48
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    126,
+    40,
+    46,
+    25
+   ]
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    127,
+    68,
+    45,
+    25
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    178,
+    71,
+    52,
+    47
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 2,
+  "2": 2,
+  "3": 2,
+  "4": 2,
+  "5": 2,
+  "6": 2,
+  "7": 2,
+  "8": 2,
+  "9": 2,
+  "10": 2,
+  "11": 2,
+  "USB": 2,
+  "USB 2": 2,
+  "Console": 2
+ },
+ "chassis_aligned": 2,
+ "saved_quality": 0.787,
+ "saved_label": "internet/image_search",
+ "saved_at": "2026-10-19 15:48"
+}

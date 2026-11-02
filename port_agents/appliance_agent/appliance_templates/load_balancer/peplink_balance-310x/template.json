@@ -1,0 +1,170 @@
+{
+ "vendor": "Peplink",
+ "model": "Balance 310X",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "8x RJ45 | 2x SFP | 1 named port type(s): USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://download.peplink.com/resources/peplink_balance_310x_5g_datasheet.pdf#page2-img34",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1016,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   467,
+   31,
+   225,
+   118
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    326,
+    84,
+    67,
+    54
+   ]
+  },
+  {
+   "id": 2,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    398,
+    84,
+    69,
+    57
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    479,
+    42,
+    53,
+    44
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    480,
+    93,
+    52,
+    45
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    531,
+    42,
+    50,
+    44
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    530,
+    93,
+    51,
+    44
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    580,
+    42,
+    50,
+    44
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    580,
+    93,
+    50,
+    45
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    629,
+    42,
+    53,
+    45
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    628,
+    92,
+    53,
+    46
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    730,
+    78,
+    34,
+    60
+   ]
+  }
+ ],
+ "labels_read": [
+  "CONSOLE"
+ ],
+ "chassis_votes": {
+  "1": 1,
+  "2": 3,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "7": 4,
+  "8": 4,
+  "9": 4,
+  "10": 4,
+  "USB": 0
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.773,
+ "saved_label": "official/vendor document peplink_balance_310x_5g_datasheet.pdf p2",
+ "saved_at": "2026-10-22 20:56"
+}

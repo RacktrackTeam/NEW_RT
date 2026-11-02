@@ -1,0 +1,51 @@
+"""Folder conventions for the integration package.
+
+integration/
+    code/            <- this package lives here
+    sample_vdo/      <- default input folder (videos)
+    output/          <- default output folder (rack images)
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+CODE_DIR = Path(__file__).resolve().parents[1]
+INTEGRATION_DIR = CODE_DIR.parent
+DEFAULT_INPUT_DIR = INTEGRATION_DIR / "sample_vdo"
+DEFAULT_OUTPUT_DIR = INTEGRATION_DIR / "output"
+
+VIDEO_EXTENSIONS = {".mp4", ".mov", ".m4v", ".avi", ".mkv", ".webm"}
+
+
+def resolve_input(video: str | Path, input_dir: str | Path | None = None) -> Path:
+    """Find the video file.
+
+    `video` may be an existing path (absolute or relative to the current directory) or just a
+    file name, which is then looked up in `input_dir` (default: integration/sample_vdo).
+    """
+    candidate = Path(video).expanduser()
+    if candidate.is_file():
+        return candidate.resolve()
+    folder = Path(input_dir).expanduser() if input_dir else DEFAULT_INPUT_DIR
+    in_folder = folder / candidate.name if candidate.parent == Path(".") else folder / candidate
+    if in_folder.is_file():
+        return in_folder.resolve()
+    raise FileNotFoundError(
+        f"Video '{video}' not found (looked at '{candidate}' and '{in_folder}')."
+    )
+
+
+def list_videos(input_dir: str | Path | None = None) -> list[Path]:
+    """All video files in the input folder, sorted by name."""
+    folder = Path(input_dir).expanduser() if input_dir else DEFAULT_INPUT_DIR
+    return sorted(p for p in folder.iterdir() if p.suffix.lower() in VIDEO_EXTENSIONS)
+
+
+def prepare_output(video_path: Path, output_dir: str | Path | None, output_name: str | None) -> Path:
+    """Create the output folder if needed and return the output file path."""
+    folder = Path(output_dir).expanduser() if output_dir else DEFAULT_OUTPUT_DIR
+    folder.mkdir(parents=True, exist_ok=True)
+    name = output_name or f"{video_path.stem}_rack.png"
+    if Path(name).suffix.lower() not in {".png", ".jpg", ".jpeg"}:
+        name += ".png"
+    return folder / name

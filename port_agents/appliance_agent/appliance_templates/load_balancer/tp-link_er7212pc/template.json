@@ -1,0 +1,180 @@
+{
+ "vendor": "TP-Link",
+ "model": "ER7212PC",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "10x RJ45 | 2x SFP | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://static.tp-link.com/upload/image-line/ER7212PC_01_normal_20250126073028f.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   990,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   239,
+   40,
+   744,
+   99
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    100,
+    63,
+    76,
+    64
+   ]
+  },
+  {
+   "id": 2,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    176,
+    61,
+    74,
+    65
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    254,
+    56,
+    75,
+    68
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    328,
+    56,
+    74,
+    66
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    402,
+    55,
+    71,
+    63
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    474,
+    56,
+    69,
+    61
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    543,
+    57,
+    70,
+    60
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    613,
+    57,
+    70,
+    62
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    684,
+    55,
+    70,
+    63
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    755,
+    57,
+    70,
+    60
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    826,
+    57,
+    69,
+    60
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    895,
+    58,
+    73,
+    63
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 2,
+  "2": 2,
+  "3": 2,
+  "4": 2,
+  "5": 2,
+  "6": 2,
+  "7": 2,
+  "8": 2,
+  "9": 2,
+  "10": 2,
+  "11": 2,
+  "12": 2
+ },
+ "chassis_aligned": 2,
+ "saved_quality": 0.909,
+ "saved_label": "official/vendor page www.omadanetworks.com: Omada 3-in-1 Gigabit VPN Gateway 1",
+ "saved_at": "2026-10-22 20:28"
+}

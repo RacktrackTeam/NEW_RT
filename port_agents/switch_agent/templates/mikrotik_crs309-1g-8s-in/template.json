@@ -1,0 +1,120 @@
+{
+ "vendor": "MikroTik",
+ "model": "CRS309-1G-8S+IN",
+ "description": "",
+ "summary": "8x SFP (1, 2, 3, 4, 5, 6, 7, 8) | console port | detected automatically",
+ "image": "front.png",
+ "image_source": "/Users/sprintparkaiml/Downloads/port_overlay 2/switch_template_agent/template_store/images/MIKROTIK/CRS309-1G-8S_IN/4550480891c04560.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   2500,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    203,
+    54,
+    97,
+    73
+   ]
+  },
+  {
+   "id": 2,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    310,
+    55,
+    95,
+    73
+   ]
+  },
+  {
+   "id": 3,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    414,
+    54,
+    95,
+    75
+   ]
+  },
+  {
+   "id": 4,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    518,
+    54,
+    95,
+    73
+   ]
+  },
+  {
+   "id": 5,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    622,
+    53,
+    95,
+    75
+   ]
+  },
+  {
+   "id": 6,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    726,
+    54,
+    95,
+    73
+   ]
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    829,
+    53,
+    96,
+    75
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    934,
+    53,
+    96,
+    76
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    1067,
+    41,
+    95,
+    80
+   ]
+  }
+ ]
+}

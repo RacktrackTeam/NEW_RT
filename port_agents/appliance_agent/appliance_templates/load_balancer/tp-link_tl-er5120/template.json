@@ -1,0 +1,108 @@
+{
+ "vendor": "TP-Link",
+ "model": "TL-ER5120",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "5x RJ45 | 0x SFP | 1 named port type(s): Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://static.tp-link.com/ER5120_2.0_1500626631652y.JPG",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1649,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   588,
+   52,
+   556,
+   106
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    606,
+    69,
+    83,
+    71
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    719,
+    71,
+    82,
+    71
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    829,
+    71,
+    81,
+    71
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    938,
+    72,
+    82,
+    70
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1045,
+    69,
+    84,
+    72
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    1194,
+    77,
+    78,
+    65
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 0,
+  "2": 0,
+  "3": 0,
+  "4": 0,
+  "5": 0,
+  "Console": 0
+ },
+ "chassis_aligned": 0,
+ "saved_quality": 0.722,
+ "saved_label": "official/vendor page www.omadanetworks.com:  TL-ER5120 ",
+ "saved_at": "2026-10-22 21:28"
+}

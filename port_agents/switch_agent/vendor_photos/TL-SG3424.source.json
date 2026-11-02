@@ -1,0 +1,31 @@
+{
+ "vendor": "TP-Link",
+ "model": "TL-SG3424",
+ "url": "https://static.tp-link.com/res/images/products/large/TL-SG3424-01.jpg",
+ "page": "https://www.tp-link.com/us/business-networking/managed-switch/tl-sg3424/",
+ "source": "image_search",
+ "agent_score": 50,
+ "quality": 0.976,
+ "photo_inliers": 0,
+ "aspect": 9.51,
+ "ports_found": 28,
+ "ports_expected": 28,
+ "row_slope": 0.0013,
+ "others": [
+  {
+   "url": "https://interprojekt.pl/files/TPLINK-SG3424/TL-SG3424.jpg",
+   "quality": 0.973,
+   "inliers": 0
+  },
+  {
+   "url": "https://tp-russia.ru/image/cache/catalog/produkts/kommutator-tp-link-24-portovyy-gigabitnyy-tl-sg3424-1500x1500.jpg",
+   "quality": 0.967,
+   "inliers": 0
+  },
+  {
+   "url": "https://c.428.ua/img/221114/3000/2000/kommutator_tp-link_tl-sg3424~1575~455.jpg",
+   "quality": 0.9,
+   "inliers": 0
+  }
+ ]
+}

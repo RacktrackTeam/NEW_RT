@@ -1,0 +1,138 @@
+{
+ "vendor": "Ubiquiti",
+ "model": "US-8-150W",
+ "description": "",
+ "summary": "8x RJ45 (ports 1-8) | 2x SFP (9, 10) | detected automatically",
+ "image": "front.png",
+ "image_source": "6fc1b4f0a964c6d4.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   855,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   176,
+   70,
+   497,
+   84
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    189,
+    83,
+    64,
+    58
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    252,
+    84,
+    58,
+    56
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    310,
+    84,
+    57,
+    55
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    367,
+    84,
+    60,
+    55
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    426,
+    84,
+    60,
+    55
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    484,
+    84,
+    58,
+    55
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    542,
+    83,
+    58,
+    56
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    599,
+    84,
+    62,
+    57
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    710,
+    40,
+    65,
+    48
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    710,
+    94,
+    63,
+    48
+   ]
+  }
+ ]
+}

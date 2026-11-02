@@ -1,0 +1,180 @@
+{
+ "vendor": "A10 Networks",
+ "model": "Thunder 940",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "5x RJ45 | 4x SFP | 2 named port type(s): USB, Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.a10networks.com/wp-content/uploads/A10-Thunder-940.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   546,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   130,
+   82,
+   308,
+   70
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    141,
+    93,
+    56,
+    49
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    200,
+    94,
+    55,
+    47
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    257,
+    94,
+    56,
+    47
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    314,
+    95,
+    56,
+    47
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    372,
+    95,
+    56,
+    47
+   ]
+  },
+  {
+   "id": 6,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    436,
+    57,
+    52,
+    40
+   ]
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    436,
+    101,
+    50,
+    41
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    494,
+    58,
+    50,
+    39
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    494,
+    102,
+    49,
+    38
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    24,
+    111,
+    51,
+    26
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    23,
+    43,
+    56,
+    42
+   ]
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    24,
+    86,
+    49,
+    22
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 0,
+  "2": 0,
+  "3": 0,
+  "4": 0,
+  "5": 0,
+  "6": 0,
+  "7": 0,
+  "8": 0,
+  "9": 0,
+  "USB": 0,
+  "Console": 0,
+  "USB 2": 0
+ },
+ "chassis_aligned": 0,
+ "saved_quality": 0.947,
+ "saved_label": "template agent (internet/image_search)",
+ "saved_at": "2026-10-22 20:41"
+}

@@ -1,0 +1,110 @@
+{
+ "vendor": "Ubiquiti",
+ "model": "US-8-60W",
+ "description": "",
+ "summary": "8x RJ45 | 0x SFP | front panel cut from the vendor photo, ports found by the RackTrack port models",
+ "image": "front.png",
+ "image_source": "us-8-60w-5.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   558,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    0,
+    50,
+    76,
+    70
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    64,
+    51,
+    77,
+    69
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    130,
+    51,
+    77,
+    69
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    195,
+    51,
+    78,
+    71
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    266,
+    50,
+    76,
+    70
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    335,
+    50,
+    75,
+    70
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    406,
+    51,
+    78,
+    70
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    475,
+    50,
+    81,
+    76
+   ]
+  }
+ ],
+ "ignore_regions_note": "cleared 24 Oct: the region ran past the image edge, so it never masked anything in the tested runs; cleared to keep the tested behaviour now that regions are clipped (review #22)"
+}

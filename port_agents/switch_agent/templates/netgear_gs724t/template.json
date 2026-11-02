@@ -1,0 +1,314 @@
+{
+ "vendor": "NETGEAR",
+ "model": "GS724T",
+ "description": "",
+ "summary": "24x RJ45 (ports 1-24) | 2x SFP (25, 26) | detected automatically",
+ "image": "front.png",
+ "image_source": "NETGEAR_GS724T_2.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   10,
+   1875,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   618,
+   40,
+   787,
+   128
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    628,
+    50,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    628,
+    114,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    688,
+    50,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    687,
+    114,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    747,
+    50,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    747,
+    114,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    807,
+    50,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    807,
+    114,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    866,
+    50,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    866,
+    114,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    926,
+    50,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    926,
+    115,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1043,
+    52,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1043,
+    116,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1103,
+    52,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1103,
+    117,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1162,
+    52,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1162,
+    117,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 19,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1222,
+    52,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 20,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1222,
+    117,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1282,
+    53,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1281,
+    117,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 23,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1341,
+    53,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 24,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1341,
+    117,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 25,
+   "type": "sfp",
+   "poe": false,
+   "box": [
+    1487,
+    117,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 26,
+   "type": "sfp",
+   "poe": false,
+   "box": [
+    1591,
+    117,
+    54,
+    41
+   ]
+  }
+ ]
+}

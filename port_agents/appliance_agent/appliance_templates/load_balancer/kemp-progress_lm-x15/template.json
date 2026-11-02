@@ -1,0 +1,303 @@
+{
+ "vendor": "Kemp (Progress)",
+ "model": "LM-X15",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "16x RJ45 | 4x SFP | 1 named port type(s): USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://docs-be.progress.com/bundle/loadmaster-technical-note-loadmaster-physical-to-logical-port-assignment-ga/page/LM-X15FrontPanel.png?_LANG=enus",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1307,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   593,
+   27,
+   396,
+   121
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    603,
+    38,
+    50,
+    43
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    604,
+    96,
+    48,
+    43
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    651,
+    40,
+    46,
+    40
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    651,
+    96,
+    45,
+    40
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    695,
+    40,
+    46,
+    40
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    695,
+    96,
+    46,
+    40
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    739,
+    39,
+    48,
+    42
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    739,
+    95,
+    47,
+    41
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    796,
+    39,
+    49,
+    42
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    796,
+    96,
+    49,
+    41
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    842,
+    40,
+    46,
+    40
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    843,
+    96,
+    45,
+    41
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    887,
+    40,
+    46,
+    40
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    887,
+    96,
+    45,
+    42
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    931,
+    39,
+    48,
+    41
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    931,
+    95,
+    48,
+    44
+   ]
+  },
+  {
+   "id": 17,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1073,
+    104,
+    46,
+    39
+   ]
+  },
+  {
+   "id": 18,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1118,
+    102,
+    45,
+    41
+   ]
+  },
+  {
+   "id": 19,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1161,
+    101,
+    45,
+    42
+   ]
+  },
+  {
+   "id": 20,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1206,
+    102,
+    48,
+    42
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    529,
+    112,
+    49,
+    28
+   ]
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    530,
+    86,
+    49,
+    26
+   ]
+  }
+ ],
+ "labels_read": [
+  "ETH15",
+  "ETH16"
+ ],
+ "chassis_votes": {
+  "1": 4,
+  "2": 4,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "7": 4,
+  "8": 4,
+  "9": 4,
+  "10": 4,
+  "11": 3,
+  "12": 4,
+  "13": 2,
+  "14": 4,
+  "15": 2,
+  "16": 4,
+  "17": 4,
+  "18": 4,
+  "19": 4,
+  "20": 4,
+  "USB": 4,
+  "USB 2": 4
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.864,
+ "saved_label": "official/vendor page docs.progress.com:  ",
+ "saved_at": "2026-10-22 21:27"
+}

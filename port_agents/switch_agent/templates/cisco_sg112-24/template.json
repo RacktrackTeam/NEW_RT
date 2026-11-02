@@ -1,0 +1,314 @@
+{
+ "vendor": "Cisco",
+ "model": "SG112-24",
+ "description": "",
+ "summary": "24x RJ45 (ports 1-24) | 2x SFP (26, 25) | detected automatically",
+ "image": "front.png",
+ "image_source": "ba18a458b204a3ef.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1260,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   353,
+   42,
+   774,
+   113
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    362,
+    51,
+    55,
+    40
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    365,
+    108,
+    54,
+    38
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    425,
+    51,
+    54,
+    42
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    427,
+    108,
+    54,
+    37
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    488,
+    51,
+    54,
+    42
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    489,
+    108,
+    54,
+    36
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    550,
+    51,
+    54,
+    42
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    550,
+    108,
+    54,
+    36
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    613,
+    51,
+    54,
+    42
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    613,
+    108,
+    54,
+    36
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    675,
+    51,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    674,
+    108,
+    54,
+    36
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    753,
+    51,
+    55,
+    42
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    751,
+    108,
+    54,
+    36
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    815,
+    51,
+    55,
+    42
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    813,
+    108,
+    54,
+    36
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    877,
+    51,
+    55,
+    42
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    873,
+    108,
+    55,
+    36
+   ]
+  },
+  {
+   "id": 19,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    939,
+    51,
+    54,
+    42
+   ]
+  },
+  {
+   "id": 20,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    936,
+    108,
+    54,
+    37
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1002,
+    51,
+    54,
+    42
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    996,
+    108,
+    55,
+    36
+   ]
+  },
+  {
+   "id": 23,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1064,
+    51,
+    54,
+    40
+   ]
+  },
+  {
+   "id": 24,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1058,
+    108,
+    54,
+    38
+   ]
+  },
+  {
+   "id": 26,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1159,
+    48,
+    62,
+    34
+   ]
+  },
+  {
+   "id": 25,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1151,
+    109,
+    62,
+    35
+   ]
+  }
+ ]
+}

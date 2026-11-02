@@ -1,0 +1,304 @@
+{
+ "vendor": "Juniper",
+ "model": "SRX240",
+ "device": "firewall",
+ "description": "",
+ "summary": "19x RJ45 | 1x SFP | 1 named port type(s): USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEicHRXMJNNfJFzZ7ZhUkgbd9kU1nOWJuiyaNv15tA2tMgLQf23Is475b6CBwf9kuFm0xFDDizpeUcdWgipjANh1J5QvKJQkj7QDXCQoRPme7bugzHGbnmfEvIw0CCMJeGpPKHlF_vZupy2M/w1200-h630-p-k-no-nu/srx240.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1352,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   263,
+   27,
+   848,
+   128
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    249,
+    45,
+    55,
+    42
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    274,
+    100,
+    54,
+    45
+   ],
+   "name": "CONSOLE"
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    340,
+    95,
+    47,
+    43
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    385,
+    96,
+    45,
+    41
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    428,
+    95,
+    45,
+    41
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    470,
+    95,
+    48,
+    42
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    541,
+    37,
+    58,
+    47
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    533,
+    96,
+    49,
+    41
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    580,
+    96,
+    44,
+    39
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    621,
+    95,
+    45,
+    39
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    665,
+    96,
+    48,
+    40
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    729,
+    96,
+    47,
+    40
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    774,
+    95,
+    45,
+    40
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    817,
+    95,
+    44,
+    39
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    843,
+    39,
+    50,
+    43
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    859,
+    95,
+    48,
+    40
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    923,
+    95,
+    47,
+    41
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    969,
+    95,
+    44,
+    39
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1011,
+    95,
+    44,
+    39
+   ]
+  },
+  {
+   "id": 19,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1053,
+    94,
+    49,
+    44
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    1122,
+    111,
+    57,
+    33
+   ]
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    1222,
+    111,
+    57,
+    32
+   ]
+  }
+ ],
+ "labels_read": [
+  "SFP",
+  "CONSOLE"
+ ],
+ "chassis_votes": {
+  "1": 3,
+  "Console": 4,
+  "2": 4,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "6": 1,
+  "7": 4,
+  "8": 4,
+  "9": 4,
+  "10": 4,
+  "11": 4,
+  "12": 4,
+  "13": 4,
+  "14": 0,
+  "15": 4,
+  "16": 4,
+  "17": 4,
+  "18": 4,
+  "19": 4,
+  "USB": 2,
+  "USB 2": 1
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.847,
+ "saved_label": "template agent (internet/image_search)",
+ "saved_at": "2026-10-22 21:50"
+}

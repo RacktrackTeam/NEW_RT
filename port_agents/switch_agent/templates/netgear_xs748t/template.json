@@ -1,0 +1,594 @@
+{
+ "vendor": "NETGEAR",
+ "model": "XS748T",
+ "description": "",
+ "summary": "48x RJ45 (ports 1-48) | 4x SFP (49, 50, 51, 52) | detected automatically",
+ "image": "front.png",
+ "image_source": "netgear-48-port-mangeable-switch-1000x1000.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1514,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    5,
+    40,
+    57,
+    52
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    6,
+    92,
+    56,
+    52
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    59,
+    40,
+    55,
+    52
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    59,
+    92,
+    55,
+    53
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    111,
+    40,
+    55,
+    52
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    111,
+    91,
+    54,
+    53
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    162,
+    40,
+    55,
+    53
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    163,
+    91,
+    55,
+    53
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    214,
+    39,
+    55,
+    53
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    214,
+    91,
+    55,
+    53
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    266,
+    39,
+    57,
+    53
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    266,
+    92,
+    58,
+    53
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    341,
+    38,
+    58,
+    53
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    342,
+    91,
+    58,
+    53
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    396,
+    38,
+    56,
+    54
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    396,
+    90,
+    55,
+    54
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    448,
+    37,
+    55,
+    54
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    448,
+    90,
+    55,
+    54
+   ]
+  },
+  {
+   "id": 19,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    499,
+    36,
+    56,
+    54
+   ]
+  },
+  {
+   "id": 20,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    500,
+    90,
+    56,
+    54
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    551,
+    36,
+    55,
+    54
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    552,
+    90,
+    54,
+    53
+   ]
+  },
+  {
+   "id": 23,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    603,
+    37,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 24,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    604,
+    90,
+    56,
+    53
+   ]
+  },
+  {
+   "id": 25,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    679,
+    37,
+    58,
+    53
+   ]
+  },
+  {
+   "id": 26,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    678,
+    90,
+    58,
+    53
+   ]
+  },
+  {
+   "id": 27,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    733,
+    37,
+    56,
+    53
+   ]
+  },
+  {
+   "id": 28,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    734,
+    89,
+    55,
+    54
+   ]
+  },
+  {
+   "id": 29,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    785,
+    36,
+    55,
+    54
+   ]
+  },
+  {
+   "id": 30,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    785,
+    89,
+    56,
+    54
+   ]
+  },
+  {
+   "id": 31,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    837,
+    36,
+    55,
+    54
+   ]
+  },
+  {
+   "id": 32,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    837,
+    89,
+    56,
+    54
+   ]
+  },
+  {
+   "id": 33,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    889,
+    36,
+    56,
+    53
+   ]
+  },
+  {
+   "id": 34,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    888,
+    89,
+    56,
+    54
+   ]
+  },
+  {
+   "id": 35,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    941,
+    36,
+    58,
+    53
+   ]
+  },
+  {
+   "id": 36,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    941,
+    89,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 37,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1016,
+    36,
+    58,
+    53
+   ]
+  },
+  {
+   "id": 38,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1016,
+    89,
+    58,
+    53
+   ]
+  },
+  {
+   "id": 39,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1071,
+    36,
+    55,
+    53
+   ]
+  },
+  {
+   "id": 40,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1070,
+    89,
+    55,
+    53
+   ]
+  },
+  {
+   "id": 41,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1122,
+    36,
+    55,
+    53
+   ]
+  },
+  {
+   "id": 42,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1122,
+    89,
+    55,
+    54
+   ]
+  },
+  {
+   "id": 43,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1174,
+    36,
+    55,
+    53
+   ]
+  },
+  {
+   "id": 44,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1173,
+    88,
+    55,
+    54
+   ]
+  },
+  {
+   "id": 45,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1225,
+    36,
+    55,
+    52
+   ]
+  },
+  {
+   "id": 46,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1224,
+    88,
+    56,
+    53
+   ]
+  },
+  {
+   "id": 47,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1277,
+    37,
+    56,
+    52
+   ]
+  },
+  {
+   "id": 48,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1278,
+    89,
+    57,
+    52
+   ]
+  },
+  {
+   "id": 49,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1350,
+    37,
+    59,
+    52
+   ]
+  },
+  {
+   "id": 50,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1350,
+    92,
+    59,
+    51
+   ]
+  },
+  {
+   "id": 51,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1406,
+    36,
+    60,
+    55
+   ]
+  },
+  {
+   "id": 52,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1406,
+    91,
+    59,
+    52
+   ]
+  }
+ ],
+ "ignore_regions_note": "cleared 24 Oct: the region ran past the image edge, so it never masked anything in the tested runs; cleared to keep the tested behaviour now that regions are clipped (review #22)"
+}

@@ -1,0 +1,9 @@
+torch
+timm
+ultralytics>=8.0
+opencv-python
+pillow
+pandas
+numpy
+scikit-learn
+tqdm

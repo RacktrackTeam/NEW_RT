@@ -1,0 +1,377 @@
+{
+ "vendor": "SonicWall",
+ "model": "NSsp 15700",
+ "device": "firewall",
+ "description": "",
+ "summary": "1x RJ45 | 26x SFP | 2 named port type(s): Console, USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://rmelas.com/wp-content/uploads/2025/01/NSsp15700_Front-1.webp",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1522,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    291,
+    82,
+    56,
+    56
+   ]
+  },
+  {
+   "id": 2,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    532,
+    43,
+    69,
+    45
+   ]
+  },
+  {
+   "id": 3,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    532,
+    95,
+    69,
+    45
+   ]
+  },
+  {
+   "id": 4,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    599,
+    43,
+    66,
+    47
+   ]
+  },
+  {
+   "id": 5,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    598,
+    96,
+    66,
+    44
+   ]
+  },
+  {
+   "id": 6,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    663,
+    43,
+    66,
+    47
+   ]
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    660,
+    96,
+    71,
+    46
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    740,
+    42,
+    70,
+    45
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    742,
+    98,
+    68,
+    44
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    807,
+    42,
+    70,
+    49
+   ]
+  },
+  {
+   "id": 11,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    807,
+    98,
+    70,
+    42
+   ]
+  },
+  {
+   "id": 12,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    979,
+    43,
+    53,
+    47
+   ]
+  },
+  {
+   "id": 13,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    978,
+    96,
+    53,
+    45
+   ]
+  },
+  {
+   "id": 14,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1030,
+    42,
+    51,
+    49
+   ]
+  },
+  {
+   "id": 15,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1030,
+    95,
+    52,
+    47
+   ]
+  },
+  {
+   "id": 16,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1078,
+    43,
+    51,
+    46
+   ]
+  },
+  {
+   "id": 17,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1078,
+    95,
+    50,
+    46
+   ]
+  },
+  {
+   "id": 18,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1127,
+    43,
+    53,
+    47
+   ]
+  },
+  {
+   "id": 19,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1126,
+    96,
+    54,
+    45
+   ]
+  },
+  {
+   "id": 20,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1194,
+    44,
+    53,
+    45
+   ]
+  },
+  {
+   "id": 21,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1192,
+    96,
+    54,
+    47
+   ]
+  },
+  {
+   "id": 22,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1244,
+    44,
+    50,
+    47
+   ]
+  },
+  {
+   "id": 23,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1244,
+    95,
+    51,
+    47
+   ]
+  },
+  {
+   "id": 24,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1292,
+    44,
+    51,
+    46
+   ]
+  },
+  {
+   "id": 25,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1291,
+    95,
+    51,
+    46
+   ]
+  },
+  {
+   "id": 26,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1341,
+    43,
+    54,
+    48
+   ]
+  },
+  {
+   "id": 27,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1340,
+    96,
+    54,
+    46
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    225,
+    84,
+    60,
+    53
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    351,
+    78,
+    35,
+    61
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 4,
+  "2": 4,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "7": 4,
+  "8": 4,
+  "9": 4,
+  "10": 4,
+  "11": 4,
+  "12": 4,
+  "13": 4,
+  "14": 4,
+  "15": 4,
+  "16": 4,
+  "17": 4,
+  "18": 4,
+  "19": 4,
+  "20": 4,
+  "21": 4,
+  "22": 4,
+  "23": 4,
+  "24": 4,
+  "25": 4,
+  "26": 4,
+  "27": 4,
+  "Console": 3,
+  "USB": 4
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.658,
+ "saved_label": "template agent (internet/image_search)",
+ "saved_at": "2026-10-22 21:29"
+}

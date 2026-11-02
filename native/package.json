@@ -1,0 +1,23 @@
+{
+  "name": "racktrack-sweep-native",
+  "version": "1.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "description": "RackTrack Sweep as an iOS and Android app: a Capacitor shell that connects to a RackTrack server and opens its app.",
+  "scripts": {
+    "sync": "npx cap sync",
+    "android:debug": "npx cap sync android && cd android && ./gradlew assembleDebug",
+    "ios:sim": "npx cap sync ios && xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath ios/build build",
+    "server": "node scripts/set-server.mjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "6.2.1",
+    "@capacitor/core": "6.2.1",
+    "@capacitor/ios": "6.2.1",
+    "@capacitor/splash-screen": "6.0.3",
+    "@capacitor/status-bar": "6.0.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "6.2.1"
+  }
+}

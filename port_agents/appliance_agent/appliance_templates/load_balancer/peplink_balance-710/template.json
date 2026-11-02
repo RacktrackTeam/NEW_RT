@@ -1,0 +1,196 @@
+{
+ "vendor": "Peplink",
+ "model": "Balance 710",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "8x RJ45 | 2x SFP | 2 named port type(s): USB, Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://download.peplink.com/resources/peplink_balance_710_datasheet.pdf#page2-img10",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   2008,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   759,
+   53,
+   1043,
+   98
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    776,
+    72,
+    73,
+    62
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    859,
+    69,
+    76,
+    65
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    943,
+    70,
+    76,
+    65
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1027,
+    70,
+    76,
+    66
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1112,
+    70,
+    76,
+    65
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1196,
+    71,
+    76,
+    64
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1514,
+    72,
+    71,
+    63
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1584,
+    74,
+    67,
+    59
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1650,
+    75,
+    67,
+    59
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1715,
+    72,
+    71,
+    63
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    697,
+    60,
+    67,
+    34
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    610,
+    71,
+    76,
+    64
+   ],
+   "name": "CONSOLE"
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    698,
+    94,
+    66,
+    40
+   ]
+  }
+ ],
+ "labels_read": [
+  "CONSOLE",
+  "CONSOLE"
+ ],
+ "chassis_votes": {
+  "1": 0,
+  "2": 0,
+  "3": 0,
+  "4": 0,
+  "5": 0,
+  "6": 0,
+  "7": 0,
+  "8": 0,
+  "9": 0,
+  "10": 0,
+  "USB": 0,
+  "Console": 0,
+  "USB 2": 0
+ },
+ "chassis_aligned": 0,
+ "saved_quality": 0.868,
+ "saved_label": "official/vendor data sheet peplink_balance_710_datasheet.pdf p2",
+ "saved_at": "2026-10-22 20:52"
+}
