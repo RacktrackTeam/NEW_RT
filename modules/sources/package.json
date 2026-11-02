@@ -1,0 +1,7 @@
+{
+  "name": "sources",
+  "private": true,
+  "description": "Importers and test fixtures for the site database copies (Excel, NetBox, ServiceNow CMDB)",
+  "scripts": { "test": "node --test test/" },
+  "dependencies": { "better-sqlite3": "*", "express": "*", "fflate": "*" }
+}
