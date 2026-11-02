@@ -183,7 +183,7 @@ function isConfigured() {
 // Graph rejects a sendMail whose whole serialised message exceeds 4 MB; larger
 // payloads need a draft plus an upload session, which is a lot of machinery for
 // the one case that needs it. Attachments are base64 in the JSON body, so the
-// wire cost is ~4/3 of the raw bytes — the ceiling below is on the ENCODED size
+// wire cost is ~4/3 of the raw bytes - the ceiling below is on the ENCODED size
 // and leaves room for the body and headers. Past it we return false, and the
 // caller falls back to SMTP, which carries the larger message happily.
 const GRAPH_MAX_ENCODED_BYTES = 3.5 * 1024 * 1024;
@@ -191,10 +191,10 @@ const GRAPH_MAX_ENCODED_BYTES = 3.5 * 1024 * 1024;
 /**
  * Send an email FROM one of the configured mailboxes via Microsoft Graph.
  * Returns true on delivery (HTTP 202), false if not configured, too large for
- * a single sendMail, or on failure — the caller then falls back to SMTP.
+ * a single sendMail, or on failure - the caller then falls back to SMTP.
  *
- * `attachments` is the nodemailer shape — { filename, content: Buffer,
- * contentType } — so one array serves both transports and callers do not have
+ * `attachments` is the nodemailer shape - { filename, content: Buffer,
+ * contentType } - so one array serves both transports and callers do not have
  * to know which one will carry the message.
  */
 async function sendGraphMail({ sender = 'support', to, subject, html, text, replyTo, attachments }) {
@@ -223,7 +223,7 @@ async function sendGraphMail({ sender = 'support', to, subject, html, text, repl
   if (encodedBytes > GRAPH_MAX_ENCODED_BYTES) {
     logger().warn(
       `[graphMail] ${Math.round(encodedBytes / 1024)}KB of attachments exceeds the single-request ` +
-      `sendMail limit — deferring to SMTP`,
+      `sendMail limit - deferring to SMTP`,
     );
     return false;
   }

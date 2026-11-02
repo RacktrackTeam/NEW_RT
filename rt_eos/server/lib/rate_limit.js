@@ -2,17 +2,17 @@
  * Lightweight in-memory rate limiter for upload routes.
  *
  * Token-bucket keyed by `(userId || ip)`. Defaults to 20 uploads/min per
- * caller — generous enough for legitimate field use (a technician scanning
+ * caller - generous enough for legitimate field use (a technician scanning
  * a row of racks back-to-back), strict enough to stop a runaway client
  * or stolen token from torching the worker pool with garbage uploads.
  *
- * Single-process only — fine while the server is a single Node instance.
+ * Single-process only - fine while the server is a single Node instance.
  * If we ever scale horizontally, this needs Redis (or move to a proxy-layer
  * limiter on Cloudflare / nginx) so the bucket is shared.
  *
  * Tunable via env:
- *   RATE_LIMIT_UPLOADS_PER_MIN   — max uploads per minute per caller (default 20)
- *   RATE_LIMIT_BURST             — burst capacity (default = rate)
+ *   RATE_LIMIT_UPLOADS_PER_MIN   - max uploads per minute per caller (default 20)
+ *   RATE_LIMIT_BURST             - burst capacity (default = rate)
  */
 
 const DEFAULT_RATE = Number(process.env.RATE_LIMIT_UPLOADS_PER_MIN) || 20;

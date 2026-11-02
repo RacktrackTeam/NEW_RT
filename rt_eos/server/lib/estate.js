@@ -3,10 +3,10 @@
  *
  * A tenant IS a datacentre. The console calls it a "Site"; the setup flow
  * calls it a datacentre; both are the same tenants row. There is deliberately
- * no separate datacentre table — one identity, one set of members, one set of
+ * no separate datacentre table - one identity, one set of members, one set of
  * claimed racks.
  *
- * Under a tenant sit spaces (a hall, a floor, a room, a row — nested through
+ * Under a tenant sit spaces (a hall, a floor, a room, a row - nested through
  * parent_id, named however the customer names them; nothing here assumes a
  * convention) and racks_known (the racks the admin typed or that the camera
  * has learned, keyed by the RK- scan id once one exists).
@@ -22,7 +22,7 @@
  * Schema (added lazily on first use, all additive and idempotent):
  *   tenants + address, timezone, lat, lng, approver_user_id, approver_email,
  *             rules_accepted_at, rules_accepted_by, setup_completed_at
- *   spaces, racks_known, tenant_rules — see _prep() below.
+ *   spaces, racks_known, tenant_rules - see _prep() below.
  *   The optional profile sections and the organisation profile live in
  *   lib/estate_profile.js; completeness and the snapshot read them from there.
  *
@@ -185,7 +185,7 @@ function getTenant(tenantId) {
  *   owner         → write, everywhere (the platform owner)
  *   org_admin     → write for Sites in their organisation, and for the Site
  *                   they themselves sit in (an org_admin stranded on the
- *                   default tenant still manages the Site they hold — the same
+ *                   default tenant still manages the Site they hold - the same
  *                   fall-through lib/rack_access applies)
  *   site_manager  → write for their own Site
  *   member        → read for their own Site
@@ -361,7 +361,7 @@ function updateSpace(tenantId, spaceId, body = {}, userId = null) {
 
 /**
  * Refused (409) while anything still points at the space: a known rack, or a
- * child space. Nothing is cascaded — the admin removes the leaves first, and
+ * child space. Nothing is cascaded - the admin removes the leaves first, and
  * a rack the camera has learned is never silently detached.
  */
 function deleteSpace(tenantId, spaceId, userId = null) {
@@ -411,7 +411,7 @@ function findRackByRackId(rackId) {
 }
 
 /**
- * Upsert by rack_id. A rack the tenant already knows is updated in place —
+ * Upsert by rack_id. A rack the tenant already knows is updated in place -
  * only the fields given are changed, so a scan binding (which knows no name)
  * never erases a name the admin typed. Returns { rack, created }.
  */
@@ -461,8 +461,8 @@ function getApprover(tenantId) {
 }
 
 /**
- * { user_id } — must be a member of this Site, or an org_admin of its
- * organisation. { email } — anyone; for an approver who is not a user yet.
+ * { user_id } - must be a member of this Site, or an org_admin of its
+ * organisation. { email } - anyone; for an approver who is not a user yet.
  * One or the other; setting one clears the other.
  */
 function setApprover(tenantId, body = {}, userId = null) {
@@ -669,7 +669,7 @@ function stateFor(user) {
   return { needsSetup: false, blocked: false, reason: null };
 }
 
-/** The two gate fields alone — cheap enough to ride on every whoami. */
+/** The two gate fields alone - cheap enough to ride on every whoami. */
 function setupSummary(user) {
   _prep();
   if (_isAdmin(user)) {

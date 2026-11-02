@@ -10,24 +10,24 @@
  * steps, the two can drift. This report is the read-only set-difference of the
  * two, so an operator can see drift before it becomes a support ticket:
  *
- *   OWNER, NO FOLDER  — a tenant owns a rack whose folder is gone. Authorized
+ *   OWNER, NO FOLDER  - a tenant owns a rack whose folder is gone. Authorized
  *                       reads of it resolve to a missing directory (broken rack).
- *   FOLDER, NO OWNER  — a scan folder nobody owns. Unreachable dead weight and
+ *   FOLDER, NO OWNER  - a scan folder nobody owns. Unreachable dead weight and
  *                       a GC candidate (see lib/orphan_gc.js).
  *
  * READ-ONLY BY DEFAULT: opens auth.db with { readonly: true } and only lists
  * the filesystem. It never writes, deletes, migrates, or touches production
- * data — safe to run against any checkout, including on the Mac dev copy.
+ * data - safe to run against any checkout, including on the Mac dev copy.
  *
  *   Report:  cd server && node scripts/reconcile-racks.js
  *   CI/cron: add --strict to exit 1 when any drift is found.
  *
  * OPT-IN HEAL (owner-rows with no folder only): --prune-dangling-owners removes
- * rack_owners rows whose folder is gone — the "authorized read → missing dir"
+ * rack_owners rows whose folder is gone - the "authorized read → missing dir"
  * case. It is a DRY RUN unless you ALSO pass --apply, and only then does it open
  * the DB read-write. FOLDER, NO OWNER is left to lib/orphan_gc.js (which owns
  * folder deletion + retention). Run heal on the SERVER after reviewing a report
- * — never blindly from a dev checkout, whose drift differs from production.
+ * - never blindly from a dev checkout, whose drift differs from production.
  *
  *   Preview heal: node scripts/reconcile-racks.js --prune-dangling-owners
  *   Apply heal:   node scripts/reconcile-racks.js --prune-dangling-owners --apply
@@ -78,18 +78,18 @@ function main() {
   console.log(`  scan folders:                ${folders.size}`);
   console.log('');
 
-  console.log(`OWNER, NO FOLDER — owned but no scan data on disk (${ownerNoFolder.length}):`);
+  console.log(`OWNER, NO FOLDER - owned but no scan data on disk (${ownerNoFolder.length}):`);
   if (ownerNoFolder.length === 0) console.log('  (none)');
   else ownerNoFolder.forEach(id => console.log(`  ${id}`));
   console.log('');
 
-  console.log(`FOLDER, NO OWNER — scan data nobody owns / GC candidate (${folderNoOwner.length}):`);
+  console.log(`FOLDER, NO OWNER - scan data nobody owns / GC candidate (${folderNoOwner.length}):`);
   if (folderNoOwner.length === 0) console.log('  (none)');
   else folderNoOwner.forEach(id => console.log(`  ${id}`));
   if (folderNoOwner.length) console.log('  → clean up with lib/orphan_gc.js (owns folder deletion + retention).');
 
   const drift = ownerNoFolder.length + folderNoOwner.length;
-  if (drift === 0) console.log('\nIn sync — no drift.');
+  if (drift === 0) console.log('\nIn sync - no drift.');
   else console.log(`\n${drift} rack(s) out of sync.`);
 
   if (prune) healDanglingOwners(ownerNoFolder);
@@ -99,7 +99,7 @@ function main() {
 /** Remove rack_owners rows whose folder is gone. Dry-run unless --apply. */
 function healDanglingOwners(ownerNoFolder) {
   const apply = process.argv.includes('--apply');
-  console.log(`\n── Heal: prune ${ownerNoFolder.length} dangling owner row(s) ${apply ? '(APPLY)' : '(dry run — pass --apply to act)'} ──`);
+  console.log(`\n── Heal: prune ${ownerNoFolder.length} dangling owner row(s) ${apply ? '(APPLY)' : '(dry run - pass --apply to act)'} ──`);
   if (ownerNoFolder.length === 0) { console.log('  nothing to prune.'); return; }
   if (!apply) {
     ownerNoFolder.forEach(id => console.log(`  would delete rack_owners WHERE rack_id = ${id}`));

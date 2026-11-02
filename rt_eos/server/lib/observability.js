@@ -1,5 +1,5 @@
 /**
- * Central observability module — logging, metrics, tracing, audit mirroring.
+ * Central observability module - logging, metrics, tracing, audit mirroring.
  *
  * Imported once during server boot, then exposed everywhere via:
  *   const o11y = require('./lib/observability');
@@ -25,7 +25,7 @@
  *   ...                               // your routes
  *   app.get('/metrics', o11y.metricsHandler);
  *   app.get('/healthz', o11y.healthHandler);
- *   app.use(o11y.errorHandler);       // last — catches anything that throws
+ *   app.use(o11y.errorHandler);       // last - catches anything that throws
  */
 
 const { randomUUID } = require('crypto');
@@ -66,7 +66,7 @@ const loggerOpts = {
 };
 
 // Fan the log stream out to two sinks:
-//   1. the console — pretty & colorized in dev, raw JSON to stdout in prod
+//   1. the console - pretty & colorized in dev, raw JSON to stdout in prod
 //   2. a durable SQLite mirror (log-store) the /api/logs dashboard reads
 // We use multistream (rather than the `transport` worker) so the DB sink runs
 // in-process and shares the same already-redacted serialized line. If the
@@ -86,7 +86,7 @@ if (isDev) {
 try {
   const logStore = require('./log-store');
   logStore.init();
-  // Persist info+ only — debug/trace (span start/end, etc.) stay console-only
+  // Persist info+ only - debug/trace (span start/end, etc.) stay console-only
   // so the dashboard table isn't drowned in dev noise.
   streams.push({ level: 'info', stream: logStore.stream });
 } catch (err) {
@@ -205,7 +205,7 @@ const httpLogger = pinoHttp({
 
 // ── HTTP metrics middleware ───────────────────────────────────────────
 // Records duration + status-code labels for every request. Routes are
-// canonicalized (UUID-ish path segments → :id) so cardinality stays low —
+// canonicalized (UUID-ish path segments → :id) so cardinality stays low -
 // otherwise every unique rack ID would explode the label set.
 function httpMetrics(req, res, next) {
   const start = process.hrtime.bigint();
@@ -247,7 +247,7 @@ async function metricsHandler(req, res) {
 }
 
 // ── /healthz handler ──────────────────────────────────────────────────
-// Lightweight liveness — uptime + version + pid. Doesn't reach external
+// Lightweight liveness - uptime + version + pid. Doesn't reach external
 // systems, so it stays fast even when downstream is degraded.
 function healthHandler(req, res) {
   res.json({
@@ -335,7 +335,7 @@ function errorHandler(err, req, res, next) {
   // or wrong-type upload surfaced as 500 "internal server error". Classify
   // BEFORE the counter and the log: a user picking the wrong file is not an
   // uncaught server fault, and counting it as one polluted the error-rate SLO
-  // with ordinary user behaviour — which is how a real outage stays invisible.
+  // with ordinary user behaviour - which is how a real outage stays invisible.
   const MULTER_TOO_LARGE = new Set(['LIMIT_FILE_SIZE', 'LIMIT_FILE_COUNT', 'LIMIT_PART_COUNT']);
   if (!err.statusCode && !err.status && err.name === 'MulterError') {
     err.status = MULTER_TOO_LARGE.has(err.code) ? 413 : 400;
@@ -380,7 +380,7 @@ process.on('uncaughtException', (err) => {
   setTimeout(() => process.exit(1), 250);
 });
 
-// ── Banner — logged at boot so ops can confirm wiring ─────────────────
+// ── Banner - logged at boot so ops can confirm wiring ─────────────────
 function logBootBanner({ port, workers, env } = {}) {
   logger.info({
     event: 'server.boot',

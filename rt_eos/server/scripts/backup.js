@@ -3,14 +3,14 @@
  * Full-corpus backup for RackTrack.
  *
  * reset-data.js only ever backed up the two .db files, only when a reset ran,
- * and only onto the same volume. The scan-image corpus — every rack photo,
- * render and result in the scan tree — had no backup at all. A
+ * and only onto the same volume. The scan-image corpus - every rack photo,
+ * render and result in the scan tree - had no backup at all. A
  * volume loss or a bad `rm` destroyed it irrecoverably. This script closes
  * that gap.
  *
  * What it captures, into a single timestamped snapshot directory:
  *   - data/db/auth.db, logs.db and index.db   (WAL-checkpointed first, then copied
- *     and verified — same proven approach reset-data.js uses, so the newest
+ *     and verified - same proven approach reset-data.js uses, so the newest
  *     committed rows in the -wal sidecar are never silently dropped)
  *   - data/orgs/   (the whole scan corpus, matrices and training memory)
  *   - manifest.json (timestamp, byte sizes, file counts, verified page counts)
@@ -19,7 +19,7 @@
  * writes into the backup directory. It never mutates, resets, or deletes
  * production data. Old *snapshots* are rotated out (keep the newest N).
  *
- * Destination — set an OFF-VOLUME path so a volume loss can't take the backup
+ * Destination - set an OFF-VOLUME path so a volume loss can't take the backup
  * with it:
  *   RACKTRACK_BACKUP_DIR=/mnt/backups/racktrack   (required unless --dry-run)
  *   RACKTRACK_BACKUP_KEEP=7                        (snapshots to retain; default 7)
@@ -137,11 +137,11 @@ function main() {
     fail('Set RACKTRACK_BACKUP_DIR to an off-volume path (or pass --dry-run to preview).');
   }
   if (!DRY_RUN && sameVolume(path.dirname(backupRoot) === backupRoot ? backupRoot : path.resolve(backupRoot, '.'), REPO_ROOT) && !ALLOW_SAME_VOLUME) {
-    fail(`Backup dir ${backupRoot} is on the same volume as the data it protects — a volume loss would take both.\n  Point RACKTRACK_BACKUP_DIR at another disk, or pass --allow-same-volume to override.`);
+    fail(`Backup dir ${backupRoot} is on the same volume as the data it protects - a volume loss would take both.\n  Point RACKTRACK_BACKUP_DIR at another disk, or pass --allow-same-volume to override.`);
   }
 
   const snapDir = path.join(backupRoot, `snapshot-${stamp}`);
-  say(`RackTrack backup ${DRY_RUN ? '(DRY RUN — nothing written)' : ''}`);
+  say(`RackTrack backup ${DRY_RUN ? '(DRY RUN - nothing written)' : ''}`);
   say(`  destination    ${snapDir}`);
   say('');
 
@@ -165,7 +165,7 @@ function main() {
   say('');
   say(`Rotation (keep ${KEEP}):`);
   rotate(backupRoot);
-  say(DRY_RUN ? '\nDry run only — re-run without --dry-run to write the snapshot.' : '\n✓ Backup complete.');
+  say(DRY_RUN ? '\nDry run only - re-run without --dry-run to write the snapshot.' : '\n✓ Backup complete.');
 }
 
 main();

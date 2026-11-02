@@ -134,7 +134,7 @@ function appendJsonlWithRotation(filePath, obj, opts = {}) {
   fs.appendFileSync(filePath, line);
 }
 
-/** Drop-in replacement for fs.appendFileSync(filePath, line) — checks
+/** Drop-in replacement for fs.appendFileSync(filePath, line) - checks
  *  size + rotates first if needed. Use this when the caller already
  *  has a pre-stringified line (existing feedback log writes). */
 function appendLineWithRotation(filePath, line, opts = {}) {

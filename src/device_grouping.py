@@ -272,7 +272,7 @@ class DeviceGrouper:
             inner = [pp[n] for n, (i, j) in enumerate(pairs) if i in g and j in g]
             devices.append({
                 "id": len(devices) + 1, "units": [u["unit"] for u in us], "height_u": len(us),
-                "range_label": f"U{nums[0]:02d}" if len(nums) == 1 else f"U{nums[0]:02d}–U{nums[-1]:02d}",
+                "range_label": f"U{nums[0]:02d}" if len(nums) == 1 else f"U{nums[0]:02d}-U{nums[-1]:02d}",
                 "box": [int(bx[:, 0].min()), int(bx[:, 1].min()), int(bx[:, 2].max()), int(bx[:, 3].max())],
                 "status": "confirmed" if all(u["status"] == "occupied" for u in us) else "check",
                 "p_same_min": float(min(inner)) if inner else None,
@@ -324,7 +324,7 @@ def group_units(method, img, rows, grouper=None, taken=None, visual=False):
         nums = sorted(int(u["unit"][1:]) for u in us)
         devices.append({
             "id": len(devices) + 1, "units": [u["unit"] for u in us], "height_u": len(us),
-            "range_label": f"U{nums[0]:02d}" if len(nums) == 1 else f"U{nums[0]:02d}–U{nums[-1]:02d}",
+            "range_label": f"U{nums[0]:02d}" if len(nums) == 1 else f"U{nums[0]:02d}-U{nums[-1]:02d}",
             "box": [int(bx[:, 0].min()), int(bx[:, 1].min()), int(bx[:, 2].max()), int(bx[:, 3].max())],
             "status": "confirmed" if all(u["status"] == "occupied" for u in us) else "check",
             "p_same_min": None, "device_seen": next((u.get("device") for u in us if u.get("device")), None)})

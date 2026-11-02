@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Remove an organization COMPLETELY — its users, sites (tenants), invites, the
+ * Remove an organization COMPLETELY - its users, sites (tenants), invites, the
  * org row itself, and the rack rows that hang off its Sites. References we
  * keep (audit rows) have their pointers nulled instead.
  *
@@ -13,7 +13,7 @@
  *
  * foreign_keys is kept ON so ON DELETE CASCADE actually fires and nothing is
  * orphaned; the explicit child-first deletes below make the teardown order
- * deterministic. Set RACKTRACK_AUTH_DB to run against a throwaway copy — the
+ * deterministic. Set RACKTRACK_AUTH_DB to run against a throwaway copy - the
  * test harness does this; never point it at the live data/db.
  */
 'use strict';
@@ -60,7 +60,7 @@ if (GO) backup();
 
 const db = new Database(DB_PATH);
 // KEEP foreign keys ON. Turning them OFF (as this script used to) does not defer
-// checks — it disables ON DELETE CASCADE entirely, so deleting users left their
+// checks - it disables ON DELETE CASCADE entirely, so deleting users left their
 // child rows behind as orphans.
 db.pragma('foreign_keys = ON');
 
@@ -70,9 +70,9 @@ function planFor(ident) {
   const org = db.prepare(
     `SELECT id, name, slug, status FROM organizations WHERE slug = ? COLLATE NOCASE OR name = ? COLLATE NOCASE`
   ).get(ident, ident);
-  if (!org) { console.log(`  · '${ident}': no such org — skipped`); return null; }
+  if (!org) { console.log(`  · '${ident}': no such org - skipped`); return null; }
   if (PROTECTED.has(String(org.slug).toLowerCase())) {
-    console.log(`  · '${ident}' is protected (${org.slug}) — refused`); return null;
+    console.log(`  · '${ident}' is protected (${org.slug}) - refused`); return null;
   }
   const users = db.prepare(`SELECT COUNT(*) c FROM users   WHERE organization_id = ?`).get(org.id).c;
   const sites = db.prepare(`SELECT COUNT(*) c FROM tenants WHERE organization_id = ?`).get(org.id).c;
@@ -126,5 +126,5 @@ for (const o of db.prepare(`SELECT id, name, slug, status FROM organizations ORD
   console.log(`  ${o.id}  ${o.name}  (${o.slug})  ${o.status}`);
 }
 console.log(GO ? '\nDone. Restart the server if it was running.'
-               : '\nDry run only — nothing was changed. Re-run with --yes to apply.');
+               : '\nDry run only - nothing was changed. Re-run with --yes to apply.');
 db.close();

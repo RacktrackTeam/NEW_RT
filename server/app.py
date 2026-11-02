@@ -1,14 +1,15 @@
-"""RackTrack server: the API behind the mobile application (mobile/) and the engine's runs.
+"""RackTrack engine: the API behind the mobile application (mobile/) and the video runs, a private service behind the sign-in
+service (./auth.sh, rt_eos/server/auth_service.js).
 
-    python3 server/app.py                      # http://0.0.0.0:8600  (phones on the same network reach it by this Mac's IP)
+    ./engine.sh                                # http://127.0.0.1:8700 (RACKTRACK_PORT to change it)
 
 What it does
-  sign-in        your name only (no access code), kept in a signed session cookie
-  sweeps         a rack video (from the in-app camera guide, an upload, or the stored sample) runs the 15 steps in a
-                 background thread; every run lives in data/runs/<id>/ (video, rack picture, result.json, report/)
-                 and survives a restart, so the history is complete
-  photos         a rack photo runs the photo pipeline (units, occupancy, devices, kinds, port layouts)
+  sign-in        none of its own: every route but the open ones needs the RT-EOS session (server/rt_session.py), and the
+                 writes check the role (ROLE_RULES, docs/AUTH.md)
+  sweeps         a rack video (an upload, a camera-guide take, or the stored sample) runs the 15 steps in a background thread;
+                 every run lives in data/runs/<org>/<site>/<id>/ (video, rack picture, result.json, report/) and survives a restart
   close-ups      a close-up of one device is read and kept with its run; the report is rebuilt
+  databases      the organization's Excel, NetBox and ServiceNow CMDB copies, the rack match and the drift (src/source_db.py)
   reports        each run's 15-step report (scripts/video/build_report.py), served uncached
 Everything heavy runs one job at a time on 2 threads (this Mac overheats otherwise); the engine is src/.
 """
@@ -16,7 +17,6 @@ import datetime
 import hashlib
 
 import cv2
-import hmac
 import io
 import json
 import os
@@ -58,8 +58,8 @@ import connections as CONN  # noqa: E402
 import rt_session  # noqa: E402  (racktrack-app sign-in: the RT-EOS session)
 
 # ------------------------------------------------------------------ settings
-PORT = int(os.environ.get("RACKTRACK_PORT", "8600"))
-HOST = os.environ.get("RACKTRACK_HOST", "0.0.0.0")
+PORT = int(os.environ.get("RACKTRACK_PORT", "8700"))          # never 8600, the live app's port
+HOST = os.environ.get("RACKTRACK_HOST", "127.0.0.1")           # this machine only: the sign-in service is the front door
 MOBILE = ROOT / "mobile"
 RUNS = pathlib.Path(os.environ.get("RACKTRACK_RUNS") or ROOT / "data" / "runs"); RUNS.mkdir(parents=True, exist_ok=True)
 SAMPLE_DIR = ROOT / "data" / "video"
@@ -68,23 +68,8 @@ SAMPLES = {"vdo1": {"title": "Demo rack (stored run)", "video": SAMPLE_DIR / "vd
 MAX_PHOTO = 25 * 1024 * 1024
 MAX_VIDEO = 600 * 1024 * 1024
 DISPLAY_MAX = 2000
-OCCUPIED_THRESH = 0.5
-SESSION_DAYS = 30
 NO_CACHE = {"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0", "Pragma": "no-cache", "Expires": "0"}
 
-CONFIG_FILE = ROOT / "server" / "config.json"
-
-
-def load_config():
-    """server/config.json: the site name and the cookie secret; written on first start."""
-    if CONFIG_FILE.exists():
-        return json.loads(CONFIG_FILE.read_text())
-    cfg = {"site": "RackTrack", "secret": secrets.token_hex(32), "created": datetime.datetime.now().isoformat(timespec="seconds")}
-    CONFIG_FILE.write_text(json.dumps(cfg, indent=1)); os.chmod(CONFIG_FILE, 0o600)
-    return cfg
-
-
-CONFIG = load_config()
 class ModelLock:
     """One model call at a time in this server, and on the whole machine: the same lock directory scripts/with-model-lock.sh uses
     (RT_MODEL_LOCK_DIR, default /tmp/one_racktrack_model.lock), taken only around a model run, so an idle server never holds it."""
@@ -210,18 +195,23 @@ class Contact(BaseModel):
     message: str = Field(min_length=1, max_length=2000)
 
 
-CONTACT_SEEN = []
+CONTACT_SEEN = {}                          # sender (address and email) -> the times of their messages in the last minute
 
 
 @app.post("/api/contact")
-def api_contact(body: Contact):
+def api_contact(body: Contact, request: Request):
     """Contact us from the sign-in screen (public): kept as a JSON file in data/contact for RackTrack to answer. Nothing is sent
-    anywhere. At most 20 messages a minute, so the open route cannot fill the disk."""
+    anywhere. Each sender may send 3 messages a minute, and all senders together 60, so one sender cannot block the others and
+    the open route cannot fill the disk."""
     now = time.time()
-    CONTACT_SEEN[:] = [t for t in CONTACT_SEEN if now - t < 60]
-    if len(CONTACT_SEEN) >= 20:
+    for k in list(CONTACT_SEEN):
+        CONTACT_SEEN[k] = [t for t in CONTACT_SEEN[k] if now - t < 60]
+        if not CONTACT_SEEN[k]:
+            del CONTACT_SEEN[k]
+    who = f"{request.client.host if request.client else '-'}|{body.email.lower()}"
+    if len(CONTACT_SEEN.get(who, [])) >= 3 or sum(len(v) for v in CONTACT_SEEN.values()) >= 60:
         raise HTTPException(429, "Too many messages just now. Try again in a minute.")
-    CONTACT_SEEN.append(now)
+    CONTACT_SEEN.setdefault(who, []).append(now)
     d = ROOT / "data" / "contact"; d.mkdir(parents=True, exist_ok=True)
     (d / f"{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}-{secrets.token_hex(3)}.json").write_text(json.dumps(body.model_dump(), indent=1))
     return {"ok": True}
@@ -619,7 +609,7 @@ def _rack_state(j):
         except Exception as ex:  # noqa: BLE001  a broken copy must not break Home
             print(f"[racktrack] compare of run {j.get('id')} for Home failed: {type(ex).__name__}: {ex}", file=sys.stderr)
             return out
-        if dv.get("match"):
+        if dv.get("match") and dv.get("confirmed"):            # only a compare a person confirmed counts on Home
             out["record"] = {"source": SDB.SOURCES[dv["source"]], "rack_key": dv["match"]["rack_key"], "how": dv["match"]["how"]}
             out["differences"] = len((dv.get("drift") or {}).get("rows") or [])
     return out
@@ -1445,94 +1435,6 @@ def api_closeup_picture(cid: str, name: str):
     if c is None or name not in c["pictures"]:
         raise HTTPException(404, "No such close-up picture.")
     return Response(jpeg_bytes(Image.open(c["pictures"][name]).convert("RGB")), media_type="image/jpeg")
-
-
-# ------------------------------------------------------------------ a rack photo: the photo pipeline
-PHOTOS = {}                                  # id -> {"json", "pics"}; the last few only
-_TYPES = ["Load Balancer", "Patch Panel", "Storage Unit", "Storage unit", "Firewall", "Gateway", "Router", "Server", "Switch", "PDU", "UPS", "PSU"]
-
-
-def no_type(text):
-    """Occupancy reasons without any device type (rule: no device type in these sentences)."""
-    if not text:
-        return text
-    s = re.sub(r"\b(?:an?\s+)?Closed Unit\b", "a closed panel", str(text)); s = re.sub(r"\b(?:an?\s+)?Empty\b(?=\s*\()", "an empty slot", s)
-    for k in _TYPES:
-        s = re.sub(rf"\b(?:an?\s+)?{re.escape(k)}\b", "a device", s)
-    return s
-
-
-def pil_to_bgr(img):
-    import cv2
-    import numpy as np
-    return cv2.cvtColor(np.array(img.convert("RGB")), cv2.COLOR_RGB2BGR)
-
-
-def photo_payload(image_id, img, name):
-    t0 = time.time(); bgr = pil_to_bgr(img)
-    with MODEL_LOCK:
-        keep_only(ENSEMBLE)
-        units, info = pipe.units_from_photo(bgr)
-        devices0 = occ.detect_devices(img) if occ.device_finder_available() else None
-        rows = occ.classify_units(img, units, ENSEMBLE, OCCUPIED_THRESH, devices0) if units else []
-        rows = [{k: v for k, v in r.items() if k != "crop"} for r in rows]
-        t1 = time.time()
-        devices, seams, how = pipe.device_rows(bgr, rows)
-        pipe.classify_photo_devices(img, devices)
-        t2 = time.time()
-    pipe.photo_switch_layouts(img, devices, pathlib.Path(tempfile.gettempdir()) / "racktrack_layouts" / image_id)
-    t3 = time.time()
-    pics = {"units": jpeg_bytes(pipe.draw_units(bgr, rows, info)), "occupancy": jpeg_bytes(pipe.draw_occupancy(img, rows)),
-            "devices": jpeg_bytes(pipe.draw_devices(img, rows, devices)), "classification": jpeg_bytes(pipe.draw_classes(img, rows, devices)),
-            "layout": jpeg_bytes(pipe.draw_ports(img, devices))}
-    lay_pics = {}
-    for d in devices:
-        for pname, path in ((d.get("layout") or {}).get("pictures") or {}).items():
-            pk = f"layout_D{d['index']}_{pname}"; pics[pk] = jpeg_bytes(Image.open(path).convert("RGB")); lay_pics.setdefault(d["index"], {})[pname] = pk
-    payload = {
-        "image": {"id": image_id, "name": name, "width": img.size[0], "height": img.size[1]},
-        "units": {"n": len(rows), "rows": [{"unit": r["unit"], "status": r["status"], "confidence": float(r["confidence"]), "reason": no_type(r.get("reason") or ""),
-                                           "uncertain": bool(r["uncertain"])} for r in rows],
-                  "summary": occ.summarize(rows) if rows else None},
-        "devices": [{"index": d["index"], "top": d["top"], "bottom": d["bottom"], "height": d["height"], "kind": (d.get("classification") or {}).get("label"),
-                     "prob": (d.get("classification") or {}).get("prob"), "layout": dict(pipe.public_layout(d), pictures={n: f"/api/photo/{image_id}/{k}" for n, k in lay_pics.get(d["index"], {}).items()}) if d.get("layout") else None}
-                    for d in devices],
-        "pictures": {k: f"/api/photo/{image_id}/{k}" for k in pics},
-        "times_s": {"units_and_occupancy": round(t1 - t0, 1), "devices_and_kinds": round(t2 - t1, 1), "port_layouts": round(t3 - t2, 1), "total": round(t3 - t0, 1)},
-    }
-    with STATE_LOCK:
-        PHOTOS[image_id] = {"json": payload, "pics": pics}
-        for k in list(PHOTOS)[:-8]:
-            PHOTOS.pop(k, None)
-    return payload
-
-
-@app.post("/api/photo")
-async def api_photo(file: UploadFile = File(...)):
-    raw = await file.read(MAX_PHOTO + 1)
-    if len(raw) > MAX_PHOTO:
-        raise HTTPException(413, "The photo is too large (25 MB at most).")
-    try:
-        img = ImageOps.exif_transpose(Image.open(io.BytesIO(raw))).convert("RGB")
-    except (UnidentifiedImageError, OSError, Image.DecompressionBombError):
-        raise HTTPException(400, "That file could not be read as a photo. Use a JPG or PNG.")
-    iid = hashlib.sha1(raw).hexdigest()[:16]
-    with STATE_LOCK:
-        if iid in PHOTOS:
-            return PHOTOS[iid]["json"]
-    if MODEL_LOCK.locked():
-        raise HTTPException(409, "A rack is being read. The photo runs when it is done; try again in a minute.")
-    from starlette.concurrency import run_in_threadpool
-    return await run_in_threadpool(photo_payload, iid, img, pathlib.Path(file.filename or "photo").name[:120])
-
-
-@app.get("/api/photo/{image_id}/{pic}")
-def api_photo_picture(image_id: str, pic: str):
-    with STATE_LOCK:
-        e = PHOTOS.get(image_id)
-    if e is None or pic not in e["pics"]:
-        raise HTTPException(404, "Run the photo first.")
-    return Response(e["pics"][pic], media_type="image/jpeg", headers={"Cache-Control": "max-age=86400"})
 
 
 # ------------------------------------------------------------------ reference pages and the app itself

@@ -80,7 +80,7 @@ module.exports = function registerOwnerConsole(app, { auth, audit, logger, feedb
   // ── Live operations dashboard ────────────────────────────────────────
   // GET /api/admin/dashboard → one JSON snapshot the DashboardPage polls every
   // few seconds. Aggregates the audit log (who did what, ok/fail, errors),
-  // the user/org tables, and feedback.jsonl (right/wrong accuracy) — all cheap
+  // the user/org tables, and feedback.jsonl (right/wrong accuracy) - all cheap
   // indexed SQLite reads plus one small file scan. Owner-only, or anyone in the
   // AUDIT_ADMINS allow-list, so per-org data never leaks to ordinary members.
   app.get('/api/admin/dashboard', auth.requireAuth, (req, res) => {
@@ -111,7 +111,7 @@ module.exports = function registerOwnerConsole(app, { auth, audit, logger, feedb
       // Feedback accuracy (right vs wrong), from the memoised tally.
       const { right: fbRight, wrong: fbWrong } = feedbackTally();
 
-      // Live activity feed — most recent events, org-resolved.
+      // Live activity feed - most recent events, org-resolved.
       // Events at the auth gate (sign-in / sign-up / reset) have no logged-in
       // session, so username is NULL. We fall back to the *attempted* identifier
       // captured in the payload and flag the row as a guest so the UI can label
@@ -135,7 +135,7 @@ module.exports = function registerOwnerConsole(app, { auth, audit, logger, feedb
         ORDER BY a.id DESC LIMIT 30`);
 
       // Busiest scanners. Resolve the real name from the user the event is
-      // attributed to (a.user_id) — the denormalized a.username is often blank
+      // attributed to (a.user_id) - the denormalized a.username is often blank
       // for owner/admin scans, which is why the board showed "(anonymous)".
       const topUsers = many(`
         SELECT COALESCE(NULLIF(u.username,''), NULLIF(a.username,''), '(anonymous)') AS username,
@@ -158,13 +158,13 @@ module.exports = function registerOwnerConsole(app, { auth, audit, logger, feedb
       // Site (tenant) name straight off the event, for scan attribution.
       const siteOf = `(SELECT t.name FROM tenants t WHERE t.id = a.tenant_id)`;
 
-      // Scans per site — the same board as byOrg, one level finer.
+      // Scans per site - the same board as byOrg, one level finer.
       const bySite = many(`
         SELECT COALESCE(${siteOf}, '(no site)') AS site, COUNT(*) AS scans
         FROM audit_log a WHERE a.action='scan.create' AND a.status='ok'
         GROUP BY site ORDER BY scans DESC LIMIT 10`);
 
-      // The scans themselves — each recent scan with who made it and where
+      // The scans themselves - each recent scan with who made it and where
       // (site + org), so the dashboard can show the work, not just the counts.
       const recentScans = many(`
         SELECT a.ts, a.target_id AS rack,
@@ -176,14 +176,14 @@ module.exports = function registerOwnerConsole(app, { auth, audit, logger, feedb
         WHERE a.action='scan.create' AND a.status='ok'
         ORDER BY a.id DESC LIMIT 100`);
 
-      // Action mix — EVERY action type (ok vs fail), nothing capped.
+      // Action mix - EVERY action type (ok vs fail), nothing capped.
       const actions = many(`
         SELECT action,
                SUM(CASE WHEN status='ok'   THEN 1 ELSE 0 END) AS ok,
                SUM(CASE WHEN status='fail' THEN 1 ELSE 0 END) AS fail
         FROM audit_log GROUP BY action ORDER BY (ok+fail) DESC`);
 
-      // EVERY user with their full activity — role, org, scans, total events,
+      // EVERY user with their full activity - role, org, scans, total events,
       // failures, and when they were last seen.
       const allUsers = many(`
         SELECT u.username, u.email, u.role, u.active, u.public_id,

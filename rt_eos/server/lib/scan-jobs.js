@@ -2,7 +2,7 @@
 //
 // Why this exists: /api/analyze runs the CV pipeline and returns the result
 // as the HTTP response. On mobile, if the app is backgrounded mid-scan, iOS
-// suspends the WebView and that response is lost — the user comes back to the
+// suspends the WebView and that response is lost - the user comes back to the
 // upload screen and the finished scan is orphaned (the server still wrote it
 // to outputs/<rackId>/, but the client never learned the rackId).
 //

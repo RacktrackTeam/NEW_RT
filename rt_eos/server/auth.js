@@ -1,5 +1,5 @@
 /**
- * Authentication module — SQLite + bcrypt + JWT.
+ * Authentication module - SQLite + bcrypt + JWT.
  *
  * Storage:
  *   data/db/auth.db       SQLite database (users + pending_signups)
@@ -7,9 +7,9 @@
  *   generated once into the data folder (lib/data_paths.js).
  *
  * Verification email goes out via SMTP with primary+fallback providers (see
- * mailProviders below — primary is tried first, then the fallback). The 6-digit
+ * mailProviders below - primary is tried first, then the fallback). The 6-digit
  * code is also logged to the server console for debugging. If SMTP isn't
- * configured or the send fails, signup/resend return a 502 — the code is
+ * configured or the send fails, signup/resend return a 502 - the code is
  * never leaked in the API response.
  */
 
@@ -53,7 +53,7 @@ const JWT_AUDIENCE = 'racktrack-app';
 // stolen hash. It also costs us ~250ms per login on this hardware, which is
 // fine for an endpoint called once a session and is itself a brute-force brake.
 // Existing hashes carry their own cost in the string, so old passwords keep
-// verifying — they are silently upgraded on next successful sign-in.
+// verifying - they are silently upgraded on next successful sign-in.
 const BCRYPT_COST = Number(process.env.BCRYPT_COST) || 12;
 
 // ── Cookie auth (web) ────────────────────────────────────────
@@ -66,7 +66,7 @@ const ACCESS_TOKEN_EXPIRY  = process.env.ACCESS_TOKEN_EXPIRY  || '15m';
 const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRY || TOKEN_TTL;
 const COOKIE_DOMAIN   = process.env.COOKIE_DOMAIN || undefined;
 // Secure cookies are the right default, but a `secure` cookie is silently
-// dropped by the browser over plain http — which is exactly how local dev and
+// dropped by the browser over plain http - which is exactly how local dev and
 // a bare-http box are served. Defaulting this to true unconditionally makes
 // login look like it succeeds and then behave as though it never happened.
 // Explicit env wins; otherwise on in production, off outside it.
@@ -99,7 +99,7 @@ const ACCESS_COOKIE_OPTS = {
   path: '/', domain: COOKIE_DOMAIN,
 };
 // Scoped to /api/auth so the long-lived credential is not attached to every
-// image, upload and scan request — only to the endpoints that consume it.
+// image, upload and scan request - only to the endpoints that consume it.
 const REFRESH_COOKIE_OPTS = {
   httpOnly: true, secure: COOKIE_SECURE, sameSite: COOKIE_SAMESITE,
   path: '/api/auth', domain: COOKIE_DOMAIN,
@@ -168,7 +168,7 @@ db.exec(`
   -- One row per generation. Rotating mints a new row and marks the old one
   -- revoked with replaced_by_token_id pointing at its successor, so a token
   -- presented after it was rotated away is recognisable as a replay rather
-  -- than merely unknown — that chain is what makes reuse detection possible.
+  -- than merely unknown - that chain is what makes reuse detection possible.
   CREATE TABLE IF NOT EXISTS refresh_tokens (
     id                    INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id               INTEGER NOT NULL REFERENCES users(id),
@@ -245,12 +245,12 @@ function assignPublicId(userId, role) {
   db.prepare('UPDATE users SET tenant_id = ? WHERE tenant_id IS NULL')
     .run(defaultTenantId);
 
-  // pending_signups.tenant_id — captured at the verify step so a user
+  // pending_signups.tenant_id - captured at the verify step so a user
   // can sign up into a specific tenant (invite flow later).
   _ensureColumn('pending_signups', 'tenant_id',
     'tenant_id INTEGER REFERENCES tenants(id)');
 
-  // audit_log.tenant_id — every audit row carries the actor's tenant
+  // audit_log.tenant_id - every audit row carries the actor's tenant
   // so org-wide audit queries are tenant-scoped.
   if (db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='audit_log'`).get()) {
     const auditHadTenant = _hasColumn('audit_log', 'tenant_id');
@@ -260,7 +260,7 @@ function assignPublicId(userId, role) {
     // on EVERY boot, so rows written legitimately tenant-less (unauthenticated
     // actors, or actors with no tenant) were re-stamped into the default tenant
     // on the next restart. Once the column exists a NULL tenant_id is a real
-    // value, not a missing one — never reclaim it.
+    // value, not a missing one - never reclaim it.
     if (!auditHadTenant) {
       db.prepare('UPDATE audit_log SET tenant_id = ? WHERE tenant_id IS NULL')
         .run(defaultTenantId);
@@ -272,7 +272,7 @@ function assignPublicId(userId, role) {
                ON audit_log(tenant_id, action, status)`);
   }
 
-  // rack_owners — many-to-many between tenants and racks. A rack id is
+  // rack_owners - many-to-many between tenants and racks. A rack id is
   // a SHA-256 of the source image, so two tenants scanning the same
   // image get the same RK-id; ownership is recorded per-tenant so the
   // shared output dir doesn't leak.
@@ -317,10 +317,10 @@ function assignPublicId(userId, role) {
   _ensureColumn('tenants', 'organization_id',
     'organization_id INTEGER REFERENCES organizations(id)');
   // Role governs what a user can do:
-  //   'owner'        — platform superadmin (creates orgs + org admins)
-  //   'org_admin'    — manages one organization (creates Sites + users)
-  //   'site_manager' — manages one Site (adds members, runs scans)
-  //   'member'       — regular user within a Site
+  //   'owner'        - platform superadmin (creates orgs + org admins)
+  //   'org_admin'    - manages one organization (creates Sites + users)
+  //   'site_manager' - manages one Site (adds members, runs scans)
+  //   'member'       - regular user within a Site
   _ensureColumn('users', 'role', "role TEXT NOT NULL DEFAULT 'member'");
   // Denormalized org id on users so org-level scoping (incl. active
   // learning) is a single indexed lookup rather than a tenant→org join.
@@ -329,7 +329,7 @@ function assignPublicId(userId, role) {
   // Soft-disable: a deactivated user keeps their data/history but can't sign in.
   _ensureColumn('users', 'active', 'active INTEGER NOT NULL DEFAULT 1');
   // Profile avatar: index into the client's preset-avatar set (0-based). Null
-  // means "not chosen yet" — the client auto-assigns one from the initial.
+  // means "not chosen yet" - the client auto-assigns one from the initial.
   _ensureColumn('users', 'avatar', 'avatar INTEGER');
   // Or a photograph of their own, chosen from the phone's gallery: one small
   // square JPEG held as a data URL, because it is a profile picture and not a
@@ -343,13 +343,13 @@ function assignPublicId(userId, role) {
   // 0 = the user has no password they know: they joined through Google / Apple /
   // Facebook (see socialAuth.js). password_hash is NOT NULL and SQLite can't
   // drop that without rebuilding the table, so those accounts store a hash of
-  // random bytes that is thrown away — unguessable, but indistinguishable from
+  // random bytes that is thrown away - unguessable, but indistinguishable from
   // a real password at the column level. Hence this flag. Every pre-existing
   // row defaults to 1, which is correct: they all signed up with a password.
   _ensureColumn('users', 'password_set', 'password_set INTEGER NOT NULL DEFAULT 1');
   // Session generation counter. Every token carries the value it was minted
   // against; requireAuth rejects any token whose copy is stale. Incrementing it
-  // therefore invalidates EVERY outstanding session for that user at once —
+  // therefore invalidates EVERY outstanding session for that user at once -
   // which is what has to happen when a password changes, an account is
   // deactivated, or the user asks to be signed out everywhere.
   //
@@ -409,7 +409,7 @@ function getDefaultTenantId() {
   return t?.id;
 }
 
-// Tenant CRUD — the bare minimum to support signup. A full tenant
+// Tenant CRUD - the bare minimum to support signup. A full tenant
 // admin UI (name change, member invite, deletion) is a later add.
 function findTenantBySlug(slug) {
   return db.prepare('SELECT * FROM tenants WHERE slug = ?').get(slug);
@@ -463,7 +463,7 @@ function validatePassword(pw) {
 // ── Email (nodemailer) with automatic failover ───────────────
 // Two providers can be configured; the primary is tried first and, if the send
 // errors (auth failure, rate-limit, outage), we automatically retry through the
-// fallback — so no single mail provider can block sign-in / reset codes.
+// fallback - so no single mail provider can block sign-in / reset codes.
 //
 //   PRIMARY   SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS / SMTP_FROM
 //   FALLBACK  SMTP_FALLBACK_HOST / _PORT / _USER / _PASS / _FROM   (optional)
@@ -496,7 +496,7 @@ function mailProviders() {
   ].filter(Boolean);
   if (!list.length && process.env.RT_MAIL_OUTBOX) list.push(outboxProvider());
   if (!list.length) {
-    logger.warn('[auth] no SMTP configured — verification codes are only logged to the server console (dev mode).');
+    logger.warn('[auth] no SMTP configured - verification codes are only logged to the server console (dev mode).');
   }
   return list;
 }
@@ -526,7 +526,7 @@ function outboxProvider() {
 
 // Can this server deliver mail AT ALL right now?
 //
-// A property of the deployment, not of any one address — which is what makes it
+// A property of the deployment, not of any one address - which is what makes it
 // safe to tell the caller about. The forgot-password endpoint is deliberately
 // silent about whether an address is registered, and that silence used to
 // swallow a much more basic failure: with no transport configured the demo box
@@ -562,10 +562,10 @@ function emailHtml(code) {
           <div style="font-family:'SF Mono','Roboto Mono',Menlo,Consolas,monospace;font-size:2rem;font-weight:700;letter-spacing:.42em;color:#5B54B0;padding-left:.42em;">${code}</div>
         </div>
         <div style="margin:32px auto 0;width:36px;height:2px;background:linear-gradient(90deg,transparent,rgba(91,84,176,0.35),transparent);"></div>
-        <p style="margin:24px 0 0;color:#6B6B7A;font-size:.82rem;line-height:1.5;">Didn't request this? You can safely ignore this email — your account stays untouched.</p>
+        <p style="margin:24px 0 0;color:#6B6B7A;font-size:.82rem;line-height:1.5;">Didn't request this? You can safely ignore this email - your account stays untouched.</p>
       </div>
     </div>
-    <p style="text-align:center;color:#8A8A99;font-size:.74rem;margin-top:22px;letter-spacing:.02em;">Sent automatically by RackTrack — please do not reply.</p>
+    <p style="text-align:center;color:#8A8A99;font-size:.74rem;margin-top:22px;letter-spacing:.02em;">Sent automatically by RackTrack - please do not reply.</p>
   </div>
 </body></html>`;
 }
@@ -573,7 +573,7 @@ function emailHtml(code) {
 // Tries the primary provider, then the fallback. Returns true if ANY delivered.
 async function sendVerificationEmail(email, code) {
   // NEVER log the code itself. It used to be interpolated into this message,
-  // which persists it to the log store — and /api/logs is readable by owners
+  // which persists it to the log store - and /api/logs is readable by owners
   // and AUDIT_ADMINS, so anyone with log access could trigger a reset for any
   // account, read the code, and take it over. Log only that a code was sent.
   logger.info({ event: 'auth.code_sent', email }, '[auth] verification code sent');
@@ -590,7 +590,7 @@ async function sendVerificationEmail(email, code) {
     });
     if (ok) return true;
   } catch (err) {
-    logger.error(`[auth] Graph verification send failed: ${err.message} — falling back to SMTP`);
+    logger.error(`[auth] Graph verification send failed: ${err.message} - falling back to SMTP`);
   }
 
   const providers = mailProviders();
@@ -607,7 +607,7 @@ async function sendVerificationEmail(email, code) {
       logger.info(`[auth] verification email sent to ${email} via ${p.label} (${p.host})`);
       return true;
     } catch (err) {
-      logger.error(`[auth] ${p.label} send to ${email} failed (${p.host}): ${err.message} — trying next provider`);
+      logger.error(`[auth] ${p.label} send to ${email} failed (${p.host}): ${err.message} - trying next provider`);
       // fall through to the next configured provider
     }
   }
@@ -626,7 +626,7 @@ function escapeHtml(s) {
 
 // ── Contact-form attachments ────────────────────────────────────────
 // A screenshot is the single most useful thing a technician can send with a bug
-// report — "the scan looks wrong" and a picture of what it drew are different
+// report - "the scan looks wrong" and a picture of what it drew are different
 // tickets. Held in memory, never written to disk: these are forwarded straight
 // into an email and are not scans, so giving them a path under uploads/ would
 // mean inventing a retention and access story for them for no reason.
@@ -655,7 +655,7 @@ const contactUpload = multer({
   fileFilter: (req, file, cb) => {
     const type = String(file.mimetype || '').toLowerCase();
     if (CONTACT_ALLOWED_TYPES.has(type)) return cb(null, true);
-    // Tagged so the handler answers 400 rather than 500 — picking the wrong
+    // Tagged so the handler answers 400 rather than 500 - picking the wrong
     // file type is a user mistake, not a server fault.
     const err = new Error('Attachments must be an image, PDF, or text file.');
     err.status = 400;
@@ -680,12 +680,12 @@ async function sendContactEmail({ fromEmail, fromName, meta, subject, message, a
   const files = (attachments || []).filter((a) => a && a.content);
   // Name the attachments in the body too. Mail clients vary in how visibly they
   // surface them, and a screenshot nobody notices is the same as one that was
-  // never sent — support needs to know to go looking.
+  // never sent - support needs to know to go looking.
   const fileLine = files.length
     ? `Attachments (${files.length}): ${files.map((f) => f.filename).join(', ')}`
     : '';
   const text = [
-    message, '', '——',
+    message, '', '--',
     `From: ${fromName || 'Unknown'} <${fromEmail || 'no email'}>`,
     meta || '',
     fileLine,
@@ -711,7 +711,7 @@ async function sendContactEmail({ fromEmail, fromName, meta, subject, message, a
     });
     if (ok) return true;
   } catch (err) {
-    logger.error(`[auth] Graph contact send failed: ${err.message} — falling back to SMTP`);
+    logger.error(`[auth] Graph contact send failed: ${err.message} - falling back to SMTP`);
   }
 
   const providers = mailProviders();
@@ -726,7 +726,7 @@ async function sendContactEmail({ fromEmail, fromName, meta, subject, message, a
       logger.info(`[auth] contact email delivered to ${SUPPORT_EMAIL} via ${p.label} (${p.host})`);
       return true;
     } catch (err) {
-      logger.error(`[auth] ${p.label} contact send failed (${p.host}): ${err.message} — trying next provider`);
+      logger.error(`[auth] ${p.label} contact send failed (${p.host}): ${err.message} - trying next provider`);
     }
   }
   logger.error(`[auth] ALL providers failed to send contact email to ${SUPPORT_EMAIL}`);
@@ -748,13 +748,13 @@ function makeToken(user, ttl = TOKEN_TTL) {
   //        exactly it (revoked_tokens) without touching the user's other
   //        sessions.
   //   tv   the user's token_version at mint time. Bumping the column
-  //        invalidates every token ever issued to them in one write — the
+  //        invalidates every token ever issued to them in one write - the
   //        lever for a password change, a deactivation, or "sign out
   //        everywhere".
   //
   // iss/aud are asserted on the way back in. They cost nothing and mean a token
-  // minted by some other service that happens to share this secret — a future
-  // staging box restored from the same backup, say — cannot authenticate here.
+  // minted by some other service that happens to share this secret - a future
+  // staging box restored from the same backup, say - cannot authenticate here.
   return jwt.sign(
     { sub: user.id, username: user.username, tenantId: user.tenant_id,
       organizationId: user.organization_id || null, role: user.role || 'member',
@@ -776,7 +776,7 @@ function makeToken(user, ttl = TOKEN_TTL) {
 // the library honours whatever `alg` the token declares, which is the JWT
 // confusion attack requireAuth pins against, and without issuer/audience a
 // token minted by any other service sharing this secret would pass. Used by
-// app.js's softAuthPayload, which decides tenant scoping on ~25 endpoints —
+// app.js's softAuthPayload, which decides tenant scoping on ~25 endpoints -
 // it must not be a weaker check than the one guarding the authenticated ones.
 function verifyAccessToken(token) {
   try {
@@ -815,7 +815,7 @@ function wantsBodyToken(req) {
   return /native app/i.test(String(req.get('user-agent') || ''));
 }
 
-// The token handed to native in the response body — long-lived, NOT the
+// The token handed to native in the response body - long-lived, NOT the
 // 15-minute access token.
 //
 // The cookie migration gave native the access JWT, which expires in 15
@@ -823,7 +823,7 @@ function wantsBodyToken(req) {
 // renews silently; native holds no cookie for capacitor://localhost and so
 // cannot call /api/auth/refresh at all. The app therefore died a quarter of an
 // hour after sign-in, every request 401'd, the refresh it attempted could
-// never succeed, and it bounced the user back to the login screen — over and
+// never succeed, and it bounced the user back to the login screen - over and
 // over. Testers hit it as an endless sign-in loop.
 //
 // Native goes back to the long-lived token it carried before cookies existed.
@@ -834,7 +834,7 @@ function nativeBodyToken(user) {
   return makeToken(user, REFRESH_TOKEN_EXPIRY);
 }
 
-// Expired and long-revoked rows serve no purpose — a row is only needed while
+// Expired and long-revoked rows serve no purpose - a row is only needed while
 // the token it describes could still be presented. Mirrors revokeSweep().
 let _lastRefreshSweep = 0;
 function refreshSweep() {
@@ -845,7 +845,7 @@ function refreshSweep() {
 }
 
 // Deny one specific token. The row only has to outlive the token itself, so it
-// carries the token's own exp — see the sweep in revokeSweep().
+// carries the token's own exp - see the sweep in revokeSweep().
 function revokeToken(payload) {
   if (!payload || !payload.jti) return false;
   db.prepare(`INSERT INTO revoked_tokens (jti, user_id, revoked_at, expires_at)
@@ -929,7 +929,7 @@ function requireAuth(req, res, next) {
   try {
     // algorithms is pinned explicitly. Without it the library will honour
     // whatever `alg` the token itself declares, which is the classic JWT
-    // confusion attack — a forged token asking to be verified as "none", or as
+    // confusion attack - a forged token asking to be verified as "none", or as
     // RS256 with our HMAC secret treated as a public key.
     //
     // issuer/audience are enforced here to match makeToken.
@@ -964,7 +964,7 @@ function requireAuth(req, res, next) {
     // migration carry no `tv` and compare equal to the default 0, so existing
     // sessions survive the deploy rather than all being dropped at once.
     if (Number(payload.tv || 0) !== Number(user.token_version || 0)) {
-      return res.status(401).json({ error: 'Session expired — please sign in again' });
+      return res.status(401).json({ error: 'Session expired - please sign in again' });
     }
     // Defensive: a token issued before tenancy landed won't carry tenantId.
     // Use the user's row value (backfilled to default tenant) instead.
@@ -975,14 +975,14 @@ function requireAuth(req, res, next) {
     }
     req.user = user;
     // The verified claims, kept for routes that act on THIS token rather than
-    // on the user — /api/auth/logout needs the jti to deny exactly this session.
+    // on the user - /api/auth/logout needs the jti to deny exactly this session.
     req.authPayload = payload;
 
     // Central org-status gate.
     //
     // Self-signup issues a working token immediately with the org left
-    // 'pending', and isOrgActive() had only three call sites — /api/analyze
-    // plus two site routes — so EVERY other endpoint accepted a token from an
+    // 'pending', and isOrgActive() had only three call sites - /api/analyze
+    // plus two site routes - so EVERY other endpoint accepted a token from an
     // unapproved account. The only thing holding those users back was
     // client-side routing (App.jsx:69), which is not a control: the token works
     // perfectly well against curl.
@@ -1005,7 +1005,7 @@ function requireAuth(req, res, next) {
 // Mirrors the client's orgNotActive() (App.jsx:69) exactly, and deliberately:
 // owners have no organization, and isOrgActive(null) returns false, so gating
 // on isOrgActive alone would lock the owner out of their own platform. A user
-// with no organization_id is likewise not gated — there is nothing to check,
+// with no organization_id is likewise not gated - there is nothing to check,
 // and that's the pre-tenancy shape.
 function orgBlocked(user) {
   if (!user) return false;
@@ -1021,7 +1021,7 @@ function orgStatusOf(user) {
   return o ? o.status : null;
 }
 
-// Role gate — runs requireAuth first, then checks req.user.role is allowed.
+// Role gate - runs requireAuth first, then checks req.user.role is allowed.
 // The five roles of racktrack-app, by name (docs/AUTH.md). The stored values stay RT-EOS's, so its checks keep working:
 //   platform owner     'owner'
 //   organization owner 'org_owner'   the first person of an approved organization; may do all an admin may, and edit admins
@@ -1049,7 +1049,7 @@ function canManageOrg(user, orgId) {
 }
 
 // Is an organization approved & active? (owner-created = active; a self-signup
-// stays 'pending' until the owner approves it — pending/rejected orgs can't
+// stays 'pending' until the owner approves it - pending/rejected orgs can't
 // add members or scan.)
 function isOrgActive(orgId) {
   if (!orgId) return false;
@@ -1090,7 +1090,7 @@ function scanDeviceCount(rackId) {
 }
 
 function registerRoutes(app) {
-  // ── Sign up: stage 1 — create pending signup, send code ────
+  // ── Sign up: stage 1 - create pending signup, send code ────
   // Now takes an optional `company` field. If absent / blank, the user
   // joins the `default` tenant (preserves the legacy behavior). If
   // present, the verify step creates a fresh tenant for that company.
@@ -1107,14 +1107,14 @@ function registerRoutes(app) {
     }
     if (!username || !USERNAME_RE.test(String(username).trim())) {
       audit.log({ req, action: 'auth.signup.start', status: 'fail', error: 'invalid username', payload: { email, username } });
-      return res.status(400).json({ error: 'Username must be 3–32 chars (letters, digits, . _ -)' });
+      return res.status(400).json({ error: 'Username must be 3-32 chars (letters, digits, . _ -)' });
     }
     const pwErr = validatePassword(password);
     if (pwErr) {
       audit.log({ req, action: 'auth.signup.start', status: 'fail', error: pwErr, payload: { email, username } });
       return res.status(400).json({ error: pwErr });
     }
-    // Company name is REQUIRED — every user must belong to a real tenant.
+    // Company name is REQUIRED - every user must belong to a real tenant.
     // Without this, blank-company signups would all collapse into the
     // shared `default` tenant, which is exactly the data-leak multi-
     // tenancy is supposed to prevent.
@@ -1158,7 +1158,7 @@ function registerRoutes(app) {
         tenant_id = NULL
     `).run(emailNorm, userNorm, passwordHash, code, expiresAt);
     // We use a side-channel column (we don't have a `company` column on
-    // pending_signups) — easiest is to reuse the `username` row. Add a
+    // pending_signups) - easiest is to reuse the `username` row. Add a
     // dedicated `company` column the cheap way: only if pending wasn't
     // already that shape.
     if (!_hasColumn('pending_signups', 'company')) {
@@ -1170,13 +1170,13 @@ function registerRoutes(app) {
     const sent = await sendVerificationEmail(emailNorm, code);
     if (!sent) {
       audit.log({ req, action: 'auth.signup.start', status: 'fail', error: 'smtp send failed', payload: { email: emailNorm } });
-      return res.status(502).json({ error: 'Could not send verification email — try again in a minute' });
+      return res.status(502).json({ error: 'Could not send verification email - try again in a minute' });
     }
     audit.log({ req, action: 'auth.signup.start', status: 'ok', payload: { email: emailNorm, username: userNorm, company: companyNorm || null } });
     res.json({ ok: true, email: emailNorm, sent: true });
   });
 
-  // ── Sign up: stage 2 — verify code → create user ───────────
+  // ── Sign up: stage 2 - verify code → create user ───────────
   app.post('/api/auth/verify', (req, res) => {
     const { email, code } = req.body || {};
     if (!email || !code) {
@@ -1193,7 +1193,7 @@ function registerRoutes(app) {
     if (Date.now() > pending.code_expires_at) {
       db.prepare('DELETE FROM pending_signups WHERE email = ?').run(emailNorm);
       audit.log({ req, action: 'auth.signup.verify', status: 'fail', error: 'code expired', payload: { email: emailNorm } });
-      return res.status(410).json({ error: 'Verification code has expired — sign up again' });
+      return res.status(410).json({ error: 'Verification code has expired - sign up again' });
     }
     if (String(code).trim() !== pending.code) {
       audit.log({ req, action: 'auth.signup.verify', status: 'fail', error: 'wrong code', payload: { email: emailNorm } });
@@ -1212,7 +1212,7 @@ function registerRoutes(app) {
 
     // Every user MUST belong to a real tenant. Signup validates that
     // `company` is non-empty, so a pending row without one means a
-    // pre-tenancy client somehow snuck in — refuse and force a fresh
+    // pre-tenancy client somehow snuck in - refuse and force a fresh
     // signup. The `default` tenant exists only as a backstop for
     // legacy users that pre-date this migration.
     if (!pending.company || !String(pending.company).trim()) {
@@ -1275,7 +1275,7 @@ function registerRoutes(app) {
     const sent = await sendVerificationEmail(emailNorm, code);
     if (!sent) {
       audit.log({ req, action: 'auth.resend', status: 'fail', error: 'smtp send failed', payload: { email: emailNorm } });
-      return res.status(502).json({ error: 'Could not send verification email — try again in a minute' });
+      return res.status(502).json({ error: 'Could not send verification email - try again in a minute' });
     }
     audit.log({ req, action: 'auth.resend', status: 'ok', payload: { email: emailNorm } });
     res.json({ ok: true, sent: true });
@@ -1304,7 +1304,7 @@ function registerRoutes(app) {
     //      so we key off organization_id, which every org member has.
     //   2. a Site / tenant (name or slug) → match a user scoped to that Site.
     // Owner accounts sit above every org and sign in with the field left
-    // blank (global username lookup — usernames are globally unique).
+    // blank (global username lookup - usernames are globally unique).
     let scope = null; // { kind: 'org' | 'tenant', id }
     if (tenantArg) {
       const orgRow = db.prepare(`
@@ -1356,7 +1356,7 @@ function registerRoutes(app) {
 
     // Transparent rehash. The password was just proven correct and is in memory
     // for this one moment, so an account still on the old cost-10 hash can be
-    // upgraded now — the only point at which that is possible without asking
+    // upgraded now - the only point at which that is possible without asking
     // the user to change anything. Deliberately NOT a token_version bump: the
     // credential hasn't changed, only how it's stored, so live sessions stay.
     try {
@@ -1364,7 +1364,7 @@ function registerRoutes(app) {
         db.prepare('UPDATE users SET password_hash = ? WHERE id = ?')
           .run(bcrypt.hashSync(password, BCRYPT_COST), user.id);
       }
-    } catch (_) { /* unreadable cost — leave the hash alone, sign-in still valid */ }
+    } catch (_) { /* unreadable cost - leave the hash alone, sign-in still valid */ }
 
     audit.log({ req, user, action: 'auth.login', status: 'ok',
       targetType: 'user', targetId: user.id,
@@ -1375,7 +1375,7 @@ function registerRoutes(app) {
       ...(wantsBodyToken(req) ? { token: nativeBodyToken(user) } : {}) });
   });
 
-  // ── Forgot password — stage 1: request a reset code ─────────
+  // ── Forgot password - stage 1: request a reset code ─────────
   // Always returns 200 (even when the email is unknown) so attackers can't
   // enumerate registered emails. The code is only created/sent when a user
   // actually exists for that email. 1-minute expiry to match signup.
@@ -1393,7 +1393,7 @@ function registerRoutes(app) {
     // entry screen for a message that was never sent. Checked for every
     // address, registered or not, so this cannot be used to probe accounts.
     if (!mailTransportAvailable()) {
-      logger.error('[auth] forgot-password requested but NO mail transport is configured — nothing was sent');
+      logger.error('[auth] forgot-password requested but NO mail transport is configured - nothing was sent');
       audit.log({ req, action: 'auth.forgot_password.start', status: 'fail',
         error: 'no mail transport', payload: { email: emailNorm } });
       return res.status(503).json({
@@ -1417,7 +1417,7 @@ function registerRoutes(app) {
           requested_at = excluded.requested_at
       `).run(emailNorm, code, expiresAt, Date.now());
 
-      // Reuse the verification email template — same look, different copy
+      // Reuse the verification email template - same look, different copy
       // would be nicer but for now the user just sees a 6-digit code.
       const sent = await sendVerificationEmail(emailNorm, code);
       audit.log({ req, action: 'auth.forgot_password.start',
@@ -1429,11 +1429,11 @@ function registerRoutes(app) {
         status: 'ok', payload: { email: emailNorm, sent: false, reason: 'no_user' } });
     }
 
-    // Always 200 with the same shape — silent on existence.
+    // Always 200 with the same shape - silent on existence.
     res.json({ ok: true, email: emailNorm });
   });
 
-  // ── Forgot password — stage 1.5: verify the code WITHOUT consuming it ─
+  // ── Forgot password - stage 1.5: verify the code WITHOUT consuming it ─
   // The UI uses this after the user enters the 6-digit code, so it can show
   // a "Do you want to change your password?" confirmation step before
   // collecting the new password. The reset row stays in the DB and is
@@ -1450,13 +1450,13 @@ function registerRoutes(app) {
     if (!reset) {
       audit.log({ req, action: 'auth.forgot_password.verify', status: 'fail',
         error: 'no pending reset', payload: { email: emailNorm } });
-      return res.status(404).json({ error: 'No pending reset for that email — request a new code' });
+      return res.status(404).json({ error: 'No pending reset for that email - request a new code' });
     }
     if (Date.now() > reset.code_expires_at) {
       db.prepare('DELETE FROM password_resets WHERE email = ?').run(emailNorm);
       audit.log({ req, action: 'auth.forgot_password.verify', status: 'fail',
         error: 'code expired', payload: { email: emailNorm } });
-      return res.status(410).json({ error: 'Reset code has expired — request a new one' });
+      return res.status(410).json({ error: 'Reset code has expired - request a new one' });
     }
     if (String(code).trim() !== reset.code) {
       audit.log({ req, action: 'auth.forgot_password.verify', status: 'fail',
@@ -1468,7 +1468,7 @@ function registerRoutes(app) {
     res.json({ ok: true });
   });
 
-  // ── Forgot password — alternative stage 2: skip the password change and
+  // ── Forgot password - alternative stage 2: skip the password change and
   // sign in directly with the OTP. The 6-digit code is treated as proof of
   // identity (the user controls the inbox), so we issue a fresh token
   // without touching password_hash. The reset row is consumed so the same
@@ -1485,13 +1485,13 @@ function registerRoutes(app) {
     if (!reset) {
       audit.log({ req, action: 'auth.forgot_password.login_with_code', status: 'fail',
         error: 'no pending reset', payload: { email: emailNorm } });
-      return res.status(404).json({ error: 'No pending reset for that email — request a new code' });
+      return res.status(404).json({ error: 'No pending reset for that email - request a new code' });
     }
     if (Date.now() > reset.code_expires_at) {
       db.prepare('DELETE FROM password_resets WHERE email = ?').run(emailNorm);
       audit.log({ req, action: 'auth.forgot_password.login_with_code', status: 'fail',
         error: 'code expired', payload: { email: emailNorm } });
-      return res.status(410).json({ error: 'Reset code has expired — request a new one' });
+      return res.status(410).json({ error: 'Reset code has expired - request a new one' });
     }
     if (String(code).trim() !== reset.code) {
       audit.log({ req, action: 'auth.forgot_password.login_with_code', status: 'fail',
@@ -1506,7 +1506,7 @@ function registerRoutes(app) {
       return res.status(404).json({ error: 'No account exists for that email' });
     }
 
-    // Consume the reset row — same code can't be replayed.
+    // Consume the reset row - same code can't be replayed.
     db.prepare('DELETE FROM password_resets WHERE email = ?').run(emailNorm);
 
     audit.log({ req, user, action: 'auth.forgot_password.login_with_code',
@@ -1518,7 +1518,7 @@ function registerRoutes(app) {
       ...(wantsBodyToken(req) ? { token: nativeBodyToken(user) } : {}) });
   });
 
-  // ── Forgot password — stage 2: verify code + set new password ─
+  // ── Forgot password - stage 2: verify code + set new password ─
   app.post('/api/auth/reset-password', (req, res) => {
     const { email, code, password } = req.body || {};
     if (!email || !code || !password) {
@@ -1537,13 +1537,13 @@ function registerRoutes(app) {
     if (!reset) {
       audit.log({ req, action: 'auth.forgot_password.reset', status: 'fail',
         error: 'no pending reset', payload: { email: emailNorm } });
-      return res.status(404).json({ error: 'No pending reset for that email — request a new code' });
+      return res.status(404).json({ error: 'No pending reset for that email - request a new code' });
     }
     if (Date.now() > reset.code_expires_at) {
       db.prepare('DELETE FROM password_resets WHERE email = ?').run(emailNorm);
       audit.log({ req, action: 'auth.forgot_password.reset', status: 'fail',
         error: 'code expired', payload: { email: emailNorm } });
-      return res.status(410).json({ error: 'Reset code has expired — request a new one' });
+      return res.status(410).json({ error: 'Reset code has expired - request a new one' });
     }
     if (String(code).trim() !== reset.code) {
       audit.log({ req, action: 'auth.forgot_password.reset', status: 'fail',
@@ -1562,7 +1562,7 @@ function registerRoutes(app) {
     const newHash = bcrypt.hashSync(password, BCRYPT_COST);
     // password_set flips to 1 here: this is the supported route for a user who
     // joined through Google/Apple to gain a password. It's safe because it
-    // still requires control of the inbox — the emailed code proves that.
+    // still requires control of the inbox - the emailed code proves that.
     db.prepare('UPDATE users SET password_hash = ?, password_set = 1 WHERE id = ?')
       .run(newHash, user.id);
     // Changing the password must end every session opened with the OLD one.
@@ -1575,11 +1575,11 @@ function registerRoutes(app) {
       status: 'ok', targetType: 'user', targetId: user.id });
 
     // Issue a fresh token so the client can sign the user in immediately
-    // after they reset — no second login round-trip needed.
+    // after they reset - no second login round-trip needed.
     //
     // Re-read first: `user` was loaded BEFORE bumpTokenVersion, so minting from
     // it would stamp the token with the old generation and requireAuth would
-    // reject it on the very next request — a reset that appears to succeed and
+    // reject it on the very next request - a reset that appears to succeed and
     // then bounces the user to the login screen.
     const refreshed = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
     const { accessJwt, refreshPlain } = issueTokenPair(refreshed, req);
@@ -1596,7 +1596,7 @@ function registerRoutes(app) {
     // fields as GET /api/setup/state: an admin whose organisation has a Site
     // still lacking the mandatory three gets needsSetup; a member or site
     // manager whose Site is not yet set up gets blocked. Required lazily and
-    // never fatal — a fault in setup must not take sign-in down with it.
+    // never fatal - a fault in setup must not take sign-in down with it.
     try {
       user.setup = require('./lib/estate').setupSummary(req.user);
     } catch (err) {
@@ -1612,7 +1612,7 @@ function registerRoutes(app) {
   // and the real user cannot both keep using it, and whichever one presents the
   // superseded copy exposes the theft.
   //
-  // Deliberately NOT behind requireAuth — the whole point is that it is reached
+  // Deliberately NOT behind requireAuth - the whole point is that it is reached
   // when the access token has already expired.
   app.post('/api/auth/refresh', (req, res) => {
     const presented = req.cookies?.rt_refresh;
@@ -1647,7 +1647,7 @@ function registerRoutes(app) {
         return res.status(401).json({ error: 'Refresh token revoked' });
       }
       if (Date.now() - row.revoked_at > REUSE_GRACE_MS) {
-        // Rotated away, then presented again well afterwards — treat as theft
+        // Rotated away, then presented again well afterwards - treat as theft
         // and drop every live session for this user, not just this chain.
         db.prepare('UPDATE refresh_tokens SET revoked_at = ? WHERE user_id = ? AND revoked_at IS NULL')
           .run(Date.now(), row.user_id);
@@ -1658,7 +1658,7 @@ function registerRoutes(app) {
         clearAuthCookies(res);
         return res.status(401).json({ error: 'Refresh token reuse detected', code: 'token_reuse' });
       }
-      graceReuse = true;   // benign concurrent-tab race — mint a fresh generation
+      graceReuse = true;   // benign concurrent-tab race - mint a fresh generation
     }
 
     const user = db.prepare('SELECT * FROM users WHERE id = ?').get(row.user_id);
@@ -1715,7 +1715,7 @@ function registerRoutes(app) {
         });
         revokeToken(payload);
         uid = payload.sub || null;
-      } catch { /* expired or malformed — the refresh row above is what matters */ }
+      } catch { /* expired or malformed - the refresh row above is what matters */ }
     }
     clearAuthCookies(res);
     audit.log({ req, action: 'auth.logout', status: 'ok',
@@ -1740,7 +1740,7 @@ function registerRoutes(app) {
     res.json({ ok: true });
   });
 
-  // Set the profile avatar — an index into the client's preset-avatar set.
+  // Set the profile avatar - an index into the client's preset-avatar set.
   app.post('/api/auth/avatar', requireAuth, (req, res) => {
     const idx = Number(req.body?.avatar);
     if (!Number.isInteger(idx) || idx < 0 || idx > 23) {
@@ -1788,7 +1788,7 @@ function registerRoutes(app) {
   const _lastContactAt = new Map();
 
   // The form posts multipart when it carries attachments and JSON when it does
-  // not — older builds of the app only ever send JSON. multer ignores anything
+  // not - older builds of the app only ever send JSON. multer ignores anything
   // that is not multipart, and express.json() has already populated req.body in
   // that case, so one handler serves both without a version check.
   const acceptContactAttachments = (req, res, next) => {
@@ -1803,7 +1803,7 @@ function registerRoutes(app) {
   app.post('/api/support/contact', requireAuth, acceptContactAttachments, async (req, res) => {
     const message = String(req.body?.message || '').trim();
     if (message.length < 4)    return res.status(400).json({ error: 'Please describe the problem.' });
-    if (message.length > 5000) return res.status(400).json({ error: 'That message is too long — please shorten it.' });
+    if (message.length > 5000) return res.status(400).json({ error: 'That message is too long - please shorten it.' });
 
     // multer caps each file and the count, but not the sum, and five files just
     // under the individual limit is a message no transport will accept.
@@ -1811,7 +1811,7 @@ function registerRoutes(app) {
     const totalBytes = files.reduce((n, f) => n + f.size, 0);
     if (totalBytes > CONTACT_MAX_TOTAL_BYTES) {
       return res.status(400).json({
-        error: `Attachments total ${(totalBytes / 1024 / 1024).toFixed(1)} MB — please keep them under ${CONTACT_MAX_TOTAL_BYTES / 1024 / 1024} MB.`,
+        error: `Attachments total ${(totalBytes / 1024 / 1024).toFixed(1)} MB - please keep them under ${CONTACT_MAX_TOTAL_BYTES / 1024 / 1024} MB.`,
       });
     }
 
@@ -1821,10 +1821,10 @@ function registerRoutes(app) {
     }
 
     const u = req.user;
-    const org = u.tenant?.name || '—';
+    const org = u.tenant?.name || '-';
     const context = String(req.body?.context || '').trim();
     const meta =
-      `Role: ${u.role || '—'} · Org/Site: ${org} · User id: ${u.id}` +
+      `Role: ${u.role || '-'} · Org/Site: ${org} · User id: ${u.id}` +
       (context ? `\nContext: ${context.slice(0, 800)}` : '');
 
     const sent = await sendContactEmail({
@@ -1885,7 +1885,7 @@ function registerRoutes(app) {
       return res.status(400).json({ error: 'name, adminUsername, adminEmail and adminPassword are required' });
     }
     if (!EMAIL_RE.test(String(adminEmail))) return res.status(400).json({ error: 'Invalid admin email' });
-    if (!USERNAME_RE.test(String(adminUsername))) return res.status(400).json({ error: 'Admin username must be 3–32 chars (letters, numbers, . _ -)' });
+    if (!USERNAME_RE.test(String(adminUsername))) return res.status(400).json({ error: 'Admin username must be 3-32 chars (letters, numbers, . _ -)' });
     const pwErr = validatePassword(adminPassword);
     if (pwErr) return res.status(400).json({ error: pwErr });
     const emailN = String(adminEmail).trim().toLowerCase();
@@ -1949,8 +1949,8 @@ function registerRoutes(app) {
     res.json({ ok: true });
   });
 
-  // Owner: permanently remove an organization — its members, sites, invites,
-  // and the org row — plus clean up references (rack ownership, audit rows).
+  // Owner: permanently remove an organization - its members, sites, invites,
+  // and the org row - plus clean up references (rack ownership, audit rows).
   // Used to clear stray self-signup orgs from the owner dashboard.
   // Owner: rename an organization and/or change its status (active <-> inactive).
   app.patch('/api/orgs/:orgId', requireRole('owner'), (req, res) => {
@@ -2153,7 +2153,7 @@ function registerRoutes(app) {
     if (req.user.role === 'site_manager') memberRole = 'member';
     if (!username || !email || !password) return res.status(400).json({ error: 'username, email and password are required' });
     if (!EMAIL_RE.test(String(email))) return res.status(400).json({ error: 'Invalid email' });
-    if (!USERNAME_RE.test(String(username))) return res.status(400).json({ error: 'Username must be 3–32 chars (letters, numbers, . _ -)' });
+    if (!USERNAME_RE.test(String(username))) return res.status(400).json({ error: 'Username must be 3-32 chars (letters, numbers, . _ -)' });
     const pwErr = validatePassword(password);
     if (pwErr) return res.status(400).json({ error: pwErr });
     const emailN = String(email).trim().toLowerCase();
@@ -2170,7 +2170,7 @@ function registerRoutes(app) {
   });
 
   // Edit a member's personal info (username / email / role / site / password).
-  // Partial update — only the fields present in the body are changed. Owner or
+  // Partial update - only the fields present in the body are changed. Owner or
   // the org's admin only; org scoping means an admin can only touch users in
   // their own org, an owner account can never be edited here, and only the
   // owner may edit an org admin.
@@ -2185,7 +2185,7 @@ function registerRoutes(app) {
     const isSiteMgr = req.user.role === 'site_manager';
     if (isSiteMgr) {
       // A site manager may only manage plain members within their own Site,
-      // and only their status (active) or password — not identity/role/site.
+      // and only their status (active) or password - not identity/role/site.
       if (Number(member.tenant_id) !== Number(req.user.tenant_id) || member.role !== 'member')
         return res.status(403).json({ error: 'Not a member of your site' });
     } else {
@@ -2201,7 +2201,7 @@ function registerRoutes(app) {
 
     if (username !== undefined) {
       const u = String(username).trim();
-      if (!USERNAME_RE.test(u)) return res.status(400).json({ error: 'Username must be 3–32 chars (letters, numbers, . _ -)' });
+      if (!USERNAME_RE.test(u)) return res.status(400).json({ error: 'Username must be 3-32 chars (letters, numbers, . _ -)' });
       if (db.prepare('SELECT 1 FROM users WHERE username = ? COLLATE NOCASE AND id <> ?').get(u, memberId))
         return res.status(409).json({ error: 'That username is taken' });
       sets.push('username = ?'); vals.push(u);
@@ -2238,7 +2238,7 @@ function registerRoutes(app) {
     if (!sets.length) return res.status(400).json({ error: 'Nothing to update' });
 
     // An admin changing someone's password, or deactivating them, has to end
-    // that person's existing sessions — otherwise both actions are advisory
+    // that person's existing sessions - otherwise both actions are advisory
     // until their 30-day token happens to expire. requireAuth now refuses a
     // deactivated user outright, but bumping here covers reactivation too: a
     // member switched off and back on gets a clean slate rather than having
@@ -2330,7 +2330,7 @@ function registerRoutes(app) {
     res.json({ ok: true, invite: { email: inv.email, role: inv.role, organization: inv.org_name, site: inv.site_name } });
   });
 
-  // Public: accept an invite — invitee sets their own username + password.
+  // Public: accept an invite - invitee sets their own username + password.
   app.post('/api/invites/:code/accept', (req, res) => {
     const code = String(req.params.code);
     const inv = db.prepare('SELECT * FROM invites WHERE code = ?').get(code);
@@ -2340,7 +2340,7 @@ function registerRoutes(app) {
 
     const { username, password } = req.body || {};
     if (!username || !USERNAME_RE.test(String(username).trim()))
-      return res.status(400).json({ error: 'Username must be 3–32 chars (letters, numbers, . _ -)' });
+      return res.status(400).json({ error: 'Username must be 3-32 chars (letters, numbers, . _ -)' });
     const pwErr = validatePassword(password);
     if (pwErr) return res.status(400).json({ error: pwErr });
     const uname = String(username).trim();
@@ -2385,12 +2385,12 @@ function registerRoutes(app) {
     `).all();
     const recentScans = db.prepare(`
       SELECT r.rack_id, r.created_at,
-             COALESCE(t.name, '—') AS site,
-             COALESCE(o.name, '—') AS org,
-             COALESCE(u.username, '—') AS by_user
+             COALESCE(t.name, '-') AS site,
+             COALESCE(o.name, '-') AS org,
+             COALESCE(u.username, '-') AS by_user
       FROM rack_owners r
       -- LEFT, not INNER. This join used to drop any scan whose tenant_id was
-      -- null or pointed at a deleted site — and owners and admins have no
+      -- null or pointed at a deleted site - and owners and admins have no
       -- tenant_id at all, so their own scans never appeared here. The totals
       -- above count rack_owners with no join, so the number was right while
       -- the list below it was short: the owner dashboard quietly failed the
@@ -2441,7 +2441,7 @@ module.exports = {
   // wholesale, so it stays obvious what the social path is allowed to touch.
   db, makeToken, publicUser, assignPublicId, USERNAME_RE,
   // app.js attributes a scan to the default tenant when the person who ran it
-  // has none of their own — owners and org_admins carry no tenant_id, and
+  // has none of their own - owners and org_admins carry no tenant_id, and
   // rack_owners.tenant_id is NOT NULL, so their scans were being dropped on
   // the floor entirely. See the claimRack calls there.
   getDefaultTenantId,

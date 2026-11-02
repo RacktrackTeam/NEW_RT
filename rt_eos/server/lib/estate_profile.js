@@ -2,7 +2,7 @@
  * Profile: what else is known about an organisation and a datacentre.
  *
  * lib/estate.js holds the estate tree and the three mandatory facts. This
- * module holds the rest of first-run onboarding — every part optional, every
+ * module holds the rest of first-run onboarding - every part optional, every
  * part editable later under organisation settings:
  *
  *   organisation profile   columns on `organizations`: short_code, timezone,
@@ -334,12 +334,12 @@ const REGEX_HINT = /[\\^$[\]()|{}+?*]/;
  * A convention pattern is either a regular expression or a literal template.
  *
  *   regex    when wrapped in slashes (/…/ or /…/i), or when it contains any of
- *            \ ^ $ [ ] ( ) | { } + ? *  — the characters a template never needs
+ *            \ ^ $ [ ] ( ) | { } + ? *  - the characters a template never needs
  *   literal  otherwise: # stands for a digit, A for a letter, every other
  *            character for itself (so "RK-####" matches RK-0001, and "A##"
  *            matches R01 but not RACK)
  *
- * "Whatever parses as a regex" would never fall through — RK-#### parses —
+ * "Whatever parses as a regex" would never fall through - RK-#### parses -
  * so the split is on the characters instead. Both kinds must match the
  * WHOLE example; a regex is anchored for you (^ and $ you wrote still work).
  */

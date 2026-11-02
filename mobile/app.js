@@ -88,7 +88,7 @@
     if (name === 'home') loadHome(); else setTimeout(reveal, 0);
     if (name === 'more') api('/api/video/history').then(function (rows) { var mine = rows.filter(function (x) { return !x.demo; }), n = mine.length; $('runs-count').textContent = n ? n + (n === 1 ? ' scan' : ' scans') : '';
       var done = mine.filter(function (x) { return x.status === 'done' && x.summary; }), racks = {}; done.forEach(function (x) { racks[rackKey(x)] = 1; });   // racks as Home counts them, not scans
-      $('ps-racks').dataset.n = Object.keys(racks).length; $('ps-units').dataset.n = done.reduce(function (t, x) { return t + (x.summary.units || 0); }, 0); $('ps-devs').dataset.n = done.reduce(function (t, x) { return t + (x.summary.devices || 0); }, 0); countUp($('ps-racks').parentNode.parentNode); }).catch(quiet('the Profile numbers'));
+      $('ps-racks').dataset.n = Object.keys(racks).length; $('ps-racks').nextElementSibling.textContent = Object.keys(racks).length === 1 ? 'rack read' : 'racks read'; $('ps-units').dataset.n = done.reduce(function (t, x) { return t + (x.summary.units || 0); }, 0); $('ps-devs').dataset.n = done.reduce(function (t, x) { return t + (x.summary.devices || 0); }, 0); countUp($('ps-racks').parentNode.parentNode); }).catch(quiet('the Profile numbers'));
     if (name === 'history') loadHistory();
     if (name === 'connections') loadConnections();
     if (name === 'copies') loadCopies();
@@ -171,11 +171,12 @@
     function links(role) {     // Profile: the RT-EOS organization screens, by role (as RT-EOS's own routes allow them)
       var L = [];
       if (role === 'owner') L.push(['/org/console', 'Platform console', 'Organizations waiting, activity']);
-      if (role === 'owner' || role === 'org_owner' || role === 'org_admin') L.push(['/org/settings', 'Organization', 'Profile, sites, data settings']);
+      if (role === 'owner' || role === 'org_owner' || role === 'org_admin') L.push(['/org/settings', 'Organization settings', 'Profile, sites, data settings']);
       if (role === 'owner' || role === 'org_owner' || role === 'org_admin' || role === 'site_manager') L.push(['/org/site', 'Sites and people', 'People, roles, invites']);
-      L.push(['/org/you', 'Settings', 'Your account']);
-      $('org-links').innerHTML = L.map(function (x) { return '<a class="grow" href="' + esc(url(x[0])) + '"><svg class="ic"><use href="#i-server"/></svg><span>' + esc(x[1]) + '</span><em>' + esc(x[2]) + '</em><span class="arr">→</span></a>'; }).join('');
-      $('org-links').hidden = false; $('org-label').hidden = false;
+      var row = function (x) { return '<a class="grow" href="' + esc(url(x[0])) + '"><svg class="ic"><use href="#i-server"/></svg><span>' + esc(x[1]) + '</span><em>' + esc(x[2]) + '</em><span class="arr">→</span></a>'; };
+      $('org-links').innerHTML = L.map(row).join('');
+      $('org-links').hidden = !L.length; $('org-label').hidden = !L.length;                // a technician has no organization entries: no empty heading
+      $('acct-settings').innerHTML = row(['/org/you', 'Settings', 'Your account']);      // the person's own settings sit under Account, beside Sign out
     }
     return { url: url, call: call, where: where, refresh: refresh, landed: landed, openForgot: openForgot, openInvite: openInvite, links: links };
   })();
@@ -196,7 +197,10 @@
   // ---------------------------------------------------------------- home and history
   function chip(x) { var c = x.demo ? 'demo' : x.status === 'done' ? 'done' : x.status === 'running' ? (x.partial ? 'part' : 'run') : 'fail';
     return '<span class="chip ' + c + '">' + (x.demo ? 'demo' : x.status === 'done' ? 'ready' : x.status === 'running' ? (x.partial ? 'ports reading' : 'running') : 'failed') + '</span>'; }
-  function when(iso) { if (!iso) return ''; var d = new Date(iso); return isNaN(d) ? iso : d.toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); }
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function when(iso) { if (!iso) return ''; var d = new Date(String(iso).length === 16 ? iso + ':00' : iso); if (isNaN(d)) return String(iso); var two = function (n) { return (n < 10 ? '0' : '') + n; };   // one date style on every screen: 27 Oct 2026, 12:53
+    return d.getDate() + ' ' + MON[d.getMonth()] + ' ' + d.getFullYear() + (/T\d/.test(String(iso)) ? ', ' + two(d.getHours()) + ':' + two(d.getMinutes()) : ''); }
+  window.RTWHEN = when;
   function summary(s) { if (!s || s.units == null) return ''; return s.units + ' units · ' + s.devices + ' devices' + (s.named != null ? ', ' + s.named + ' named' : '') + ' · ' + s.layouts + ' port layouts'; }
   function thumb(x) { return (x.status === 'done' || x.partial) ? '<img class="thumbimg" src="/api/video/' + encodeURIComponent(x.id) + '/file/rack.png" alt="" loading="lazy">' : ''; }
   function loadHistory() {
@@ -628,7 +632,7 @@
     var out = [], s0 = null, p = null; nums.forEach(function (n) { if (s0 === null) { s0 = p = n; } else if (n === p + 1) { p = n; } else { out.push(s0 === p ? String(s0) : s0 + '-' + p); s0 = p = n; } }); if (s0 !== null) out.push(s0 === p ? String(s0) : s0 + '-' + p);
     return out.concat(rest.map(String)).join(', ');
   }
-  var TYPE_NAMES = { rj45: 'RJ45', sfp: 'SFP', sfpplus: 'SFP+', qsfp: 'QSFP', osfp: 'OSFP', lc: 'LC', sc: 'SC', fc: 'FC', console: 'Console', management_port: 'Management', usb_a: 'USB-A', usb_b: 'USB-B', usb_c: 'USB-C', usb: 'USB', aux: 'Aux', combo: 'Combo' };
+  var TYPE_NAMES = { rj45: 'RJ45', sfp: 'SFP', sfpplus: 'SFP+', qsfp: 'QSFP', osfp: 'OSFP', lc: 'LC', sc: 'SC', fc: 'FC', console: 'Console', management_port: 'Management', usb_a: 'USB-A', usb_b: 'USB-B', usb_c: 'USB-C', usb: 'USB', aux: 'Aux', combo: 'Combo', hidden: 'hidden' };
   function typeName(t) { t = String(t || 'port').toLowerCase(); return TYPE_NAMES[t] || t.toUpperCase(); }   // the port detector's 13 classes, readable (auto mode, 29 Oct)
   function portFacts(L) {
     var ports = L.ports || []; if (!ports.length) return '';
@@ -807,7 +811,7 @@
         var cr = $('caprow'); if (cr && !cr.querySelector('.rkchange')) $('fit-tog').insertAdjacentHTML('beforebegin', '<button class="link rkchange" type="button" data-rkid-clear>Change ID</button>');
         renderNext(v); return; }
       var rc = document.querySelector('#caprow .rkchange'); if (rc) rc.remove();
-      el.innerHTML = '<div class="rkrow"><span class="sig"></span><div><b>Rack ' + esc(R.id) + '</b><small>' + esc(R.source === 'verified from the label' ? 'verified from the label' : R.source === 'typed' ? 'entered' : 'chosen') + (R.on ? ' · ' + esc(R.on.replace('T', ' ')) : '') + '</small></div><button class="link" type="button" data-rkid-clear>Change</button></div>';
+      el.innerHTML = '<div class="rkrow"><span class="sig"></span><div><b>Rack ' + esc(R.id) + '</b><small>' + esc(R.source === 'verified from the label' ? 'verified from the label' : R.source === 'typed' ? 'entered' : 'chosen') + (R.on ? ' · ' + esc(when(R.on)) : '') + '</small></div><button class="link" type="button" data-rkid-clear>Change</button></div>';
       renderNext(v); return;
     }
     renderNext(v);
@@ -887,8 +891,8 @@
       .concat(devs.map(function (d) { var ps = PORT_KINDS[d.kind] ? devState(d, v) : null, why = d.unsure ? 'device not sure' : !d.kind || d.kind === 'Other' ? 'type not sure'
           : ps && ps.key === 'unc' ? (ps.panel ? 'no ports seen' : 'needs a close photo') : ps && ps.key === 'auto' ? 'model not read' : ps && ps.key === 'off' ? 'make and model not checked yet' : null;   // the device page's own state
         return why ? '<button class="lrow" type="button" data-dev="' + d.index + '"><span class="iu">' + UP(d.top) + '</span><b>D' + d.index + ' · ' + why + '</b><span class="arr">›</span></button>' : null; }).filter(Boolean));
-    var unsurePorts = devs.reduce(function (t, d) { return t + ((d.layout || {}).ports || []).filter(function (p) { return p.status !== 'connected' && p.status !== 'empty'; }).length; }, 0);
-    if (unsurePorts) look.push('<a class="lrow" href="#tools/' + encodeURIComponent(v.id) + '/worklist"><span class="iu">Ports</span><b>' + pl(unsurePorts, 'port') + ' not sure: answer them in the Worklist</b><span class="arr">›</span></a>');
+    var asks = devs.reduce(function (t, d) { return t + Math.min(8, ((d.layout || {}).ports || []).filter(function (p) { return p.status !== 'connected' && p.status !== 'empty'; }).length); }, 0);   // as the Worklist asks: up to 8 ports a device
+    if (asks) look.push('<a class="lrow" href="#tools/' + encodeURIComponent(v.id) + '/worklist" style="text-decoration:none;color:inherit"><span class="iu">Ports</span><b>' + pl(asks, 'port') + ' not sure, in the Worklist</b><span class="arr">›</span></a>');
     $('rp-top').innerHTML = '<header class="rphead"><span class="eyebrow">Rack report</span><h2>' + esc(title) + '</h2><p class="muted">' + esc(v.title || '') + '</p><p class="rpline"><b>' + n + 'U</b> · <b>' + used + '</b> in use · <b class="free">' + free + '</b> free' + (unc ? ' · <b class="unc">' + unc + '</b> not sure' : '') + '</p></header>'
       + '<div class="rpcol b"><section class="card rpelev"><div class="rpkpis"><div><b>' + devs.length + '</b><span>devices</span></div><div><b>' + kinds.length + '</b><span>kinds</span></div><div><b>' + free + 'U</b><span>free</span></div><p class="muted small">' + esc(kindLine) + '</p></div>' + elev + '</section>'
       + '</div><div class="rpcol a"><span class="glabel">Devices, top to bottom</span><div class="card flush"><table class="rptable"><thead><tr><th>Unit</th><th>Device</th><th>Make and model</th></tr></thead><tbody>' + table + '</tbody></table></div></div><div class="rpcol c">'
@@ -913,7 +917,7 @@
     dust_cap: 'An empty port the record expects capped has no dust cap.' };
   function loadDrift() { var id = RES.id; api('/api/video/' + id + '/drift').then(function (d) { if (RES.id === id) renderCompare(d); }).catch(function (e) { $('df-top').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
   function setDb(body) { return api('/api/video/' + RES.id + '/database', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (d) { renderCompare(d); return d; }).catch(function (e) { toast(e.message); }); }
-  function copyWhen(d, s) { return d.imported[s] ? 'copy of ' + d.imported[s].replace('T', ' ').slice(0, 16) : 'no copy yet'; }
+  function copyWhen(d, s) { return d.imported[s] ? 'copy of ' + when(d.imported[s]) : 'no copy yet'; }
   var SRCLABEL = { excel: 'Excel workbook', netbox: 'NetBox', cmdb: 'ServiceNow CMDB' };
   function firstSentence(t) { t = String(t || '').replace(/\s+/g, ' ').trim(); var m = t.match(/^.*?[.!?](\s|$)/); t = m ? m[0].trim() : t; return t.length > 110 ? t.slice(0, 107) + '...' : t; }
   // the compare, in the owner's order: a button, a dropdown of the three databases, one panel to confirm the rack id, then the differences.
@@ -936,7 +940,7 @@
     renderDiff(d, false);
   }
   function recordRow(d, name) { var r = (d.record || []).filter(function (x) { return x.name === name; })[0]; if (!r) return '';
-    return [r.name, r.kind, [r.manufacturer, r.model].filter(Boolean).join(' '), r.ru_start != null ? 'U' + r.ru_start + (r.ru_height > 1 ? '-' + (r.ru_start + r.ru_height - 1) : '') : ''].filter(Boolean).map(esc).join(' · '); }
+    return [r.name, r.kind, (r.manufacturer && r.model && String(r.model).toLowerCase().indexOf(String(r.manufacturer).toLowerCase()) === 0 ? r.model : [r.manufacturer, r.model].filter(Boolean).join(' ')), r.ru_start != null ? 'U' + r.ru_start + (r.ru_height > 1 ? '-' + (r.ru_start + r.ru_height - 1) : '') : ''].filter(Boolean).map(esc).join(' · '); }
   function renderDiff(d, show) {
     var el = $('diff-top');
     if (!(show && d.confirmed && d.drift && d.match)) { el.innerHTML = ''; return; }
@@ -962,9 +966,10 @@
     var src = RES.cmpSrc || (RES.cmp && RES.cmp.source) || 'excel';
     if (t.dataset.dfmode) { RES.diffMode = t.dataset.dfmode; return renderDiff(RES.cmp, true); }
     if (t.dataset.cmpsrc) { src = t.dataset.cmpsrc; RES.cmpSrc = src; $('cmp-menu').hidden = true; $('cmp-btn').setAttribute('aria-expanded', 'false'); RES.cmpPick = false; RES.cmpUi = 'confirm';
-      if (RES.cmp && RES.cmp.imported[src]) return setDb({ source: src });
+      var toCompare = function () { var el = $('sec-compare'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); };   // on a phone the panel opens below the report: go to it
+      if (RES.cmp && RES.cmp.imported[src]) return Promise.resolve(setDb({ source: src })).then(toCompare);
       if (src === 'excel') { RES.cmpUi = 'idle'; toast('No workbook is copied in yet. Copy one in under Database copies.'); return go('copies'); }
-      toast('Copying ' + SRCLABEL[src] + ' in...'); return api('/api/sources/' + src + '/import', { method: 'POST' }).then(function (r) { toast(pl(r.devices, 'device') + ' copied in from ' + pl(r.racks, 'rack')); return setDb({ source: src }); }).catch(function (er) { RES.cmpUi = 'idle'; toast(er.message); loadDrift(); }); }
+      toast('Copying ' + SRCLABEL[src] + ' in...'); return api('/api/sources/' + src + '/import', { method: 'POST' }).then(function (r) { toast(pl(r.devices, 'device') + ' copied in from ' + pl(r.racks, 'rack')); return Promise.resolve(setDb({ source: src })).then(toCompare); }).catch(function (er) { RES.cmpUi = 'idle'; toast(er.message); loadDrift(); }); }
     if (t.dataset.cmppick) return setDb({ source: src, rack_key: t.dataset.cmppick });
     if (t.id === 'cmp-use') { var v = ($('cmp-type').value || '').trim(); if (!v) return toast('Type or pick a rack id first.');
       var known = (RES.cmp.candidates || []).some(function (r) { return r.rack_key === v; });
@@ -1003,7 +1008,7 @@
     var c = d.connections;
     $('cn-list').innerHTML = Object.keys(c).map(function (t) { var x = c[t], nb = t === 'netbox', held = function (k) { return x[k] ? 'saved, leave blank to keep' : ''; };
       return '<form class="card cnform" data-cn="' + t + '"><div class="dfrow"><b>' + esc(x.label) + '</b><span class="cnstate ' + esc(x.state) + '">' + esc({ ok: 'Connected', failed: 'Not connected', untested: 'Not tested', mock: 'Local test copy' }[x.state] || x.state) + '</span></div>'
-        + '<p class="muted small" data-cnwords>' + esc(x.state_words || '') + (x.tested_at ? ' Tested ' + esc(x.tested_at.replace('T', ' ').slice(0, 16)) + '.' : '') + '</p>'
+        + '<p class="muted small" data-cnwords>' + esc(x.state_words || '') + (x.tested_at ? ' Tested ' + esc(when(x.tested_at)) + '.' : '') + '</p>'
         + '<label>Address<input name="address" placeholder="' + (nb ? 'https://netbox.example.com' : 'https://example.service-now.com') + '" value="' + esc(x.address || '') + '" autocomplete="off"></label>'
         + (nb ? '<label>Token<input name="token" type="password" autocomplete="new-password" placeholder="' + held('token') + '"></label><p class="muted small">Or a username and password:</p>' : '')
         + '<label>Username<input name="username" autocomplete="off" placeholder="' + held('username') + '"></label>'
@@ -1024,7 +1029,7 @@
   function renderCopies(d) {
     if (!d.copies.length) { $('cp-list').innerHTML = '<div class="card"><p class="muted">No copy yet. ' + (ADMIN ? 'Read a workbook or copy NetBox or the CMDB in above.' : 'An organization admin copies the databases in.') + '</p></div>'; return; }
     $('cp-list').innerHTML = '<div class="card flush"><table class="dftable cptable"><thead><tr><th>Source</th><th class="wide">Version</th><th class="wide">Copied</th><th class="cpn">Racks</th><th class="cpn">Devices</th><th class="cpn wide">Ports</th><th class="wide">From</th><th>State</th><th></th></tr></thead><tbody>'
-      + d.copies.map(function (c) { return '<tr data-copy="' + c.id + '"' + (c.active ? ' class="on"' : '') + '><td><b>' + esc(d.sources[c.source] || c.source) + '</b><span class="cpwhen small muted">v' + c.version + ' · ' + esc(c.imported_at.replace('T', ' ').slice(0, 16)) + '</span></td><td class="mono wide">v' + c.version + '</td><td class="mono small wide">' + esc(c.imported_at.replace('T', ' ').slice(0, 16)) + '</td>'
+      + d.copies.map(function (c) { return '<tr data-copy="' + c.id + '"' + (c.active ? ' class="on"' : '') + '><td><b>' + esc(d.sources[c.source] || c.source) + '</b><span class="cpwhen small muted">v' + c.version + ' · ' + esc(when(c.imported_at)) + '</span></td><td class="mono wide">v' + c.version + '</td><td class="mono small wide">' + esc(when(c.imported_at)) + '</td>'
         + '<td class="cpn">' + c.racks + '</td><td class="cpn">' + c.devices + '</td><td class="cpn wide">' + (c.ports || 0) + '</td><td class="wide small muted">' + esc(String(c.file || '').replace(/^workbook_[0-9a-f]{8}_/, '')) + '</td>'
         + '<td>' + (c.active ? '<span class="cpon">Active</span>' : '<span class="muted small">Older</span>') + '</td><td>' + (ADMIN ? '<button class="btn danger" type="button" data-cpdel="' + c.id + '">Delete</button>' : '') + '</td></tr>'; }).join('') + '</tbody></table></div>';
   }

@@ -107,7 +107,7 @@ def meta(org):
     for t, label in TYPES.items():
         r = rows.get(t)
         if not r:
-            out[t] = {"type": t, "label": label, "saved": False, "state": "mock", "state_words": "No login saved: the local mock is used."}
+            out[t] = {"type": t, "label": label, "saved": False, "state": "mock", "state_words": "No login saved: the local test copy is used."}
             continue
         s = json.loads(unseal(r["secret_blob"]) or "{}")
         out[t] = {"type": t, "label": label, "saved": True, "address": r["address"], "username": bool(s.get("username")), "password": bool(s.get("password")),

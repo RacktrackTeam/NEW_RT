@@ -2,7 +2,7 @@
  * Persistent application-log sink for the logs dashboard.
  *
  * The server's pino logger streams to stdout (pretty in dev, JSON in prod) and
- * is otherwise ephemeral — restart the process and the history is gone, and
+ * is otherwise ephemeral - restart the process and the history is gone, and
  * there is nothing for an admin to browse in the UI. This module adds a small,
  * self-pruning SQLite mirror of the log stream plus a query API the
  * `/api/logs` endpoint serves to the dashboard.
@@ -25,7 +25,7 @@ const path = require('path');
 const { Writable } = require('stream');
 const Database = require('better-sqlite3');
 
-// Live beside the auth/audit DB but in its own file — log volume is high and
+// Live beside the auth/audit DB but in its own file - log volume is high and
 // we don't want prune churn touching the auth database's WAL.
 // LOG_DB_PATH, else logs.db beside the auth database: see lib/data_paths.js.
 const { LOG_DB: DB_PATH } = require('./data_paths');
@@ -79,7 +79,7 @@ function init() {
     `);
     prune(); // clear anything stale left from a previous run
   } catch (err) {
-    // Never let log persistence failure break the server — degrade to no-op.
+    // Never let log persistence failure break the server - degrade to no-op.
      
     console.error('[log-store] init failed, log dashboard disabled:', err.message);
     db = null;
@@ -123,7 +123,7 @@ function writeLine(raw) {
     insertStmt.run(rowFromLine(obj, raw));
     if (++insertsSincePrune >= PRUNE_EVERY) { insertsSincePrune = 0; prune(); }
   } catch (_) {
-    // Non-JSON line or transient DB error — drop it silently. Losing a log
+    // Non-JSON line or transient DB error - drop it silently. Losing a log
     // row must never surface as an application error.
   }
 }
@@ -146,7 +146,7 @@ function prune() {
   } catch (_) { /* best-effort */ }
 }
 
-// Wipe every stored log line and reclaim the file space — "start fresh".
+// Wipe every stored log line and reclaim the file space - "start fresh".
 // Done through the live connection (rather than deleting logs.db on disk)
 // so the running server keeps a valid handle and nothing is corrupted.
 // Returns how many rows were removed.
@@ -154,7 +154,7 @@ function clearAll() {
   if (!db) return 0;
   const before = db.prepare('SELECT COUNT(*) c FROM app_logs').get().c;
   db.prepare('DELETE FROM app_logs').run();
-  try { db.exec('VACUUM'); } catch (_) { /* not fatal — space just isn't reclaimed */ }
+  try { db.exec('VACUUM'); } catch (_) { /* not fatal - space just isn't reclaimed */ }
   return before;
 }
 

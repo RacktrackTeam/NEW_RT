@@ -49,7 +49,7 @@
     var rows = [['Serial', x.serial], ['Asset tag', x.asset_tag], ['Labels read', (x.labels || []).join(', ')], ['Cable labels read', (x.cables || []).join(', ')]];
     return '<div class="ft-ids card"><span class="eyebrow">Serial and asset tag</span>'
       + rows.map(function (r) { return '<div class="ft-kv"><span>' + r[0] + '</span><b class="mono">' + (r[1] ? esc(r[1]) : '<em class="muted">not read</em>') + '</b></div>'; }).join('')
-      + (x.from ? '<p class="muted small">From a close-up' + (x.by ? ' taken by ' + esc(x.by) : '') + (x.when ? ', ' + esc(String(x.when).slice(0, 16).replace('T', ' ')) : '') + '.</p>' : '<p class="muted small">The video is too small to read them. A close-up of the device label reads them.</p>')
+      + (x.from ? '<p class="muted small">From a close-up' + (x.by ? ' taken by ' + esc(x.by) : '') + (x.when ? ', ' + esc(window.RTWHEN ? window.RTWHEN(x.when) : x.when) : '') + '.</p>' : '<p class="muted small">The video is too small to read them. A close-up of the device label reads them.</p>')
       + '<label class="btn file"><input type="file" accept="image/*" capture="environment" class="ft-ids-in" data-dev="' + d.index + '" data-run="' + esc(run) + '" hidden>Read from a close-up</label><p class="muted small ft-ids-msg" hidden></p></div>';
   }
   document.addEventListener('change', function (e) {
@@ -159,7 +159,7 @@
         + '<div class="fx-pills">' + pill(r.rows ? r.ends_checked + ' ends checked' : 'No matrix cable', 'na') + (r.rows ? pill(r.rows.length + ' to look at', r.rows.length ? 'bad' : 'ok') : '') + (r.ends_not_read ? pill(r.ends_not_read + ' on unread ports', 'na') : '') + '</div>'
         + '<p class="muted">' + esc(r.words) + '</p>'
         + (r.rows.length ? '<ul class="fx-list" id="cb-rows">' + r.rows.map(function (w) { return '<li><button type="button" class="fx-row" data-dev="' + w.index + '">' + pill(w.what, 'bad') + '<span><b>' + esc(w.unit) + ' · D' + w.index + ', port ' + esc(w.port) + '</b><small>' + esc(w.cable || '') + '</small></span></button></li>'; }).join('') + '</ul><p class="fx-note">Pick a cable to see its device on the picture.</p>'
-          : empty('The cables agree with the matrix', 'Nothing to fix here.'))
+          : r.ends_checked ? empty('The cables agree with the matrix', 'Nothing to fix here.') : empty('No cable to check', 'The Excel copy has no cable row with an end in this rack.'))
         + '</div></div>'
         + '<form class="fx-bar" id="az-form"><label><span>A-end rack</span><select id="az-a">' + sel() + '</select></label><label><span>Z-end rack</span><select id="az-z">' + sel() + '</select></label><button class="btn primary" type="submit">Check the cable labels</button></form><div id="az-out"></div>');
       fitFigs(root());
@@ -210,7 +210,7 @@
       var st = s.state;
       root().innerHTML = head('Read again', 'Every device of this run is read again with the models as they are today: its make, model and ports. What people corrected (kinds, makes and models, port states) and what close-ups read stay as they are.', run)
         + '<div class="card ft-again"><p>' + (st === 'running' ? 'Reading device ' + Math.min((s.done || 0) + 1, s.of || 1) + ' of ' + (s.of || '?') + '. One device takes about a minute; you can leave this page.'
-          : st === 'done' ? 'Read again on ' + esc(String(s.finished || '').replace('T', ' ')) + ': ' + s.of + ' devices.' : 'Not read again yet.') + '</p>'
+          : st === 'done' ? 'Read again on ' + esc(window.RTWHEN ? window.RTWHEN(s.finished) : s.finished) + ': ' + s.of + ' devices.' : 'Not read again yet.') + '</p>'
         + (st === 'running' ? '<div class="ft-bar"><i style="width:' + Math.round(100 * (s.done || 0) / (s.of || 1)) + '%"></i></div>' : '<button class="btn primary" id="ag-go" type="button">Read again</button>') + '</div>';
       var b = $('ag-go'); if (b) b.addEventListener('click', function () { b.disabled = true; post('/api/video/' + encodeURIComponent(run) + '/read-again', {}).then(function () { delete VIEW[run]; again(run); }).catch(fail); });
       if (st === 'running') againTimer = setTimeout(function () { if ((location.hash || '').indexOf('/again') > 0) again(run); }, 4000);

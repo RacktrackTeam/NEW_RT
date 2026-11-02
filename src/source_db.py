@@ -307,7 +307,7 @@ def _get(base, path, headers=None):
     import urllib.parse, urllib.request
     host = urllib.parse.urlparse(base).hostname
     if host not in ("127.0.0.1", "localhost"):
-        raise ValueError("Only the local mocks are read today, never a real system.")
+        raise ValueError("Only the local test copies are read today, never a real system.")
     try:
         with urllib.request.urlopen(urllib.request.Request(base.rstrip("/") + path, headers=headers or {}), timeout=15) as r:
             return json.loads(r.read().decode())
@@ -734,7 +734,7 @@ def identify(source, rack_id, result, position=None, label=None, rack_id_how=Non
     rows, steps = racks(source), []
     # 0 a person confirmed the record for this rack label before (this run or an earlier one)
     if confirmed and any(r["rack_key"] == confirmed["rack_key"] for r in rows):
-        steps.append({"n": 0, "title": "Confirmed before", "proof": f"Confirmed by {confirmed['by']} on {str(confirmed['on_'])[:10]}: the rack labelled {rack_id} is the record {confirmed['rack_key']}.",
+        steps.append({"n": 0, "title": "Confirmed before", "proof": f"Confirmed by {confirmed['by']} on {_day(confirmed['on_']) or str(confirmed['on_'])[:10]}: the rack labelled {rack_id} is the record {confirmed['rack_key']}.",
                       "left": [confirmed["rack_key"]], "outcome": "one"})
     # 1 location: the run's phone position against each rack's site position
     # ---- wt/features: a rack with no position of its own takes its site's (the sign-in service's sites, by name, else the run's own
@@ -869,7 +869,8 @@ def identify(source, rack_id, result, position=None, label=None, rack_id_how=Non
             elif st["n"] == 2 and st["left"]:
                 c = 0.95 if person else max(0.5, float(lab.get("confidence") or 0.5)) if lab else 0.5
                 st["conf"] = round(c * (1.0 if st.get("how") == "exact" else 0.9), 2); st["agrees"] = st["left"][0] == key
-                st["why"] = (f"read {lab['text']} at {lab.get('confidence')} confidence" if lab else "no label text read") + (", confirmed by a person" if person else "") \
+                st["why"] = (f"the label reader read {lab['text']}, {round(100 * float(lab.get('confidence') or 0))} % sure" if lab else "no label text read") \
+                    + (f"; a person confirmed it, so this step counts {round(100 * st['conf'])} %" if person else "") \
                     + (", exact match" if st.get("how") == "exact" else ", match with separators ignored") + ", no other rack has this label"
             elif st.get("ranked"):
                 own = next((x for x in st["ranked"] if x["rack_key"] == key), None); nxt = next((x for x in st["ranked"] if x["rack_key"] != key), None)

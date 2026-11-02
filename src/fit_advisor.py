@@ -670,7 +670,7 @@ def _free_runs(rows) -> list[list[int]]:
 
 def _range_label(positions) -> str:
     lo, hi = min(positions), max(positions)
-    return f"U{lo:02d}" if lo == hi else f"U{lo:02d}–U{hi:02d}"
+    return f"U{lo:02d}" if lo == hi else f"U{lo:02d}-U{hi:02d}"
 
 
 def _bbox_union(boxes):
@@ -777,7 +777,7 @@ def suggest_placements(rows, units_needed: int, prefer: str = "bottom") -> list[
     """Up to 5 ranked placements for a device `units_needed` U tall.
 
     prefer: 'bottom' (heavy gear), 'top' (light network gear), 'middle' or 'any'.
-    Each suggestion: {"units": [top..bottom labels], "range_label": "U04–U05",
+    Each suggestion: {"units": [top..bottom labels], "range_label": "U04-U05",
     "bbox": union of the rows' boxes, "score": float, "reason": str}.
     """
     if isinstance(units_needed, bool) or not isinstance(units_needed, int):

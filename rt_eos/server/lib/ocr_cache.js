@@ -4,7 +4,7 @@
  * OCR answers, keyed by the image itself.
  *
  * Reading the labels off a rack photograph takes seconds and gives the same
- * answer every time for the same pixels — so paying for it twice is pure
+ * answer every time for the same pixels - so paying for it twice is pure
  * waste. Racks already cache their own pass (labels-front.json,
  * ocr_devices.json), but that is per rack: the same photo uploaded again, or
  * scanned as a second rack, or a close-up of the same label taken twice in a
@@ -16,7 +16,7 @@
  *
  * On disk under the data tree's cache/ocr (lib/store.js cachePath), because
  * these answers should survive a
- * restart — the models take longer to load than the cache takes to read — and
+ * restart - the models take longer to load than the cache takes to read - and
  * in memory in front of that. Contents are facts about hardware in a
  * photograph; the cache is not tenant-scoped for the same reason the spec
  * lookup cache is not.

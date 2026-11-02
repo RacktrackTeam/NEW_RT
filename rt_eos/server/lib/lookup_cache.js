@@ -13,12 +13,12 @@
 //
 // In-memory on purpose: re-warming after a restart is cheap, and it sidesteps
 // invalidating a file on disk entirely. The contents are public facts about
-// hardware — no tenant data — so one cache serves every caller.
+// hardware - no tenant data - so one cache serves every caller.
 
 const DEFAULTS = {
   ttlOkMs:   24 * 60 * 60_000,   // 24h for a real answer
-  // Negative results are cached too — a model the vendor doesn't publish
-  // should not re-scrape the web on every visit — but for much less time, so
+  // Negative results are cached too - a model the vendor doesn't publish
+  // should not re-scrape the web on every visit - but for much less time, so
   // a newly added model isn't shut out for a day.
   ttlMissMs: 30 * 60_000,
   max:       500,
@@ -51,7 +51,7 @@ function createLookupCache(opts = {}) {
 
   // Collapses concurrent identical lookups onto one call. Without this, a rack
   // of four identical switches fires four simultaneous scrapes of the same
-  // vendor page — which on a 2-core box turns a 7s wait into a 30s one.
+  // vendor page - which on a 2-core box turns a 7s wait into a 30s one.
   //
   // A rejected produce() is NOT cached: a thrown error is a transient failure,
   // and freezing it for the miss TTL would keep a recovered vendor unreachable.

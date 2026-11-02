@@ -194,3 +194,20 @@ def test_camera_takes_stay_in_their_organization(eng, monkeypatch):
     listed = lambda who: {t["folder"] for t in _as(client, who).get("/api/captures").json()["takes"]}
     assert listed("tech") == {"t1__a"} and listed("tech2") == {"t2__b"} and listed("owner") == {"t1__a", "t2__b", "t3__c"}
     assert _as(client, "tech").get("/api/captures/app/t2__b/video").status_code == 404
+
+
+def test_contact_limit_is_per_sender(eng):
+    app, client, _ = eng
+    client.cookies.clear()
+    app.CONTACT_SEEN.clear()
+    import pathlib as _p
+    sent = []
+    orig = _p.Path.write_text
+    try:
+        _p.Path.write_text = lambda self, *a, **k: sent.append(self.name)             # nothing is written to data/contact by the test
+        msg = lambda email: client.post("/api/contact", json={"name": "A", "email": email, "message": "hello"}).status_code
+        assert [msg("one@x.test") for _ in range(4)] == [200, 200, 200, 429]
+        assert msg("two@x.test") == 200                                                # another sender is not blocked
+    finally:
+        _p.Path.write_text = orig
+        app.CONTACT_SEEN.clear()

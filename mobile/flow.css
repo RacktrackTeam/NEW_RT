@@ -207,6 +207,7 @@ body.web.result #rnav.inpage { align-self:flex-start !important; margin:0 !impor
 /* The result's bar now holds the rack tools too: it scrolls sideways when it does not fit. */
 #rnav .pill { overflow-x:auto; overflow-y:hidden; scrollbar-width:none; justify-content:flex-start; }
 #rnav .pill::-webkit-scrollbar { display:none; }
+@media (max-width:999px) { #rnav .pill { padding-right:32px; -webkit-mask-image:linear-gradient(90deg, #000 calc(100% - 32px), transparent); mask-image:linear-gradient(90deg, #000 calc(100% - 32px), transparent); } }   /* more tabs to the right: the edge fades */
 #rnav .pill a { flex:0 0 auto; min-width:68px; padding:0 8px; }
 #rnav .pill a span { font-size:10px; }
 #rnav.inpage { max-width:calc(100vw - 360px); } #rnav.inpage .pill { max-width:100%; } #rnav.inpage a { min-width:0; padding:0 14px !important; }

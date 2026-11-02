@@ -154,6 +154,6 @@ if (require.main === module) {
   const summary = run({ dryRun, retentionDays });
   console.log(JSON.stringify(summary, null, 2));
   if (dryRun && summary.scanned > 0) {
-    console.log(`\nDry run only — re-run with --apply to actually delete.`);
+    console.log(`\nDry run only - re-run with --apply to actually delete.`);
   }
 }

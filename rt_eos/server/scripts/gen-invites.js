@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Generate N fresh member invite codes for an existing organization and write
- * a plain-text links file. ADDITIVE — does not touch existing users/invites.
+ * a plain-text links file. ADDITIVE - does not touch existing users/invites.
  *
  *   Run:  cd server && node scripts/gen-invites.js "<BASE_URL>" [count] [org-slug]
  *     e.g. node scripts/gen-invites.js https://pilot.example.com 15 eos-pilot

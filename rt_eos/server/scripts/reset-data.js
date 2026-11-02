@@ -2,7 +2,7 @@
 /**
  * Reset RackTrack to a clean slate for a fresh round of testing.
  *
- *   node scripts/reset-data.js            # dry run — prints what it would do
+ *   node scripts/reset-data.js            # dry run - prints what it would do
  *   node scripts/reset-data.js --yes      # actually do it
  *
  * Stop the server first. This writes to the databases directly, and a running
@@ -81,7 +81,7 @@ function backup(file) {
   const dest = `${file}.bak-reset-${stamp}`;
   if (GO) {
     // NOT copyFileSync. These databases run in WAL mode, so recently committed
-    // data lives in the -wal sidecar until a checkpoint folds it back in — at
+    // data lives in the -wal sidecar until a checkpoint folds it back in - at
     // one point auth.db-wal was 2.6MB against a 2.5MB main file. Copying only
     // the main file produces a backup that silently omits the newest data,
     // which is the worst possible failure for the one artefact you would reach
@@ -111,7 +111,7 @@ function emptyDir(dir) {
   if (n === null) return;
   if (!GO) { say(`  would clear   ${dir}  (${n} entries)`); return; }
   for (const entry of fs.readdirSync(dir)) {
-    // Leave dotfiles — .gitkeep and friends keep the directory in the repo.
+    // Leave dotfiles - .gitkeep and friends keep the directory in the repo.
     if (entry.startsWith('.')) continue;
     fs.rmSync(path.join(dir, entry), { recursive: true, force: true });
   }
@@ -130,13 +130,13 @@ async function main() {
   // --i-understand-production. This check happens before anything is opened or
   // copied, so a refusal changes nothing on disk.
   if (GO && process.env.NODE_ENV === 'production' && !FORCE_PROD) {
-    console.error(`\n✗ NODE_ENV=production on ${os.hostname()} — refusing to reset live data.`);
+    console.error(`\n✗ NODE_ENV=production on ${os.hostname()} - refusing to reset live data.`);
     console.error('  This is the production host. If you REALLY mean it, re-run with:');
     console.error('    node scripts/reset-data.js --yes --i-understand-production\n');
     process.exit(1);
   }
 
-  say(`\nRackTrack data reset — ${GO ? 'LIVE' : 'DRY RUN (pass --yes to apply)'}`);
+  say(`\nRackTrack data reset - ${GO ? 'LIVE' : 'DRY RUN (pass --yes to apply)'}`);
   say(`host:           ${os.hostname()}`);
   say(`data directory: ${DATA}\n`);
 
@@ -150,7 +150,7 @@ async function main() {
   const owner = db.prepare(
     "SELECT id, email, public_id, tenant_id FROM users WHERE role='owner' ORDER BY id LIMIT 1").get();
   if (!owner) {
-    console.error('✗ no owner account found — refusing to run, you would be locked out.');
+    console.error('✗ no owner account found - refusing to run, you would be locked out.');
     process.exit(1);
   }
   say(`\nKeeping owner  id=${owner.id}  ${owner.email}  ${owner.public_id}  tenant=${owner.tenant_id}`);
@@ -163,8 +163,8 @@ async function main() {
   const run = db.transaction(() => {
     for (const t of TRUNCATE) {
       // A missing table is the ONE expected, skippable condition (not every
-      // deploy created every table). Anything else — a locked DB, a
-      // constraint violation, corruption — must abort the whole transaction:
+      // deploy created every table). Anything else - a locked DB, a
+      // constraint violation, corruption - must abort the whole transaction:
       // swallowing it and continuing to COMMIT is exactly how a partial reset
       // used to still print "Reset complete". Check existence explicitly, then
       // let any DELETE error propagate out of the transaction so better-sqlite3
@@ -180,7 +180,7 @@ async function main() {
     const users = db.prepare('DELETE FROM users WHERE id != ?').run(owner.id).changes;
     say(`  removed  ${String(users).padStart(6)}  users (kept the owner)`);
 
-    // Tenants point at organizations, so tenants must go first — deleting an
+    // Tenants point at organizations, so tenants must go first - deleting an
     // organization that a tenant still references fails the foreign key.
     db.prepare('UPDATE users SET organization_id = NULL WHERE id = ?').run(owner.id);
     db.prepare('UPDATE tenants SET organization_id = NULL WHERE id = ?').run(owner.tenant_id);
@@ -205,7 +205,7 @@ async function main() {
     //
     // `users` is deliberately EXCLUDED. Resetting its counter hands the next
     // signups the ids of the accounts just deleted, and tokens are valid for
-    // 30 days — so someone still holding a pre-reset token for old user 3
+    // 30 days - so someone still holding a pre-reset token for old user 3
     // would authenticate as whoever now occupies id 3. That is a privilege
     // escalation, not a cosmetic id gap. Let user ids keep climbing.
     for (const t of TRUNCATE) {
@@ -224,7 +224,7 @@ async function main() {
     say(`    ${String(before.tenants ?? 0).padStart(6)}  tenants (keeping the owner's)`);
     const answer = await ask('\nType "RESET" to proceed (anything else aborts): ');
     if (answer !== 'RESET') {
-      say('\nAborted — the database was not changed (a backup was already written).');
+      say('\nAborted - the database was not changed (a backup was already written).');
       db.close();
       process.exit(1);
     }
@@ -295,14 +295,14 @@ async function main() {
     if (GO) { fs.rmSync(p, { force: true }); say(`  removed       ${p}`); } else say(`  would remove  ${p}`);
   }
 
-  say(`\n${GO ? '✔ Reset complete.' : 'Dry run only — nothing was changed. Re-run with --yes to apply.'}`);
+  say(`\n${GO ? '✔ Reset complete.' : 'Dry run only - nothing was changed. Re-run with --yes to apply.'}`);
   if (GO) say('  Restart the server, then sign in as the owner.\n');
 }
 
 // Any error thrown from the reset transaction (a real DELETE failure, not a
 // missing table) rejects here and exits non-zero WITHOUT printing "Reset
-// complete" — the transaction has already been rolled back by better-sqlite3.
+// complete" - the transaction has already been rolled back by better-sqlite3.
 main().catch((err) => {
-  console.error(`\n✗ Reset aborted — the transaction was rolled back: ${err.message}`);
+  console.error(`\n✗ Reset aborted - the transaction was rolled back: ${err.message}`);
   process.exit(1);
 });

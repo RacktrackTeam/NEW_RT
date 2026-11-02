@@ -1,11 +1,11 @@
 // Single source of truth for "may this caller touch this rack?".
 //
-// There were three copies of this policy — app.js's app.param, and a
+// There were three copies of this policy - app.js's app.param, and a
 // router.param in each of two mounted routers, because Express does not fire a
 // parent app.param for routes on a mounted router. The three drifted, which is
 // exactly what an audit found: one router had no check at all, and the other
 // two disagreed with each other about a user whose
-// tenant_id is NULL — app.param let them through to every rack on the
+// tenant_id is NULL - app.param let them through to every rack on the
 // platform, while canAccessRack refused them. Two guards for one policy that
 // disagree is the defect; the fix is that there is now one.
 //
@@ -60,7 +60,7 @@ function canAccessRack(principal, rackId, tenant) {
   // with strictly LESS access than a plain member of the same site: a user
   // whose organization has no site of its own sits on the legacy default
   // tenant, so `rackInOrg` finds nothing and their own scans became
-  // unreachable — the results page loaded with zero devices and the rack
+  // unreachable - the results page loaded with zero devices and the rack
   // photo 404'd, for the person who took it.
   //
   // This does not widen anything across a boundary: tenantOwnsRack only ever
@@ -109,7 +109,7 @@ function visibleRackIds(principal, tenant, { userId = null, perUser = false } = 
 
 /**
  * Build an Express `:rackId` param guard. Mount on the parent app AND on every
- * router that declares `:rackId` — app.param does not reach mounted routers.
+ * router that declares `:rackId` - app.param does not reach mounted routers.
  *
  * @param {object} opts
  * @param {object} opts.tenant       lib/tenant
@@ -126,7 +126,7 @@ function rackOwnershipParam({ tenant, logger, getPrincipal, allow } = {}) {
   return function rackIdGuard(req, res, next, rackId) {
     // Shape FIRST, always. This used to sit below the `allow` hatch, so a
     // capability token minted for a rackId of `../../server/data` skipped the
-    // one check that exists because rackId reaches path.join — the validation
+    // one check that exists because rackId reaches path.join - the validation
     // was absent on exactly the path that needed it most.
     if (!isValidRackId(rackId)) {
       return res.status(400).json({ error: 'Invalid rack id' });
