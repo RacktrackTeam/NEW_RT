@@ -105,6 +105,23 @@ def verify(token):
     return out
 
 
+def org_online_lookups(org):
+    """The organization's online lookups setting (RT-EOS lib/org_settings.js, organizations.online_lookups), read only.
+    Off when the setting or the organization cannot be read."""
+    path = _setting("RACKTRACK_AUTH_DB")
+    if not org or not path or not pathlib.Path(path).exists():
+        return False
+    try:
+        c = sqlite3.connect(f"file:{path}?mode=ro", uri=True, timeout=5)
+        try:
+            row = c.execute("SELECT online_lookups FROM organizations WHERE id = ?", (org,)).fetchone()
+        finally:
+            c.close()
+    except sqlite3.Error:
+        return False
+    return bool(row and row[0] is not None and int(row[0]) == 1)
+
+
 def from_request(request):
     """The rt_access cookie first (browsers), then the Bearer header (the native app), as requireAuth reads them."""
     bearer = re.match(r"^Bearer\s+(.+)$", request.headers.get("authorization") or "", re.I)

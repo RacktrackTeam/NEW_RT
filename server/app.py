@@ -61,7 +61,7 @@ import rt_session  # noqa: E402  (racktrack-app sign-in: the RT-EOS session)
 PORT = int(os.environ.get("RACKTRACK_PORT", "8600"))
 HOST = os.environ.get("RACKTRACK_HOST", "0.0.0.0")
 MOBILE = ROOT / "mobile"
-RUNS = ROOT / "data" / "runs"; RUNS.mkdir(parents=True, exist_ok=True)
+RUNS = pathlib.Path(os.environ.get("RACKTRACK_RUNS") or ROOT / "data" / "runs"); RUNS.mkdir(parents=True, exist_ok=True)
 SAMPLE_DIR = ROOT / "data" / "video"
 SAMPLES = {"vdo1": {"title": "Demo rack (stored run)", "video": SAMPLE_DIR / "vdo1.mp4", "truth": ROOT / "data" / "ground_truth" / "SP-HYD-RM01-R01-R1" / "netbox_devices.csv",
                     "run": ROOT / "results" / "video_experiment" / "vdo1", "report": ROOT / "reports" / "video" / "vdo1"}}
@@ -143,6 +143,25 @@ def keep_only(chosen):
 # the sign-in service (auth.sh, rt_eos/server/auth_service.js) signs; a run of another organization or site is not there.
 OPEN_PATHS = ("/", "/app", "/app/", "/manifest.webmanifest", "/sw.js", "/api/health", "/api/auth-service", "/favicon.ico", "/logo.jpg", "/api/contact")
 RUN_PATH = re.compile(r"^/(?:api/video|video-report)/([A-Za-z0-9_-]+)(?:/|$)")
+# Who may write what (docs/AUTH.md, the five roles). A role outside the list gets 403 with the reason in words; the platform-only
+# pages answer 404 to everyone but the platform owner, as if they were not there (rule 11). Every other route is open to anyone
+# signed in, and a run's own routes are then checked by _run_guard (organization and site).
+ADMINS = frozenset({"owner", "org_owner", "org_admin"})
+ROLE_RULES = (
+    (("POST", "DELETE"), re.compile(r"^/api/connections/[a-z]+(?:/test)?/?$"), ADMINS, 403, "Only an organization admin can change the organization's logins."),
+    (("POST",), re.compile(r"^/api/sources/(?:excel|excel/import|[a-z]+/import)/?$"), ADMINS, 403, "Only an organization admin can copy a database in."),
+    (("DELETE",), re.compile(r"^/api/sources/copies/[^/]+/?$"), ADMINS, 403, "Only an organization admin can remove a database copy."),
+    (("DELETE",), re.compile(r"^/api/video/[A-Za-z0-9_-]+/?$"), ADMINS | {"site_manager"}, 403, "Only a site manager or an organization admin can remove a scan."),
+    (None, re.compile(r"^/(?:racks-report/|api/racks-report/|models-overview/?$)"), frozenset({"owner"}), 404, "Not found."),
+)
+
+
+def role_refusal(p, method, path):
+    """(status, words) when this person's role may not make this call, else None."""
+    for methods, pat, roles, code, words in ROLE_RULES:
+        if (methods is None or method in methods) and pat.match(path) and (p or {}).get("role") not in roles:
+            return code, words
+    return None
 
 
 def _run_guard(p, path):
@@ -175,9 +194,12 @@ async def require_session(request: Request, call_next):
     request.state.principal = who
     rt_session.CURRENT.set(who)
     SDB.ORG.set(rt_session.org_key(who))                   # each organization has its own database copies
-    blocked = _run_guard(who, p)
+    blocked = _run_guard(who, p)                           # a stranger's run is not there (404) before any role is weighed
     if blocked is not None:
         return blocked
+    refused = role_refusal(who, request.method, p)
+    if refused is not None:
+        return JSONResponse({"error": refused[1]}, status_code=refused[0])
     return await call_next(request)
 
 
@@ -379,15 +401,16 @@ def rack_id_options(j):
             seen.add(i.upper()); opts.append({"id": i, "why": why})
     RL = rack_label_of(j) or {}
     add(((RL.get("id") or {}).get("text")), "read off the label in this video")
-    for o in sorted(JOBS.values(), key=lambda x: x.get("started") or "", reverse=True):
-        if o is j or o["id"].startswith("example-"):
-            continue
+    me = rt_session.current()
+    # "here" is the run's own organization and site, and only runs the signed-in person may open: one organization never
+    # sees another's rack ids (rule 11)
+    here = [o for o in JOBS.values() if o is not j and not o["id"].startswith("example-") and str(o.get("org")) == str(j.get("org"))
+            and str(o.get("site")) == str(j.get("site")) and (me is None or rt_session.can_see(me, o))]
+    for o in sorted(here, key=lambda x: x.get("started") or "", reverse=True):
         rid = (o.get("rack_id") or {}).get("id")
         if rid:
             add(rid, "confirmed on another rack scanned here")
-    for o in JOBS.values():
-        if o is j or o["id"].startswith("example-"):
-            continue
+    for o in here:
         ol = rack_label_of(o) or {}
         add(((ol.get("id") or {}).get("text")), "read on another rack scanned here")
     for o in list(opts):                                                  # the next IDs in a sequence: ...-R1 -> ...-R2, ...-R3
@@ -963,10 +986,21 @@ def _spec_same_model(asked, rec):
     return False
 
 
+def online_lookups(p=None):
+    """May a lookup leave this machine (the makers' pages)? Only when the engine allows it (RACKTRACK_ONLINE_LOOKUPS=1; engine.sh
+    leaves it off and the tests never set it) and the person's organization has its online lookups setting on (RT-EOS's
+    organization settings). The platform owner has no organization, so never."""
+    if os.environ.get("RACKTRACK_ONLINE_LOOKUPS") != "1":
+        return False
+    p = p or rt_session.current()
+    return bool(p and p.get("org")) and rt_session.org_online_lookups(p["org"])
+
+
 @app.get("/api/specs")
 def api_specs(vendor: str = "", model: str = ""):
     """The main specifications of a make and model (user, 2026-10-27): ports, uplinks, speed, capacity, PoE, power, layer,
-    height. Only a record that really is the asked model counts; the answer is kept in data/specs_cache.json."""
+    height. Only a record that really is the asked model counts; the answer is kept in data/specs_cache.json. The local knowledge
+    base first; the web only when online lookups are allowed (online_lookups)."""
     import subprocess
     if not model.strip():
         raise HTTPException(400, "A model is needed.")
@@ -977,11 +1011,12 @@ def api_specs(vendor: str = "", model: str = ""):
         cache = {}
     if key in cache:
         return cache[key]
-    out = {"ok": False, "specs": {}, "note": "No specifications found for this model."}
+    online = online_lookups()
+    out = {"ok": False, "specs": {}, "note": "No specifications found for this model." if online else "This model is not in the local knowledge base, and online lookups are off."}
     if SPECS_CLI.exists():
         try:
             rec, resp = None, {}
-            for extra in (["--no-live"], ["--deadline", "8"]):            # the local knowledge base at once; the web only when it has nothing
+            for extra in (["--no-live"], ["--deadline", "8"]) if online else (["--no-live"],):   # the local knowledge base at once; the web only when allowed and it has nothing
                 p = subprocess.run([sys.executable, str(SPECS_CLI), "--json", *extra, f"{vendor} {model}".strip()], cwd=SPECS_CLI.parent, capture_output=True, text=True, timeout=30)
                 line = next((ln for ln in reversed(p.stdout.splitlines()) if ln.startswith("{")), "{}")
                 resp = (json.loads(line).get("response") or {})
@@ -1005,13 +1040,14 @@ def api_specs(vendor: str = "", model: str = ""):
                     specs["Ports"] = str(rec["port_count"])
                 out = {"ok": True, "specs": specs, "datasheet": rec.get("datasheet_url"), "vendor": rec.get("vendor"), "model": rec.get("model")}
         except Exception as ex:  # noqa: BLE001
-            out["note"] = f"The lookup failed ({type(ex).__name__})."
-    if True:                                                 # misses are kept too: the web is not asked again for the same name
+            print(f"[racktrack] specs lookup for {vendor} {model} failed: {type(ex).__name__}: {ex}", file=sys.stderr)
+            out["note"] = "The specifications could not be looked up just now."
+    if out["ok"] or online:                                  # misses after a web lookup are kept too: the web is not asked again for the same name
         cache[key] = out
         try:
             SPECS_CACHE.write_text(json.dumps(cache, indent=1))
-        except OSError:
-            pass
+        except OSError as ex:
+            print(f"[racktrack] specs cache not saved: {ex}", file=sys.stderr)
     return out
 
 

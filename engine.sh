@@ -17,6 +17,11 @@ export RACKTRACK_SPECS_CLI="$HERE/rt_eos/switch_specs/cli.py"
 export RACKTRACK_SPECS_AGENT="$HERE/rt_eos/switch_specs"
 export RACKTRACK_TEAM_CAPTURES="$HERE/data/team_captures"
 export RACKTRACK_WORKERS=1
+# No call leaves this machine (hard rule 2): the port agents' vendor-site and image search is off, and the specifications
+# lookup reads only the local knowledge base. RACKTRACK_ONLINE_LOOKUPS=1 would let an organization whose online lookups
+# setting is on reach the makers' pages; leave it off here.
+export SWITCH_MAPPER_WEB_SEARCH=0
+export RACKTRACK_ONLINE_LOOKUPS=0
 
 cd "$HERE" || exit 1
 export OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2

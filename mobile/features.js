@@ -255,6 +255,9 @@
   function site() {
     Promise.all([api('/api/me'), authBase()]).then(function (x) {
       var me = x[0], base = x[1];
+      if (!(me.role === 'org_owner' || me.role === 'org_admin' || me.role === 'site_manager') || !me.site) {   // a technician (or the platform owner, who has no site) cannot change it
+        root().innerHTML = head('Site position', 'Only a site manager or an organization admin can set where ' + (me.site_name || 'the site') + ' is.', null); return;
+      }
       return fetch(base + '/api/setup/' + me.site, { credentials: 'include', cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (s) {
         var dc = (s && (s.datacentre || (s.setup && s.setup.datacentre))) || {};
         root().innerHTML = head('Site position', 'Where ' + (me.site_name || 'your site') + ' is. A scan sent with the phone\'s position is checked against it: racks of sites within 300 m stay in, the others drop out. The position only narrows the racks, it never decides.', null)

@@ -176,8 +176,13 @@
     }
     return { url: url, call: call, where: where, refresh: refresh, landed: landed, openForgot: openForgot, openInvite: openInvite, links: links };
   })();
+  var ADMIN = false;
   function setWho(j) {
     var ROLE = { owner: 'Platform owner', org_admin: 'Organization admin', site_manager: 'Site manager', member: 'Technician' }, site = [ROLE[j.role] || '', j.site_name || ''].filter(Boolean).join(' · '), ini = (j.name || '?').trim().charAt(0).toUpperCase();
+    ADMIN = j.role === 'owner' || j.role === 'org_owner' || j.role === 'org_admin';           // logins and copies are the admins' (docs/AUTH.md); the server checks it too
+    document.body.dataset.role = j.role || ''; document.body.classList.toggle('is-admin', ADMIN);
+    $('site-pos').hidden = !(j.role === 'org_owner' || j.role === 'org_admin' || j.role === 'site_manager');   // only those who may save a site's position see it
+    $('cp-in').hidden = !ADMIN;
     $('who').textContent = ini; $('av2').textContent = ini; $('av3').textContent = ini; $('who2').textContent = j.name; $('who3').textContent = j.name; $('site2').textContent = site; $('site3').textContent = site; $('site2').hidden = !site; $('site3').hidden = !site;
     AUTH.links(j.role);
   }
@@ -996,8 +1001,9 @@
         + (nb ? '<label>Token<input name="token" type="password" autocomplete="new-password" placeholder="' + held('token') + '"></label><p class="muted small">Or a username and password:</p>' : '')
         + '<label>Username<input name="username" autocomplete="off" placeholder="' + held('username') + '"></label>'
         + '<label>Password<input name="password" type="password" autocomplete="new-password" placeholder="' + held('password') + '"></label>'
-        + '<div class="dfrow"><button class="btn primary" type="submit">Save</button><button class="btn" type="button" data-cntest' + (x.saved ? '' : ' disabled') + '>Test connection</button>'
-        + (x.saved ? '<button class="btn danger" type="button" data-cndel>Remove</button>' : '') + '</div></form>'; }).join('');
+        + (ADMIN ? '<div class="dfrow"><button class="btn primary" type="submit">Save</button><button class="btn" type="button" data-cntest' + (x.saved ? '' : ' disabled') + '>Test connection</button>'
+        + (x.saved ? '<button class="btn danger" type="button" data-cndel>Remove</button>' : '') + '</div>' : '<p class="muted small">Only an organization admin can change this login.</p>') + '</form>'; }).join('');
+    if (!ADMIN) $('cn-list').querySelectorAll('input').forEach(function (i) { i.disabled = true; });
   }
   document.addEventListener('submit', function (e) { var f = e.target.closest && e.target.closest('form[data-cn]'); if (!f) return; e.preventDefault();
     var body = {}; ['address', 'username', 'password', 'token'].forEach(function (k) { if (f.elements[k]) body[k] = f.elements[k].value; });
@@ -1009,11 +1015,11 @@
   // Database copies (Profile): every copy with its source, version, time and counts; the active ones marked; delete
   function loadCopies() { api('/api/sources/copies').then(renderCopies).catch(function (e) { $('cp-list').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
   function renderCopies(d) {
-    if (!d.copies.length) { $('cp-list').innerHTML = '<div class="card"><p class="muted">No copy yet. Read a workbook or copy NetBox or the CMDB in above.</p></div>'; return; }
+    if (!d.copies.length) { $('cp-list').innerHTML = '<div class="card"><p class="muted">No copy yet. ' + (ADMIN ? 'Read a workbook or copy NetBox or the CMDB in above.' : 'An organization admin copies the databases in.') + '</p></div>'; return; }
     $('cp-list').innerHTML = '<div class="card flush"><table class="dftable cptable"><thead><tr><th>Source</th><th class="wide">Version</th><th class="wide">Copied</th><th class="cpn">Racks</th><th class="cpn">Devices</th><th class="cpn wide">Ports</th><th class="wide">From</th><th>State</th><th></th></tr></thead><tbody>'
       + d.copies.map(function (c) { return '<tr data-copy="' + c.id + '"' + (c.active ? ' class="on"' : '') + '><td><b>' + esc(d.sources[c.source] || c.source) + '</b><span class="cpwhen small muted">v' + c.version + ' · ' + esc(c.imported_at.replace('T', ' ').slice(0, 16)) + '</span></td><td class="mono wide">v' + c.version + '</td><td class="mono small wide">' + esc(c.imported_at.replace('T', ' ').slice(0, 16)) + '</td>'
         + '<td class="cpn">' + c.racks + '</td><td class="cpn">' + c.devices + '</td><td class="cpn wide">' + (c.ports || 0) + '</td><td class="wide small muted">' + esc(String(c.file || '').replace(/^workbook_[0-9a-f]{8}_/, '')) + '</td>'
-        + '<td>' + (c.active ? '<span class="cpon">Active</span>' : '<span class="muted small">Older</span>') + '</td><td><button class="btn danger" type="button" data-cpdel="' + c.id + '">Delete</button></td></tr>'; }).join('') + '</tbody></table></div>';
+        + '<td>' + (c.active ? '<span class="cpon">Active</span>' : '<span class="muted small">Older</span>') + '</td><td>' + (ADMIN ? '<button class="btn danger" type="button" data-cpdel="' + c.id + '">Delete</button>' : '') + '</td></tr>'; }).join('') + '</tbody></table></div>';
   }
   document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-cpdel]'); if (!b) return;
     if (!confirm('Delete this copy? Runs checked against it use the copy before it, if there is one.')) return;
