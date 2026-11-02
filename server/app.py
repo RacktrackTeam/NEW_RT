@@ -1422,16 +1422,46 @@ def api_sources():
 
 @app.post("/api/sources/excel")
 async def api_sources_excel(workbook: UploadFile = File(...)):
-    """The manager's source-of-truth workbook (.xlsx), read into our copy."""
+    """The manager's source-of-truth workbook (.xlsx): read and checked, nothing imported yet. The answer is the validation
+    report (every problem, with counts) and the upload's name for the Import step (RT-EOS's matrix upload, then import)."""
     if not (workbook.filename or "").lower().endswith(".xlsx"):
         raise HTTPException(400, "Send the manager's workbook as an .xlsx file.")
     d = ROOT / "data" / "sources"; d.mkdir(parents=True, exist_ok=True)
-    f = d / ("workbook_" + re.sub(r"[^A-Za-z0-9_.-]", "_", workbook.filename)[-80:])
+    f = d / ("workbook_" + secrets.token_hex(4) + "_" + re.sub(r"[^A-Za-z0-9_.-]", "_", workbook.filename)[-80:])
     f.write_bytes(await workbook.read(50 * 1024 * 1024))
     try:
-        return SDB.import_excel(f)
+        report = SDB.validate_excel(f)
     except Exception as e:                      # a broken or foreign file says why, in words
+        f.unlink(missing_ok=True)
         raise HTTPException(400, f"The workbook could not be read: {e}")
+    report["upload"] = f.name
+    return report
+
+
+@app.post("/api/sources/excel/import")
+def api_sources_excel_import(body: dict = Body(...)):
+    """Import a workbook already read and checked (its upload name from POST /api/sources/excel) as a new Excel copy."""
+    name = str(body.get("upload") or "")
+    f = ROOT / "data" / "sources" / name
+    if not re.fullmatch(r"workbook_[0-9a-f]{8}_[A-Za-z0-9_.-]+\.xlsx", name) or not f.is_file():
+        raise HTTPException(404, "That upload is not here any more. Read the workbook again.")
+    try:
+        return SDB.import_excel(f)
+    except Exception as e:
+        raise HTTPException(400, f"The workbook could not be imported: {e}")
+
+
+@app.get("/api/sources/copies")
+def api_sources_copies():
+    """Every copy of every source (version, time, racks, devices, ports), newest first, the active ones marked."""
+    return {"sources": SDB.SOURCES, "copies": SDB.copies()}
+
+
+@app.delete("/api/sources/copies/{cid}")
+def api_sources_copy_delete(cid: int):
+    if not SDB.delete_copy(cid):
+        raise HTTPException(404, "No such copy.")
+    return {"sources": SDB.SOURCES, "copies": SDB.copies()}
 
 
 @app.post("/api/sources/{source}/import")

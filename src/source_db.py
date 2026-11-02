@@ -17,17 +17,28 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 DB = pathlib.Path(os.environ.get("RACKTRACK_SOURCES_DB", ROOT / "data" / "sources.db"))
 SOURCES = {"excel": "Excel workbook", "netbox": "NetBox", "cmdb": "ServiceNow CMDB"}
 NOT_SEEN_KINDS = {"cable manager", "blank panel", "blank", "shelf", "tray"}   # the video's models have no class for these (as in RT-EOS)
+# Every import is a copy (src_copies) with its own version per source; the rows keep the copy's id. For each source and rack the
+# newest copy that holds the rack is the active one; deleting a copy brings the one before it back.
 SCHEMA = """
-CREATE TABLE IF NOT EXISTS src_racks (source TEXT, rack_key TEXT, name TEXT, label TEXT, height_ru INTEGER, imported_at TEXT, file TEXT,
-  PRIMARY KEY (source, rack_key));
-CREATE TABLE IF NOT EXISTS src_devices (source TEXT, rack_key TEXT, device_key TEXT, name TEXT, role TEXT, kind TEXT, manufacturer TEXT,
-  model TEXT, serial TEXT, asset_tag TEXT, ru_start INTEGER, ru_height INTEGER, imported_at TEXT, PRIMARY KEY (source, rack_key, device_key));
+CREATE TABLE IF NOT EXISTS src_copies (id INTEGER PRIMARY KEY AUTOINCREMENT, source TEXT, version INTEGER, imported_at TEXT, file TEXT,
+  racks INTEGER, devices INTEGER, ports INTEGER);
+CREATE TABLE IF NOT EXISTS src_racks (copy_id INTEGER, source TEXT, rack_key TEXT, name TEXT, label TEXT, height_ru INTEGER, imported_at TEXT, file TEXT,
+  PRIMARY KEY (copy_id, rack_key));
+CREATE TABLE IF NOT EXISTS src_devices (copy_id INTEGER, source TEXT, rack_key TEXT, device_key TEXT, name TEXT, role TEXT, kind TEXT, manufacturer TEXT,
+  model TEXT, serial TEXT, asset_tag TEXT, ru_start INTEGER, ru_height INTEGER, imported_at TEXT, PRIMARY KEY (copy_id, rack_key, device_key));
+CREATE TABLE IF NOT EXISTS src_ports (copy_id INTEGER, source TEXT, rack_key TEXT, device_key TEXT, port_number INTEGER, port_name TEXT, port_type TEXT,
+  expected_occupied TEXT, expected_dust_cap TEXT);
 """
+ACTIVE = "copy_id = (SELECT MAX(x.copy_id) FROM src_racks x WHERE x.source = {t}.source AND x.rack_key = {t}.rack_key)"
 
 
 def _db():
     DB.parent.mkdir(parents=True, exist_ok=True)
-    c = sqlite3.connect(DB); c.row_factory = sqlite3.Row; c.executescript(SCHEMA)
+    c = sqlite3.connect(DB); c.row_factory = sqlite3.Row
+    if c.execute("SELECT 1 FROM sqlite_master WHERE name='src_racks'").fetchone() and \
+            "copy_id" not in [r[1] for r in c.execute("PRAGMA table_info(src_racks)")]:
+        c.executescript("DROP TABLE src_racks; DROP TABLE IF EXISTS src_devices;")   # the first layout had no copies: its rows are copied in again
+    c.executescript(SCHEMA)
     return c
 
 
@@ -53,44 +64,205 @@ def _kind(role):
     return _s(role)
 
 
-def _store(source, racks, devices, file):
-    """Replace this source's copy of these racks with the new rows."""
+def _store(source, racks, devices, file, ports=()):
+    """A new copy of this source: its own version, its racks, devices and ports. It becomes the active copy of each rack it holds."""
     now = datetime.datetime.now().isoformat(timespec="seconds")
     with _db() as c:
+        version = (c.execute("SELECT MAX(version) FROM src_copies WHERE source=?", (source,)).fetchone()[0] or 0) + 1
+        cid = c.execute("INSERT INTO src_copies (source, version, imported_at, file, racks, devices, ports) VALUES (?,?,?,?,?,?,?)",
+                        (source, version, now, file, len(racks), len(devices), len(ports))).lastrowid
         for r in racks:
-            c.execute("DELETE FROM src_devices WHERE source=? AND rack_key=?", (source, r["rack_key"]))
-            c.execute("INSERT OR REPLACE INTO src_racks VALUES (?,?,?,?,?,?,?)", (source, r["rack_key"], r.get("name"), r.get("label"), r.get("height_ru"), now, file))
+            c.execute("INSERT OR REPLACE INTO src_racks VALUES (?,?,?,?,?,?,?,?)", (cid, source, r["rack_key"], r.get("name"), r.get("label"), r.get("height_ru"), now, file))
         for d in devices:
-            c.execute("INSERT OR REPLACE INTO src_devices VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                      (source, d["rack_key"], d["device_key"], d.get("name"), d.get("role"), d.get("kind") or _kind(d.get("role")), d.get("manufacturer"), d.get("model"),
+            c.execute("INSERT OR REPLACE INTO src_devices VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                      (cid, source, d["rack_key"], d["device_key"], d.get("name"), d.get("role"), d.get("kind") or _kind(d.get("role")), d.get("manufacturer"), d.get("model"),
                        d.get("serial"), d.get("asset_tag"), d.get("ru_start"), d.get("ru_height"), now))
-    return {"source": source, "racks": len(racks), "devices": len(devices), "imported_at": now, "file": file}
+        for q in ports:
+            c.execute("INSERT INTO src_ports VALUES (?,?,?,?,?,?,?,?,?)", (cid, source, q["rack_key"], q["device_key"], q.get("port_number"), q.get("port_name"),
+                                                                        q.get("port_type"), q.get("expected_occupied"), q.get("expected_dust_cap")))
+    return {"source": source, "copy_id": cid, "version": version, "racks": len(racks), "devices": len(devices), "ports": len(ports), "imported_at": now, "file": file}
+
+
+def copies():
+    """Every copy, newest first, with whether it is the active copy of at least one rack."""
+    with _db() as c:
+        rows = [dict(x) for x in c.execute("SELECT * FROM src_copies ORDER BY id DESC")]
+        live = {x[0] for x in c.execute("SELECT DISTINCT copy_id FROM src_racks r WHERE " + ACTIVE.format(t="r"))}
+    for r in rows:
+        r["active"] = r["id"] in live
+    return rows
+
+
+def delete_copy(cid):
+    with _db() as c:
+        if not c.execute("DELETE FROM src_copies WHERE id=?", (cid,)).rowcount:
+            return False
+        for t in ("src_racks", "src_devices", "src_ports"):
+            c.execute(f"DELETE FROM {t} WHERE copy_id=?", (cid,))
+    return True
 
 
 # ------------------------------------------------------------------ the three readers
-def import_excel(path):
-    """The manager's workbook: RACK_INVENTORY and DEVICE_INVENTORY, by RT-EOS's column names."""
+# The manager's workbook: the checks are RT-EOS's (rt_eos/server/lib/workbook.js parse(), the inventory part; this app copies
+# no cables yet, so the A_Z_CONNECTION_MATRIX rows are counted, not checked).
+YES_NO = ("Yes", "No", "N/A")
+DEFAULT_LOOKUPS = {"Record_Status": ["Active", "Planned", "Decommissioned", "Superseded"],
+                   "Port_Type": ["OSFP", "QSFP-DD", "QSFP28", "QSFP+", "SFP28", "SFP+", "SFP", "RJ45"]}
+NEEDED = {"RACK_INVENTORY": ("Rack_ID", "Rack_Height_RU"), "DEVICE_INVENTORY": ("Rack_ID", "Device_ID", "RU_Start", "RU_Height"),
+          "PORT_INVENTORY": ("Device_ID", "Port_Number", "Port_Type", "Expected_Occupied", "Expected_Dust_Cap")}
+OPTIONAL_SHEETS = ("PORT_INVENTORY", "A_Z_CONNECTION_MATRIX", "LABEL_RULES", "LOOKUPS")
+
+
+def _key(h):
+    return re.sub(r"[^a-z0-9]", "", str(h or "").lower())
+
+
+def _yes_no(v):
+    v = _s(v)
+    return next((x for x in YES_NO if _key(x) == _key(v)), v) if v else None
+
+
+def read_workbook(path):
+    """Read every sheet and check it: (racks, devices, ports, report). The report lists every problem with its sheet and row,
+    and counts; `blocking` is true when the import cannot go on (a sheet or column it needs is missing)."""
     import openpyxl
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
-    missing = [s for s in ("RACK_INVENTORY", "DEVICE_INVENTORY") if s not in wb.sheetnames]
-    if missing:
-        raise ValueError("This is not the manager's workbook: it has no " + " or ".join(missing) + " sheet.")
+    names = {_key(n): n for n in wb.sheetnames}
+    problems, counts = [], {}
+
+    def note(level, sheet, row, reason, kind):
+        problems.append({"level": level, "sheet": sheet, "row_no": row, "reason": reason, "kind": kind})
 
     def rows(name):
-        it = wb[name].iter_rows(values_only=True); head = [_s(h) for h in next(it, [])]
-        for row in it:
-            rec = {h: v for h, v in zip(head, row) if h}
-            if any(_s(v) for v in rec.values()) and (_s(rec.get("Record_Status")) or "Active").lower() not in ("sample", "retired", "inactive"):
-                yield rec
-    racks = [{"rack_key": _s(r.get("Rack_ID")), "name": _s(r.get("Rack_Name")) or _s(r.get("Rack_ID")), "label": _s(r.get("Expected_Rack_Label")), "height_ru": _int(r.get("Rack_Height_RU"))}
-             for r in rows("RACK_INVENTORY") if _s(r.get("Rack_ID"))]
-    devices = [{"rack_key": _s(r.get("Rack_ID")), "device_key": _s(r.get("Device_ID")) or _s(r.get("Device_Name")), "name": _s(r.get("Device_Name")), "role": _s(r.get("Device_Role")),
-                "manufacturer": _s(r.get("Manufacturer")), "model": _s(r.get("Model")), "serial": _s(r.get("Serial_Number")), "asset_tag": _s(r.get("Asset_Tag")),
-                "ru_start": _int(r.get("RU_Start")), "ru_height": _int(r.get("RU_Height"))}
-               for r in rows("DEVICE_INVENTORY") if _s(r.get("Rack_ID")) and (_s(r.get("Device_ID")) or _s(r.get("Device_Name")))]
+        if _key(name) not in names:
+            return None
+        it = wb[names[_key(name)]].iter_rows(values_only=True)
+        head = [_s(h) for h in next(it, [])]
+        out = []
+        for i, row in enumerate(it, start=2):
+            rec = {_key(h): v for h, v in zip(head, row) if h}
+            if any(_s(v) for v in rec.values()):
+                out.append((i, rec))
+        for col in NEEDED.get(name, ()):
+            if _key(col) not in {_key(h) for h in head if h}:
+                note("error", name, 1, f"The {name} sheet has no {col} column.", "missing column")
+        return out
+
+    for name in ("RACK_INVENTORY", "DEVICE_INVENTORY"):
+        if _key(name) not in names:
+            note("error", name, None, f"The {name} sheet is missing. This is not the manager's workbook, or the sheet was renamed.", "missing sheet")
+    for name in OPTIONAL_SHEETS:
+        if _key(name) not in names:
+            note("warning", name, None, f"The {name} sheet is missing. The import goes on without it.", "missing sheet")
+    look = dict(DEFAULT_LOOKUPS)
+    lk = rows("LOOKUPS")
+    if lk is not None:
+        it = wb[names[_key("LOOKUPS")]].iter_rows(values_only=True); head = next(it, [])
+        cols = list(it)
+        for j, h in enumerate(head):
+            vals = [_s(r[j]) for r in cols if j < len(r) and _s(r[j])]
+            if h and vals:
+                look[str(h).strip()] = vals
+    status = lambda rec: _s(rec.get("recordstatus")) or "Active"
+    live = lambda rec: status(rec).lower() == "active"
+    in_list = lambda lst, v: not v or any(_key(x) == _key(v) for x in lst or [])
+
+    rk_rows, dv_rows, pt_rows = rows("RACK_INVENTORY") or [], rows("DEVICE_INVENTORY") or [], rows("PORT_INVENTORY") or []
+    az = rows("A_Z_CONNECTION_MATRIX")
+    counts["cables"] = len(az or [])
+
+    def unique(lst, field, sheet, what):
+        seen = {}
+        for n, rec in lst:
+            v = _s(rec.get(field))
+            if not v:
+                note("warning", sheet, n, f"{what} is empty.", "empty id"); continue
+            if not live(rec):
+                continue
+            if _key(v) in seen:
+                note("error", sheet, n, f"{what} {v} is also on row {seen[_key(v)]}. An id is never used twice.", "duplicate id")
+            else:
+                seen[_key(v)] = n
+    unique(rk_rows, "rackid", "RACK_INVENTORY", "Rack_ID")
+    unique(dv_rows, "deviceid", "DEVICE_INVENTORY", "Device_ID")
+    unique(pt_rows, "portid", "PORT_INVENTORY", "Port_ID")
+    for sheet, lst in (("RACK_INVENTORY", rk_rows), ("DEVICE_INVENTORY", dv_rows), ("PORT_INVENTORY", pt_rows)):
+        for n, rec in lst:
+            if not in_list(look.get("Record_Status"), status(rec)):
+                note("warning", sheet, n, f'Record_Status "{status(rec)}" is not one of the LOOKUPS values.', "value not in LOOKUPS")
+            if "illustrative sample" in str(rec.get("notes") or "").lower():
+                note("warning", sheet, n, "This is the template's sample row. It is skipped.", "sample row")
+
+    height = {_key(rec.get("rackid")): _int(rec.get("rackheightru")) for n, rec in rk_rows if _s(rec.get("rackid"))}
+    dev_ids = {_key(rec.get("deviceid")) for n, rec in dv_rows if _s(rec.get("deviceid"))}
+    by_rack = {}
+    for n, rec in dv_rows:
+        name, rid = _s(rec.get("devicename")) or _s(rec.get("deviceid")) or "This device", _s(rec.get("rackid"))
+        start, h = _int(rec.get("rustart")), _int(rec.get("ruheight")) or 1
+        if rid and rk_rows and _key(rid) not in height:
+            note("error", "DEVICE_INVENTORY", n, f"{name} is in rack {rid}, which is not in RACK_INVENTORY.", "rack not in RACK_INVENTORY")
+        if start is None:
+            note("warning", "DEVICE_INVENTORY", n, f"{name} has no RU_Start, so its unit cannot be checked.", "no unit")
+            continue
+        top = height.get(_key(rid))
+        if start < 1 or (top and start + h - 1 > top):
+            note("error", "DEVICE_INVENTORY", n, f"{name} at U{start}" + (f" to U{start + h - 1}" if h > 1 else "") + f" is outside the rack's {top or '?'} units.",
+                 "outside the rack height")
+        if live(rec) and rid:
+            by_rack.setdefault(_key(rid), []).append((start, h, name, n))
+    for lst in by_rack.values():
+        lst.sort()
+        for (s0, h0, n0, _), (s1, h1, n1, r1) in zip(lst, lst[1:]):
+            if s1 <= s0 + h0 - 1:
+                note("warning", "DEVICE_INVENTORY", r1, f"{n1} at U{s1} overlaps {n0} (U{s0} to U{s0 + h0 - 1}).", "devices overlap")
+    for n, rec in pt_rows:
+        did = _s(rec.get("deviceid"))
+        if did and dv_rows and _key(did) not in dev_ids:
+            note("warning", "PORT_INVENTORY", n, f"Device_ID {did} is not in DEVICE_INVENTORY.", "device not in DEVICE_INVENTORY")
+        pt = _s(rec.get("porttype"))
+        if pt and not in_list(look.get("Port_Type"), pt):
+            note("warning", "PORT_INVENTORY", n, f'Port_Type "{pt}" is not one of the LOOKUPS values.', "value not in LOOKUPS")
+        for f, col in (("expectedoccupied", "Expected_Occupied"), ("expecteddustcap", "Expected_Dust_Cap")):
+            v = _yes_no(rec.get(f))
+            if v and v not in YES_NO:
+                note("warning", "PORT_INVENTORY", n, f'{col} should be Yes, No or N/A, not "{v}".', "not Yes or No")
+
+    keep = lambda rec: status(rec).lower() not in ("sample", "retired", "inactive", "decommissioned", "superseded") and "illustrative sample" not in str(rec.get("notes") or "").lower()
+    racks = [{"rack_key": _s(r.get("rackid")), "name": _s(r.get("rackname")) or _s(r.get("rackid")), "label": _s(r.get("expectedracklabel")),
+              "height_ru": _int(r.get("rackheightru"))} for n, r in rk_rows if _s(r.get("rackid")) and keep(r)]
+    devices = [{"rack_key": _s(r.get("rackid")), "device_key": _s(r.get("deviceid")) or _s(r.get("devicename")), "name": _s(r.get("devicename")) or _s(r.get("deviceid")),
+                "role": _s(r.get("devicerole")), "manufacturer": _s(r.get("manufacturer")), "model": _s(r.get("model")), "serial": _s(r.get("serialnumber")),
+                "asset_tag": _s(r.get("assettag")), "ru_start": _int(r.get("rustart")), "ru_height": _int(r.get("ruheight"))}
+               for n, r in dv_rows if _s(r.get("rackid")) and (_s(r.get("deviceid")) or _s(r.get("devicename"))) and keep(r)]
+    rack_of = {_key(d["device_key"]): d["rack_key"] for d in devices}
+    ports = [{"rack_key": _s(r.get("rackid")) or rack_of.get(_key(r.get("deviceid"))), "device_key": _s(r.get("deviceid")), "port_number": _int(r.get("portnumber")),
+              "port_name": _s(r.get("portname")), "port_type": _s(r.get("porttype")), "expected_occupied": _yes_no(r.get("expectedoccupied")),
+              "expected_dust_cap": _yes_no(r.get("expecteddustcap"))} for n, r in pt_rows if _s(r.get("deviceid")) and keep(r)]
     known = {r["rack_key"] for r in racks}
     racks += [{"rack_key": k, "name": k, "label": None, "height_ru": None} for k in sorted({d["rack_key"] for d in devices} - known)]
-    return _store("excel", racks, devices, pathlib.Path(path).name)
+    by_kind = {}
+    for x in problems:
+        by_kind[x["kind"]] = by_kind.get(x["kind"], 0) + 1
+    errors = sum(x["level"] == "error" for x in problems)
+    blocking = any(x["kind"] in ("missing sheet", "missing column") and x["level"] == "error" and x["sheet"] != "PORT_INVENTORY" for x in problems)
+    counts.update(racks=len(racks), devices=len(devices), ports=len(ports), problems=len(problems), errors=errors, warnings=len(problems) - errors)
+    report = {"file": pathlib.Path(path).name, "sheets": [{"name": n, "rows": max(0, (wb[n].max_row or 1) - 1)} for n in wb.sheetnames],
+              "counts": counts, "by_kind": by_kind, "problems": problems, "blocking": blocking}
+    return racks, devices, ports, report
+
+
+def validate_excel(path):
+    return read_workbook(path)[3]
+
+
+def import_excel(path):
+    """The manager's workbook into a new Excel copy: RACK_INVENTORY, DEVICE_INVENTORY and PORT_INVENTORY, by RT-EOS's column names."""
+    racks, devices, ports, report = read_workbook(path)
+    if report["blocking"]:
+        raise ValueError(" ".join(x["reason"] for x in report["problems"] if x["level"] == "error" and x["kind"] in ("missing sheet", "missing column")))
+    out = _store("excel", racks, devices, pathlib.Path(path).name, ports)
+    out["problems"] = report["counts"]["problems"]
+    return out
 
 
 NETBOX_URL = os.environ.get("RACKTRACK_NETBOX_URL", "http://127.0.0.1:3301")          # the local NetBox mock (modules/sources/mock/netbox.js)
@@ -155,14 +327,27 @@ def import_cmdb(org=None):
 
 
 def racks(source=None):
+    """The active copy of every rack."""
     with _db() as c:
-        q = "SELECT r.*, (SELECT COUNT(*) FROM src_devices d WHERE d.source=r.source AND d.rack_key=r.rack_key) AS devices FROM src_racks r"
-        return [dict(x) for x in (c.execute(q + " WHERE source=? ORDER BY rack_key", (source,)) if source else c.execute(q + " ORDER BY source, rack_key"))]
+        q = ("SELECT r.*, (SELECT COUNT(*) FROM src_devices d WHERE d.copy_id=r.copy_id AND d.rack_key=r.rack_key) AS devices FROM src_racks r WHERE "
+             + ACTIVE.format(t="r"))
+        return [dict(x) for x in (c.execute(q + " AND source=? ORDER BY rack_key", (source,)) if source else c.execute(q + " ORDER BY source, rack_key"))]
 
 
 def devices(source, rack_key):
     with _db() as c:
-        return [dict(x) for x in c.execute("SELECT * FROM src_devices WHERE source=? AND rack_key=? ORDER BY ru_start DESC", (source, rack_key))]
+        return [dict(x) for x in c.execute("SELECT * FROM src_devices d WHERE source=? AND rack_key=? AND " + ACTIVE.format(t="d") + " ORDER BY ru_start DESC",
+                                           (source, rack_key))]
+
+
+def ports(source, rack_key):
+    """PORT_INVENTORY rows of the rack's active copy, by device: {device_key: {port_number: row}}."""
+    out = {}
+    with _db() as c:
+        for x in c.execute("SELECT * FROM src_ports p WHERE source=? AND rack_key=? AND " + ACTIVE.format(t="p"), (source, rack_key)):
+            if x["port_number"] is not None:
+                out.setdefault(x["device_key"], {})[x["port_number"]] = dict(x)
+    return out
 
 
 # ------------------------------------------------------------------ the rack match

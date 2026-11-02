@@ -790,7 +790,7 @@
       + Object.keys(d.sources).map(function (s) { return '<button class="btn' + (s === src ? ' on' : '') + '" type="button" data-dfsrc="' + s + '">' + esc(d.sources[s]) + '</button>'; }).join('') + '</div>';
     h += '<div class="dfrow"><span class="muted small">' + (src ? esc(d.sources[src]) + ': ' + when(src) : 'No database copied yet. Read a workbook or copy one in.') + '</span></div>'
       + '<div class="dfrow"><input type="file" id="df-file" accept=".xlsx"><button class="btn" type="button" id="df-xlsx">Read workbook</button>'
-      + '<button class="btn" type="button" data-dfimp="netbox">Copy in from NetBox</button><button class="btn" type="button" data-dfimp="cmdb">Copy in from CMDB</button></div></div>';
+      + '<button class="btn" type="button" data-dfimp="netbox">Copy in from NetBox</button><button class="btn" type="button" data-dfimp="cmdb">Copy in from CMDB</button></div><div id="df-report"></div></div>';
     h += '<span class="glabel">Rack record</span><div class="card">';
     h += '<p>Rack id of this run: <b class="mono">' + esc(d.rack_id || 'not confirmed yet') + '</b></p>';
     if (d.match) h += '<p><b>' + esc(d.match.rack_key) + '</b> ' + (d.match.how === 'exact' ? 'matched exactly' : d.match.how === 'close' ? 'matched' : 'chosen') + '. <span class="muted">' + esc(d.match.why) + '</span></p>';
@@ -812,7 +812,23 @@
     var done = function (src) { return function (r) { toast(r.devices + ' devices copied in from ' + r.racks + (r.racks === 1 ? ' rack' : ' racks')); return setDb({ source: src }); }; };
     if (t.dataset.dfimp) return api('/api/sources/' + t.dataset.dfimp + '/import', { method: 'POST' }).then(done(t.dataset.dfimp)).catch(function (er) { toast(er.message); });
     var f = $('df-file').files[0]; if (!f) return toast('Choose the workbook first.');
-    var fd = new FormData(); fd.append('workbook', f); upload('/api/sources/excel', fd, function () {}).then(done('excel')).catch(function (er) { toast(er.message); }); });
+    var fd = new FormData(); fd.append('workbook', f); upload('/api/sources/excel', fd, function () {}).then(renderWbReport).catch(function (er) { toast(er.message); }); });
+  // the workbook's validation report (RT-EOS's checks), shown before anything is imported; Import makes a new Excel copy
+  function renderWbReport(r) {
+    var c = r.counts, kinds = Object.keys(r.by_kind), MAX = 100;
+    var h = '<div class="wbrep"><p><b>' + esc(r.file.replace(/^workbook_[0-9a-f]{8}_/, '')) + '</b>: ' + c.racks + ' racks, ' + c.devices + ' devices, ' + c.ports + ' ports, ' + c.cables + ' cables. '
+      + (c.problems ? '<b class="' + (c.errors ? 'err' : '') + '">' + c.problems + (c.problems === 1 ? ' problem' : ' problems') + '</b> (' + c.errors + ' errors, ' + c.warnings + ' warnings).' : '<span class="dfok">No problems found.</span>') + '</p>';
+    if (kinds.length) h += '<ul class="wbkinds">' + kinds.map(function (k) { return '<li><b>' + r.by_kind[k] + '</b> ' + esc(k) + '</li>'; }).join('') + '</ul>';
+    if (c.problems) h += '<table class="dftable wbtable"><thead><tr><th>Sheet</th><th>Row</th><th>Problem</th></tr></thead><tbody>' + r.problems.slice(0, MAX).map(function (x) {
+      return '<tr data-wblevel="' + x.level + '"><td class="mono small">' + esc(x.sheet) + '</td><td class="mono">' + (x.row_no || '') + '</td><td><span class="' + (x.level === 'error' ? 'err' : '') + '">' + (x.level === 'error' ? 'Error' : 'Warning') + '</span><p>' + esc(x.reason) + '</p></td></tr>'; }).join('') + '</tbody></table>'
+      + (r.problems.length > MAX ? '<p class="muted small">And ' + (r.problems.length - MAX) + ' more.</p>' : '');
+    h += '<div class="dfrow">' + (r.blocking ? '<p class="err">This workbook cannot be imported until the missing sheets and columns are added.</p>' : '<button class="btn primary" type="button" id="df-import" data-upload="' + esc(r.upload) + '">Import</button>') + '<button class="btn" type="button" id="df-cancel">Cancel</button></div></div>';
+    $('df-report').innerHTML = h;
+  }
+  document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('#df-import, #df-cancel'); if (!t) return;
+    if (t.id === 'df-cancel') { $('df-report').innerHTML = ''; return; }
+    t.disabled = true; api('/api/sources/excel/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ upload: t.dataset.upload }) })
+      .then(function (r) { toast(r.devices + ' devices and ' + r.ports + ' ports imported as Excel copy ' + r.version); return setDb({ source: 'excel' }); }).catch(function (er) { t.disabled = false; toast(er.message); }); });
   document.addEventListener('change', function (e) { if (e.target.id !== 'df-pick') return; var b = document.querySelector('#df-top .dfsrc .on'); setDb({ source: b ? b.dataset.dfsrc : null, rack_key: e.target.value || null }); });
   // Connections (Profile): the organization's NetBox and ServiceNow logins; the server sends back the address and the state only, never a secret
   function loadConnections() { api('/api/connections').then(renderConnections).catch(function (e) { $('cn-list').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
