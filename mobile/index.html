@@ -15,8 +15,8 @@
 <link rel="preload" href="/app/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/app/app.css?v=127">
 <link rel="stylesheet" href="/app/rt/rt-topology.css?v=12">
-<link rel="stylesheet" href="/app/flow.css?v=13">
-<link rel="stylesheet" href="/app/features.css?v=4"><!-- wt/features -->
+<link rel="stylesheet" href="/app/flow.css?v=15">
+<link rel="stylesheet" href="/app/features.css?v=5"><!-- wt/features -->
 <style>
 /* the Drift tab: the database the run is checked against, the matched record, the differences */
 #df-top { display:flex; flex-direction:column; gap:12px; width:100%; }
@@ -269,6 +269,7 @@
     <div class="rpart" id="res-report">
       <div class="rpbar"><div class="cmpdd"><button class="btn primary" type="button" id="cmp-btn" aria-haspopup="true" aria-expanded="false">Compare against the database</button>
         <div class="ddmenu" id="cmp-menu" hidden><button type="button" data-cmpsrc="excel">Excel workbook</button><button type="button" data-cmpsrc="netbox">NetBox</button><button type="button" data-cmpsrc="cmdb">ServiceNow CMDB</button></div></div></div>
+      <div id="cmp-status" class="cmpstatus" hidden></div>
       <div id="rp-top"></div>
       <div class="cmpsec" id="sec-compare"><div id="df-top"></div></div>
       <div class="cmpsec" id="sec-diff"><div id="diff-top"></div></div>
@@ -344,12 +345,11 @@
   <div class="pill">
     <a href="#" data-rtab="rack"><svg class="ic"><use href="#i-rack"/></svg><span>Rack</span></a>
     <a href="#" data-rtab="devices"><svg class="ic"><use href="#i-guide"/></svg><span>Devices</span></a>
-    <a href="#" data-rtab="layout"><svg class="ic"><use href="#i-chart"/></svg><span>Layout</span></a>
-    <a href="#" data-rtab="report"><svg class="ic"><use href="#i-doc"/></svg><span>Report</span></a>
     <a href="#" data-rtab="find" data-tool="1"><svg class="ic"><use href="#i-rack"/></svg><span>Find a port</span></a>
     <a href="#" data-rtab="connections" data-tool="1"><svg class="ic"><use href="#i-server"/></svg><span>Connections</span></a>
     <a href="#" data-rtab="cables" data-tool="1"><svg class="ic"><use href="#i-doc"/></svg><span>Cables</span></a>
-    <a href="#" data-rtab="worklist" data-tool="1"><svg class="ic"><use href="#i-check"/></svg><span>Worklist</span></a>
+    <a href="#" data-rtab="layout"><svg class="ic"><use href="#i-chart"/></svg><span>Layout</span></a>
+    <a href="#" data-rtab="report"><svg class="ic"><use href="#i-doc"/></svg><span>Report</span></a>
   </div>
 </nav>
 <nav class="bottom" id="nav" hidden>
@@ -364,7 +364,7 @@
 <div id="lb" hidden><img id="lbimg" alt=""><span>tap to close</span></div>
 <script src="/app/topology.js?v=1"></script>
 <script src="/app/rt/rt-topology.js?v=12" defer></script>
-<script src="/app/app.js?v=154"></script>
-<script src="/app/features.js?v=4"></script><!-- wt/features -->
+<script src="/app/app.js?v=156"></script>
+<script src="/app/features.js?v=7"></script><!-- wt/features -->
 </body>
 </html>

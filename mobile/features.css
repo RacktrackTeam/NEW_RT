@@ -72,3 +72,12 @@
 .fx-page .ft-cells { gap:4px; } .fx-page :focus-visible { outline:2px solid #1f2a3a; outline-offset:2px; }
 @media (prefers-reduced-motion:reduce) { .fx-in, .fx-box.hl, .fx-spin { animation:none; } }
 @media (max-width:760px) { .fx-two, .fx-grid, .fx-wl { grid-template-columns:1fr; gap:14px; } .fx-bar .btn { width:100%; } .fx-bar label.fx-num { flex:1 1 100%; } .fx-kv dd { text-align:left; } }
+
+/* Find a port: the whole rack picture with every device outlined on the left, the pickers on the right, the crop and facts below */
+.fp-top { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:28px; align-items:start; margin-bottom:24px; }
+.fp-top .fx-rack { margin:0; } .fp-top .fx-rack img { max-height:68vh; }
+.fp-pick { display:flex; flex-direction:column; gap:14px; min-width:0; } .fp-pick label { display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--t2); } .fp-pick select { width:100%; }
+.fp-grid { gap:6px; } .fp-grid .ft-cell { min-width:36px; height:32px; cursor:pointer; font-family:inherit; } .fp-grid .ft-cell.chosen { outline:2px solid #1f2a3a; outline-offset:2px; }
+.fp-dev { fill:rgba(255,255,255,.04); stroke:rgba(255,255,255,.75); stroke-width:1.5; } .fp-dev.fp-none { cursor:default; stroke-dasharray:4 4; stroke:rgba(255,255,255,.4); }
+.fp-dev.sel { fill:rgba(255,255,255,.28); stroke:#fff; stroke-width:4; }
+@media (max-width:760px) { .fp-top { grid-template-columns:1fr; gap:14px; } .fp-top .fx-rack img { max-height:55vh; } }

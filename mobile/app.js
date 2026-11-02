@@ -75,13 +75,14 @@
     document.body.classList.toggle('web', wide);
     $('rnav').hidden = !(me && (rtab || tool)); document.body.classList.toggle('tabbed', !!(me && (rtab || tool))); document.body.classList.toggle('result', !!(me && rtab));
     if (rtab || tool) document.querySelectorAll('#rnav a').forEach(function (a) { a.href = a.dataset.tool ? '#tools/' + arg + '/' + a.dataset.rtab : '#result/' + arg + (a.dataset.rtab === 'rack' ? '' : '/' + a.dataset.rtab); a.classList.toggle('on', a.dataset.rtab === (rtab || tool)); });
+    if (!tool) rn.dataset.rack = ''; else if (RES.id === arg && $('res-title').textContent) rn.dataset.rack = $('res-title').textContent;
     if (tool) { var onA = document.querySelector('#rnav a.on'); if (onA && onA.scrollIntoView) onA.scrollIntoView({ inline: 'center', block: 'nearest' }); }
     document.querySelectorAll('[data-nav]').forEach(function (a) { a.classList.toggle('on', a.dataset.nav === tab); });
     $('nav').hidden = !me || !!rtab || !!tool; $('top').hidden = !me; $('side').hidden = !me; document.body.classList.toggle('signed', !!me);
     $('back').hidden = !DETAIL[name]; $('topmark').hidden = !!DETAIL[name]; $('toptitle').textContent = (rtab || tool) ? 'Result' : (DETAIL[name] || 'RackTrack');
     $('top').classList.toggle('detail', !!DETAIL[name]); $('who').hidden = !!DETAIL[name]; $('topspacer').hidden = !DETAIL[name]; if (name !== 'result') { $('topsub').hidden = true; }
     var TT = { home: 'Racks', sweep: 'Scan a rack', job: 'Reading the rack', history: 'History', more: 'Profile', models: 'Models and accuracy', connections: 'Connections', copies: 'Database copies', signin: 'Sign in', contact: 'Contact us', forgot: 'Reset your password', invite: 'Accept your invite', pending: 'Waiting for approval' };
-    var tt = rtab ? TABS[rtab] : tool ? ({ find: 'Find a port', connections: 'Connections', cables: 'Cables', worklist: 'Worklist' }[tool] || 'Rack tool') : TT[name] || 'RackTrack';
+    var tt = rtab ? TABS[rtab] : tool ? ({ find: 'Find a port', connections: 'Connections', cables: 'Cables' }[tool] || 'Rack tool') : TT[name] || 'RackTrack';
     document.title = tt + (tt === 'RackTrack' ? '' : ' - RackTrack');
     clearInterval(pollTimer); stopGuide();
     window.scrollTo(0, 0);
@@ -891,8 +892,6 @@
       .concat(devs.map(function (d) { var ps = PORT_KINDS[d.kind] ? devState(d, v) : null, why = d.unsure ? 'device not sure' : !d.kind || d.kind === 'Other' ? 'type not sure'
           : ps && ps.key === 'unc' ? (ps.panel ? 'no ports seen' : 'needs a close photo') : ps && ps.key === 'auto' ? 'model not read' : ps && ps.key === 'off' ? 'make and model not checked yet' : null;   // the device page's own state
         return why ? '<button class="lrow" type="button" data-dev="' + d.index + '"><span class="iu">' + UP(d.top) + '</span><b>D' + d.index + ' · ' + why + '</b><span class="arr">›</span></button>' : null; }).filter(Boolean));
-    var asks = devs.reduce(function (t, d) { return t + Math.min(8, ((d.layout || {}).ports || []).filter(function (p) { return p.status !== 'connected' && p.status !== 'empty'; }).length); }, 0);   // as the Worklist asks: up to 8 ports a device
-    if (asks) look.push('<a class="lrow" href="#tools/' + encodeURIComponent(v.id) + '/worklist" style="text-decoration:none;color:inherit"><span class="iu">Ports</span><b>' + pl(asks, 'port') + ' not sure, in the Worklist</b><span class="arr">›</span></a>');
     $('rp-top').innerHTML = '<header class="rphead"><span class="eyebrow">Rack report</span><h2>' + esc(title) + '</h2><p class="muted">' + esc(v.title || '') + '</p><p class="rpline"><b>' + n + 'U</b> · <b>' + used + '</b> in use · <b class="free">' + free + '</b> free' + (unc ? ' · <b class="unc">' + unc + '</b> not sure' : '') + '</p></header>'
       + '<div class="rpcol b"><section class="card rpelev"><div class="rpkpis"><div><b>' + devs.length + '</b><span>devices</span></div><div><b>' + kinds.length + '</b><span>kinds</span></div><div><b>' + free + 'U</b><span>free</span></div><p class="muted small">' + esc(kindLine) + '</p></div>' + elev + '</section>'
       + '</div><div class="rpcol a"><span class="glabel">Devices, top to bottom</span><div class="card flush"><table class="rptable"><thead><tr><th>Unit</th><th>Device</th><th>Make and model</th></tr></thead><tbody>' + table + '</tbody></table></div></div><div class="rpcol c">'
@@ -916,7 +915,9 @@
     port_type: 'Look at the port: if the video is right, the record has the wrong port type.', port_occupied: 'A cable is where the record expects none, or missing where it expects one.',
     dust_cap: 'An empty port the record expects capped has no dust cap.' };
   function loadDrift() { var id = RES.id; api('/api/video/' + id + '/drift').then(function (d) { if (RES.id === id) renderCompare(d); }).catch(function (e) { $('df-top').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
-  function setDb(body) { return api('/api/video/' + RES.id + '/database', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (d) { renderCompare(d); return d; }).catch(function (e) { toast(e.message); }); }
+  // one line under the compare button: a spinner while something runs, one sentence if it fails
+  function cmpStatus(text, kind) { var el = $('cmp-status'); if (!el) return; if (!text) { el.hidden = true; el.innerHTML = ''; return; } el.hidden = false; el.className = 'cmpstatus ' + (kind || ''); el.setAttribute('role', kind === 'err' ? 'alert' : 'status'); el.innerHTML = (kind === 'err' ? '' : '<span class="spin" aria-hidden="true"></span>') + '<span>' + esc(text) + '</span>'; }
+  function setDb(body) { return api('/api/video/' + RES.id + '/database', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (d) { cmpStatus(''); renderCompare(d); return d; }).catch(function (e) { cmpStatus(String(e.message || 'The compare did not run.').replace(/\s*$/, '').replace(/([^.!?])$/, '$1.'), 'err'); }); }
   function copyWhen(d, s) { return d.imported[s] ? 'copy of ' + when(d.imported[s]) : 'no copy yet'; }
   var SRCLABEL = { excel: 'Excel workbook', netbox: 'NetBox', cmdb: 'ServiceNow CMDB' };
   function firstSentence(t) { t = String(t || '').replace(/\s+/g, ' ').trim(); var m = t.match(/^.*?[.!?](\s|$)/); t = m ? m[0].trim() : t; return t.length > 110 ? t.slice(0, 107) + '...' : t; }
@@ -967,9 +968,12 @@
     if (t.dataset.dfmode) { RES.diffMode = t.dataset.dfmode; return renderDiff(RES.cmp, true); }
     if (t.dataset.cmpsrc) { src = t.dataset.cmpsrc; RES.cmpSrc = src; $('cmp-menu').hidden = true; $('cmp-btn').setAttribute('aria-expanded', 'false'); RES.cmpPick = false; RES.cmpUi = 'confirm';
       var toCompare = function () { var el = $('sec-compare'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); };   // on a phone the panel opens below the report: go to it
-      if (RES.cmp && RES.cmp.imported[src]) return Promise.resolve(setDb({ source: src })).then(toCompare);
+      cmpStatus('');
+      if (RES.cmp && RES.cmp.imported[src]) { cmpStatus('Finding the rack...'); return Promise.resolve(setDb({ source: src })).then(toCompare); }
       if (src === 'excel') { RES.cmpUi = 'idle'; toast('No workbook is copied in yet. Copy one in under Database copies.'); return go('copies'); }
-      toast('Copying ' + SRCLABEL[src] + ' in...'); return api('/api/sources/' + src + '/import', { method: 'POST' }).then(function (r) { toast(pl(r.devices, 'device') + ' copied in from ' + pl(r.racks, 'rack')); return Promise.resolve(setDb({ source: src })).then(toCompare); }).catch(function (er) { RES.cmpUi = 'idle'; toast(er.message); loadDrift(); }); }
+      cmpStatus('Copying in from ' + SRCLABEL[src] + '...');
+      return api('/api/sources/' + src + '/import', { method: 'POST' }).then(function (r) { cmpStatus('Finding the rack...'); return Promise.resolve(setDb({ source: src })).then(toCompare); })
+        .catch(function (er) { RES.cmpUi = 'idle'; cmpStatus(String(er.message || 'The copy did not work.').replace(/([^.!?])$/, '$1.'), 'err'); }); }
     if (t.dataset.cmppick) return setDb({ source: src, rack_key: t.dataset.cmppick });
     if (t.id === 'cmp-use') { var v = ($('cmp-type').value || '').trim(); if (!v) return toast('Type or pick a rack id first.');
       var known = (RES.cmp.candidates || []).some(function (r) { return r.rack_key === v; });

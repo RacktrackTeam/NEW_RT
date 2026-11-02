@@ -1,5 +1,5 @@
 /* wt/features: the remaining RT-EOS functions on a run, as screens of this app (#tools/<run>/<tool>) and step 6 of the result.
-   The content follows RT-EOS's own screens (rt_eos/client: FindPort, Connections, Worklist, Read again, Physical layer, SFP advice,
+   The content follows RT-EOS's own screens (rt_eos/client: FindPort, Connections, Read again, Physical layer, SFP advice,
    RackTopology, the A-end / Z-end check) in the RT-EOS minimal look; the data comes from server/app.py's wt/features routes. */
 (function () {
   'use strict';
@@ -15,7 +15,6 @@
     ['find', 'Find a port', 'Pick a device and a port number: it is marked on the rack picture with its cable and label.'],
     ['connections', 'Connections', 'Per device: its problems and a card of its ports.'],
     ['cables', 'Cables', 'The Excel matrix against the ports the video read, and the A-end / Z-end check with its CSV.'],
-    ['worklist', 'Worklist', 'The readings the video is least sure of: confirm or correct them.'],
     ['again', 'Read again', 'Read every device again with the current models. Your corrections are kept.'],
     ['physical', 'Physical layer', 'The physical layer document: JSON and a page to print.'],
     ['sfp', 'SFP advice', 'Which optic and cable fit the fibre and SFP ports.'],
@@ -64,7 +63,8 @@
 
   // ------------------------------------------------------------ the tools
   var VIEW = {};
-  function view(run) { return VIEW[run] ? Promise.resolve(VIEW[run]) : api('/api/video/' + encodeURIComponent(run) + '/view').then(function (v) { VIEW[run] = v; return v; }); }
+  function nameBar(v) { var n = $('rnav'); if (n && v) n.dataset.rack = (v.rack_id && v.rack_id.id) || v.title || ''; return v; }
+  function view(run) { return VIEW[run] ? Promise.resolve(nameBar(VIEW[run])) : api('/api/video/' + encodeURIComponent(run) + '/view').then(function (v) { VIEW[run] = v; return nameBar(v); }); }
   function unitOf(d) { var a = parseInt(String(d.top).replace(/\D/g, ''), 10), b = parseInt(String(d.bottom).replace(/\D/g, ''), 10); return a === b ? 'U' + a : 'U' + Math.min(a, b) + '-' + Math.max(a, b); }
   function devLabel(d) { var L = d.layout || {}; return 'D' + d.index + ' · ' + unitOf(d) + ' · ' + (d.kind || 'Not sure') + (L.vendor ? ' · ' + L.vendor + (L.model ? ' ' + L.model : '') : ''); }
 
@@ -92,26 +92,57 @@
   function find(run, q) {
     view(run).then(function (v) {
       var devs = (v.devices || []).filter(function (d) { return (d.layout || {}).ports && d.layout.ports.length; }).sort(function (a, b) { return parseInt(String(b.top).replace(/\D/g, ''), 10) - parseInt(String(a.top).replace(/\D/g, ''), 10); });
-      var want = (q || '').split('-'), wd = parseInt(want[0], 10), wp = parseInt(want[1], 10);
-      root().innerHTML = shell('Find a port', run,
-        '<form class="fx-bar" id="fp-form"><label><span>Device</span><select id="fp-dev">' + devs.map(function (d) { return '<option value="' + d.index + '"' + (d.index === wd ? ' selected' : '') + '>' + esc(devLabel(d)) + '</option>'; }).join('') + '</select></label>'
-        + '<label class="fx-num"><span>Port</span><input id="fp-port" type="number" min="1" max="999" value="' + (wp || 1) + '" inputmode="numeric"></label><button class="btn primary" type="submit">Show this port</button></form><div id="fp-out">'
-        + (wd && wp ? loading('Finding port ' + wp + '...') : empty('Pick a device and a port', 'The port is outlined on the picture of the device.')) + '</div>');
-      $('fp-form').addEventListener('submit', function (e) { e.preventDefault(); location.hash = '#tools/' + run + '/find/' + $('fp-dev').value + '-' + $('fp-port').value; });
-      if (!(wd && wp)) return;
-      api('/api/video/' + encodeURIComponent(run) + '/find-port?device=' + wd + '&port=' + wp).then(function (r) {
-        var p = r.read || {}, c = r.cable, pic;
-        if (r.placed === 'crop') pic = fig(fileUrl(run, r.crop_file), Object.keys(r.port_boxes).map(function (k) { return { box: r.port_boxes[k], n: k, cls: (String(k) === String(r.port) ? 'hl' : ''), tip: 'Port ' + k }; }), 'fx-find');
-        else pic = '<figure class="fx-fig"><img src="' + esc(r.picture) + '" alt=""></figure>';
-        var note = r.placed ? 'Tap another port on the picture to look at it.' : 'Port ' + r.port + ' could not be placed on the picture: the ports of this device were counted, not located.';
-        var kv = [['Cable', c ? c.cable : null], ['Label', c ? c.label : null], ['Other end', c ? [c.other.device, c.other.port ? 'port ' + c.other.port : ''].filter(Boolean).join(' ') : null], ['Cable type', c ? c.type : null], ['Colour read', p.colour], ['Connector', p.connector]];
-        $('fp-out').innerHTML = '<div class="fx-two"><div class="fx-left">' + pic + '<p class="fx-note">' + esc(note) + '</p></div><div class="fx-right fx-in"><span class="fx-eye">' + esc(r.device) + ' · ' + esc(r.unit) + '</span>'
-          + (r.found ? '<h2>Port ' + r.port + '</h2><div class="fx-pills">' + pill(stateWord(p.state), stCls(p.state)) + (p.type ? pill(String(p.type).toUpperCase()) : '') + pill(r.kind || 'Not sure') + '</div>'
-            : '<h2>Port ' + r.port + ' was not read</h2><p class="muted">Ports read: ' + esc((r.ports || []).join(', ') || 'none') + '.</p>')
-          + '<dl class="fx-kv">' + kv.map(function (x) { return '<dt>' + x[0] + '</dt><dd>' + (x[1] ? esc(x[1]) : '<em>none</em>') + '</dd>'; }).join('') + '</dl></div></div>';
-        fitFigs($('fp-out'));
-        $('fp-out').onclick = function (e) { var b = e.target.closest && e.target.closest('.fx-box'); if (b && b.dataset.n) location.hash = '#tools/' + run + '/find/' + wd + '-' + b.dataset.n; };
-      }).catch(function (e) { $('fp-out').innerHTML = '<p class="fx-err">' + esc(e.message) + '. Try another port.</p>'; });
+      var want = (q || '').split('-'), cur = { dev: parseInt(want[0], 10) || null, port: parseInt(want[1], 10) || null }, seq = 0;
+      if (!devs.length) { root().innerHTML = shell('Find a port', run, empty('No device with ports was read on this rack', 'Scan the rack again with a slower pass.')); return; }
+      var devOf = function (i) { return devs.filter(function (d) { return Number(d.index) === i; })[0]; };
+      if (!devOf(cur.dev)) cur.port = null;
+      var W = (v.rack.size || [1000, 2000])[0], H = (v.rack.size || [1000, 2000])[1];
+      var boxes = (v.devices || []).filter(function (d) { return d.polygon && d.polygon.length > 1; }).map(function (d) {
+        var xs = d.polygon.map(function (p) { return p[0]; }), ys = d.polygon.map(function (p) { return p[1]; });
+        return { i: Number(d.index), box: [Math.min.apply(null, xs), Math.min.apply(null, ys), Math.max.apply(null, xs), Math.max.apply(null, ys)], ports: !!devOf(Number(d.index)), tip: 'D' + d.index + ' · ' + unitOf(d) + ' · ' + (d.kind || 'Not sure') };
+      });
+      var picture = '<figure class="fx-fig fx-rack fp-rack" id="fp-rack"><img src="' + esc(v.rack.picture) + '" alt="The stitched rack"><svg aria-hidden="false" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' + boxes.map(function (b) {
+        return '<rect class="fx-box fp-dev' + (b.ports ? '' : ' fp-none') + '" data-i="' + b.i + '" x="' + b.box[0] + '" y="' + b.box[1] + '" width="' + (b.box[2] - b.box[0]) + '" height="' + (b.box[3] - b.box[1]) + '" rx="2"><title>' + esc(b.tip) + '</title></rect>';
+      }).join('') + '</svg></figure>';
+      root().innerHTML = shell('Find a port', run, '<div class="fp-top">' + picture + '<div class="fp-pick"><label><span>Device</span><select id="fp-dev">' + (cur.dev ? '' : '<option value="">Choose a device</option>')
+        + devs.map(function (d) { return '<option value="' + d.index + '"' + (Number(d.index) === cur.dev ? ' selected' : '') + '>' + esc(devLabel(d)) + '</option>'; }).join('') + '</select></label>'
+        + '<label><span>Port</span><select id="fp-port"></select></label><div id="fp-grid" class="ft-cells fp-grid" role="group" aria-label="Ports of this device"></div>'
+        + '<p class="fx-note" id="fp-hint"></p></div></div><div id="fp-out"></div>');
+      fitFigs(root());
+      var out = $('fp-out');
+      function mark() { [].forEach.call(document.querySelectorAll('#fp-rack .fp-dev'), function (r) { r.classList.toggle('sel', Number(r.dataset.i) === cur.dev); }); }
+      function pickers() {
+        var d = devOf(cur.dev), ports = d ? d.layout.ports.filter(function (p) { return p.id != null; }) : [];
+        $('fp-port').innerHTML = (cur.port ? '' : '<option value="">Choose a port</option>') + ports.map(function (p) { return '<option value="' + p.id + '"' + (p.id === cur.port ? ' selected' : '') + '>Port ' + p.id + ' · ' + esc(stateWord(p.status)) + '</option>'; }).join('');
+        $('fp-port').disabled = !d;
+        $('fp-grid').innerHTML = ports.map(function (p) { var st = p.status === 'connected' ? 'on' : p.status === 'empty' ? 'off' : 'na';
+          return '<button type="button" class="ft-cell ' + st + (p.id === cur.port ? ' chosen' : '') + '" data-p="' + p.id + '" title="Port ' + p.id + ': ' + esc(stateWord(p.status)) + '" aria-pressed="' + (p.id === cur.port) + '">' + p.id + '</button>'; }).join('');
+        $('fp-hint').textContent = d ? 'Filled number: cable plugged in. Plain: empty. Dashed: not sure.' : 'Choose a device here or tap one on the rack picture.';
+      }
+      function show() {
+        mark(); pickers();
+        if (cur.dev) history.replaceState(null, '', '#tools/' + run + '/find/' + cur.dev + (cur.port ? '-' + cur.port : ''));
+        if (!(cur.dev && cur.port)) { out.innerHTML = empty(cur.dev ? 'Choose a port' : 'Choose a device and a port', 'The device and the port are marked, with the facts, below the pickers.'); return; }
+        var my = ++seq; out.innerHTML = loading('Finding port ' + cur.port + '...');
+        api('/api/video/' + encodeURIComponent(run) + '/find-port?device=' + cur.dev + '&port=' + cur.port).then(function (r) {
+          if (my !== seq) return;
+          var p = r.read || {}, c = r.cable, pic;
+          if (r.placed === 'crop') pic = fig(fileUrl(run, r.crop_file), Object.keys(r.port_boxes).map(function (k) { return { box: r.port_boxes[k], n: k, cls: (String(k) === String(r.port) ? 'hl' : ''), tip: 'Port ' + k }; }), 'fx-find');
+          else pic = '<figure class="fx-fig"><img src="' + esc(r.picture) + '" alt=""></figure>';
+          var note = r.placed ? 'Tap another port on the picture to look at it.' : 'Port ' + r.port + ' could not be placed on the picture: the ports of this device were counted, not located.';
+          var kv = [['Port type', p.type ? String(p.type).toUpperCase() : null], ['State', stateWord(p.state)], ['Cable', c ? c.cable : null], ['Label', c ? c.label : null], ['Other end', c ? [c.other.device, c.other.port ? 'port ' + c.other.port : ''].filter(Boolean).join(' ') : null], ['Cable type', c ? c.type : null], ['Colour read', p.colour], ['Connector', p.connector]];
+          out.innerHTML = '<div class="fx-two"><div class="fx-left">' + pic + '<p class="fx-note">' + esc(note) + '</p></div><div class="fx-right fx-in"><span class="fx-eye">' + esc(r.device) + ' · ' + esc(r.unit) + '</span>'
+            + (r.found ? '<h2>Port ' + r.port + '</h2><div class="fx-pills">' + pill(stateWord(p.state), stCls(p.state)) + (r.kind ? pill(r.kind) : '') + '</div>' : '<h2>Port ' + r.port + ' was not read</h2><p class="muted">Ports read: ' + esc((r.ports || []).join(', ') || 'none') + '.</p>')
+            + '<dl class="fx-kv">' + kv.map(function (x) { return '<dt>' + x[0] + '</dt><dd>' + (x[1] ? esc(x[1]) : '<em>none</em>') + '</dd>'; }).join('') + '</dl></div></div>';
+          fitFigs(out);
+        }).catch(function (e) { if (my === seq) out.innerHTML = '<p class="fx-err">' + esc(e.message) + '. Try another port.</p>'; });
+      }
+      $('fp-dev').onchange = function () { cur.dev = parseInt(this.value, 10) || null; cur.port = null; show(); };
+      $('fp-port').onchange = function () { cur.port = parseInt(this.value, 10) || null; show(); };
+      $('fp-grid').onclick = function (e) { var b = e.target.closest('[data-p]'); if (b) { cur.port = parseInt(b.dataset.p, 10); show(); } };
+      $('fp-rack').onclick = function (e) { var r = e.target.closest('.fp-dev'); if (!r || r.classList.contains('fp-none')) return; cur.dev = parseInt(r.dataset.i, 10); cur.port = null; show(); };
+      out.onclick = function (e) { var b = e.target.closest && e.target.closest('.fx-box'); if (b && b.dataset.n) { cur.port = parseInt(b.dataset.n, 10); show(); } };
+      show();
     }).catch(fail);
   }
 
@@ -177,29 +208,6 @@
               ['Why', function (x) { return x.aExplained || x.zExplained || ''; }]]);
         }).catch(function (e2) { $('az-out').innerHTML = '<p class="fx-err">' + esc(e2.message) + '. Check both racks are scanned and try again.</p>'; });
       });
-    }).catch(fail);
-  }
-
-  // ---- Worklist: each doubtful reading with its crop; confirm or correct on the crop
-  function worklist(run) {
-    api('/api/video/' + encodeURIComponent(run) + '/worklist').then(function (r) {
-      root().innerHTML = shell('Worklist', run, (r.items.length ? '<p class="fx-key"><span id="wl-left">' + pill(r.items.length + ' to look at', 'bad') + '</span>' + pill('Least sure first') + '</p><div class="fx-grid fx-wl">' + r.items.map(function (it, i) {
-        var pic = it.kind === 'port' && it.cut && it.box ? fig(fileUrl(run, it.cut), [{ box: it.box, n: it.port, cls: 'hl' }]) : '<figure class="fx-fig"><img src="/api/video/' + encodeURIComponent(run) + '/crop/' + it.index + '" alt=""></figure>';
-        var acts = it.kind === 'device'
-          ? '<button class="btn primary wl-go" type="button" data-id="' + it.id + '" data-a="' + esc(it.read) + '">Confirm ' + esc(it.read) + '</button><button class="btn wl-fix" type="button">Correct it</button><select class="wl-kind" hidden>' + r.kinds.map(function (k) { return '<option' + (k === it.read ? ' selected' : '') + '>' + esc(k) + '</option>'; }).join('') + '</select><button class="btn primary wl-go" type="button" data-id="' + it.id + '" hidden>Save</button>'
-          : '<button class="btn primary wl-go" type="button" data-id="' + it.id + '" data-a="connected">Cable plugged in</button><button class="btn wl-go" type="button" data-id="' + it.id + '" data-a="empty">Empty</button>';
-        return '<section class="fx-card fx-in ft-wl" style="--i:' + Math.min(i, 8) + '" data-item="' + it.id + '">' + pic + '<div class="fx-body"><span class="fx-eye">' + esc(it.unit) + ' · D' + it.index + (it.port ? ' · port ' + it.port : '') + '</span><b>' + esc(it.question) + '</b>'
-          + '<p class="muted small">' + esc(it.why) + '</p><div class="ft-btns fx-acts">' + acts + '</div></div></section>';
-      }).join('') + '</div>' : empty('Nothing left to confirm', 'Every reading on this rack is settled.')));
-      fitFigs(root());
-      root().onclick = function (e) {
-        var fix = e.target.closest('.wl-fix'); if (fix) { var cd = fix.closest('.ft-wl'); [].forEach.call(cd.querySelectorAll('.wl-go, .wl-fix'), function (z) { z.hidden = !z.hidden; }); cd.querySelector('.wl-kind').hidden = false; return; }
-        var b = e.target.closest('.wl-go'); if (!b) return;
-        var card = b.closest('.ft-wl'), ans = b.dataset.a || card.querySelector('.wl-kind').value; b.disabled = true;
-        post('/api/video/' + encodeURIComponent(run) + '/worklist/' + b.dataset.id, { answer: ans }).then(function () { card.classList.add('ft-done'); card.querySelector('.ft-btns').innerHTML = pill('Saved: ' + (STATE[ans] || ans), 'ok'); delete VIEW[run];
-          var left = root().querySelectorAll('.ft-wl:not(.ft-done)').length; if ($('wl-left')) $('wl-left').innerHTML = left ? pill(left + ' to look at', 'bad') : pill('All done', 'ok'); })
-          .catch(function (e2) { b.disabled = false; card.querySelector('.fx-body').insertAdjacentHTML('beforeend', '<p class="fx-err">' + esc(e2.message) + '. Try again.</p>'); });
-      };
     }).catch(fail);
   }
 
@@ -274,7 +282,7 @@
     }).catch(fail);
   }
 
-  var RUNNERS = { find: find, connections: connections, cables: cables, worklist: worklist, again: again, physical: physical, sfp: sfp, topology: topology };
+  var RUNNERS = { find: find, connections: connections, cables: cables, again: again, physical: physical, sfp: sfp, topology: topology };
   var SHOWN = null;                                   // the tool on screen: the app routes again now and then (session checks), which must not reload it
   function open(run, tool, q) {
     var key = [run, tool, q].join('/'); if (key === SHOWN && root().children.length) return; SHOWN = key;

@@ -267,3 +267,23 @@ h1, h2, b, .rkrow2 b, .fx-body, .fx-row span { overflow-wrap:anywhere; }
   body.tabbed main { padding-top:calc(50px + 16px) !important; padding-bottom:24px !important; }
   body.tabbed .runpage, body.tabbed .fx-page { padding-bottom:16px; }
 }
+
+/* the compare's one status line under the button: spinner while it runs, one sentence if it fails */
+.cmpstatus { display:flex; align-items:center; gap:10px; margin:10px 0 0; font-size:14px; color:#1f2a3a; }
+.cmpstatus[hidden] { display:none; } .cmpstatus.err { color:#b3261e; }
+.cmpstatus .spin { width:16px; height:16px; border:2px solid #d5dbe3; border-top-color:#1f2a3a; border-radius:50%; animation:cmpspin .8s linear infinite; flex:none; }
+@keyframes cmpspin { to { transform:rotate(360deg); } }
+
+/* result tab bar (laptop): the rack name on the left, compact tabs right aligned on one line; the open tab filled, the others plain text */
+@media (min-width:1000px) {
+  body.web.result .screen[data-screen="result"] { display:grid !important; grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"title tabs" "pending pending" "part part"; grid-template-rows:auto auto minmax(0,1fr); align-items:center; column-gap:24px; row-gap:16px !important; }
+  body.web.result #res-title { grid-area:title; } body.web.result .screen[data-screen="result"] > .rpart { grid-area:part; } body.web.result #res-pending { grid-area:pending; }
+  body.web.result #rnav.inpage { align-self:center !important; justify-self:end; max-width:none; }
+  .screen[data-screen="tools"] > #rnav.inpage { display:flex !important; align-items:center; justify-content:space-between; max-width:100%; margin:0 0 20px !important; }
+  .screen[data-screen="tools"] > #rnav.inpage::before { content:attr(data-rack); font-size:24px; font-weight:600; color:#111; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:24px; }
+  #rnav.inpage .pill { height:auto !important; padding:0 !important; background:transparent !important; gap:4px; display:inline-flex; flex-wrap:nowrap; }
+  #rnav.inpage .pill a { height:32px; padding:0 14px !important; font-size:13px !important; font-weight:500; border-radius:999px; background:transparent; color:#444; white-space:nowrap; }
+  #rnav.inpage .pill a .ic { display:none; } #rnav.inpage .pill a span { font-size:13px !important; letter-spacing:0; text-transform:none; }
+  #rnav.inpage .pill a:hover:not(.on) { background:#f1f2f4; }
+  #rnav.inpage .pill a.on { background:#1f2a3a; color:#fff; }
+}
