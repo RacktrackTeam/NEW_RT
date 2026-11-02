@@ -53,6 +53,7 @@ import rack_video  # noqa: E402
 import rack_label  # noqa: E402
 import patch_panels  # noqa: E402
 import build_report as video_report  # noqa: E402
+import source_db as SDB  # noqa: E402
 
 # ------------------------------------------------------------------ settings
 PORT = int(os.environ.get("RACKTRACK_PORT", "8600"))
@@ -175,7 +176,7 @@ JOBS = {}                                   # id -> {"status", "progress", "resu
 
 def _save(j):
     """status.json beside the run: what the history and the app need, never the big result."""
-    keep = {k: j.get(k) for k in ("id", "status", "progress", "error", "started", "finished", "title", "name", "from_guide", "stride", "summary", "phase", "partial", "ports", "ports_error", "video_file", "rack_id", "video_md5", "video_probe")}
+    keep = {k: j.get(k) for k in ("id", "status", "progress", "error", "started", "finished", "title", "name", "from_guide", "stride", "summary", "phase", "partial", "ports", "ports_error", "video_file", "rack_id", "video_md5", "video_probe", "db")}
     try:
         (pathlib.Path(j["dir"]) / "status.json").write_text(json.dumps(keep, indent=1))
     except OSError:
@@ -1409,6 +1410,82 @@ def service_worker():
 @app.get("/favicon.ico")
 def favicon():
     return FileResponse(MOBILE / "icons" / "icon-192.png", media_type="image/png")
+
+
+# ------------------------------------------------------------------ the site's database and the drift (src/source_db.py)
+@app.get("/api/sources")
+def api_sources():
+    """What has been copied in from each source: its racks, device counts and when."""
+    return {"sources": SDB.SOURCES, "racks": SDB.racks()}
+
+
+@app.post("/api/sources/excel")
+async def api_sources_excel(workbook: UploadFile = File(...)):
+    """The manager's source-of-truth workbook (.xlsx), read into our copy."""
+    if not (workbook.filename or "").lower().endswith(".xlsx"):
+        raise HTTPException(400, "Send the manager's workbook as an .xlsx file.")
+    d = ROOT / "data" / "sources"; d.mkdir(parents=True, exist_ok=True)
+    f = d / ("workbook_" + re.sub(r"[^A-Za-z0-9_.-]", "_", workbook.filename)[-80:])
+    f.write_bytes(await workbook.read(50 * 1024 * 1024))
+    try:
+        return SDB.import_excel(f)
+    except Exception as e:                      # a broken or foreign file says why, in words
+        raise HTTPException(400, f"The workbook could not be read: {e}")
+
+
+@app.post("/api/sources/{source}/import")
+def api_sources_import(source: str):
+    """Copy NetBox or the ServiceNow CMDB in (today: the local mocks)."""
+    fn = {"netbox": SDB.import_netbox, "cmdb": SDB.import_cmdb}.get(source)
+    if fn is None:
+        raise HTTPException(404, "No such source.")
+    try:
+        return fn()
+    except (ConnectionError, ValueError, KeyError) as e:
+        raise HTTPException(502, str(e))
+
+
+def drift_view(j):
+    """The run against its record: the chosen source, the matched rack (or the one a person picked), and the drift."""
+    rid = (j.get("rack_id") or {}).get("id")
+    have = SDB.racks()
+    db = j.get("db") or {}
+    source = db.get("source") or next((s for s in SDB.SOURCES if any(r["source"] == s for r in have)), None)
+    out = {"rack_id": rid, "source": source, "sources": SDB.SOURCES, "imported": {s: next((r["imported_at"] for r in have if r["source"] == s), None) for s in SDB.SOURCES},
+           "candidates": [r for r in have if r["source"] == source], "match": None, "record": [], "drift": None}
+    if not source:
+        return out
+    if db.get("rack_key") and db.get("source") == source and any(r["rack_key"] == db["rack_key"] for r in out["candidates"]):
+        out["match"] = {"rack_key": db["rack_key"], "how": "picked", "why": f"Picked by {db.get('by') or 'a person'}."}
+    else:
+        out["match"] = SDB.match(source, rid)
+    if out["match"]:
+        out["record"] = SDB.devices(source, out["match"]["rack_key"])
+        out["drift"] = SDB.drift(j.get("result"), out["record"])
+    return out
+
+
+@app.get("/api/video/{job}/drift")
+def api_video_drift(job: str):
+    j = job_or_none(job)
+    if j is None or j.get("result") is None:
+        raise HTTPException(404, "No such run.")
+    return drift_view(j)
+
+
+@app.post("/api/video/{job}/database")
+def api_video_database(job: str, request: Request, body: dict = Body(...)):
+    """Choose the source for this run's rack, and optionally the record (rack_key) instead of the automatic match."""
+    j = job_or_none(job)
+    if j is None or j.get("result") is None or job.startswith("example-"):
+        raise HTTPException(404, "No such run.")
+    source = body.get("source")
+    if source not in SDB.SOURCES:
+        raise HTTPException(400, "Choose Excel, NetBox or CMDB.")
+    j["db"] = {"source": source, "rack_key": body.get("rack_key") or None, "by": read_session(request.cookies.get("rt_session"))["name"],
+               "on": datetime.datetime.now().isoformat(timespec="minutes")}
+    _save(j)
+    return drift_view(j)
 
 
 @app.exception_handler(HTTPException)
