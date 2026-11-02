@@ -434,24 +434,46 @@ def layout_kind(L):
     return LAYOUT_KIND.get(str(L.get("kind") or "").strip().lower())
 
 
-def device_kind(d):
+def _day(iso):
+    try:
+        return datetime.datetime.fromisoformat(str(iso)[:19]).strftime("%-d %b %Y")
+    except ValueError:
+        return None
+
+
+def device_kind(d, when=None):
     """The one kind of a device everywhere in the app (Devices list, device page, rack view, report, drift, the JSON routes), in this
-    order: a person's correction, then the make and model step (the faceplate read), then the classifier (the picture). Returns
-    {"kind", "from" (corrected, faceplate, picture or None), "picture" (the classifier's label), "words" (the source in plain words)}."""
+    order: a person's correction, then the kind the port step used (layout.kind), then the classifier (the picture). The words say
+    where it came from truly: "from the faceplate" only when a layout was fitted or a make and model were read; otherwise the layout's
+    kind is the one recorded when its ports were mapped (`when`, the run's date); every other source that disagrees is said.
+    Returns {"kind", "from" (corrected, faceplate, ports, picture or None), "picture" (the classifier's label), "words"}."""
     cl = (d or {}).get("classification") or {}
     pic = cl.get("label") or (d or {}).get("type")
     pic_known = pic if pic not in (None, "", "Other", "Not sure") else None
+    prob = cl.get("prob")
+    pic_words = f"from the picture ({round(100 * prob)} %)" if prob is not None else "from the picture"
     ov = ((d or {}).get("kind_override") or {})
+    L = (d or {}).get("layout") or {}
+    lk = layout_kind(L)
+    read = bool(L.get("fitted") or (L.get("vendor") and L.get("model")))     # a text read alone (vendor_read, model_read) is not the faceplate
+    lk_words = None
+    if lk:
+        day = _day(when) if when else None
+        lk_words = "from the faceplate" if read else "as read when its ports were mapped" + (f" on {day}" if day else "")
     if ov.get("kind"):
-        kind, src, words = ov["kind"], "corrected", f"{ov['kind']}, set by {ov.get('by') or 'a person'}"
-    elif layout_kind((d or {}).get("layout")):
-        kind, src, words = layout_kind(d["layout"]), "faceplate", f"{layout_kind(d['layout'])}, from the faceplate"
-    elif pic_known and not ((d or {}).get("unsure") and (cl.get("prob") or 0) < 0.7):
-        return {"kind": pic_known, "from": "picture", "picture": pic, "words": f"{pic_known}, from the picture"}
+        kind, src, words = ov["kind"], "corrected", f"{ov['kind']}, your correction" + (f" ({ov['by']})" if ov.get("by") else "")
+    elif lk:
+        kind, src, words = lk, "faceplate" if read else "ports", f"{lk}, {lk_words}"
+    elif pic_known and not ((d or {}).get("unsure") and (prob or 0) < 0.7):
+        return {"kind": pic_known, "from": "picture", "picture": pic, "words": f"{pic_known}, {pic_words}"}
     else:
         return {"kind": None, "from": None, "picture": pic, "words": "Not sure: the picture could not tell" + (f" (best guess {pic})" if pic_known else "")}
+    if src == "corrected" and lk and _norm(lk) != _norm(kind):
+        words += f"; {lk} {lk_words}"
     if pic_known and _norm(pic_known) != _norm(kind):
-        words += f"; the picture said {pic_known}"
+        words += f"; {pic_known} {pic_words}"
+    elif not pic_known and cl.get("class"):
+        words += f"; the picture was not sure ({cl['class']} {round(100 * (prob or 0))} %)"
     return {"kind": kind, "from": src, "picture": pic, "words": words}
 
 

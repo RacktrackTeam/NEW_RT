@@ -539,7 +539,7 @@ def worklist(result):
         k = SDB.device_kind(d)
         cl = d.get("classification") or {}
         prob = float(cl.get("prob") or 0)
-        if k["from"] not in ("corrected", "faceplate") and prob < LOW_DEVICE:
+        if k["from"] not in ("corrected", "faceplate", "ports") and prob < LOW_DEVICE:
             items.append({"id": f"d{d['index']}", "kind": "device", "index": d["index"], "unit": SDB._units(*_span(d)), "read": k["kind"] or cl.get("class") or "Not sure",
                           "confidence": round(prob, 2), "question": f"What is the device at {SDB._units(*_span(d))}?",
                           "why": f"The picture read {cl.get('class') or 'nothing sure'} at {round(100 * prob)} %."})

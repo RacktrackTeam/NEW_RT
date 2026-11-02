@@ -111,3 +111,13 @@ def test_find_port_connections_worklist_physical_sfp(env):
     assert doc["schema"] == "racktrack-physical-layer/1" and doc["counts"]["ports"] == sum(len(d["ports"]) for u in doc["units"] for d in u["devices"])
     sfp = RTF.sfp_advice(r, rec, cab)["items"]
     assert {x["device"] for x in sfp} >= {"SP-R1-U17-SW03", "SP-R1-U15-SW02"} and all(x["port_type"] == "SFP" for x in sfp)
+
+
+def test_kind_words_say_the_true_source():
+    import source_db as SDB
+    r = _vdo1()
+    d1, d2, d3 = r["devices"][:3]
+    assert SDB.device_kind(d1, "2026-10-27T12:54:50")["words"] == "Router, as read when its ports were mapped on 27 Oct 2026; Switch from the picture (83 %)"
+    assert SDB.device_kind(d2, "2026-10-27T12:54:50")["words"].startswith("Firewall, as read when its ports were mapped on 27 Oct 2026; the picture was not sure")
+    assert SDB.device_kind(d3)["words"] == "Switch, from the faceplate"
+    assert SDB.device_kind(dict(d1, kind_override={"kind": "Router", "by": "admin"}))["words"].startswith("Router, your correction (admin); Switch from the picture")

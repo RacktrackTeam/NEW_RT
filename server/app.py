@@ -650,7 +650,7 @@ def api_video_view(job: str):
                 "ports_state": (j.get("ports") or {}).get(str(d["index"])) or ("done" if d.get("layout") else None),
                 "seconds": d.get("layout_seconds")}
     devices = [{"index": d["index"], "top": d["top"], "bottom": d["bottom"], "height": d["height"], "units": d.get("units"), "polygon": d.get("polygon"),
-                **_kind_of(d),
+                **_kind_of(d, j.get("finished") or j.get("started")),
                 "prob": None if d.get("kind_override") else (d.get("classification") or {}).get("prob"), "unsure": bool(d.get("unsure")), "kind_model": (d.get("classification") or {}).get("label"), "corrected_by": (d.get("kind_override") or {}).get("by"), "crop": f"/api/video/{job}/crop/{d['index']}" + _crop_ver(j, d["index"]),   # the crop with nothing drawn on it (api_device_crop); a new cut gets a new link
                 "frames": [base + t["file"] for t in d.get("top_frames") or [] if t.get("file")],
                 "views": [f"/api/video/{job}/crop/{d['index']}" + _crop_ver(j, d["index"])] + [f"/api/video/{job}/crop/{d['index']}/{n}" for n in range(1, min(3, len(d.get("top_frames") or [])))],   # clean cuts, nothing drawn
@@ -667,9 +667,9 @@ def api_video_view(job: str):
             "rack_id": j.get("rack_id"), "rack_id_options": rack_id_options(j)}
 
 
-def _kind_of(d):
+def _kind_of(d, when=None):
     """The device's one kind for the screens (src/source_db.py device_kind) and where it came from, in plain words."""
-    k = SDB.device_kind(d)
+    k = SDB.device_kind(d, when)                 # when: the run's date, for a kind recorded when the ports were mapped
     return {"kind": k["kind"], "kind_from": k["from"], "kind_words": k["words"]}
 
 
