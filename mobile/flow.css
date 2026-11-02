@@ -122,7 +122,7 @@ table.rptable, table.dftable, table.cptable, table.wbtable { border-collapse:col
 .rptable tbody tr:nth-child(odd) td, .rptable tbody tr:nth-child(odd) { background:#fff !important; }
 /* the compare inside the report */
 .cmpsec { display:flex; flex-direction:column; gap:12px; padding-top:24px; border-top:1px solid var(--line); margin-top:8px; }
-.cmpsec:empty, #sec-diff:has(#diff-top:empty) { display:none; }
+.cmpsec[hidden] { display:none; }   /* set by app.js when the section is empty: Safari 26.4 does not re-check :has(:empty) when the content arrives */
 .dflines li { font-size:15px; }
 @media (max-width:600px) {
   body, body.web { font-size:15px !important; }
@@ -172,7 +172,6 @@ body.web.result #rnav.inpage { align-self:flex-start !important; margin:0 !impor
 .idbtns { gap:10px; } .idpick { display:flex; flex-direction:column; gap:10px; padding-top:8px; border-top:1px solid var(--line); }
 .rpmore { margin:24px 0 8px; font-size:13px; } .rpmore a { color:var(--t2); text-decoration:underline; }
 @media (max-width:600px) { .cmpdd, #cmp-btn { width:100%; } .ddmenu { left:0; right:0; } }
-#sec-compare:has(#df-top:empty) { display:none; }
 
 /* Sign in: one centred column, white page, no card. */
 .screen[data-screen="signin"]:not([hidden]) { min-height:calc(100vh - 140px); min-height:calc(100dvh - 140px); display:flex; align-items:center; justify-content:center; }
