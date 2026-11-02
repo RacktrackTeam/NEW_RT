@@ -1,0 +1,83 @@
+/* The RT-EOS minimal look over the video screens (values from rt_eos/client/src/styles/global.css): pure white ground,
+   near-black ink doing the accenting, greyscale neutrals, flat cards with a 1px line and no shadow, pill buttons, one radius.
+   Pages span the full device width and work at 400 px. Loaded last, so it wins over app.css. Light theme only. */
+:root { color-scheme:light;
+  --ground:#ffffff; --raised:#ffffff; --sunken:#f6f6f6; --line:rgba(18,18,18,.08); --line2:rgba(18,18,18,.06); --ink:#121212; --ink2:#121212;
+  --t2:#6b6b6b; --t3:#757575; --lift:none; --lift-hi:none; --press:none; --r1:12px; --r2:12px; --r3:12px; --r4:12px;
+  --ok:#15803d; --bad:#ba1a1a; --warn:#b45309; --ok-bg:rgba(22,163,74,.09); --bad-bg:rgba(186,26,26,.08); --warn-bg:rgba(245,158,11,.12); }
+html, body, body.web, body.on-home, .shell, .content, main, #top, body.on-home #top { background:#fff !important; }
+.top { box-shadow:none !important; border-bottom:1px solid var(--line); -webkit-backdrop-filter:none; backdrop-filter:none; }
+.side { background:#fff !important; border-right:1px solid var(--line) !important; box-shadow:none !important; }
+.card, .run, .li, .kpirow, .film, .repbox, .choice, .sidecard, .onecard, .upcard { background:#fff !important; border:1px solid var(--line) !important; border-radius:12px !important; box-shadow:none !important; }
+.card.flush { padding:0; }
+.btn { border-radius:999px !important; border:1px solid rgba(18,18,18,.14) !important; background:#fff !important; color:var(--ink) !important; box-shadow:none !important; min-height:44px; font-weight:600; }
+.btn.primary, .btn.on, .dfsrc .btn.on, .seg2 .btn.on { background:#121212 !important; border-color:#121212 !important; color:#fff !important; }
+.btn.danger { color:var(--bad) !important; }
+.btn.big { min-height:52px; }
+input, select { border:1px solid rgba(17,17,17,.14) !important; border-radius:12px !important; background:#fff !important; min-height:44px; padding:0 12px; font:inherit; font-size:16px; max-width:100%; }
+input[type=file] { padding:8px; }
+.chip { border-radius:999px; font-weight:600; }
+.chip.done { background:var(--ok-bg); color:var(--ok); } .chip.part { background:var(--warn-bg); color:var(--warn); } .chip.fail { background:var(--bad-bg); color:var(--bad); }
+.glabel, .eyebrow { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t2); }
+.bottom .pill { background:#fff; border:1px solid var(--line); box-shadow:0 8px 24px rgba(17,17,17,.1), 0 2px 6px rgba(17,17,17,.05); }
+.pill a.on { background:#121212 !important; color:#fff !important; }
+
+/* full device width: no centred column */
+main { max-width:none !important; margin:0 !important; padding-left:16px !important; padding-right:16px !important; }
+@media (min-width:900px) { main { padding-left:32px !important; padding-right:32px !important; }
+  .screen[data-screen="more"] > *, .swrows, .swh, .mtable, #res-rack, #res-report > * { max-width:none !important; } }
+
+/* Home: the racks and their state */
+.racklist .card.flush { overflow:hidden; }
+.rkrow { display:flex; align-items:center; gap:12px; padding:12px 16px; text-decoration:none; color:var(--ink); border-top:1px solid var(--line); min-height:72px; }
+.rkrow:first-child { border-top:0; } .rkrow:hover { background:#fafafa; }
+.rkrow .thumb { width:44px; height:56px; border-radius:8px; overflow:hidden; background:var(--sunken); display:flex; align-items:center; justify-content:center; flex:none; position:relative; }
+.rkrow .thumb img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; } .rkrow .thumb .ic { color:var(--t2); }
+.rkrow .t { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; } .rkrow .t b { font-size:15px; overflow-wrap:anywhere; }
+.rkrow .t small { color:var(--t2); font-size:13px; } .rkrow .rkrec { color:var(--ink) !important; }
+.rkrow .side2 { display:flex; align-items:center; gap:8px; flex:none; } .rkrow .chev { color:var(--t2); }
+.nowcard { flex-direction:row !important; align-items:center; gap:10px; text-decoration:none; }
+@media (max-width:600px) { .rkrow .side2 .chip { font-size:11px; padding:2px 8px; } .screen[data-screen="home"] .phead .btn { width:100%; } }
+
+/* the result: one page, five steps, a short line under each heading */
+@media (min-width:1000px) {
+  body.web.result, body.web.result .content, body.web.result main { height:auto !important; overflow:visible !important; }
+  body.web.result main { padding-top:16px !important; padding-bottom:48px !important; }
+  body.web.result .screen[data-screen="result"] { height:auto !important; display:flex !important; flex-direction:column; }
+  body.web.result .screen[data-screen="result"] > .rpart { height:auto !important; overflow:visible !important; margin-top:0 !important; }
+  #res-rack { height:auto !important; }
+  #res-rack > .rackshot, #res-rack .rackshot.fit { height:min(82vh, 920px) !important; }
+  #res-devices, #dv-pick, #dv-one { height:auto !important; }
+  #dv-list.plist2 { overflow:visible !important; }
+  #dv-one .onecard, #dv-one .webside { overflow:visible !important; }
+  #rnav.inpage { position:sticky; top:0; z-index:15; background:#fff; padding:8px 0; }
+}
+.rsh { display:flex; gap:14px; align-items:flex-start; padding:28px 0 4px; border-top:1px solid var(--line); scroll-margin-top:72px; }
+.rsh:first-of-type { border-top:0; padding-top:4px; }
+.rsn { width:32px; height:32px; border-radius:999px; background:#121212; color:#fff; font-weight:600; display:inline-flex; align-items:center; justify-content:center; flex:none; font-size:14px; }
+.rsh h2 { font-size:20px; letter-spacing:-.01em; margin:2px 0 4px; } .rsh p { font-size:14px; max-width:80ch; }
+#res-elevation .glabel { display:block; margin:8px 0; }
+.cmpcard .dfrow, .idcard .dfrow { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.cmpcard select { flex:1 1 260px; }
+.lblstrip { margin:4px 0; } .lblstrip img { width:100%; max-height:180px; object-fit:contain; background:#1e1f22; border-radius:12px; display:block; }
+.idsteps { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0; }
+.idsteps li { padding:10px 0; border-top:1px solid var(--line); } .idsteps li:first-child { border-top:0; }
+.idsteps .dfrow { justify-content:space-between; } .idout { font-size:13px; font-weight:600; color:var(--t2); }
+.idsteps li.st-one .idout { color:var(--ok); } .idsteps li.st-skipped { opacity:.75; }
+.verdict { font-weight:600; padding:10px 12px; border-radius:12px; background:var(--sunken); }
+.verdict.verified { background:var(--ok-bg); color:var(--ok); } .verdict.confirm, .verdict.pick, .verdict.ask { background:var(--warn-bg); color:var(--warn); }
+.idtop { display:flex; flex-direction:column; gap:8px; } .idtop .btn { justify-content:flex-start; text-align:left; height:auto; padding:8px 16px; flex-wrap:wrap; }
+#cmp-type { flex:1 1 220px; }
+.seg2 { display:flex; gap:8px; }
+.dflines { list-style:none; margin:0; padding:0; } .dflines li { padding:10px 0; border-top:1px solid var(--line); } .dflines li:first-child { border-top:0; }
+.dflines li p { margin:2px 0 0; color:var(--t2); font-size:14px; }
+.dfcard .dfrow { justify-content:space-between; } .dfpair { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.dfcrop { width:100%; max-width:420px; border-radius:8px; margin-top:6px; background:#1e1f22; display:block; }
+@media (max-width:600px) { .dfpair { grid-template-columns:1fr; gap:10px; } .rsh { padding-top:22px; } .rsh h2 { font-size:18px; } }
+#cp-in .dfrow { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.idconf { font-weight:700; font-size:18px; } .idconf.verified { color:var(--ok); } .idconf.confirm { color:var(--warn); }
+.idsteps li.st-against b, .idsteps li.st-against .idout, .idsteps li.st-against p.small { color:var(--bad) !important; }
+.idcard > .dfrow { justify-content:space-between; }
+/* plain: content is there at once, no fade or slide on the way in (a long one-page result would otherwise sit invisible below the fold) */
+.rv, .a1, .a2, .a3, .a4, #dv-list > *, .rpart > *, .rpart.mo > *, #dv-one > *, #dv-one.mo > *, .screen > *, .mo > * { opacity:1 !important; transform:none !important; animation:none !important; transition:none !important; }
+.screen[data-screen="result"] > .rsh { align-self:stretch !important; max-width:none !important; width:100% !important; margin-left:0 !important; margin-right:0 !important; }

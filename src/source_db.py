@@ -335,8 +335,9 @@ def import_cmdb(org=None):
         locs = {x["name"]: x for x in _get(base, "/api/now/table/cmn_location?sysparm_limit=10000", hd)["result"]}
     except ConnectionError:
         locs = {}
-    racks = [{"rack_key": r["name"], "name": r["name"], "label": r["name"], "height_ru": _int(r.get("rack_units")), "site": r.get("location"),
-              "lat": (locs.get(r.get("location")) or {}).get("latitude"), "lng": (locs.get(r.get("location")) or {}).get("longitude")} for r in rk]
+    loc = lambda r: (r.get("location") or {}).get("display_value") or (r.get("location") or {}).get("value") if isinstance(r.get("location"), dict) else r.get("location")  # noqa: E731
+    racks = [{"rack_key": r["name"], "name": r["name"], "label": r["name"], "height_ru": _int(r.get("rack_units")), "site": loc(r),
+              "lat": (locs.get(loc(r)) or {}).get("latitude"), "lng": (locs.get(loc(r)) or {}).get("longitude")} for r in rk]
     rack_of = {r["sys_id"]: r["name"] for r in rk}
     child_rack = {x["child"]["value"]: rack_of[x["parent"]["value"]] for x in _get(base, "/api/now/table/cmdb_rel_ci?sysparm_limit=100000", hd)["result"]
                   if x["parent"]["value"] in rack_of}
@@ -610,7 +611,7 @@ def identify(source, rack_id, result, position=None, label=None, rack_id_how=Non
     rows, steps = racks(source), []
     # 0 a person confirmed the record for this rack label before (this run or an earlier one)
     if confirmed and any(r["rack_key"] == confirmed["rack_key"] for r in rows):
-        steps.append({"n": 0, "title": "Confirmed before", "proof": f"Confirmed by {confirmed['by']} on {str(confirmed['on_'])[:10]}: {rack_id} is {confirmed['rack_key']}.",
+        steps.append({"n": 0, "title": "Confirmed before", "proof": f"Confirmed by {confirmed['by']} on {str(confirmed['on_'])[:10]}: the rack labelled {rack_id} is the record {confirmed['rack_key']}.",
                       "left": [confirmed["rack_key"]], "outcome": "one"})
     # 1 location: the run's phone position against each rack's site position
     placed = [r for r in rows if r.get("lat") is not None and r.get("lng") is not None]
@@ -652,7 +653,7 @@ def identify(source, rack_id, result, position=None, label=None, rack_id_how=Non
         steps.append({"n": 4, "title": "Rack height", "proof": "No unit count or no rack heights to compare.", "left": None, "outcome": "skipped"})
     else:
         steps.append({"n": 4, "title": "Rack height", "proof": f"The video counted {n_units} units; {pl(len(fits_h), 'rack')} in this copy can hold that many.",
-                      "left": [r["rack_key"] for r in fits_h], "outcome": "one" if len(fits_h) == 1 else "narrowed" if fits_h else "none"})
+                      "left": [r["rack_key"] for r in fits_h], "outcome": "narrowed" if fits_h else "none"})   # the height only narrows, it never names
     # 5 the rack number inside device labels read on the video (R1 in SP-R1-U17-SW03; rack_identity.js rackNumberInLabel and rackNumberOf)
     dev_labels = [x for d in ((result or {}).get("devices") or []) for x in (d.get("label_read"), (d.get("layout") or {}).get("label_read")) if x]   # device labels the OCR read (none kept by the runs today)
     nums = {n for n in (_rack_number_in_label(t) for t in dev_labels) if n is not None}

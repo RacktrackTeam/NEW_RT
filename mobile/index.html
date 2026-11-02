@@ -15,6 +15,7 @@
 <link rel="preload" href="/app/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/app/app.css?v=127">
 <link rel="stylesheet" href="/app/rt/rt-topology.css?v=12">
+<link rel="stylesheet" href="/app/flow.css?v=3">
 <style>
 /* the Drift tab: the database the run is checked against, the matched record, the differences */
 #df-top { display:flex; flex-direction:column; gap:12px; width:100%; }
@@ -109,21 +110,12 @@
     </div>
   </section>
 
-  <!-- home -->
-  <section class="screen rthome" data-screen="home" hidden>
-    <!-- racktrack.ai's front door (RT-EOS HomePage): one photo of a whole cabled rack, a title, one line, one button, all on one left edge -->
-    <div class="rh">
-      <figure class="rh-photo"><img src="/app/img/home-rack.jpg?v=1" alt="A rack of switches and patch panels, fully cabled"><span class="leds" aria-hidden="true"><i style="--x:88%;--y:4%;--d:0s"></i><i style="--x:90%;--y:22%;--d:.8s"></i><i style="--x:89%;--y:39%;--d:1.6s"></i><i style="--x:90%;--y:55%;--d:.4s"></i><i style="--x:88%;--y:73%;--d:1.2s"></i><i style="--x:12%;--y:47%;--d:2s"></i></span></figure>
-      <div class="rh-text">
-        <p class="rh-eyebrow" id="greet-sub"></p>
-        <h1 class="rh-title" id="h-words"><span>Know</span> <span>what's</span> <span>really</span> <span>in</span> <span>the</span> <span>rack</span></h1>
-        <p class="rh-sub">Film the rack once. RackTrack finds every unit and device, reads the makes, models and ports, and shows what is free.</p>
-        <a class="rh-live" id="now-card" href="#" hidden><i class="sig live"></i><span id="now-title">Reading your rack</span><span class="mono" id="now-step"></span></a>
-        <div class="rh-actions"><a class="rh-btn" href="#sweep"><svg class="ic"><use href="#n-camera"/></svg>Scan a rack</a><a class="rh-second" href="#history">My racks</a></div>
-        <p class="rh-tally" id="tally" hidden></p>
-        <ul class="rh-reads" aria-label="What a scan reads"><li>Rack units and free space</li><li>Devices and their types</li><li>Makes, models and ports</li></ul>
-      </div>
-    </div>
+  <!-- home: the racks scanned and their state, one button -->
+  <section class="screen" data-screen="home" hidden>
+    <div class="phead"><div><p class="eyebrow" id="greet-sub"></p><h1>Racks</h1><p class="muted">Every rack scanned, newest first: when it was scanned, the record it was compared with and how many differences were found. Open a rack to see the result.</p></div>
+      <a class="btn primary big" href="#sweep"><svg class="ic"><use href="#n-camera"/></svg>Scan a rack</a></div>
+    <a class="card nowcard" id="now-card" href="#" hidden><i class="sig live"></i><b id="now-title">Reading your rack</b><span class="mono muted small" id="now-step"></span></a>
+    <div id="home-racks" class="racklist"><p class="muted">Loading...</p></div>
   </section>
 
   <!-- history -->
@@ -135,7 +127,7 @@
 
   <!-- sweep: two ways in, the camera (the guided capture) or an upload -->
   <section class="screen scanpage" data-screen="sweep" hidden>
-    <div class="swh a1"><h1>Scan a rack</h1><p class="muted">Film the rack top to bottom, or pick a video of it. Video only.</p></div>
+    <div class="swh a1"><h1>Scan a rack</h1><p class="muted">Record the rack with the camera, top to bottom, or upload a video of it. Then the run reads it step by step and the result opens by itself.</p></div>
     <div class="scanbody a2" id="sw-choices">
       <div class="upcard dropzone" id="dropzone" role="button" tabindex="0" aria-label="Pick a video">
         <div class="dz-idle" id="dz-idle">
@@ -198,6 +190,7 @@
   <section class="screen" data-screen="result" hidden>
     <span id="res-eyebrow" hidden></span><span id="res-title" hidden></span><span id="res-sub" hidden></span><a id="rep-full" href="#" hidden></a>
     <div class="card note" id="res-pending" hidden><span class="dot run"></span><div><b>Ports are being read in the background.</b><p class="muted small">Makes, models and ports fill in when done. Everything else is final.</p></div></div>
+    <header class="rsh" id="sec-rack"><span class="rsn">1</span><div><h2>The rack picture</h2><p class="muted">The rack stitched from the video, with every unit numbered. Switch the layer to see free space, devices or types. Next: the devices read from it.</p></div></header>
     <div class="rpart" id="res-rack">
       <div class="card rkask" id="rk-ask" hidden></div>
       <a class="nextstrip" id="rk-next" href="#" hidden></a>
@@ -209,7 +202,8 @@
       <div class="caprow" id="caprow"><p class="laycap" id="lay-cap"></p><button class="link fittog" id="fit-tog" type="button">Zoom in</button></div>
       <aside class="webside" id="rack-side"></aside>
     </div>
-    <div class="rpart" id="res-devices" hidden>
+    <header class="rsh" id="sec-devices"><span class="rsn">2</span><div><h2>Devices read</h2><p class="muted">Every device found, top to bottom: its kind and where that came from, and where read its make, model and ports. Open one to check it. Next: the record to compare with.</p></div></header>
+    <div class="rpart" id="res-devices">
       <div id="dv-pick"><p class="glabel" id="dv-pick-title">Choose a device</p><div class="card flush plist2" id="dv-list"></div></div>
       <div id="dv-one" hidden>
         <div class="card onecard" id="res-dev"></div>
@@ -217,16 +211,16 @@
         <div class="oneacts"><button class="btn primary big" id="dv-another" type="button">Pick another device</button><button class="btn ghost big" id="dv-rack" type="button">Back to the rack</button></div>
       </div>
     </div>
-    <div class="rpart" id="res-elevation" hidden>
+    <div class="rpart" id="res-elevation"><p class="glabel">The same devices, drawn as an elevation</p>
       <div class="elegend" id="rt-legend"></div>
       <div class="rteos" id="rt-topo"></div>
     </div>
-    <div class="rpart" id="res-report" hidden>
-      <div id="rp-top"></div>
-    </div>
-    <div class="rpart" id="res-drift" hidden>
-      <div id="df-top"></div>
-    </div>
+    <header class="rsh" id="sec-record"><span class="rsn">3</span><div><h2>The record</h2><p class="muted">Choose the database to check this rack against and press Compare. You see which rack id the video read and which record it matched, with the proof. Change the record if it is wrong, then Continue.</p></div></header>
+    <div class="rpart" id="res-record"><div id="df-top"></div></div>
+    <header class="rsh" id="sec-diff"><span class="rsn">4</span><div><h2>Differences</h2><p class="muted">What the video shows that the record does not, and the other way round, after you Continue. Nothing is ever written back to the database. Next: the report.</p></div></header>
+    <div class="rpart" id="res-diff"><div id="diff-top"><p class="muted small">Compare against a database in step 3 first.</p></div></div>
+    <header class="rsh" id="sec-report"><span class="rsn">5</span><div><h2>Report</h2><p class="muted">The rack on one page to keep or share: units, devices, free space and, once compared, the differences.</p></div></header>
+    <div class="rpart" id="res-report"><div id="rp-cmp"></div><div id="rp-top"></div></div>
   </section>
 
   <!-- more -->
@@ -263,7 +257,10 @@
 
   <!-- every copy of a database read into ours (Excel, NetBox, CMDB): version, time, counts, the active one marked -->
   <section class="screen" data-screen="copies" hidden>
-    <div class="phead"><div><h1>Database copies</h1><p class="muted">Every time a workbook, NetBox or the CMDB is copied in, a new copy is kept. The newest copy of each rack is the one checked. Deleting a copy brings the one before it back.</p></div></div>
+    <div class="phead"><div><h1>Database copies</h1><p class="muted">Every time a workbook, NetBox or the CMDB is copied in, a new copy is kept. The newest copy of each rack is the one a result is compared with. Deleting a copy brings the one before it back.</p></div></div>
+    <div class="card" id="cp-in"><b>Copy a database in</b><p class="muted small">Read the manager's workbook (it is checked first, then Import), or copy NetBox or the ServiceNow CMDB in through the login under Connections (with no login, the local test copy). Each copy-in makes a new copy below.</p>
+      <div class="dfrow"><input type="file" id="df-file" accept=".xlsx"><button class="btn" type="button" id="df-xlsx">Read workbook</button><button class="btn" type="button" data-dfimp="netbox">Copy in from NetBox</button><button class="btn" type="button" data-dfimp="cmdb">Copy in from CMDB</button></div>
+      <div id="df-report"></div></div>
     <div id="cp-list"></div>
   </section>
 
@@ -285,11 +282,11 @@
 <!-- the result's own bar: it replaces the app bar while a result is open -->
 <nav class="bottom" id="rnav" hidden>
   <div class="pill">
-    <a href="#" data-rtab="rack"><svg class="ic"><use href="#i-rack"/></svg><span>Rack</span></a>
-    <a href="#" data-rtab="devices"><svg class="ic"><use href="#i-guide"/></svg><span>Devices</span></a>
-    <a href="#" data-rtab="elevation"><svg class="ic"><use href="#i-chart"/></svg><span>Layout</span></a>
-    <a href="#" data-rtab="report"><svg class="ic"><use href="#i-doc"/></svg><span>Report</span></a>
-    <a href="#" data-rtab="drift"><svg class="ic"><use href="#i-server"/></svg><span>Drift</span></a>
+    <a href="#" data-rtab="rack"><svg class="ic"><use href="#i-rack"/></svg><span>1 Rack</span></a>
+    <a href="#" data-rtab="devices"><svg class="ic"><use href="#i-guide"/></svg><span>2 Devices</span></a>
+    <a href="#" data-rtab="record"><svg class="ic"><use href="#i-server"/></svg><span>3 Record</span></a>
+    <a href="#" data-rtab="diff"><svg class="ic"><use href="#i-check"/></svg><span>4 Differences</span></a>
+    <a href="#" data-rtab="report"><svg class="ic"><use href="#i-doc"/></svg><span>5 Report</span></a>
   </div>
 </nav>
 <nav class="bottom" id="nav" hidden>
@@ -304,6 +301,6 @@
 <div id="lb" hidden><img id="lbimg" alt=""><span>tap to close</span></div>
 <script src="/app/topology.js?v=1"></script>
 <script src="/app/rt/rt-topology.js?v=12" defer></script>
-<script src="/app/app.js?v=146"></script>
+<script src="/app/app.js?v=148"></script>
 </body>
 </html>

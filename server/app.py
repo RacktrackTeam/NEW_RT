@@ -207,7 +207,10 @@ def load_runs():
             j = json.loads(f.read_text())
         except ValueError:
             continue
-        vp = pathlib.Path(j["video_file"]) if j.get("video_file") and pathlib.Path(j["video_file"]).exists() else None     # a sample's video lives outside the run folder
+        vf = pathlib.Path(j["video_file"]) if j.get("video_file") else None
+        if vf is not None and ROOT not in vf.resolve().parents:            # a path into another folder (a run copied in): its file in this run folder instead
+            vf = d / vf.name
+        vp = vf if vf is not None and vf.exists() else None
         j.update(dir=d, result=None, rack_path=d / "rack.png", video_path=vp or next((p for p in d.glob("video*") if p.suffix in (".mp4", ".mov", ".webm", ".avi")), None))
         if j.get("status") == "running":
             j.update(status="failed", error="The server was restarted while this run was going.", progress="failed"); _save(j)
