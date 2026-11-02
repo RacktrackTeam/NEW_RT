@@ -177,7 +177,7 @@ JOBS = {}                                   # id -> {"status", "progress", "resu
 
 def _save(j):
     """status.json beside the run: what the history and the app need, never the big result."""
-    keep = {k: j.get(k) for k in ("id", "status", "progress", "error", "started", "finished", "title", "name", "from_guide", "stride", "summary", "phase", "partial", "ports", "ports_error", "video_file", "rack_id", "video_md5", "video_probe", "db")}
+    keep = {k: j.get(k) for k in ("id", "status", "progress", "error", "started", "finished", "title", "name", "from_guide", "stride", "summary", "phase", "partial", "ports", "ports_error", "video_file", "rack_id", "video_md5", "video_probe", "db", "position")}
     try:
         (pathlib.Path(j["dir"]) / "status.json").write_text(json.dumps(keep, indent=1))
     except OSError:
@@ -442,7 +442,7 @@ def _same_video_run(path):
 
 @app.post("/api/video")
 async def api_video(request: Request, video: UploadFile | None = File(None), sample: str | None = Form(None), capture: str | None = Form(None),
-                    stride: int = Form(rack_video.STRIDE)):
+                    stride: int = Form(rack_video.STRIDE), lat: float | None = Form(None), lng: float | None = Form(None)):
     """Start a sweep: a video upload, a take from the camera guide (capture = "<source>/<folder>") or the stored sample."""
     if MODEL_LOCK.locked():
         running = [k for k, v in JOBS.items() if v.get("status") == "running"]
@@ -476,7 +476,8 @@ async def api_video(request: Request, video: UploadFile | None = File(None), sam
     else:
         raise HTTPException(400, "Send a rack video, a take, or ask for the sample.")
     j = {"id": job, "status": "running", "progress": "queued", "result": None, "dir": d, "error": "", "started": datetime.datetime.now().isoformat(timespec="seconds"),
-         "title": title, "name": name, "from_guide": from_guide, "stride": max(1, min(30, int(stride))), "by": who}
+         "title": title, "name": name, "from_guide": from_guide, "stride": max(1, min(30, int(stride))), "by": who,
+         "position": {"lat": lat, "lng": lng} if lat is not None and lng is not None and -90 <= lat <= 90 and -180 <= lng <= 180 else None}   # the phone's position when the scan started (optional); it only narrows the racks
     with STATE_LOCK:
         JOBS[job] = j
     _save(j)
@@ -487,9 +488,23 @@ async def api_video(request: Request, video: UploadFile | None = File(None), sam
 @app.get("/api/video/history")
 def api_video_history():
     """Every run on this server, newest first."""
-    rows = [public_job(j) for j in JOBS.values()]       # the stored demo is not listed (user, 2026-10-27); it stays reachable as example-<name>
+    rows = [dict(public_job(j), **_rack_state(j)) for j in JOBS.values()]       # the stored demo is not listed (user, 2026-10-27); it stays reachable as example-<name>
     rows.sort(key=lambda x: x["started"] or "", reverse=True)
     return rows
+
+
+def _rack_state(j):
+    """What Home shows for a run: the rack id, the record it was compared with and how many differences (only once a person compared)."""
+    out = {"rack_id": (j.get("rack_id") or {}).get("id"), "record": None, "differences": None}
+    if j.get("result") is not None and (j.get("db") or {}).get("source"):
+        try:
+            dv = drift_view(j)
+        except Exception:  # noqa: BLE001  a broken copy must not break Home
+            return out
+        if dv.get("match"):
+            out["record"] = {"source": SDB.SOURCES[dv["source"]], "rack_key": dv["match"]["rack_key"], "how": dv["match"]["how"]}
+            out["differences"] = len((dv.get("drift") or {}).get("rows") or [])
+    return out
 
 
 @app.get("/api/video/{job}")
@@ -1532,14 +1547,35 @@ def drift_view(j):
            "candidates": [r for r in have if r["source"] == source], "match": None, "record": [], "drift": None}
     if not source:
         return out
+    out["label"] = rack_label_of(j)
+    out["rack_id_how"] = (j.get("rack_id") or {}).get("source")
+    out["identify"] = SDB.identify(source, rid, j.get("result"), j.get("position"), out["label"])     # the ladder: location, label, device labels, layout
     if db.get("rack_key") and db.get("source") == source and any(r["rack_key"] == db["rack_key"] for r in out["candidates"]):
         out["match"] = {"rack_key": db["rack_key"], "how": "picked", "why": f"Picked by {db.get('by') or 'a person'}."}
-    else:
-        out["match"] = SDB.match(source, rid)
+    elif out["identify"]["rack_key"]:
+        k = out["identify"]["rack_key"]
+        out["match"] = SDB.match(source, rid) if out["identify"]["named_by"] == 2 else {"rack_key": k, "how": "ladder", "why": out["identify"]["words"]}
+    out["chosen"] = bool(db.get("source"))
+    out["confirmed"] = bool(db.get("confirmed")) and db.get("source") == source
     if out["match"]:
         out["record"] = SDB.devices(source, out["match"]["rack_key"])
         out["drift"] = SDB.drift(j.get("result"), out["record"], SDB.ports(source, out["match"]["rack_key"]) if source == "excel" else None)
     return out
+
+
+@app.get("/api/video/{job}/rack-label.jpg")
+def api_rack_label_strip(job: str):
+    """The proof of the rack id: the strip of the stitched picture above the first unit, where the label reader looks first
+    (src/rack_label.py read_rack_label)."""
+    j = job_or_none(job)
+    if j is None or j.get("result") is None:
+        raise HTTPException(404, "No such run.")
+    rows = ((j["result"].get("occupancy_frames") or {}).get("rows")) or []
+    f = pathlib.Path(j["dir"]) / "rack.png"
+    if not rows or not f.exists():
+        raise HTTPException(404, "No label strip for this run.")
+    img = Image.open(f).convert("RGB"); y1 = int(rows[0]["box"][1])
+    return Response(jpeg_bytes(img.crop((0, max(0, y1 - 220), img.size[0], min(img.size[1], y1 + 30)))), media_type="image/jpeg", headers={"Cache-Control": "max-age=300"})
 
 
 @app.get("/api/video/{job}/drift")
@@ -1559,7 +1595,9 @@ def api_video_database(job: str, request: Request, body: dict = Body(...)):
     source = body.get("source")
     if source not in SDB.SOURCES:
         raise HTTPException(400, "Choose Excel, NetBox or CMDB.")
-    j["db"] = {"source": source, "rack_key": body.get("rack_key") or None, "by": read_session(request.cookies.get("rt_session"))["name"],
+    if body.get("rack_key") and not any(r["rack_key"] == body["rack_key"] for r in SDB.racks(source)):
+        raise HTTPException(400, f"No record called {body['rack_key']} in {SDB.SOURCES[source]}.")
+    j["db"] = {"source": source, "rack_key": body.get("rack_key") or None, "confirmed": bool(body.get("confirmed")), "by": read_session(request.cookies.get("rt_session"))["name"],
                "on": datetime.datetime.now().isoformat(timespec="minutes")}
     _save(j)
     return drift_view(j)

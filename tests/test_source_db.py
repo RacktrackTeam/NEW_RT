@@ -55,3 +55,34 @@ def test_drift_uses_the_kind_the_result_screen_shows(sdb):
     assert kinds == {1: "Router", 2: "Firewall", 3: "Switch", 4: "Server"}
     record = [{"name": "R", "kind": "Router", "ru_start": 20, "ru_height": 1}, {"name": "F", "kind": "Firewall", "ru_start": 19, "ru_height": 1}]
     assert not [r for r in sdb.drift(result, record)["rows"] if r["type"] == "kind"]
+
+
+def _three_racks(sdb):
+    """The three ground truth racks as one copy, with their sites' test positions (as the NetBox mock serves them)."""
+    racks, devices = [], []
+    for f in ("vdo1", "whatsapp_2143", "whatsapp_2319"):
+        g = json.loads((ROOT / "modules" / "sources" / "ground_truth" / f"{f}.json").read_text())
+        racks.append({"rack_key": g["rack"]["label"], "name": g["rack"]["label"], "label": g["rack"]["label"], "height_ru": 42,
+                      "site": g["site"]["name"], "lat": g["site"].get("lat"), "lng": g["site"].get("lng")})
+        devices += [{"rack_key": g["rack"]["label"], "device_key": d["name"], "name": d["name"], "kind": d["kind"], "manufacturer": d.get("manufacturer"),
+                     "model": d.get("model"), "ru_start": d.get("position"), "ru_height": d.get("height")} for d in g["devices"]]
+    sdb._store("netbox", racks, devices, "test")
+
+
+def test_identify_ladder_on_the_office_run(sdb):
+    _three_racks(sdb)
+    run = ROOT / "data" / "runs" / "91af02c09bbc"
+    result, label = json.loads((run / "result.json").read_text()), json.loads((run / "rack_label.json").read_text())
+    out = sdb.identify("netbox", "SP-HYD-RM01-R01-R1", result, None, label)
+    assert [s["outcome"] for s in out["steps"]] == ["skipped", "one", "one", "one"]
+    assert out["rack_key"] == "SP-HYD-RM01-R01-R1" and out["named_by"] == 2 and out["state"] == "verified"
+    assert "Step 4 agrees, 10 of 10." in out["words"]
+    # a phone position at the office leaves one rack at step 1; the label then agrees
+    near = sdb.identify("netbox", "SP-HYD-RM01-R01-R1", result, {"lat": 17.4487, "lng": 78.3909}, label)
+    assert near["named_by"] == 1 and near["steps"][0]["proof"].startswith("1 rack within 300 m")
+    # no label read: the device labels (models read on faceplates) name it, and the layout agrees
+    blind = sdb.identify("netbox", None, result, None, None)
+    assert blind["named_by"] == 3 and blind["rack_key"] == "SP-HYD-RM01-R01-R1"
+    # a wrong label that names another rack: the later steps disagree and the person is asked
+    wrong = sdb.identify("netbox", "NETWORK RACK 2", result, None, None)
+    assert wrong["named_by"] == 2 and wrong["state"] == "confirm" and "points to SP-HYD-RM01-R01-R1" in wrong["words"]

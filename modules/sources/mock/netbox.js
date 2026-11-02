@@ -47,7 +47,7 @@ function build(truths) {
     return typeByKey.get(k);
   };
   for (const t of truths) {
-    const site = { id: ++id.site, name: t.siteName, slug: t.siteName.toLowerCase().replace(/[^a-z0-9]+/g, '-'), status: { value: 'active', label: 'Active' }, region: t.gt.site.region ? { name: t.gt.site.region } : null };
+    const site = { id: ++id.site, name: t.siteName, slug: t.siteName.toLowerCase().replace(/[^a-z0-9]+/g, '-'), status: { value: 'active', label: 'Active' }, region: t.gt.site.region ? { name: t.gt.site.region } : null, latitude: t.gt.site.lat ?? null, longitude: t.gt.site.lng ?? null };
     state.sites.push(site);
     const rack = { id: ++id.rack, name: t.rackLabel, facility_id: t.gt.rack.facility_id || null, site: { id: site.id, name: site.name }, u_height: t.gt.rack.height_ru, status: { value: 'active', label: 'Active' } };
     state.racks.push(rack);

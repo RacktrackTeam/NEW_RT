@@ -4,7 +4,10 @@
   "video": "vdo1.mp4",
   "site": {
     "name": "Office-Sprintpark",
-    "region": "Hyderabad"
+    "region": "Hyderabad",
+    "lat": 17.4486,
+    "lng": 78.3908,
+    "position_note": "a test position for the location step, not surveyed; replace with the real site position"
   },
   "rack": {
     "label": "SP-HYD-RM01-R01-R1",

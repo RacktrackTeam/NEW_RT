@@ -4,7 +4,10 @@
   "video": "WhatsApp Video 2026-10-26 at 21.43.13.mp4",
   "site": {
     "name": "Network Room",
-    "region": "unknown"
+    "region": "unknown",
+    "lat": 17.4401,
+    "lng": 78.3489,
+    "position_note": "a test position for the location step, not surveyed; replace with the real site position"
   },
   "rack": {
     "label": "NETWORK RACK 1",

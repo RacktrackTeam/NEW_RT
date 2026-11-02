@@ -35,10 +35,11 @@ const DEVICE_CLASSES = [...new Set([...Object.values(CLASS_OF), 'cmdb_ci_hardwar
 const PORT_TYPE = { interface: 'RJ45', front: 'RJ45', rear: 'RJ45' };
 
 function build(truths) {
-  const t = { cmdb_ci_rack: [], cmdb_rel_ci: [], cmdb_ci_network_adapter: [], cmdb_ci_port: [] };
+  const t = { cmdb_ci_rack: [], cmdb_rel_ci: [], cmdb_ci_network_adapter: [], cmdb_ci_port: [], cmn_location: [] };
   for (const c of DEVICE_CLASSES) t[c] = [];
   for (const tr of truths) {
     const rackId = hex32(`rack:${tr.file}`);
+    if (!t.cmn_location.some((l) => l.name === tr.siteName)) t.cmn_location.push({ sys_id: hex32(`loc:${tr.siteName}`), sys_class_name: 'cmn_location', name: tr.siteName, latitude: tr.gt.site.lat != null ? String(tr.gt.site.lat) : '', longitude: tr.gt.site.lng != null ? String(tr.gt.site.lng) : '' });
     t.cmdb_ci_rack.push({ sys_id: rackId, sys_class_name: 'cmdb_ci_rack', name: tr.rackLabel, rack_units: String(tr.gt.rack.height_ru), location: tr.siteName, u_racktrack_scan_id: '' });
     for (const d of tr.devices) {
       const cls = CLASS_OF[d.kind] || 'cmdb_ci_hardware';

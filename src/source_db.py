@@ -39,12 +39,23 @@ def _db():
             "copy_id" not in [r[1] for r in c.execute("PRAGMA table_info(src_racks)")]:
         c.executescript("DROP TABLE src_racks; DROP TABLE IF EXISTS src_devices;")   # the first layout had no copies: its rows are copied in again
     c.executescript(SCHEMA)
+    have = [r[1] for r in c.execute("PRAGMA table_info(src_racks)")]
+    for col, ty in (("site", "TEXT"), ("lat", "REAL"), ("lng", "REAL")):          # the site and its position, for the location step
+        if col not in have:
+            c.execute(f"ALTER TABLE src_racks ADD COLUMN {col} {ty}")
     return c
 
 
 def _int(v):
     try:
         return int(float(str(v).strip()))
+    except (TypeError, ValueError):
+        return None
+
+
+def _num(v):
+    try:
+        return float(v) if v not in (None, "") else None
     except (TypeError, ValueError):
         return None
 
@@ -72,7 +83,8 @@ def _store(source, racks, devices, file, ports=()):
         cid = c.execute("INSERT INTO src_copies (source, version, imported_at, file, racks, devices, ports) VALUES (?,?,?,?,?,?,?)",
                         (source, version, now, file, len(racks), len(devices), len(ports))).lastrowid
         for r in racks:
-            c.execute("INSERT OR REPLACE INTO src_racks VALUES (?,?,?,?,?,?,?,?)", (cid, source, r["rack_key"], r.get("name"), r.get("label"), r.get("height_ru"), now, file))
+            c.execute("INSERT OR REPLACE INTO src_racks (copy_id, source, rack_key, name, label, height_ru, imported_at, file, site, lat, lng) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                      (cid, source, r["rack_key"], r.get("name"), r.get("label"), r.get("height_ru"), now, file, r.get("site"), _num(r.get("lat")), _num(r.get("lng"))))
         for d in devices:
             c.execute("INSERT OR REPLACE INTO src_devices VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                       (cid, source, d["rack_key"], d["device_key"], d.get("name"), d.get("role"), d.get("kind") or _kind(d.get("role")), d.get("manufacturer"), d.get("model"),
@@ -297,7 +309,10 @@ def import_netbox(org=None):
     """NetBox's REST API (dcim/racks and dcim/devices), through the organization's saved login, else the local NetBox mock."""
     base, hd = _login(org, "netbox", NETBOX_URL)
     rk = _get(base, "/api/dcim/racks/?limit=1000", hd)["results"]
-    racks = [{"rack_key": r["name"], "name": r["name"], "label": r.get("facility_id") or r["name"], "height_ru": _int(r.get("u_height"))} for r in rk]
+    sites = {x["id"]: x for x in _get(base, "/api/dcim/sites/?limit=1000", hd)["results"]}
+    racks = [{"rack_key": r["name"], "name": r["name"], "label": r.get("facility_id") or r["name"], "height_ru": _int(r.get("u_height")),
+              "site": (r.get("site") or {}).get("name"), "lat": sites.get((r.get("site") or {}).get("id"), {}).get("latitude"),
+              "lng": sites.get((r.get("site") or {}).get("id"), {}).get("longitude")} for r in rk]
     devices = []
     for d in _get(base, "/api/dcim/devices/?limit=10000", hd)["results"]:
         if not d.get("rack"):
@@ -313,7 +328,12 @@ def import_cmdb(org=None):
     """ServiceNow's Table API (cmdb_ci_rack, cmdb_rel_ci and the device classes in cmdb_ci), through the saved login, else the local mock."""
     base, hd = _login(org, "cmdb", SERVICENOW_URL)
     rk = _get(base, "/api/now/table/cmdb_ci_rack?sysparm_limit=10000", hd)["result"]
-    racks = [{"rack_key": r["name"], "name": r["name"], "label": r["name"], "height_ru": _int(r.get("rack_units"))} for r in rk]
+    try:
+        locs = {x["name"]: x for x in _get(base, "/api/now/table/cmn_location?sysparm_limit=10000", hd)["result"]}
+    except ConnectionError:
+        locs = {}
+    racks = [{"rack_key": r["name"], "name": r["name"], "label": r["name"], "height_ru": _int(r.get("rack_units")), "site": r.get("location"),
+              "lat": (locs.get(r.get("location")) or {}).get("latitude"), "lng": (locs.get(r.get("location")) or {}).get("longitude")} for r in rk]
     rack_of = {r["sys_id"]: r["name"] for r in rk}
     child_rack = {x["child"]["value"]: rack_of[x["parent"]["value"]] for x in _get(base, "/api/now/table/cmdb_rel_ci?sysparm_limit=100000", hd)["result"]
                   if x["parent"]["value"] in rack_of}
@@ -523,15 +543,15 @@ def drift(result, record, ports=None):
         if not any(p[0] is r for p in pairs):
             where = _units(r["ru_start"], r.get("ru_height"))
             extra = f" The video covers U1 to U{top} only." if top and r["ru_start"] > top else ""
-            rows.append({"type": "missing", "what": "Missing device", "unit": where, "device": r.get("name"), "record": f"{r.get('kind') or 'Device'} at {where}", "read": "nothing seen",
+            rows.append({"type": "missing", "what": "Missing device", "unit": where, "device": r.get("name"), "record_name": r.get("name"), "record": f"{r.get('kind') or 'Device'} at {where}", "read": "nothing seen",
                          "words": f"The record has {r.get('name')} at {where}; the video shows no device there.{extra}"})
     for s in free:
         where = _units(s["ru_start"], s["ru_height"])
-        rows.append({"type": "extra", "what": "Extra device", "unit": where, "device": f"D{s['index']}", "record": "nothing", "read": f"{s['kind'] or 'a device'} at {where}",
+        rows.append({"type": "extra", "what": "Extra device", "index": s["index"], "unit": where, "device": f"D{s['index']}", "record": "nothing", "read": f"{s['kind'] or 'a device'} at {where}",
                      "words": f"The video shows {s['kind'] or 'a device'} (D{s['index']}) at {where}; the record has nothing there."})
     for r, s in pairs:
         name, rec_at, read_at = r.get("name"), _units(r["ru_start"], r.get("ru_height")), _units(s["ru_start"], s["ru_height"])
-        base = {"unit": read_at, "device": f"{name} / D{s['index']}"}
+        base = {"unit": read_at, "device": f"{name} / D{s['index']}", "index": s["index"], "record_name": name}
         if s["ru_start"] != r["ru_start"]:
             rows.append({**base, "type": "moved", "what": "Moved", "record": rec_at, "read": read_at, "words": f"{name} is at {rec_at} in the record and at {read_at} in the video."})
         if r.get("ru_height") and s["ru_height"] != r["ru_height"]:
@@ -554,3 +574,99 @@ def drift(result, record, ports=None):
                 notes.append(f"{name} has {len(want)} ports in PORT_INVENTORY but the video read none of its ports, so they are not checked.")
     rows.sort(key=lambda x: (-(_unum(x["unit"]) or 0), x.get("port") or 0))
     return {"rows": rows, "checked": len(pairs), "record_devices": len(record), "video_devices": len(seen), "notes": notes, "ports_checked": ports_checked}
+
+
+# ------------------------------------------------------------------ naming the rack: the ladder, strongest evidence first
+# The rungs and thresholds of the rack identity ladders in rt_eos/server/lib/rack_identity.js and vendor/dark_mobile/server/lib/rack_identity.js
+# (identifyFromEvidence: a location narrows, a label names, the devices rung needs MIN_DEVICES, a MIN_SHARE and no rack within TIE_MARGIN).
+# Each step leaves a set of racks; the first step that leaves exactly one names the rack; the later steps only agree or disagree.
+MIN_DEVICES, MIN_SHARE, TIE_MARGIN, NEAR_M = 3, 0.6, 0.1, 300
+
+
+def _metres(a, b):
+    import math
+    la1, lo1, la2, lo2 = map(math.radians, (a[0], a[1], b[0], b[1]))
+    h = math.sin((la2 - la1) / 2) ** 2 + math.cos(la1) * math.cos(la2) * math.sin((lo2 - lo1) / 2) ** 2
+    return 6371000 * 2 * math.asin(math.sqrt(h))
+
+
+def _share_rung(seen, rows, fits):
+    """dark_mobile's devicesRung on a list of read things: the share each rack holds, the rack it decides (or None) and why."""
+    ranked = sorted(({"rack_key": r["rack_key"], "which": [w for w in (fits(x, r) for x in seen) if w]} for r in rows), key=lambda x: -len(x["which"]))
+    for x in ranked:
+        x["fits"] = len(x["which"]); x["share"] = round(x["fits"] / len(seen), 2) if seen else 0.0
+    top, second = (ranked + [None, None])[:2]
+    tied = bool(top and second and top["share"] - second["share"] < TIE_MARGIN)
+    decides = bool(top and len(seen) >= MIN_DEVICES and top["share"] >= MIN_SHARE and not tied)
+    return ranked, (top["rack_key"] if decides else None), tied
+
+
+def identify(source, rack_id, result, position=None, label=None):
+    """The rack for a run in one source's copy, step by step. Returns {"steps": [...], "rack_key", "state", "words"}; each step has a
+    title, its proof in words, the racks it leaves and its outcome."""
+    rows, steps = racks(source), []
+    # 1 location: the run's phone position against each rack's site position
+    placed = [r for r in rows if r.get("lat") is not None and r.get("lng") is not None]
+    if not position or position.get("lat") is None:
+        steps.append({"n": 1, "title": "Location", "proof": "No position was sent with this run.", "left": None, "outcome": "skipped"})
+    elif not placed:
+        steps.append({"n": 1, "title": "Location", "proof": "No rack in this copy has a site position.", "left": None, "outcome": "skipped"})
+    else:
+        here = (float(position["lat"]), float(position["lng"]))
+        near = [r for r in placed if _metres(here, (r["lat"], r["lng"])) <= NEAR_M]
+        rows = near or rows
+        steps.append({"n": 1, "title": "Location", "proof": f"{pl(len(near), 'rack')} within {NEAR_M} m of the phone's position" + ("" if near else "; none near, so every rack stays in"),
+                      "left": [r["rack_key"] for r in rows], "outcome": "one" if len(near) == 1 else "narrowed" if near else "none"})
+    keys = {r["rack_key"] for r in rows}
+    # 2 the rack id or label read from the video, exact, then separators ignored
+    m = match(source, rack_id) if rack_id else None
+    m = m if m and m["rack_key"] in keys else None
+    lab = (label or {}).get("id") or (label or {}).get("name") or {}
+    seen_txt = f'"{lab["text"]}" read in {pl(lab.get("seen") or 0, "frame")}, confidence {round(100 * (lab.get("confidence") or 0))} %' if lab else "no label text read"
+    steps.append({"n": 2, "title": "Rack label", "proof": f"Rack id {rack_id or 'not confirmed'} ({seen_txt}). " + (m["why"] if m else "No record in this copy has that id."),
+                  "left": [m["rack_key"]] if m else None, "outcome": "one" if m else "none", "how": m["how"] if m else None})
+    # 3 device names, serials and asset tags read on the devices; then the makes and models read on their faceplates
+    seen = run_devices(result)
+    ids = [x for s_ in seen for x in (s_.get("serial"), s_.get("asset_tag")) if x]
+    models = [s_["model"] for s_ in seen if s_.get("model")]
+    recs = {r["rack_key"]: devices(source, r["rack_key"]) for r in rows}
+    def text_fit(t, r):
+        return next((f"{d.get('name')} ({t})" for d in recs[r["rack_key"]] if any(_same(t, d.get(k)) for k in ("name", "serial", "asset_tag", "model") if d.get(k))), None)
+    things = ids + models
+    ranked3, one3, _ = _share_rung(things, rows, text_fit)
+    t3 = ranked3[0] if ranked3 else None
+    steps.append({"n": 3, "title": "Device labels", "proof": ("Serial and asset tag: not read on any device. " if not ids else f"{pl(len(ids), 'serial or asset tag')} read. ")
+                  + (f"{pl(len(models), 'model')} read on faceplates ({', '.join(models)}); {t3['fits']} of them are in {t3['rack_key']}." if models and t3 else "No model read on a faceplate."),
+                  "left": [one3] if one3 else None, "outcome": "one" if one3 else "none", "ranked": ranked3[:3]})
+    # 4 the layout: devices at their units with the same kind (and model where both are read), a last resort and a tie-breaker
+    kinded = [x for x in seen if x["kind"]]
+    def lay_fit(x, r):
+        hit = next((d for d in recs[r["rack_key"]] if d.get("ru_start") == x["ru_start"] and d.get("kind") and _norm(d["kind"]) == _norm(x["kind"])
+                    and not (x["model"] and d.get("model") and not _same(x["model"], d["model"]))), None)
+        return f"{hit.get('name')} at U{x['ru_start']}" if hit else None
+    ranked4, one4, tied4 = _share_rung(kinded, rows, lay_fit)
+    steps.append({"n": 4, "title": "Layout", "proof": "; ".join(f"{x['rack_key']}: {x['fits']} of {len(kinded)}" for x in ranked4[:3]) + " devices at the same units with the same kind",
+                  "left": [one4] if one4 else None, "outcome": "one" if one4 else "tied" if tied4 else "none", "ranked": ranked4[:3]})
+    # the first step that leaves exactly one rack names it; the others agree or disagree
+    first = next((st for st in steps if st["outcome"] == "one" and st["left"] and len(st["left"]) == 1), None)
+    key = first["left"][0] if first else None
+    others = [st for st in steps if st is not first and st["outcome"] == "one" and st["n"] > 1]
+    against = [st for st in others if st["left"][0] != key]
+    lay = next((x for x in ranked4 if x["rack_key"] == key), None)
+    if not key:
+        state, words = "pick", "No step named one rack. Pick the record."
+    else:
+        words = f"Step {first['n']} named one rack: {key}."
+        for st in others:
+            got = next((x for x in st.get("ranked") or [] if x["rack_key"] == key), None)
+            n_of = f", {got['fits']} of {len(kinded) if st['n'] == 4 else len(things)}" if got else ""
+            words += f" Step {st['n']} " + (f"agrees{n_of}." if st["left"][0] == key else f"points to {st['left'][0]}.")
+        if lay and not any(st["n"] == 4 for st in others) and first["n"] != 4:
+            words += f" Step 4: {lay['fits']} of {len(kinded)} devices fit."
+        state = "confirm" if against else "verified" if others else "confirm"
+        words += " Verified." if state == "verified" else " Please confirm the record or pick another."
+    return {"steps": steps, "rack_key": key, "state": state, "words": words, "named_by": first["n"] if first else None}
+
+
+def pl(n, w):
+    return f"{n} {w}{'' if n == 1 else 's'}"
