@@ -15,6 +15,20 @@
 <link rel="preload" href="/app/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/app/app.css?v=127">
 <link rel="stylesheet" href="/app/rt/rt-topology.css?v=12">
+<style>
+/* the Drift tab: the database the run is checked against, the matched record, the differences */
+#df-top { display:flex; flex-direction:column; gap:12px; width:100%; }
+.dfsrc { display:flex; gap:8px; flex-wrap:wrap; }
+.dfsrc .btn.on { background:var(--ink); color:#fff; }
+.dfrow { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.dftable { width:100%; border-collapse:collapse; font-size:14px; }
+.dftable th, .dftable td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line, #e5e7eb); vertical-align:top; }
+.dftable td p { margin:4px 0 0; color:var(--t2); font-size:13px; }
+.dftable .dk { font-weight:600; white-space:nowrap; }
+.dfok { color:var(--sig-deep, #166534); font-weight:600; }
+#df-top select { min-height:40px; max-width:100%; }
+@media (max-width:600px) { .dftable th:nth-child(2), .dftable td:nth-child(2) { display:none; } .dftable th, .dftable td { padding:8px; } }
+</style>
 </head>
 <body>
 <!-- icons: drawn once, used everywhere with <use> -->
@@ -199,6 +213,9 @@
     <div class="rpart" id="res-report" hidden>
       <div id="rp-top"></div>
     </div>
+    <div class="rpart" id="res-drift" hidden>
+      <div id="df-top"></div>
+    </div>
   </section>
 
   <!-- more -->
@@ -244,6 +261,7 @@
     <a href="#" data-rtab="devices"><svg class="ic"><use href="#i-guide"/></svg><span>Devices</span></a>
     <a href="#" data-rtab="elevation"><svg class="ic"><use href="#i-chart"/></svg><span>Layout</span></a>
     <a href="#" data-rtab="report"><svg class="ic"><use href="#i-doc"/></svg><span>Report</span></a>
+    <a href="#" data-rtab="drift"><svg class="ic"><use href="#i-server"/></svg><span>Drift</span></a>
   </div>
 </nav>
 <nav class="bottom" id="nav" hidden>
@@ -258,6 +276,6 @@
 <div id="lb" hidden><img id="lbimg" alt=""><span>tap to close</span></div>
 <script src="/app/topology.js?v=1"></script>
 <script src="/app/rt/rt-topology.js?v=12" defer></script>
-<script src="/app/app.js?v=144"></script>
+<script src="/app/app.js?v=145"></script>
 </body>
 </html>

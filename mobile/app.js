@@ -36,7 +36,7 @@
   // ---------------------------------------------------------------- routing: #signin #home #history #sweep #job/<id> #result/<id> #report/<id> #more #models
   var DETAIL = { job: 'Run', result: 'Result', history: 'History', models: 'Models and accuracy' };
   // the result's bar: Main is the rack read from the data; the other four show the report's steps in groups
-  var TABS = { rack: 'Rack', devices: 'Devices', elevation: 'Layout', report: 'Report' };   // ports live on each device (user, 2026-10-27: one place per device)
+  var TABS = { rack: 'Rack', devices: 'Devices', elevation: 'Layout', report: 'Report', drift: 'Drift' };   // ports live on each device (user, 2026-10-27: one place per device)
   var KINDS = ['Switch', 'Router', 'Firewall', 'Gateway', 'Patch Panel', 'Server', 'Storage unit', 'PDU', 'UPS', 'Other'];
   var LAST = null;                                   // the run the Report tab opens: the one being looked at, else the newest finished one
   try { LAST = localStorage.getItem('rt_last') || null; } catch (e) {}
@@ -444,6 +444,7 @@
     RES.tab = tab; Object.keys(TABS).forEach(function (k) { $('res-' + k).hidden = k !== tab; }); $('res-eyebrow').textContent = TABS[tab]; $('rep-full').hidden = tab !== 'report' || NATIVE;
     loadView(true);
     watchPorts();
+    if (tab === 'drift') loadDrift();
   }
   function loadView(first) {
     api('/api/video/' + RES.id + '/view').then(function (v) { RES.view = v; renderResult(v, first); }).catch(function (e) { toast(e.message); if (first) go('job/' + RES.id); });
@@ -779,6 +780,39 @@
   document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('#rp-top .ed, #rp-top tr[data-dev]'); if (t) { selectDevice(parseInt(t.dataset.dev, 10)); go('result/' + RES.id + '/devices'); } });
   document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('#rp-top .lrow'); if (!b) return;
     if (b.dataset.unit) selectUnit(b.dataset.unit); else selectDevice(parseInt(b.dataset.dev, 10)); go('result/' + RES.id + '/devices'); });
+  // the Drift tab: choose the database for this rack (Excel, NetBox or CMDB), see which record matched and why, and every difference
+  function loadDrift() { var id = RES.id; api('/api/video/' + id + '/drift').then(function (d) { if (RES.id === id) renderDrift(d); }).catch(function (e) { $('df-top').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
+  function setDb(body) { return api('/api/video/' + RES.id + '/database', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(renderDrift).catch(function (e) { toast(e.message); }); }
+  function renderDrift(d) {
+    var src = d.source, when = function (s) { return d.imported[s] ? 'copied ' + d.imported[s].replace('T', ' ').slice(0, 16) : 'not copied yet'; };
+    var h = '<span class="glabel">Database</span><div class="card"><p class="muted small">The record this rack is checked against. Nothing is ever written back to it.</p><div class="dfsrc">'
+      + Object.keys(d.sources).map(function (s) { return '<button class="btn' + (s === src ? ' on' : '') + '" type="button" data-dfsrc="' + s + '">' + esc(d.sources[s]) + '</button>'; }).join('') + '</div>';
+    h += '<div class="dfrow"><span class="muted small">' + (src ? esc(d.sources[src]) + ': ' + when(src) : 'No database copied yet. Read a workbook or copy one in.') + '</span></div>'
+      + '<div class="dfrow"><input type="file" id="df-file" accept=".xlsx"><button class="btn" type="button" id="df-xlsx">Read workbook</button>'
+      + '<button class="btn" type="button" data-dfimp="netbox">Copy in from NetBox</button><button class="btn" type="button" data-dfimp="cmdb">Copy in from CMDB</button></div></div>';
+    h += '<span class="glabel">Rack record</span><div class="card">';
+    h += '<p>Rack id of this run: <b class="mono">' + esc(d.rack_id || 'not confirmed yet') + '</b></p>';
+    if (d.match) h += '<p><b>' + esc(d.match.rack_key) + '</b> ' + (d.match.how === 'exact' ? 'matched exactly' : d.match.how === 'close' ? 'matched' : 'chosen') + '. <span class="muted">' + esc(d.match.why) + '</span></p>';
+    else if (src) h += '<p class="err">No record in ' + esc(d.sources[src]) + ' matches this rack id. Pick one below.</p>';
+    if (d.candidates.length) h += '<div class="dfrow"><label class="muted small" for="df-pick">Use another record</label><select id="df-pick"><option value="">Match by rack id</option>'
+      + d.candidates.map(function (r) { return '<option value="' + esc(r.rack_key) + '"' + (d.match && d.match.how === 'picked' && d.match.rack_key === r.rack_key ? ' selected' : '') + '>' + esc(r.rack_key) + (r.label && r.label !== r.rack_key ? ' (' + esc(r.label) + ')' : '') + ' - ' + r.devices + ' devices</option>'; }).join('') + '</select></div>';
+    h += '</div>';
+    if (d.drift) { var rows = d.drift.rows;
+      h += '<span class="glabel">Drift</span><div class="card"><p><b>' + rows.length + '</b> ' + (rows.length === 1 ? 'difference' : 'differences') + ' · ' + d.drift.checked + ' devices compared · ' + d.drift.video_devices + ' in the video · ' + d.drift.record_devices + ' in the record</p></div>';
+      h += rows.length ? '<div class="card flush"><table class="dftable"><thead><tr><th>Difference</th><th>Unit</th><th>Record</th><th>Video</th></tr></thead><tbody>' + rows.map(function (r) {
+        return '<tr data-dftype="' + esc(r.type) + '"><td><span class="dk">' + esc(r.what) + '</span><p>' + esc(r.words) + '</p></td><td class="mono">' + esc(r.unit) + '</td><td>' + esc(r.record) + '</td><td>' + esc(r.read) + '</td></tr>'; }).join('') + '</tbody></table></div>'
+        : '<div class="card"><p class="dfok">No drift. The rack matches the record.</p></div>';
+      if (d.drift.notes.length) h += '<span class="glabel">Not checked</span><div class="card"><ul class="muted small">' + d.drift.notes.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('') + '</ul></div>';
+    }
+    $('df-top').innerHTML = h;
+  }
+  document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('#df-top [data-dfsrc], #df-top [data-dfimp], #df-xlsx'); if (!t) return;
+    if (t.dataset.dfsrc) return setDb({ source: t.dataset.dfsrc });
+    var done = function (src) { return function (r) { toast(r.devices + ' devices copied in from ' + r.racks + (r.racks === 1 ? ' rack' : ' racks')); return setDb({ source: src }); }; };
+    if (t.dataset.dfimp) return api('/api/sources/' + t.dataset.dfimp + '/import', { method: 'POST' }).then(done(t.dataset.dfimp)).catch(function (er) { toast(er.message); });
+    var f = $('df-file').files[0]; if (!f) return toast('Choose the workbook first.');
+    var fd = new FormData(); fd.append('workbook', f); upload('/api/sources/excel', fd, function () {}).then(done('excel')).catch(function (er) { toast(er.message); }); });
+  document.addEventListener('change', function (e) { if (e.target.id !== 'df-pick') return; var b = document.querySelector('#df-top .dfsrc .on'); setDb({ source: b ? b.dataset.dfsrc : null, rack_key: e.target.value || null }); });
   // the Devices tab shows ONE thing: a device or a unit (RES.pick), or the list to choose one from
   function selectDevice(i, auto) {
     RES.pick = { kind: 'dev', id: i }; RES.sel = i;

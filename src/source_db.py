@@ -135,7 +135,7 @@ def import_cmdb():
     child_rack = {x["child"]["value"]: rack_of[x["parent"]["value"]] for x in _get(SERVICENOW_URL, "/api/now/table/cmdb_rel_ci?sysparm_limit=100000")["result"]
                   if x["parent"]["value"] in rack_of}
     devices = []
-    for d in _get(SERVICENOW_URL, "/api/now/table/cmdb_ci?sysparm_limit=100000")["result"]:
+    for d in _get(SERVICENOW_URL, "/api/now/table/cmdb_ci?sysparm_limit=100000&sysparm_display_value=true")["result"]:
         if d.get("sys_id") not in child_rack:
             continue
         devices.append({"rack_key": child_rack[d["sys_id"]], "device_key": d["name"], "name": d["name"], "role": _s(d.get("short_description")),
