@@ -1003,7 +1003,7 @@
   // Database copies (Profile): every copy with its source, version, time and counts; the active ones marked; delete
   function loadCopies() { api('/api/sources/copies').then(renderCopies).catch(function (e) { $('cp-list').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
   function renderCopies(d) {
-    if (!d.copies.length) { $('cp-list').innerHTML = '<div class="card"><p class="muted">No copy yet. Read a workbook or copy NetBox or the CMDB in from a run\'s Drift tab.</p></div>'; return; }
+    if (!d.copies.length) { $('cp-list').innerHTML = '<div class="card"><p class="muted">No copy yet. Read a workbook or copy NetBox or the CMDB in above.</p></div>'; return; }
     $('cp-list').innerHTML = '<div class="card flush"><table class="dftable cptable"><thead><tr><th>Source</th><th class="wide">Version</th><th class="wide">Copied</th><th class="cpn">Racks</th><th class="cpn">Devices</th><th class="cpn wide">Ports</th><th class="wide">From</th><th>State</th><th></th></tr></thead><tbody>'
       + d.copies.map(function (c) { return '<tr data-copy="' + c.id + '"' + (c.active ? ' class="on"' : '') + '><td><b>' + esc(d.sources[c.source] || c.source) + '</b><span class="cpwhen small muted">v' + c.version + ' · ' + esc(c.imported_at.replace('T', ' ').slice(0, 16)) + '</span></td><td class="mono wide">v' + c.version + '</td><td class="mono small wide">' + esc(c.imported_at.replace('T', ' ').slice(0, 16)) + '</td>'
         + '<td class="cpn">' + c.racks + '</td><td class="cpn">' + c.devices + '</td><td class="cpn wide">' + (c.ports || 0) + '</td><td class="wide small muted">' + esc(String(c.file || '').replace(/^workbook_[0-9a-f]{8}_/, '')) + '</td>'

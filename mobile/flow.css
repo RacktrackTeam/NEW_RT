@@ -138,3 +138,10 @@ table.rptable, table.dftable, table.cptable, table.wbtable { border-collapse:col
   .scanpage .scanbody > #sw-tips { grid-column:2; grid-row:1 / span 2; }
 }
 .scanpage .or { border:0 !important; font-family:var(--font) !important; font-size:13px !important; color:var(--t2); }
+#cp-list > .card, .card.flush { padding:0 !important; overflow:hidden; }
+@media (max-width:600px) {
+  .cptable td, .cptable th, .dftable td, .dftable th, .wbtable td, .wbtable th { padding:8px 6px !important; }
+  .cptable td:first-child, .cptable th:first-child { padding-left:12px !important; }
+  .cptable .btn { min-height:32px !important; padding:0 10px !important; font-size:13px !important; }
+}
+@media (max-width:600px) { .cptable th:nth-child(4), .cptable td:nth-child(4) { display:none; } .cptable .cpwhen { white-space:normal; } }
