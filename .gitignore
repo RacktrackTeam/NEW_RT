@@ -39,3 +39,8 @@ _cache/
 # Sample videos and photos, and model files: inside this folder, not in git
 samples/
 models/
+
+# RT-EOS inside the work folder: its data, and the node_modules links into _cache
+rt_eos/data/
+rt_eos/server/node_modules
+rt_eos/client/node_modules
