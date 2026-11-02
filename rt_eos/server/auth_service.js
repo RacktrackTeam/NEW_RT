@@ -120,6 +120,8 @@ const authLimit = uploadLimiter({
 app.use(['/api/auth/login', '/api/auth/signup', '/api/auth/forgot-password',
   '/api/auth/reset-password', '/api/auth/login-with-code',
   '/api/auth/verify-reset-code', '/api/auth/verify', '/api/auth/resend-code'], authLimit);
+// No self sign-up in racktrack-app (owner, 2 Nov 2026): organizations are created by the platform owner (POST /api/orgs).
+app.post('/api/auth/signup', (req, res) => res.status(404).json({ error: 'Organizations are created by RackTrack. Use Contact us on the sign-in page.' }));
 auth.registerRoutes(app);
 
 app.use('/api/setup', auth.requireAuth, require('./routes/setup'));

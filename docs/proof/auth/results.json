@@ -1,10 +1,10 @@
 {
- "when": "2026-11-02 15:30",
+ "when": "2026-11-02 15:40",
  "checks": [
   {
    "check": "no engine route answers without a session (no cookie, and a token signed with another key)",
-   "ok": true,
-   "detail": "48 routes called twice"
+   "ok": false,
+   "detail": "49 routes called twice: POST /api/contact -> 422; POST /api/contact -> 422"
   },
   {
    "check": "health stays open",
@@ -64,7 +64,7 @@
   {
    "check": "database copies are per organization",
    "ok": true,
-   "detail": "first 2, second 0"
+   "detail": "first 3, second 0"
   },
   {
    "check": "the second organization cannot delete the first one's copy",
@@ -82,27 +82,22 @@
    "detail": ""
   },
   {
-   "check": "sign-up sends its code to the local outbox (no real mail)",
+   "check": "self sign-up is refused (organizations are created by the platform owner)",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "check": "the platform owner creates an organization",
    "ok": true,
    "detail": "200"
   },
   {
-   "check": "the new organization starts as pending",
+   "check": "its first person is the organization owner",
    "ok": true,
-   "detail": "{\"id\": 5, \"slug\": \"new-organization-613572-6286\", \"name\": \"New Organization 613572\", \"status\": \"pending\"}"
+   "detail": "org_owner"
   },
   {
-   "check": "the engine refuses a pending organization",
-   "ok": true,
-   "detail": "[403, 403, 403]"
-  },
-  {
-   "check": "the owner sees it waiting and approves it",
-   "ok": true,
-   "detail": "waiting [5, 4], approve 200"
-  },
-  {
-   "check": "after approval the same session opens the engine",
+   "check": "the organization owner opens the engine",
    "ok": true,
    "detail": "200"
   },
@@ -132,9 +127,9 @@
    "detail": ""
   },
   {
-   "check": "the owner's organizations screen lists the organization waiting for approval",
+   "check": "the owner's organizations screen lists the organizations",
    "ok": true,
-   "detail": "RackTrack Home Scan Map History Site Default O Owner Platform owner Organization settings ORGANIZATION New Organization 613572 New Organization 613484 Second Organization Demo Organization Organizatio"
+   "detail": "RackTrack Home Scan Map History Site Default O Owner Platform owner Organization settings ORGANIZATION New Organization 614175 New Organization 613572 New Organization 613484 Second Organization Demo "
   },
   {
    "check": "a new organization's admin is sent to RT-EOS's first-run setup",
@@ -142,7 +137,7 @@
    "detail": "http://127.0.0.1:3302/org/setup"
   },
   {
-   "check": "sign-in screen hides the Google, Apple and Facebook buttons without keys",
+   "check": "the sign-in screen offers no Google, Apple or Facebook button and no Create an organization",
    "ok": true,
    "detail": ""
   },

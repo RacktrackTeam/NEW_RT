@@ -81,3 +81,13 @@ main { max-width:none !important; margin:0 !important; padding-left:16px !import
 /* plain: content is there at once, no fade or slide on the way in (a long one-page result would otherwise sit invisible below the fold) */
 .rv, .a1, .a2, .a3, .a4, #dv-list > *, .rpart > *, .rpart.mo > *, #dv-one > *, #dv-one.mo > *, .screen > *, .mo > * { opacity:1 !important; transform:none !important; animation:none !important; transition:none !important; }
 .screen[data-screen="result"] > .rsh { align-self:stretch !important; max-width:none !important; width:100% !important; margin-left:0 !important; margin-right:0 !important; }
+/* signed out: the sign-in, forgot, invite, contact and waiting screens sit centred on the white page, the logo above the card;
+   at phone width the card fills the width */
+body:not(.signed) main { min-height:100vh; display:flex; flex-direction:column; justify-content:flex-start; }
+.screen > .auth, main > .screen > .auth { margin:0 auto !important; width:100%; max-width:440px; padding-top:10vh; }
+.auth .logo.big { width:64px; height:64px; }
+.auth textarea { border:1px solid rgba(17,17,17,.14); border-radius:12px; padding:10px 12px; font:inherit; font-size:16px; width:100%; }
+@media (max-width:600px) { .screen > .auth, main > .screen > .auth { max-width:none; padding-top:6vh; } }
+/* Home: the list uses the width it has */
+.screen[data-screen="home"] > * { max-width:none !important; width:100%; }
+.screen[data-screen="home"] .phead { align-items:flex-end; }

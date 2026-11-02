@@ -27,7 +27,8 @@ APP = os.environ.get("RT_APP", "http://127.0.0.1:8700")
 NETBOX = os.environ.get("RACKTRACK_NETBOX_URL", "http://127.0.0.1:3303")
 SNOW = os.environ.get("RACKTRACK_SERVICENOW_URL", "http://127.0.0.1:3304")
 RUN = "91af02c09bbc"
-LOGIN = os.environ.get("RT_PROOF_LOGIN")          # "email:password" once sign-in is in; else the name-only sign-in
+PW_FILE = ROOT / "data" / "auth" / "seed-password.txt"     # made by auth.sh, mode 600; read, never printed
+LOGIN = os.environ.get("RT_PROOF_LOGIN") or (("owner:" + PW_FILE.read_text().strip()) if PW_FILE.exists() else None)   # the platform owner sees the stored runs from before sign-in
 
 
 def call(method, url, body=None):
@@ -77,7 +78,7 @@ def main():
             pg.goto(APP + "/app/#signin"); pg.wait_for_timeout(800)
             if LOGIN:
                 email, pw = LOGIN.split(":", 1)
-                pg.fill("#si-email", email); pg.fill("#si-password", pw)
+                pg.fill("#si-user", email); pg.fill("#si-pass", pw)
             else:
                 pg.fill("#si-name", "Aasritha")
             pg.click("#signin button[type=submit]"); pg.wait_for_selector('[data-screen="home"]:not([hidden])', timeout=15000)

@@ -1,7 +1,7 @@
 """Proof for sign-in and organizations: the RT-EOS sign-in service (auth.sh) in front of the engine (engine.sh).
 
   1 No engine route answers without a session: every route in server/app.py is called with no cookie (and with a token
-    signed by the wrong key); only /api/health and /api/auth-service answer.
+    signed by the wrong key); only /api/health, /api/auth-service and /api/contact (Contact us, public on purpose) answer.
   2 A technician sees only the runs of their own site; another site's run, another organization's run and a run from
     before sign-in answer 404 (history, view, report, delete). The organization admin sees the organization's runs, the
     platform owner every run.
@@ -116,7 +116,7 @@ def routes():
 
 
 def test_no_session(engine):
-    open_ok = {"/api/health", "/api/auth-service", "/", "/manifest.webmanifest", "/sw.js", "/favicon.ico", "/logo.jpg"}
+    open_ok = {"/api/health", "/api/auth-service", "/api/contact", "/", "/manifest.webmanifest", "/sw.js", "/favicon.ico", "/logo.jpg"}
     bad = []
     forged = jwt.encode({"sub": 1, "role": "owner", "iss": "racktrack", "aud": "racktrack-app", "exp": int(time.time()) + 600}, "a-different-key-that-the-service-never-used-0123456789", algorithm="HS256")
     n = 0
@@ -198,24 +198,20 @@ def outbox_code(email, after):
 
 
 def test_pending(auth, engine):
+    """No self sign-up (owner, 2 Nov 2026): the sign-up route is gone; the platform owner creates the organization and its first
+    person is the organization owner, who can then use the engine."""
     stamp = str(int(time.time()))[-6:]
     email, user = f"neworg{stamp}@gmail.com", f"neworg{stamp}"
     w = Who(auth, engine)
-    t0 = time.time() - 1
     r = w.a("POST", "/api/auth/signup", json={"email": email, "username": user, "password": password(), "company": f"New Organization {stamp}"})
-    code = outbox_code(email, t0)
-    check("sign-up sends its code to the local outbox (no real mail)", r.status_code == 200 and code is not None, str(r.status_code))
-    v = w.a("POST", "/api/auth/verify", json={"email": email, "code": code})
-    org = (v.json().get("user") or {}).get("organization") or {}
-    check("the new organization starts as pending", v.status_code == 200 and org.get("status") == "pending", json.dumps(org))
-    blocked = [w.e("GET", p).status_code for p in ("/api/me", "/api/video/history", "/api/sources/copies")]
-    check("the engine refuses a pending organization", blocked == [403, 403, 403], str(blocked))
+    check("self sign-up is refused (organizations are created by the platform owner)", r.status_code == 404, str(r.status_code))
     owner = Who(auth, engine, "owner")
-    waiting = [o["id"] for o in owner.a("GET", "/api/orgs/pending").json().get("pending", [])]
-    ok = owner.a("POST", f"/api/orgs/{org.get('id')}/approve")
-    check("the owner sees it waiting and approves it", org.get("id") in waiting and ok.status_code == 200, f"waiting {waiting}, approve {ok.status_code}")
-    after = w.e("GET", "/api/me")
-    check("after approval the same session opens the engine", after.status_code == 200, str(after.status_code))
+    made = owner.a("POST", "/api/orgs", json={"name": f"New Organization {stamp}", "adminUsername": user, "adminEmail": email, "adminPassword": password()})
+    check("the platform owner creates an organization", made.status_code == 200, str(made.status_code))
+    first = Who(auth, engine, user)
+    check("its first person is the organization owner", first.user.get("role") == "org_owner", str(first.user.get("role")))
+    after = first.e("GET", "/api/me")
+    check("the organization owner opens the engine", after.status_code == 200, str(after.status_code))
     return user
 
 
@@ -267,7 +263,7 @@ def shots(auth, engine, pending_user, new_admin=None):
 
             ctx, pg = page_for()
             pg.goto(engine + "/app/"); pg.wait_for_selector("#si-user", state="visible"); snap(pg, "signin")
-            social_hidden = pg.is_hidden("#si-social")
+            social_hidden = not pg.locator("#si-social").count() and "Create an organization" not in pg.content()
             pg.goto(engine + "/app/#forgot"); pg.wait_for_selector("#fg-email", state="visible"); snap(pg, "forgot")
             ctx.close()
 
@@ -292,7 +288,7 @@ def shots(auth, engine, pending_user, new_admin=None):
             orgs_text = pg.inner_text("body"); ctx.close()
             if width == 1280:
                 check("the owner's console opens (logs and dashboard served by the sign-in service)", "Not found" not in console_text)
-                check("the owner's organizations screen lists the organization waiting for approval", "Waiting Organization" in orgs_text, orgs_text[:200].replace("\n", " "))
+                check("the owner's organizations screen lists the organizations", "Demo Organization" in orgs_text, orgs_text[:200].replace("\n", " "))
 
             if new_admin:        # an approved new organization's admin: sent to RT-EOS's first-run setup (a technician never is)
                 ctx, pg = page_for(); sign_in(pg, new_admin); pg.wait_for_url(re.compile(r".*/org/setup.*"), timeout=20000); pg.wait_for_load_state("networkidle")
@@ -304,7 +300,7 @@ def shots(auth, engine, pending_user, new_admin=None):
                 ctx, pg = page_for(); sign_in(pg, pending_user); pg.wait_for_selector('[data-screen="pending"]:not([hidden])', timeout=15000); snap(pg, "pending"); ctx.close()
 
             if width == 1280:
-                check("sign-in screen hides the Google, Apple and Facebook buttons without keys", social_hidden)
+                check("the sign-in screen offers no Google, Apple or Facebook button and no Create an organization", social_hidden)
                 check("the technician's history lists only their site's run", "Hyderabad DC rack" in hist and "Chennai" not in hist and "Pune" not in hist)
                 check("Profile: the technician gets Settings only; the admin gets Organization, Sites and people, Settings",
                       "Organization" not in tech_links and "Settings" in tech_links and all(x in admin_links for x in ("Organization", "Sites and people", "Settings")),
@@ -313,13 +309,8 @@ def shots(auth, engine, pending_user, new_admin=None):
 
 
 def waiting_org(auth, engine):
-    """A new organization left pending, for the waiting screen."""
-    stamp = str(int(time.time()))[-6:]
-    email, user = f"waiting{stamp}@gmail.com", f"waiting{stamp}"
-    w = Who(auth, engine); t0 = time.time() - 1
-    w.a("POST", "/api/auth/signup", json={"email": email, "username": user, "password": password(), "company": f"Waiting Organization {stamp}"})
-    w.a("POST", "/api/auth/verify", json={"email": email, "code": outbox_code(email, t0)})
-    return user
+    """No organization can wait for approval any more (no self sign-up)."""
+    return None
 
 
 def main():

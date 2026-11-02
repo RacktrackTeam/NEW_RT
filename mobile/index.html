@@ -15,7 +15,7 @@
 <link rel="preload" href="/app/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/app/app.css?v=127">
 <link rel="stylesheet" href="/app/rt/rt-topology.css?v=12">
-<link rel="stylesheet" href="/app/flow.css?v=3">
+<link rel="stylesheet" href="/app/flow.css?v=4">
 <style>
 /* the Drift tab: the database the run is checked against, the matched record, the differences */
 #df-top { display:flex; flex-direction:column; gap:12px; width:100%; }
@@ -106,11 +106,28 @@
         <label>Password<input id="si-pass" type="password" autocomplete="current-password" maxlength="200" required></label>
         <button class="btn primary big block" type="submit">Sign in</button>
         <p class="err" id="si-err" hidden></p>
-        <p class="si-links"><a href="#forgot">Forgot password?</a> <span class="muted">·</span> <a id="si-new" href="#">Create an organization</a></p>
+        <p class="si-links"><a href="#forgot">Forgot password?</a> <span class="muted">·</span> <a href="#contact">Contact us</a></p>
       </form>
       <p class="muted small" id="si-server" hidden></p>
     </div>
   </section>
+  <section class="screen" data-screen="contact" hidden>
+    <div class="auth">
+      <img class="logo big" src="/app/img/logo-192.png" alt="">
+      <h1>Contact us</h1>
+      <p class="muted">For a new organization, an account or help with signing in. RackTrack creates organizations; we answer by email.</p>
+      <form class="card form" id="contact">
+        <label>Your name<input id="ct-name" autocomplete="name" maxlength="80" required></label>
+        <label>Email<input id="ct-email" type="email" autocomplete="email" maxlength="120" required></label>
+        <label>Organization<input id="ct-org" autocomplete="organization" maxlength="120"></label>
+        <label>Message<textarea id="ct-msg" rows="4" maxlength="2000" required></textarea></label>
+        <button class="btn primary big block" type="submit">Send</button>
+        <p class="err" id="ct-err" hidden></p><p class="dfok" id="ct-ok" hidden>Thank you. We have your message and will answer by email.</p>
+        <p class="si-links"><a href="#signin">Back to sign in</a></p>
+      </form>
+    </div>
+  </section>
+
   <section class="screen" data-screen="forgot" hidden>
     <div class="auth">
       <h1>Reset your password</h1>
@@ -345,6 +362,6 @@
 <div id="lb" hidden><img id="lbimg" alt=""><span>tap to close</span></div>
 <script src="/app/topology.js?v=1"></script>
 <script src="/app/rt/rt-topology.js?v=12" defer></script>
-<script src="/app/app.js?v=148"></script>
+<script src="/app/app.js?v=149"></script>
 </body>
 </html>

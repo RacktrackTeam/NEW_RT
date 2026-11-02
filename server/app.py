@@ -85,7 +85,41 @@ def load_config():
 
 
 CONFIG = load_config()
-MODEL_LOCK = threading.Lock()        # one model call at a time
+class ModelLock:
+    """One model call at a time in this server, and on the whole machine: the same lock directory scripts/with-model-lock.sh uses
+    (RT_MODEL_LOCK_DIR, default /tmp/one_racktrack_model.lock), taken only around a model run, so an idle server never holds it."""
+    def __init__(self):
+        self._t = threading.Lock()
+        self._dir = pathlib.Path(os.environ.get("RT_MODEL_LOCK_DIR", "/tmp/one_racktrack_model.lock"))
+
+    def locked(self):
+        return self._t.locked()
+
+    def __enter__(self):
+        self._t.acquire()
+        try:
+            while True:
+                try:
+                    self._dir.mkdir()
+                    (self._dir / "pid").write_text(str(os.getpid()))
+                    return self
+                except FileExistsError:
+                    try:
+                        holder = int((self._dir / "pid").read_text().strip() or 0)
+                        os.kill(holder, 0)
+                    except (OSError, ValueError):            # the holder is gone: take the lock over, as the shell script does
+                        shutil.rmtree(self._dir, ignore_errors=True); continue
+                    time.sleep(2)
+        except BaseException:
+            self._t.release(); raise
+
+    def __exit__(self, *exc):
+        shutil.rmtree(self._dir, ignore_errors=True)
+        self._t.release()
+        return False
+
+
+MODEL_LOCK = ModelLock()              # one model call at a time, here and on the machine
 STATE_LOCK = threading.Lock()
 app = FastAPI(title="RackTrack", docs_url="/api/docs", redoc_url=None)
 APPROACHES = {a.key: a for a in occ.build_approaches("v2")}
@@ -107,7 +141,7 @@ def keep_only(chosen):
 # ------------------------------------------------------------------ sign-in: the RT-EOS session (server/rt_session.py)
 # racktrack-app sign-in (auth merge): the name-only /api/login is gone. Every /api route except health needs the session
 # the sign-in service (auth.sh, rt_eos/server/auth_service.js) signs; a run of another organization or site is not there.
-OPEN_PATHS = ("/", "/app", "/app/", "/manifest.webmanifest", "/sw.js", "/api/health", "/api/auth-service", "/favicon.ico", "/logo.jpg")
+OPEN_PATHS = ("/", "/app", "/app/", "/manifest.webmanifest", "/sw.js", "/api/health", "/api/auth-service", "/favicon.ico", "/logo.jpg", "/api/contact")
 RUN_PATH = re.compile(r"^/(?:api/video|video-report)/([A-Za-z0-9_-]+)(?:/|$)")
 
 
@@ -145,6 +179,30 @@ async def require_session(request: Request, call_next):
     if blocked is not None:
         return blocked
     return await call_next(request)
+
+
+class Contact(BaseModel):
+    name: str = Field(min_length=1, max_length=80)
+    email: str = Field(min_length=3, max_length=120, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+    organization: str = Field(default="", max_length=120)
+    message: str = Field(min_length=1, max_length=2000)
+
+
+CONTACT_SEEN = []
+
+
+@app.post("/api/contact")
+def api_contact(body: Contact):
+    """Contact us from the sign-in screen (public): kept as a JSON file in data/contact for RackTrack to answer. Nothing is sent
+    anywhere. At most 20 messages a minute, so the open route cannot fill the disk."""
+    now = time.time()
+    CONTACT_SEEN[:] = [t for t in CONTACT_SEEN if now - t < 60]
+    if len(CONTACT_SEEN) >= 20:
+        raise HTTPException(429, "Too many messages just now. Try again in a minute.")
+    CONTACT_SEEN.append(now)
+    d = ROOT / "data" / "contact"; d.mkdir(parents=True, exist_ok=True)
+    (d / f"{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}-{secrets.token_hex(3)}.json").write_text(json.dumps(body.model_dump(), indent=1))
+    return {"ok": True}
 
 
 @app.get("/api/auth-service")

@@ -96,7 +96,7 @@
   // RT-EOS's sign-in service (auth.sh, rt_eos/server/auth_service.js) signs the session: these screens call it directly and it sets
   // the rt_access cookie on this host, which the engine reads. Its own screens (organization, sites and people, settings, the
   // platform owner's console, the first-run setup) are RT-EOS's React screens at <service>/org/, sharing the same cookie.
-  var AUTH_SCREENS = { signin: 1, forgot: 1, invite: 1, pending: 1 };
+  var AUTH_SCREENS = { signin: 1, forgot: 1, invite: 1, pending: 1, contact: 1 };
   var AUTH = (function () {
     var base = location.protocol + '//' + location.hostname + ':3302';
     function url(p) { return base + p; }
@@ -125,7 +125,12 @@
         .then(function () { $('si-pass').value = ''; try { localStorage.setItem('rt_user', $('si-user').value.trim()); } catch (x) {} return landed(); })
         .catch(function (x) { err('si-err', x); });
     });
-    $('si-new').addEventListener('click', function (e) { e.preventDefault(); location.href = url('/org/login'); });
+    $('contact').addEventListener('submit', function (e) {          // Contact us: kept in the local outbox for RackTrack (no mail is sent from here)
+      e.preventDefault(); $('ct-err').hidden = true; $('ct-ok').hidden = true;
+      fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: $('ct-name').value, email: $('ct-email').value, organization: $('ct-org').value, message: $('ct-msg').value }) })
+        .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || r.statusText); $('contact').reset(); $('ct-ok').hidden = false; }); })
+        .catch(function (x) { $('ct-err').textContent = x.message; $('ct-err').hidden = false; });
+    });
     var fgStep = 1;
     function openForgot() { fgStep = 1; $('fg-step2').hidden = true; $('fg-go').textContent = 'Send the code'; $('fg-err').hidden = true; $('fg-lead').textContent = 'Enter the email on your account. We send a code to it.'; }
     $('forgot').addEventListener('submit', function (e) {

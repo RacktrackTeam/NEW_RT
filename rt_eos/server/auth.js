@@ -1898,8 +1898,8 @@ function registerRoutes(app) {
       const org = createOrganization(name, req.user.id);
       const hash = bcrypt.hashSync(adminPassword, BCRYPT_COST);
       db.prepare(`INSERT INTO users (email, username, password_hash, email_verified, role, organization_id)
-                  VALUES (?, ?, ?, 1, 'org_admin', ?)`)
-        .run(emailN, adminUsername, hash, org.id);
+                  VALUES (?, ?, ?, 1, 'org_owner', ?)`)
+        .run(emailN, adminUsername, hash, org.id);              // the first person of the organization is its organization owner
       return org;
     }).immediate();
     audit.log({ req, user: req.user, action: 'org.create', status: 'ok', targetType: 'organization', targetId: out.id, payload: { name } });
