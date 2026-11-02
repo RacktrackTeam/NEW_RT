@@ -86,7 +86,7 @@
     if (name === 'more') api('/api/sources/copies').then(function (d) { $('copies-count').textContent = d.copies.length ? d.copies.length + (d.copies.length === 1 ? ' copy' : ' copies') : ''; }).catch(function () {});
     if (name === 'sweep') openSweep();
     if (name === 'job') openJob(arg);
-    if (name === 'result') openResult(arg, rtab);
+    if (name === 'result') { document.querySelector('[data-screen="result"]').dataset.tab = rtab; openResult(arg, rtab); }
     if (name === 'invite') AUTH.openInvite(arg);
     if (name === 'forgot') AUTH.openForgot();
     if (name === 'tools' && window.RTFEAT) window.RTFEAT.open(arg, arg2, h.split('/')[3]);      // wt/features: the rack tools (mobile/features.js)
@@ -531,7 +531,7 @@
     var fresh = RES.id !== id;
     if (fresh) { RES.sel = null; RES.view = null; RES.pick = null; RES.labelAsked = null; RES.cmp = null; RES.cmpSrc = null; RES.diffMode = null; $('df-top').innerHTML = ''; $('diff-top').innerHTML = ''; }
     RES.id = id; clearInterval(RES.timer); remember(id);
-    RES.tab = tab; Object.keys(TABS).forEach(function (k) { $('res-' + k).hidden = false; }); $('res-eyebrow').textContent = 'Result'; $('rep-full').hidden = NATIVE;   // every step on one page
+    RES.tab = tab; $('res-eyebrow').textContent = 'Result'; $('rep-full').hidden = NATIVE;   // only the open tab shows (data-tab)
     loadView(true);
     watchPorts();
     if (fresh || !RES.cmp) loadDrift();
@@ -548,7 +548,7 @@
         return '<li><b>' + esc(when(x.started)) + '</b> <span class="muted small">' + (s.devices != null ? pl(s.devices, 'device') + ' · ' + s.units + ' units · ' : '') + (x.record ? 'compared with ' + esc(x.record.source) + ', ' + (x.differences ? pl(x.differences, 'difference') : 'no differences') : 'not compared') + '</span> <a href="#result/' + encodeURIComponent(x.id) + '">Open</a></li>'; }).join('') + '</ul></details>';
     }).catch(function () {});
   }
-  function secTo(tab) { if (!tab || tab === 'rack') return window.scrollTo(0, 0); var el = $('sec-' + tab); if (el) el.scrollIntoView({ block: 'start' }); }   // jump to a step of the result page
+  function secTo(tab) { if (TABS[tab]) { if (RES.tab !== tab && RES.id) return go('result/' + RES.id + (tab === 'rack' ? '' : '/' + tab)); return window.scrollTo(0, 0); } var el = $('sec-' + tab); if (el) el.scrollIntoView({ block: 'start' }); }   // open a tab (the page scrolls to the top), or jump to a block inside the Report
   function portCells(ports, max) {
     if (!ports || !ports.length) return '';
     var list = max ? ports.slice(0, max) : ports;

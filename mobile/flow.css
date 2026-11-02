@@ -157,3 +157,9 @@ body.web.result #rnav.inpage { align-self:flex-start !important; margin:0 !impor
   .rptable td:nth-child(3) { text-align:right; max-width:none !important; }
 }
 @media (max-width:600px) { .rptable td:nth-child(1), .rptable td:nth-child(2) { text-align:left !important; } .rptable td:nth-child(3) .kd { display:block; } }
+
+/* the result shows one tab at a time: Rack, Devices, Layout or Report (data-tab on the section, set by route()) */
+.screen[data-screen="result"][data-tab="rack"] > #res-devices, .screen[data-screen="result"][data-tab="rack"] > #res-layout, .screen[data-screen="result"][data-tab="rack"] > #res-report,
+.screen[data-screen="result"][data-tab="devices"] > #res-rack, .screen[data-screen="result"][data-tab="devices"] > #res-layout, .screen[data-screen="result"][data-tab="devices"] > #res-report,
+.screen[data-screen="result"][data-tab="layout"] > #res-rack, .screen[data-screen="result"][data-tab="layout"] > #res-devices, .screen[data-screen="result"][data-tab="layout"] > #res-report,
+.screen[data-screen="result"][data-tab="report"] > #res-rack, .screen[data-screen="result"][data-tab="report"] > #res-devices, .screen[data-screen="result"][data-tab="report"] > #res-layout { display:none !important; }
