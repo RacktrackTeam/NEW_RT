@@ -971,9 +971,10 @@
       return renderDiff(d, true);
     }
     if (ui !== 'confirm' || !(d.chosen && d.source === src)) { $('df-top').innerHTML = ''; return renderDiff(d, ui === 'drift'); }
-    var m = d.match;
+    var m = d.match, other = m && m.how === 'picked' && I.rack_key && I.rack_key !== m.rack_key;   // a person picked another record than the steps found: the steps' confidence is not this record's
     var h = '<div class="card idcard"><div class="dfrow"><b>Confirm the verified rack id</b><span class="muted small">' + esc(SRCLABEL[src] || d.sources[src]) + '</span></div>'
-      + '<div class="dfrow idhead"><span class="idrack">' + (m ? esc(m.rack_key) : 'No single rack found') + '</span>' + (I.confidence != null ? '<span class="idconf ' + esc(I.state) + '">' + pc(I.confidence) + ' overall</span>' : '') + '</div>'
+      + '<div class="dfrow idhead"><span class="idrack">' + (m ? esc(m.rack_key) : 'No single rack found') + '</span>' + (other ? '<span class="muted small">' + esc(m.why) + '</span>' : I.confidence != null ? '<span class="idconf ' + esc(I.state) + '">' + pc(I.confidence) + ' overall</span>' : '') + '</div>'
+      + (other ? '<p class="muted small">The steps below found ' + esc(I.rack_key) + ', not this record. Confirm only if you are sure.</p>' : '')
       + '<figure class="lblstrip"><img src="/api/video/' + encodeURIComponent(RES.id) + '/rack-label.jpg" alt="The rack label crop" onerror="this.parentNode.hidden=true"></figure>'
       + stepsHtml(I)
       + '<div class="dfrow idbtns"><button class="btn primary" type="button" id="cmp-continue"' + (m ? '' : ' disabled') + '>Confirm</button><button class="btn" type="button" id="cmp-change">Change</button></div>';
