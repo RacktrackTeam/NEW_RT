@@ -98,7 +98,7 @@
       function pickers() {
         var d = devOf(cur.dev), ports = d ? d.layout.ports.filter(function (p) { return p.id != null; }) : [];
         $('fp-port').innerHTML = (cur.port ? '' : '<option value="">Choose a port</option>') + ports.map(function (p) { return '<option value="' + p.id + '"' + (p.id === cur.port ? ' selected' : '') + '>Port ' + p.id + ' · ' + esc(stateWord(p.status)) + '</option>'; }).join('');
-        $('fp-port').disabled = !d;
+        $('fp-port').disabled = !d; if (d) $('fp-dev').value = String(cur.dev);   // a device tapped on the rack picture shows in the picker too
         $('fp-grid').innerHTML = ports.map(function (p) { var st = p.status === 'connected' ? 'on' : p.status === 'empty' ? 'off' : 'na';
           return '<button type="button" class="ft-cell ' + st + (p.id === cur.port ? ' chosen' : '') + '" data-p="' + p.id + '" title="Port ' + p.id + ': ' + esc(stateWord(p.status)) + '" aria-pressed="' + (p.id === cur.port) + '">' + p.id + '</button>'; }).join('');
         $('fp-hint').textContent = d ? 'Filled number: cable plugged in. Plain: empty. Dashed: not sure.' : 'Choose a device here or tap one on the rack picture.';
