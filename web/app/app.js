@@ -817,7 +817,7 @@
   function renderRackAsk(v) {
     var el = $('rk-ask'); if (!el) return;
     var R = v.rack_id, RL = v.rack_label || {}, read = RL.id && RL.id.text, opts = v.rack_id_options || [];
-    if (R && R.id) {
+    if (R && R.id && RES.rkEdit !== v.id) {
       var web = document.body.classList.contains('web');
       el.hidden = false; el.className = 'card rkask done' + (web ? '' : ' slim');
       if (!web) {                                                        // the phone: the line shows for 3 seconds after the answer, then folds away (user, 2026-10-30)
@@ -876,10 +876,13 @@
         return api('/api/video/' + RES.id + '/view').then(function (v) { RES.view = v; RES.geo = null; drawLayer(v, LAY, false); renderRackSide(v); renderRackAsk(v); selectUnit(unit); }); })
       .catch(function (err) { b.disabled = false; toast(err.message); });
   });
-  function saveRackId(body) { if (body.id) RES.rkJust = RES.id + '|' + body.id; return api('/api/video/' + RES.id + '/rack-id', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function () { return loadView(false); }).catch(function (e) { toast(e.message); }); }
+  function saveRackId(body) { RES.rkEdit = null; if (body.id) RES.rkJust = RES.id + '|' + body.id; return api('/api/video/' + RES.id + '/rack-id', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function () { return loadView(false); }).catch(function (e) { toast(e.message); }); }
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('#rk-ask [data-rkid], #rk-ask [data-rkid-skip], [data-rkid-clear]'); if (!b) return;
-    if (b.dataset.rkid) saveRackId({ id: b.dataset.rkid }); else if ('rkidSkip' in b.dataset) saveRackId({ skip: true }); else saveRackId({ clear: true });
+    if (b.dataset.rkid) saveRackId({ id: b.dataset.rkid });
+    else if ('rkidSkip' in b.dataset) { if (RES.rkEdit === RES.id) { RES.rkEdit = null; renderRackAsk(RES.view); } else saveRackId({ skip: true }); }
+    else if (RES.view && RES.view.rack_id && RES.view.rack_id.id) { RES.rkEdit = RES.id; renderRackAsk(RES.view); }   // Change: ask again, but the confirmed ID stays until a new one is saved (Not now keeps it)
+    else saveRackId({ clear: true });
   });
   document.addEventListener('submit', function (e) { var f = e.target.closest && e.target.closest('#rk-ask [data-rkid-form]'); if (!f) return; e.preventDefault(); var id = f.id.value.trim(); if (!id) return; saveRackId({ id: id, typed: true }); });
   function renderReport(v) {
