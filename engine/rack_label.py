@@ -5,7 +5,7 @@ and from the strip of the stitched picture above the first unit. Each frame is r
 pipeline/ocr_labels.py); the readings are pooled and a label wins by its summed confidence. Camera misreadings of digits
 (O for 0, I for 1) are repaired where a segment can only be a number, the way RT-EOS repairs unit segments.
 
-    python3 src/rack_label.py data/runs/<id>      prints what it reads (no file written)
+    python3 engine/rack_label.py data/runs/<id>      prints what it reads (no file written)
 """
 import local_models  # noqa: F401  (model caches inside this folder, hub lookups off)
 import json

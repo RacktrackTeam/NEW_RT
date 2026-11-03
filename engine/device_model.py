@@ -1,5 +1,5 @@
 """Step 3, logic + model: Shankar's device detector draws a box around every device it sees, and the
-one logic (src/device_join.py: our seam score mixed with the team's joining model) decides where the detector is silent.
+one logic (engine/device_join.py: our seam score mixed with the team's joining model) decides where the detector is silent.
 
 A unit belongs to the detector box that covers at least COVER of it (boxes under SCORE are dropped). At every seam
 between two occupied units:

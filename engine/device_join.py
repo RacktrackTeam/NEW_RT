@@ -12,7 +12,7 @@ devices, 5,848 devices):
     our logic alone 84.0 %, joining model alone 85.4 %, mixed 88.2 % devices exact (all photos; the joining model
     was trained on 479 of them); on the 453 photos neither part had seen: 82.4 / 82.5 / 85.5 % (photos with every
     device right 60.5 %). Stackers with more inputs (logistic, boosted trees) did no better on the unseen photos.
-    With Shankar's device detector on top (src/device_model.py): 95.3 / 93.3 %.
+    With Shankar's device detector on top (engine/device_model.py): 95.3 / 93.3 %.
 Grades kept in results/devices/grade_devices_test_*.json (the test photos were removed on 2026-10-22).
 
 The joining model's package was called device_logic too, so it lives in src/ as fa_device_logic."""

@@ -1,6 +1,6 @@
 """Run one of Srikanth's port agents (port_agents/, the 28 Oct 2026 "spec" package) on a list of crops, in one process, the models loaded once.
 
-    python3 src/port_agents_batch.py switch|router|appliance jobs.json
+    python3 engine/port_agents_batch.py switch|router|appliance jobs.json
 
 Started by pipeline.agent_layouts with the agent's own folder as the only import path (PYTHONPATH) and as the
 working directory, as port_agents/run_agent.py does: the three agents share module names and must never meet in one

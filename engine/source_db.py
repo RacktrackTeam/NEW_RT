@@ -337,7 +337,7 @@ def _get(base, path, headers=None):
 
 
 def _login(org, type_, default):
-    """The organization's saved login (src/connections.py), else the local mock with no login."""
+    """The organization's saved login (engine/connections.py), else the local mock with no login."""
     import connections
     lg = connections.resolve(org, type_) if org else None
     return (lg["address"], connections.headers(type_, lg["secret"])) if lg else (default, None)

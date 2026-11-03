@@ -10,7 +10,7 @@
     step 6  port layout    that layout fitted onto the photo, every port numbered with its outline (switch_layouts,
                        Srikanth's port agents in port_agents/, template or auto mode)
 
-Command line:  python3 src/pipeline.py PHOTO [--out DIR]   prints the result as JSON and writes the four pictures.
+Command line:  python3 engine/pipeline.py PHOTO [--out DIR]   prints the result as JSON and writes the four pictures.
 The server (server/app.py) calls units_from_photo, device_rows and the draw_* functions.
 """
 import argparse
@@ -36,8 +36,8 @@ STEP1 = "RackTrack unit model + logic"
 STEP3_MODEL, STEP3_LOGIC = "device detector + logic", "logic only (detector not installed)"
 
 # ------------------------------------------------------------------ step 4: device classification
-# The one place the device classifier is called, for photos and videos (src/rack_video.py uses it too). Our ConvNeXt-Tiny
-# (src/device_classifier.py) stands in until the final one: to replace it, change classify_crops() and CLASSIFIER_NAME only.
+# The one place the device classifier is called, for photos and videos (engine/rack_video.py uses it too). Our ConvNeXt-Tiny
+# (engine/device_classifier.py) stands in until the final one: to replace it, change classify_crops() and CLASSIFIER_NAME only.
 # It takes crops (the device cut along its shape, outside black) and returns per crop {"label", "class", "prob", ...}.
 CLASSIFIER_NAME = "ConvNeXt-Tiny (ours, to be replaced)"
 _CLF = None
@@ -74,7 +74,7 @@ def classify_photo_devices(img, devices):
 # ------------------------------------------------------------------ steps 5 and 6: device layout and port layout
 # The port agents are Srikanth's package port_agents/ (24 Oct 2026, the review fixes in), used as delivered: the switch
 # agent for switches, the router agent for routers, the appliance agent for firewalls, load balancers and gateways. Each
-# runs in its own process with only its own folder on the import path (src/port_agents_batch.py), one process per device
+# runs in its own process with only its own folder on the import path (engine/port_agents_batch.py), one process per device
 # group, WORKERS of them side by side.
 PORT_AGENTS = ROOT / "engine" / "port_agents"
 SWITCH_AGENT = PORT_AGENTS / "switch_agent"
@@ -362,7 +362,7 @@ def photo_switch_layouts(img, devices, work):
 
 
 def add_port_details(layout, cut_pil, work, key):
-    """Step 6 in detail on one switch cut (src/port_details.py): every port, empty or connected, its spec and cable."""
+    """Step 6 in detail on one switch cut (engine/port_details.py): every port, empty or connected, its spec and cable."""
     try:
         import port_details as PD
         if not PD.available():

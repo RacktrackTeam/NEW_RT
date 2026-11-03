@@ -46,7 +46,7 @@ def available():
 
 
 def _rteos_modules(*names):
-    """RT-EOS's own modules (package "pipeline"), loaded while our src/pipeline.py steps aside, then put back."""
+    """RT-EOS's own modules (package "pipeline"), loaded while our engine/pipeline.py steps aside, then put back."""
     import importlib
     ours = sys.modules.pop("pipeline", None)
     sys.path.insert(0, str(RTEOS))

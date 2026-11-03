@@ -1,6 +1,6 @@
 """Rack occupancy pipeline.
 
-1. Rows   - the RT-EOS unit ladder (src/unit_grid.py, identical to RT-EOS pipeline/detection.py)
+1. Rows   - the RT-EOS unit ladder (engine/unit_grid.py, identical to RT-EOS pipeline/detection.py)
             reads every rack row from weights/rack_unit_finder.pt, numbered u01 at the BOTTOM.
 2. Crop   - each row is cut out and squashed to 224x224, exactly like the training crops.
 3. Classify - the chosen approach returns P(occupied) per row.
@@ -317,7 +317,7 @@ def classify_units(img, units, approach, thresh: float = 0.5, devices=None, side
         An empty slot or closed (blank) panel seen by the detector always means unoccupied (FREE_DEVICE_CLASSES);
       * device_disagreement = "overrule": the detector's answer is used.
     A row is also uncertain when the classifier alone decided and is less than `uncertain_below` sure. On a photo
-    taken from a side angle (src/side_angle.py) it must be at least side_angle.SIDE_SURE sure instead.
+    taken from a side angle (engine/side_angle.py) it must be at least side_angle.SIDE_SURE sure instead.
     Each row gets `attention` ("warning" / "uncertain" / "info" / None) and a plain-English `reason`.
     """
     crops = [crop_unit(img, u["box"]) for u in units]

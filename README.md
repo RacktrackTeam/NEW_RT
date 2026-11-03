@@ -1,85 +1,92 @@
 # RackTrack
 
-Film a rack with a phone; the server stitches the video into one rack picture, numbers every unit, marks what is full and
-free, finds and names every device, reads makes and models, and maps the ports. One application: a mobile app
-(`mobile/`, installable from the browser) and a server (`server/`) that runs the engine (`src/`).
+Film a rack from top to bottom. RackTrack stitches the video into one rack picture, numbers every unit, finds and names
+every device, reads makes, models and ports, matches the rack with the organization's database copy (Excel workbook,
+NetBox or ServiceNow CMDB), shows the drift and writes the report. One application: the app's screens (`web/app`, also
+the phone shell's content), an engine API (`server/app.py` with `engine/`) and a sign-in service (`server/auth`) for
+organizations, sites and people. The layout of the folder is in [docs/STRUCTURE.md](docs/STRUCTURE.md).
 
-## Run it
+## Start and stop
 
 ```
-pip install -r requirements.txt            # Python 3.10, tested on macOS Apple Silicon
-./server/run.sh                            # http://<this machine>:8600/app/
+./start.sh        # the sign-in service (3302), the local NetBox and ServiceNow (3303, 3304) when no real login is saved,
+                  # then the engine (8700); one line per service. Open http://127.0.0.1:8700/app/
+./stop.sh         # stops what start.sh started (by the process ids in data/pids)
 ```
 
-There is no access code: phones on the same network open `http://<this-mac-ip>:8600/app/`, type their name,
-and add the page to the home screen (Safari: Share, Add to Home Screen; Chrome:
-Install app).
+Each service also starts on its own: `./auth.sh`, `./sources.sh`, `./engine.sh` (`RACKTRACK_PORT` for another engine
+port, `RACKTRACK_DATA` for another data folder). Logs are in `data/logs/`. Use the same host name for the app and the
+sign-in service (127.0.0.1, or localhost for both): the session cookie belongs to the host.
 
-Phone cameras work on https only. For the camera guide on a phone: `./server/make_cert.sh` once, then `./server/run.sh --https`
-and accept the certificate on the phone. Over http the app still takes videos and photos from the phone's gallery.
+The engine reads one video at a time (about 2 to 10 minutes on this Mac; the device port reads come after, per device)
+and takes the machine-wide model lock only around a model run, with two threads (`OMP_NUM_THREADS=2`): this Mac overheats
+with more. Nothing leaves the machine: every model is read from `models/`, the model hubs are switched off, and NetBox
+and ServiceNow are the local mocks until an organization admin saves a real login under Profile > Connections.
 
-The engine runs one job at a time on 2 threads (`OMP_NUM_THREADS`), on purpose: this Mac overheats with more. On a server
-with a GPU the same code is several times faster with no change.
+## Accounts
 
-`run.sh` starts the server under `caffeinate`, so the Mac does not sleep while a run is going: a closed lid otherwise
-stops the run until the next wake (seen on 26 October: a 7-minute port step stretched over 85 minutes of sleep).
+`./auth.sh` seeds them on its first start. The password is in `data/auth/seed-password.txt` (set `RT_SEED_PASSWORD`
+before the first start to choose it). Details and what each role may do: [docs/AUTH.md](docs/AUTH.md).
 
-## What the app does
+| Username | Role | Organization |
+|---|---|---|
+| owner | platform owner | - |
+| orgowner, admin, manager, tech | organization owner, admin, site manager, technician | Demo Organization (Hyderabad DC) |
+| orgownert, admint, managert, techt | the same four | Test Organization (Test Hyderabad DC), for proofs and tests |
 
-| Screen | What happens |
+The Demo Organization is the owner's demo: one clean copy of each database and one stored run of the owner's rack
+(SP-HYD-RM01-R01-R1). Proofs never write to it (`tools/proof_guard.py`); planted differences live in the Test
+Organization. `tools/reset_demo_copies.py` puts the Demo Organization's copies back to the clean record.
+
+## Install on a clean Mac
+
+1. Python 3.10 (python.org installer), Node 20, git.
+2. The engine's environment, from the pinned list:
+   `python3.10 -m venv _cache/venv-engine && _cache/venv-engine/bin/python -m pip install -r requirements.txt`
+3. The RT-EOS readers' environment (the engine calls them as child processes):
+   `python3.10 -m venv _cache/venv && _cache/venv/bin/python -m pip install -r engine/readers/requirements.txt`
+4. The Node packages: `cd server/auth && npm ci`, `cd web/org && npm ci`, `cd server/mocks && npm ci`. On this Mac they
+   are kept in `_cache/rt_eos_node_modules` and linked in by `auth.sh`.
+5. The models and samples are not in git. Copy `models/` and `samples/` from a Mac that has them, then check the copy:
+   `_cache/venv-engine/bin/python tools/make_manifest.py --check` compares every file with `models/MANIFEST.txt`
+   (size and SHA-256; the manifest says where each folder comes from).
+6. `./start.sh`.
+
+On this Mac `_cache/venv-engine` was made offline from the packages already installed in its Python 3.10
+(`tools/make_engine_env.py`), so nothing was downloaded.
+
+## The test videos
+
+`samples/video`: `vdo1.mp4` (the owner's rack, SP-HYD-RM01-R01-R1, its record in `samples/ground_truth`) and the two
+WhatsApp videos (NETWORK RACK 1 and 2), each with a stored run (`run_of_vdo1`, `run_of_whatsapp_2143`,
+`run_of_whatsapp_2319`). Upload one under Scan, or run `tools/proof_video_run.py`.
+
+## Tests and proofs
+
+```
+tools/with-model-lock.sh _cache/venv-engine/bin/python -m pytest -q tests        # the engine (loads the models)
+(cd server/auth && npm test)                                                     # the sign-in service
+(cd web/org && npx vitest run)                                                   # the organization pages
+```
+
+Proofs, against a running engine (`PW_CHROMIUM` names a headless Chromium for the browser ones):
+
+| Proof | What it shows |
 |---|---|
-| Sign in | your name only; a signed session cookie for 30 days |
-| Home | greeting, Sweep a rack, the run going now, the last report, how it works |
-| History | every run on this server, newest first, with its rack picture and state |
-| New sweep | the camera guide (the team's Rack Sweep Guide, inside the app) records one slow sweep from the top of the rack to the bottom and sends it; the run starts by itself. Or a video from the gallery |
-| Run | the 15 steps with the one running, the elapsed time; the run keeps going if the phone leaves; a finished or failed run can be removed |
-| Result | two tabs: Main (the rack drawn from the data: numbers, the picture with the devices, the elevation, the device card, how it was read) and Report (the 15-step report inside the app) |
-| More | the demo video, install help, the server, sign out |
-| More | models and accuracy, the demo run, install help, sign out |
+| `tools/proof_video_run.py` | one fresh video run end to end, compared with the stored run |
+| `tools/proof_standard.py` | every screen at 1280 and 400 px, against docs/design/STANDARD.md |
+| `tools/proof_pass2.py` | sign-in without refused calls, the /org/ pages, the failed-run screen, find-port answers |
+| `tools/proof_auth.py` | sign-in, roles, organizations and 404 for strangers (31 checks) |
+| `tools/proof_compare.py`, `tools/proof_compare_sources.py` | the compare with Excel, NetBox and ServiceNow |
+| `tools/proof_features.py` | the RT-EOS functions on a run (cables, A-end / Z-end, close-ups, site position) |
+| `tools/evaluate.py` | the three videos against their records |
 
-Every run lives in `data/runs/<id>/` (video, stitched rack picture, `result.json`, `status.json`, `report/`) and survives
-a server restart; the history is read from there. The stored demo run is `results/video_experiment/vdo1` with its report
-in `reports/video/vdo1`.
+## The phone app
 
-## The 15 steps
+`native/` is the Capacitor shell (app id com.racktrack.sweep). It opens a small start page, finds the RackTrack server
+and loads the server's app (`web/app`), so a screen change needs no new build. See [native/README.md](native/README.md).
 
-Input, quality check, stitched rack picture, frames, unit detection, unit classification, device detection, device
-classification, OCR (make and model), agents (vendor templates: the switch mapper, the router mapper, the firewall and
-gateway mapper), overlay (the port layout on the device), fallback (the RT-EOS port model when no template fits), port
-review, rack report, models and accuracy. About 9.5 minutes per 13 s video on this Mac; the port steps are 80 % of it.
+## Rules
 
-## Layout
-
-```
-server/        app.py (the API and the app's pages), run.sh, make_cert.sh, config.json (made on first start, keep private)
-mobile/        the app: index.html, app.js, app.css, manifest.webmanifest, sw.js, icons/; capture/ = the camera guide
-src/           the engine: pipeline.py (photo), rack_video.py (video), rack_stitch.py + rack_stitcher/ (stitching),
-               frame_locator.py (best frames), occupancy.py, device_*.py, port_agents_batch.py (runs one of the
-               port agents on a list of crops), port_details.py (RT-EOS port models)
-port_agents/   the team's three port agents (switch, router, appliance), used as delivered, never edited here
-data/catalogues/  the switch workbook and its json (models_by_vendor.*), site checks
-scripts/       video/build_report.py (the 15-step report), video/add_closeups.py, switches/build_catalog.py, evaluations
-models/ weights/   the trained models (device classifier, occupancy ensemble, detectors, port models)
-data/          video/ (demo video), ground_truth/, captures/ (takes from the guide), runs/ (every run), closeups/,
-               datasets/, device_crops/, eval/ (numbers the reports quote)
-results/ reports/  the stored demo run and the built reports; tests/ (python3 -m pytest -q tests)
-native/        the iOS and Android app (Capacitor): a start page that connects to a server and opens mobile/; see native/README.md
-deliveries/    the teammates' packages as received (srikanth_ocr, integration) and the retired desktop portal
-docs/          DEVICE_LABEL_REVIEW.md
-```
-
-## API
-
-All under a session cookie except `/api/login` and `/api/health`.
-
-| Call | Does |
-|---|---|
-| `POST /api/login {name}` | signs in; `POST /api/logout`; `GET /api/me` (`{name: null}` when signed out) |
-| `POST /api/video` (video file, or `capture=app/<take>`, or `sample=vdo1`; `stride`) | starts a run, returns `{job}` |
-| `GET /api/video/history` | every run, newest first |
-| `GET /api/video/{job}` | state, progress, summary, devices |
-| `DELETE /api/video/{job}` | removes a finished or failed run and its folder |
-| `GET /video-report/{job}/index.html` | the run's report |
-| `POST /api/closeup` (file, job, device) | reads a close-up of one device and keeps it with the run |
-| `POST /api/photo` (file) | the photo pipeline on one rack photo |
-| `/capture/`, `/capture/upload` | the camera guide and its upload (pieces, resumable) |
+Plain English and the plain hyphen on every screen, white light theme, full device width, accent #1f2a3a
+(docs/design/STANDARD.md). Every path stays inside this folder. Commits are plain sentences.

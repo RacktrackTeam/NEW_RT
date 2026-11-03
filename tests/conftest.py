@@ -1,5 +1,5 @@
 """Every test runs with outside calls off: the port agents' web search, the specifications' online lookup (hard rule 2),
-and every model hub (Hugging Face, torch hub, Ultralytics): src/local_models.py points their caches at models/ and turns
+and every model hub (Hugging Face, torch hub, Ultralytics): engine/local_models.py points their caches at models/ and turns
 their lookups off, and any HTTP request that is not to this machine goes to a closed port and fails."""
 import os
 import pathlib

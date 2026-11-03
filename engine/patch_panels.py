@@ -3,7 +3,7 @@ a DINOv2 match against its gallery, step 2 checks that with the YOLO port detect
 = a cable plugged in, "empty" = nothing in the slot), step 3 draws them. Nothing in the package is changed: it is run as
 its own command (its two models stay in separate processes, as its README asks) and its CSV is read back.
 
-    python3 src/patch_panels.py data/runs/<id> <device index>        prints what it reads
+    python3 engine/patch_panels.py data/runs/<id> <device index>        prints what it reads
 """
 import csv
 import json

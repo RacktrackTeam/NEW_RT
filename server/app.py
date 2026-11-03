@@ -9,9 +9,9 @@ What it does
   sweeps         a rack video (an upload or a camera-guide take) runs the 15 steps in a background thread;
                  every run lives in data/runs/<org>/<site>/<id>/ (video, rack picture, result.json, report/) and survives a restart
   close-ups      a close-up of one device is read and kept with its run; the report is rebuilt
-  databases      the organization's Excel, NetBox and ServiceNow CMDB copies, the rack match and the drift (src/source_db.py)
+  databases      the organization's Excel, NetBox and ServiceNow CMDB copies, the rack match and the drift (engine/source_db.py)
   reports        each run's 15-step report (engine/video_report.py), served uncached
-Everything heavy runs one job at a time on 2 threads (this Mac overheats otherwise); the engine is src/.
+Everything heavy runs one job at a time on 2 threads (this Mac overheats otherwise); the engine is engine/.
 """
 import datetime
 import hashlib
@@ -388,7 +388,7 @@ def run_job(job, video_path, truth_path=None):
         start_rack_label(job)                       # the rack's own label (ID and name), read after the run in the background
 
 
-# ------------------------------------------------------------------ the rack's label: its ID and name, read once per run (src/rack_label.py)
+# ------------------------------------------------------------------ the rack's label: its ID and name, read once per run (engine/rack_label.py)
 RACK_LABEL_RUNNING = set()
 
 
@@ -668,7 +668,7 @@ def api_video_view(job: str):
     ubox = {u["unit"]: u["box"] for u in r["occupancy_frames"]["rows"] if u.get("box")}
     def lay_of(d):
         C = d.get("closeup") or {}; L = d.get("layout") or {}
-        sp = SDB.screen_ports(d, ubox)                     # the one reading of the ports every screen and tool uses (src/source_db.py)
+        sp = SDB.screen_ports(d, ubox)                     # the one reading of the ports every screen and tool uses (engine/source_db.py)
         src, used, used_c, pd = sp["src"], sp["used"], sp["used_c"], sp["pd"]
         keep = ("id", "type", "status", "cable_type", "cable_colour", "cable_connector", "polygon", "cap_state", "cable_views")   # polygon: on the cut picture (pictures.cut)
         ports = [{k: q.get(k) for k in keep} for q in sp["ports"]]
@@ -725,7 +725,7 @@ def _record_passive(j):
 
 
 def _kind_of(d, when=None):
-    """The device's one kind for the screens (src/source_db.py device_kind) and where it came from, in plain words."""
+    """The device's one kind for the screens (engine/source_db.py device_kind) and where it came from, in plain words."""
     k = SDB.device_kind(d, when)                 # when: the run's date, for a kind recorded when the ports were mapped
     return {"kind": k["kind"], "kind_from": k["from"], "kind_words": k["words"]}
 
@@ -842,7 +842,7 @@ def capture_upload_info():
 @app.post("/capture/upload")
 async def capture_upload(request: Request):
     """One file of one take (video.mp4 / video.webm / log.json), whole or in pieces, saved in data/captures/ with the
-    guide's own checks (src/captures.py)."""
+    guide's own checks (engine/captures.py)."""
     q = request.query_params
     try:
         length = int(request.headers.get("content-length") or 0)
@@ -943,7 +943,7 @@ PORT_KINDS = set(pipe.MAPPER_KIND)
 
 
 def _read_panel_thread(job, index):
-    """A patch panel's type and ports (src/patch_panels.py, the team's package), kept as the device's layout."""
+    """A patch panel's type and ports (engine/patch_panels.py, the team's package), kept as the device's layout."""
     j = JOBS[job]
     try:
         with MODEL_LOCK:
@@ -1489,7 +1489,7 @@ def favicon():
     return FileResponse(MOBILE / "icons" / "icon-192.png", media_type="image/png")
 
 
-# ------------------------------------------------------------------ the site's database and the drift (src/source_db.py)
+# ------------------------------------------------------------------ the site's database and the drift (engine/source_db.py)
 @app.get("/api/sources")
 def api_sources():
     """What has been copied in from each source: its racks, device counts and when."""
@@ -1554,7 +1554,7 @@ def api_sources_import(source: str):
         raise HTTPException(502, str(e))
 
 
-# ------------------------------------------------------------------ the logins vault (src/connections.py): per organization
+# ------------------------------------------------------------------ the logins vault (engine/connections.py): per organization
 def _run_org(j):
     """The organization a run belongs to, for what people confirmed on it (kept in that organization's copies file)."""
     return str((j or {}).get("org") or "default")
@@ -1655,7 +1655,7 @@ def _drift_view(j):
 @app.get("/api/video/{job}/rack-label.jpg")
 def api_rack_label_strip(job: str):
     """The proof of the rack id: the strip of the stitched picture above the first unit, where the label reader looks first
-    (src/rack_label.py read_rack_label)."""
+    (engine/rack_label.py read_rack_label)."""
     j = job_or_none(job)
     if j is None or j.get("result") is None:
         raise HTTPException(404, "No such run.")
@@ -1695,7 +1695,7 @@ def api_video_database(job: str, request: Request, body: dict = Body(...)):
     return dv
 
 
-# ====================================================================== wt/features: the remaining RT-EOS functions on a run (src/rt_features.py)
+# ====================================================================== wt/features: the remaining RT-EOS functions on a run (engine/rt_features.py)
 # Serials and asset tags from close-ups, the phone's position and the sites', the cable checks, find a port, connections, worklist,
 # read again, the physical layer document, SFP advice and the topology. Every route below is under /api/video/<run>/ (the run guard
 # applies) or keeps to the signed-in person's organization.

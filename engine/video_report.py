@@ -969,7 +969,7 @@ def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=N
         + '<li><b>Vendor layout</b><span>the model\'s front view: every port, its type and number</span></li></ol>'
         + '<p class="inote">The first step that reads the model gives make, model and layout; with no model, the first that reads the make. With no fit the agent\'s auto mode boxes the ports it sees in the photo and numbers them left to right.</p></section>'
         + ('<div class="lmd">' + lpicker() + '<div class="lsws">' + "".join(lcard(d) for d in sw_) + "</div></div>" if sw_ else ""))
-    # Port layout: every switch, its port map and every port (src/port_details.py); a close-up's details win when given
+    # Port layout: every switch, its port map and every port (engine/port_details.py); a close-up's details win when given
     PDL = lambda d: (d.get("closeup") or {}).get("port_details") or (d["layout"].get("port_details") or {})
     allp = [p for d in sw_ for p in PDL(d).get("ports") or []]
     STAT = {"connected": ("occ", "connected"), "empty": ("free", "empty"), "unknown": ("unc", "not sure")}
@@ -1226,7 +1226,7 @@ def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=N
         ("Analyse each frame", "like a normal photo: units, full or free, devices", "3 steps per frame"),
         ("Let the frames vote", "unit by unit and boundary by boundary", f"{lad['votes']} lines, {r['frame_polygons']} shapes"),
         ("Result", "on the stitched picture, with a reason for each answer", f"{lad['units']} units · {len(devices)} devices")]) + "</ol>")
-    # how we are doing it: the exact method and setting behind every stage, read from src/rack_video.py and the models in use
+    # how we are doing it: the exact method and setting behind every stage, read from engine/rack_video.py and the models in use
     mem_ = _eval_numbers()["members"]
     how_rows = [
         ("Read the frames", f"Take one frame in every {RV.STRIDE}; neighbouring frames are almost the same picture. Give each a sharpness score: how crisp its edges are.",

@@ -1,5 +1,5 @@
 """Step 0 of a rack video: stitch the video into one picture of the whole rack (the stitched rack image every later
-step is placed on). The video is the only input; everything after this step (src/rack_video.py) is unchanged.
+step is placed on). The video is the only input; everything after this step (engine/rack_video.py) is unchanged.
 
 The stitching is the teammate's rack_stitcher (src/rack_stitcher, used as delivered): the sharpest frames, aligned
 on the rack plane, joined along invisible seams, straightened and cropped to the cabinet, with fixed settings for every

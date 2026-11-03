@@ -1,7 +1,7 @@
 """Approach 2/3: frozen foundation-model image embeddings + a small head.
 
-    python3 src/train_embed.py clip     # CLIP ViT-B/32 (semantic, web-scale)
-    python3 src/train_embed.py dinov2   # DINOv2 ViT-B/14 (self-supervised, fine visual structure)
+    python3 engine/train_embed.py clip     # CLIP ViT-B/32 (semantic, web-scale)
+    python3 engine/train_embed.py dinov2   # DINOv2 ViT-B/14 (self-supervised, fine visual structure)
 """
 import local_models  # noqa: F401  (model caches inside this folder, hub lookups off)
 import json

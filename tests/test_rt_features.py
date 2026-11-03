@@ -1,4 +1,4 @@
-"""wt/features: the RT-EOS functions on the stored vdo1 run (src/rt_features.py), with no model loaded."""
+"""wt/features: the RT-EOS functions on the stored vdo1 run (engine/rt_features.py), with no model loaded."""
 import json
 import pathlib
 import subprocess

@@ -4,7 +4,7 @@
  "description": "",
  "summary": "24x RJ45 (ports 1-24) | 2x SFP (25, 26) | detected automatically",
  "image": "front.png",
- "image_source": "/Users/sprintparkaiml/Downloads/port_overlay 2/switch_template_agent/template_store/images/MIKROTIK/CRS326-24G-2S_RM/2c4b1e167a02c083.png",
+ "image_source": "engine/port_agents/switch_agent/switch_template_agent/template_store/images/MIKROTIK/CRS326-24G-2S_RM/2c4b1e167a02c083.png",
  "auto_generated": true,
  "numbering_scheme": "top-odd",
  "match_regions": [

@@ -1,5 +1,5 @@
 """How well each stored video run read its rack: the run's devices (unit, kind, make, model) against the ground truth in
-modules/sources/ground_truth, then the same run through the drift compare (src/source_db.py drift) on a record made from that ground
+modules/sources/ground_truth, then the same run through the drift compare (engine/source_db.py drift) on a record made from that ground
 truth, to check that the two agree. No model is loaded: it reads the runs' result.json files only.
 
   _cache/venv/bin/python tools/evaluate.py            prints the numbers per video
@@ -25,7 +25,7 @@ VIDEOS = [  # video, its ground truth, its stored run
 
 
 def record_of(truth):
-    """The ground truth as the record the drift reads (the shape src/source_db.py stores for every source)."""
+    """The ground truth as the record the drift reads (the shape engine/source_db.py stores for every source)."""
     return [{"name": d["name"], "device_key": d["name"], "kind": d.get("kind") or SDB._kind(d.get("role")), "manufacturer": d.get("manufacturer"),
              "model": d.get("model"), "serial": d.get("serial"), "ru_start": d.get("position"), "ru_height": d.get("height") or 1} for d in truth["devices"]]
 

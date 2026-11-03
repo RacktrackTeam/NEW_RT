@@ -4,7 +4,7 @@
  "description": "",
  "summary": "8x SFP (1, 2, 3, 4, 5, 6, 7, 8) | console port | detected automatically",
  "image": "front.png",
- "image_source": "/Users/sprintparkaiml/Downloads/port_overlay 2/switch_template_agent/template_store/images/MIKROTIK/CRS309-1G-8S_IN/4550480891c04560.png",
+ "image_source": "engine/port_agents/switch_agent/switch_template_agent/template_store/images/MIKROTIK/CRS309-1G-8S_IN/4550480891c04560.png",
  "auto_generated": true,
  "numbering_scheme": "top-odd",
  "match_regions": [

@@ -4,7 +4,7 @@
  "description": "",
  "summary": "24x RJ45 (ports 1-24) | detected automatically",
  "image": "front.png",
- "image_source": "/Users/sprintparkaiml/Downloads/port_overlay 2/vendor_photos/web/Cisco_Catalyst_2960-24-S.jpg",
+ "image_source": "engine/port_agents/switch_agent/vendor_photos/web/Cisco_Catalyst_2960-24-S.jpg",
  "auto_generated": true,
  "numbering_scheme": "top-odd",
  "match_regions": [

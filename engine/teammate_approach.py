@@ -5,7 +5,7 @@ Their code is folded in here (the embedding below is their common.get_embedding,
 folder is no longer needed.
   * Their exact recipe (same embedding, same LogisticRegression settings) retrained on the v2
     dataset by train_v2.py -> models/v2/teammate_clf.joblib.
-  * Units come from the RT-EOS ladder (src/unit_grid.py) like every other approach.
+  * Units come from the RT-EOS ladder (engine/unit_grid.py) like every other approach.
 
 teammate_unit_embeddings.pkl was inspected before loading: it references only numpy arrays and
 sklearn.linear_model.LogisticRegression.

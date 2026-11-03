@@ -4,7 +4,7 @@ device_classifier asks it for a second opinion and, by agreement.json ("both agr
 differently is left as Other for a person (user, 2026-10-27: 'use model 1 + model 2'). Loaded once; about a second per
 crop on this Mac.
 
-    python3 src/device_second.py <crop.jpg> ...     prints each crop's type and score
+    python3 engine/device_second.py <crop.jpg> ...     prints each crop's type and score
 """
 import math
 import os

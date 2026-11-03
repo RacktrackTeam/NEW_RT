@@ -4,7 +4,7 @@
  "description": "",
  "summary": "16x RJ45 (ports 1-16) | 2x SFP (17, 18) | detected automatically",
  "image": "front.png",
- "image_source": "/Users/sprintparkaiml/Downloads/port_overlay 2/switch_template_agent/template_store/images/MIKROTIK/CSS318-16G-2S_IN/780d42f7a0fe4389.png",
+ "image_source": "engine/port_agents/switch_agent/switch_template_agent/template_store/images/MIKROTIK/CSS318-16G-2S_IN/780d42f7a0fe4389.png",
  "auto_generated": true,
  "numbering_scheme": "top-odd",
  "match_regions": [

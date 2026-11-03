@@ -1,7 +1,7 @@
 """The video experiment: units, occupancy and devices from the source video frames, fused on the constructed
 (stitched) rack image.
 
-    1. The constructed rack image is the global reference: units, occupancy and devices as in src/pipeline.py,
+    1. The constructed rack image is the global reference: units, occupancy and devices as in engine/pipeline.py,
        kept as the comparison ("the rack image alone").
     2. Frames are read from the video (every STRIDE-th), scored for sharpness and registered to the rack image with
        SIFT features and a RANSAC homography: every frame gets its own map frame -> rack coordinates.
@@ -28,11 +28,11 @@
        the rack image's own box for the rack-only devices; a unit band only where no box owns the device), the
        frames' device polygons on the rack, section crops from the best frame of every device, the result projected
        back onto the frames. With a NetBox device export (netbox_devices.csv) every answer is scored against the truth
-       (src/netbox_truth.py).
+       (engine/netbox_truth.py).
 
-Command line:  python3 src/rack_video.py VIDEO.mov --out DIR [--truth netbox_devices.csv]
+Command line:  python3 engine/rack_video.py VIDEO.mov --out DIR [--truth netbox_devices.csv]
 (the video is the only input: turned upright if it lies on its side, then stitched into the rack picture by
-src/rack_stitch.py, saved as DIR/rack.png)
+engine/rack_stitch.py, saved as DIR/rack.png)
 """
 import argparse
 import json
@@ -1803,7 +1803,7 @@ def read_device_ports(out_dir, video, rack_bgr, index, progress=None, hint=None,
 
 
 def best_device_frames(video, rack_bgr, devices, regs, by_idx, fr_by_idx, progress=None):
-    """Each device's top 5 frames by the lead's frame locator (src/frame_locator.py): every frame of the video, not only
+    """Each device's top 5 frames by the lead's frame locator (engine/frame_locator.py): every frame of the video, not only
     the mapped ones, gated (the whole device inside, a sound match) and ranked by the sharpness of the device itself,
     at least 10 frames apart. A device the locator finds in no frame keeps its frames from the mapped frames
     (device_frame_scores). Our own maps of the nearest mapped frame (within 2 frames) only skip a device that lies far
@@ -2264,7 +2264,7 @@ def run(rack_bgr, video, approach, out_dir, progress=None, stride=STRIDE, truth_
 
 
 def main():
-    if len(sys.argv) > 2 and sys.argv[1] == "--retrim":       # python3 src/rack_video.py --retrim data/runs/<id> ... [--top N] [--bottom N]: frame rows off an old run, its report rebuilt
+    if len(sys.argv) > 2 and sys.argv[1] == "--retrim":       # python3 engine/rack_video.py --retrim data/runs/<id> ... [--top N] [--bottom N]: frame rows off an old run, its report rebuilt
         import video_report as build_report
         args = sys.argv[2:]; top = int(args[args.index("--top") + 1]) if "--top" in args else 0; bottom = int(args[args.index("--bottom") + 1]) if "--bottom" in args else 0
         for run_dir in [a for a in args if a.startswith("data/") or "/" in a]:
