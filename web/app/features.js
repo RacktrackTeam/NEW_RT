@@ -139,6 +139,21 @@
       return '<span class="ft-cell ' + s + '" title="Port ' + p.n + ': ' + esc(stateWord(p.state)) + '">' + p.n + '</span>';
     }).join('') + '</div>';
   }
+  // the same problem on several ports of one device is one line ("Wrong port type, ports 25 to 28"), not one line a port
+  function probGroups(list) {
+    var out = [], by = {};
+    list.forEach(function (p) {
+      var m = p.port && /^Port \d+ of (.+?) is (.*)$/.exec(p.words || ''), k = m ? p.what + '|' + m[1] + '|' + m[2] : null;
+      if (k && by[k]) { by[k].nums.push(p.port); return; }
+      var g = { what: p.what, port: p.port, words: p.words, m: m, nums: [p.port] }; out.push(g); if (k) by[k] = g;
+    });
+    return out.map(function (g) {
+      if (g.nums.length < 2) return g;
+      var n = g.nums.map(Number), run = n.every(function (x, i) { return !i || x === n[i - 1] + 1; });
+      var ports = run ? n[0] + ' to ' + n[n.length - 1] : n.join(', ');
+      return { what: g.what, ports: ports, words: 'Ports ' + ports + ' of ' + g.m[1] + ' are ' + g.m[2] };
+    });
+  }
   // ---- Connections: each device's crop with its ports coloured by state, the problems and a port card beside it
   function connections(run) {
     view(run).catch(function () { return null; });                      // the rack's name in the header
@@ -150,7 +165,7 @@
           return '<section class="fx-card fx-in" style="--i:' + i + '" data-dev="' + d.index + '">' + pic + '<div class="fx-body"><div class="fx-head"><div><span class="fx-eye">' + esc(d.unit) + ' · D' + d.index + '</span><h2>' + esc(d.name) + '</h2></div>'
             + pill(d.problems.length ? d.problems.length + (d.problems.length === 1 ? ' problem' : ' problems') : 'No problem', d.problems.length ? 'bad' : 'ok') + '</div>'
             + '<div class="fx-pills">' + pill(d.kind || 'Not sure') + (d.ports.length ? pill(d.counts.connected + ' cabled', 'on') + pill(d.counts.empty + ' empty', 'off') + (d.counts.unknown ? pill(d.counts.unknown + ' not sure', 'na') : '') : pill('No port read', 'na')) + '</div>'
-            + (d.problems.length ? '<ul class="fx-probs">' + d.problems.map(function (p) { return '<li><b>' + esc(p.what) + (p.port ? ', port ' + p.port : '') + '</b> ' + esc(p.words) + '</li>'; }).join('') + '</ul>' : '')
+            + (d.problems.length ? '<ul class="fx-probs">' + probGroups(d.problems).map(function (p) { return '<li><b>' + esc(p.what) + (p.ports ? ', ports ' + p.ports : p.port ? ', port ' + p.port : '') + '</b> ' + esc(p.words) + '</li>'; }).join('') + '</ul>' : '')
             + (d.ports.length ? cells(d.ports) : '') + '</div></section>';
         }).join('') + '</div>' : empty('No device was read on this rack', 'Scan the rack again with a slower pass.')));
       fitFigs(root());
@@ -175,8 +190,8 @@
         return { box: xs.length ? [Math.min.apply(0, xs), Math.min.apply(0, ys), Math.max.apply(0, xs), Math.max.apply(0, ys)] : null, n: d.index, cls: d.index === pick ? 'hl' : '', tip: 'D' + d.index }; }); };
       var sel = function (o) { return runs.map(function (h) { return '<option value="' + esc(h.id) + '"' + (h.id === run ? ' selected' : '') + '>' + esc((h.rack_id || h.title) + ' (' + h.id + ')') + '</option>'; }).join(''); };
       root().innerHTML = shell('Cables', run, '<div class="fx-two"><div class="fx-left"><div id="cb-pic">' + fig(fileUrl(run, 'rack.png'), boxes(null), 'fx-rack') + '</div></div><div class="fx-right fx-in">'
-        + '<div class="fx-pills">' + pill(r.rows ? r.ends_checked + ' ends checked' : 'No matrix cable', 'na') + (r.rows ? pill(r.rows.length + ' to look at', r.rows.length ? 'bad' : 'ok') : '') + (r.ends_not_read ? pill(r.ends_not_read + ' on unread ports', 'na') : '') + '</div>'
-        + '<p class="muted">' + esc(r.words) + '</p>'
+        + (r.ends_checked || r.rows.length || r.ends_not_read ? '<div class="fx-pills">' + pill(r.ends_checked + ' ends checked', 'na') + pill(r.rows.length + ' to look at', r.rows.length ? 'bad' : 'ok') + (r.ends_not_read ? pill(r.ends_not_read + ' on unread ports', 'na') : '') + '</div>'
+          + '<p class="muted">' + esc(r.words) + '</p>' : '')      // nothing to check: the one card below says so, not three lines saying the same
         + (r.rows.length ? '<ul class="fx-list" id="cb-rows">' + r.rows.map(function (w) { return '<li><button type="button" class="fx-row" data-dev="' + w.index + '">' + pill(w.what, 'bad') + '<span><b>' + esc(w.unit) + ' · D' + w.index + ', port ' + esc(w.port) + '</b><small>' + esc(w.cable || '') + '</small></span></button></li>'; }).join('') + '</ul><p class="fx-note">Pick a cable to see its device on the picture.</p>'
           : r.ends_checked ? empty('The cables agree with the matrix', 'Nothing to fix here.') : empty('No cable to check', 'The Excel copy has no cable row with an end in this rack.'))
         + '</div></div>'
