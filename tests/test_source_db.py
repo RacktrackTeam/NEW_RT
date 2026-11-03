@@ -103,6 +103,8 @@ def test_a_certain_rack_needs_no_confirmation_and_an_unsure_one_still_asks(sdb):
     assert sure["certain"] and sure["certain_why"] == "the rack label matches this record exactly" and sure["confidence"] >= sdb.CERTAIN_AT
     remembered = sdb.identify("netbox", "SP-HYD-RM01-R01-R1", result, None, label, confirmed={"rack_key": "SP-HYD-RM01-R01-R1", "by": "admin", "on_": "2026-11-03T10:00"})
     assert remembered["certain"] and remembered["certain_why"] == "confirmed for this rack before"
+    auto = sdb.identify("netbox", "SP-HYD-RM01-R01-R1", result, None, label, confirmed={"rack_key": "SP-HYD-RM01-R01-R1", "by": "admin (accepted by itself: identified for certain)", "on_": "2026-11-03T10:00"})
+    assert auto["certain"] and auto["certain_why"] == "accepted by itself before, when it was identified for certain"   # nobody confirmed it: the line does not say so
     wrong = sdb.identify("netbox", "NETWORK RACK 2", result, None, None)               # a label that names another rack: the person is asked
     assert not wrong["certain"] and wrong["state"] == "confirm"
     r2 = json.loads((ROOT / "samples" / "video" / "run_of_whatsapp_2143" / "result.json").read_text())

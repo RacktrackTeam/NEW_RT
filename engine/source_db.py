@@ -859,7 +859,7 @@ def identify(source, rack_id, result, position=None, label=None, rack_id_how=Non
         who = (f"Accepted by itself, identified for certain, when {by[:-len(auto_tail)]} compared" if by.endswith(auto_tail)
                else f"Confirmed by {by}")
         steps.append({"n": 0, "title": "Confirmed before", "proof": f"{who} on {_day(confirmed['on_']) or str(confirmed['on_'])[:10]}: the rack labelled {rack_id} is the record {confirmed['rack_key']}.",
-                      "left": [confirmed["rack_key"]], "outcome": "one"})
+                      "left": [confirmed["rack_key"]], "outcome": "one", "auto": by.endswith(auto_tail)})
     # 1 location: the run's phone position against each rack's site position
     # ---- wt/features: a rack with no position of its own takes its site's (the sign-in service's sites, by name, else the run's own
     # site); the radius and the accuracy rule are location.js's (300 m, or twice the phone's accuracy; a reading worse than 2 km says nothing)
@@ -1024,7 +1024,8 @@ def identify(source, rack_id, result, position=None, label=None, rack_id_how=Non
     if state == "verified" and key and not any(st.get("agrees") is False for st in steps):
         lab_step = next((st for st in steps if st["n"] == 2), None)
         if first and first["n"] == 0:
-            certain, certain_why = True, "confirmed for this rack before"
+            certain, certain_why = True, ("accepted by itself before, when it was identified for certain" if first.get("auto")
+                                          else "confirmed for this rack before")
         elif lab_step and lab_step.get("outcome") == "one" and lab_step.get("how") == "exact" and lab_step.get("agrees"):
             certain, certain_why = True, "the rack label matches this record exactly"
         elif overall is not None and overall >= CERTAIN_AT:

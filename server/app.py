@@ -1701,7 +1701,9 @@ def api_video_database(job: str, request: Request, body: dict = Body(...)):
     _save(j)
     dv = drift_view(j)
     if (body.get("confirmed") or auto) and dv.get("match"):        # kept for the next scan of this rack (step 0 of the identification)
-        SDB.confirm_rack(_run_org(j), dv["rack_id"], source, dv["match"]["rack_key"], j["db"]["by"])
+        before = SDB.confirmed(_run_org(j), dv["rack_id"], source) if auto else None
+        if not (before and before["rack_key"] == dv["match"]["rack_key"]):   # an acceptance by itself never overwrites an earlier one of the same record (a person's stays)
+            SDB.confirm_rack(_run_org(j), dv["rack_id"], source, dv["match"]["rack_key"], j["db"]["by"])
     return dv
 
 
