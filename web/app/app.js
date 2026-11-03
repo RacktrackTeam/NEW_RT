@@ -78,6 +78,7 @@
     if (rtab || tool) document.querySelectorAll('#rnav a').forEach(function (a) { a.href = a.dataset.tool ? '#tools/' + arg + '/' + a.dataset.rtab : '#result/' + arg + (a.dataset.rtab === 'rack' ? '' : '/' + a.dataset.rtab); a.classList.toggle('on', a.dataset.rtab === (rtab || tool)); });
     if (!tool) rn.dataset.rack = ''; else if (RES.id === arg && $('res-title').textContent) rn.dataset.rack = $('res-title').textContent;
     if (tool) { var onA = document.querySelector('#rnav a.on'); if (onA && onA.scrollIntoView) onA.scrollIntoView({ inline: 'center', block: 'nearest' }); }
+    else if (rtab) { var onR = document.querySelector('#rnav a.on'), pill = onR && onR.parentNode; if (pill && pill.scrollWidth > pill.clientWidth) { var ra = onR.getBoundingClientRect(), rp = pill.getBoundingClientRect(); pill.scrollLeft += (ra.left + ra.width / 2) - (rp.left + rp.width / 2); } }   // on a phone the marked tab is brought into view sideways only (the page does not move)
     document.querySelectorAll('[data-nav]').forEach(function (a) { a.classList.toggle('on', a.dataset.nav === tab); });
     $('nav').hidden = !me || !!rtab || !!tool; $('top').hidden = !me; $('side').hidden = !me; document.body.classList.toggle('signed', !!me);
     $('back').hidden = !DETAIL[name]; $('topmark').hidden = !!DETAIL[name]; $('toptitle').textContent = (rtab || tool) ? 'Result' : (DETAIL[name] || 'RackTrack');
