@@ -23,7 +23,7 @@
   function head(title, lead, run) {
     return '<div class="phead ft-head"><div><span class="eyebrow">' + (run ? '<a href="#result/' + esc(run) + '">The rack</a> · ' : '') + 'Rack tools</span><h1>' + esc(title) + '</h1><p class="muted">' + esc(lead) + '</p></div></div>';
   }
-  function fail(e) { root().innerHTML = '<div class="fx-page"><p class="fx-err">' + esc(e.message || 'Something went wrong') + '. Go back to the rack and try again.</p></div>'; }
+  function fail(e) { root().innerHTML = '<div class="fx-page"><p class="fx-err">' + esc(String(e.message || 'Something went wrong').replace(/\.\s*$/, '')) + '. Go back to the rack and try again.</p></div>'; }
 
   function idsBlock(d, run) {
     var x = d.ids || {};
@@ -122,7 +122,7 @@
             + (r.found ? '<h2>Port ' + r.port + '</h2><div class="fx-pills">' + pill(stateWord(p.state), stCls(p.state)) + (r.kind ? pill(r.kind) : '') + '</div>' : '<h2>Port ' + r.port + ' was not read</h2><p class="muted">Ports read: ' + esc((r.ports || []).join(', ') || 'none') + '.</p>')
             + '<dl class="fx-kv">' + kv.map(function (x) { return '<dt>' + x[0] + '</dt><dd>' + (x[1] ? esc(x[1]) : '<em>' + x[2] + '</em>') + '</dd>'; }).join('') + '</dl></div></div>';
           fitFigs(out);
-        }).catch(function (e) { if (my === seq) out.innerHTML = '<p class="fx-err">' + esc(e.message) + '. Try another port.</p>'; });
+        }).catch(function (e) { if (my === seq) out.innerHTML = '<p class="fx-err">' + esc(String(e.message).replace(/\.\s*$/, '')) + '. Try another port.</p>'; });
       }
       $('fp-dev').onchange = function () { cur.dev = parseInt(this.value, 10) || null; cur.port = null; show(); };
       $('fp-port').onchange = function () { cur.port = parseInt(this.value, 10) || null; show(); };
@@ -188,7 +188,7 @@
       var r = x[0], runs = x[1].filter(function (h) { return h.status === 'done'; }), v = x[2];
       var boxes = function (pick) { return (v.devices || []).map(function (d) { var xs = (d.polygon || []).map(function (q) { return q[0]; }), ys = (d.polygon || []).map(function (q) { return q[1]; });
         return { box: xs.length ? [Math.min.apply(0, xs), Math.min.apply(0, ys), Math.max.apply(0, xs), Math.max.apply(0, ys)] : null, n: d.index, cls: d.index === pick ? 'hl' : '', tip: 'D' + d.index }; }); };
-      var sel = function (o) { return runs.map(function (h) { return '<option value="' + esc(h.id) + '"' + (h.id === run ? ' selected' : '') + '>' + esc((h.rack_id || h.title) + ' (' + h.id + ')') + '</option>'; }).join(''); };
+      var sel = function (o) { return runs.map(function (h) { return '<option value="' + esc(h.id) + '"' + (h.id === run ? ' selected' : '') + '>' + esc((h.rack_id || h.title) + ' (' + [h.site_name, window.RTWHEN ? window.RTWHEN(h.started) : h.started].filter(Boolean).join(', ') + ')') + '</option>'; }).join(''); };
       root().innerHTML = shell('Cables', run, '<div class="fx-two"><div class="fx-left"><div id="cb-pic">' + fig(fileUrl(run, 'rack.png'), boxes(null), 'fx-rack') + '</div></div><div class="fx-right fx-in">'
         + (r.ends_checked || r.rows.length || r.ends_not_read ? '<div class="fx-pills">' + pill(r.ends_checked + ' ends checked', 'na') + pill(r.rows.length + ' to look at', r.rows.length ? 'bad' : 'ok') + (r.ends_not_read ? pill(r.ends_not_read + ' on unread ports', 'na') : '') + '</div>'
           + '<p class="muted">' + esc(r.words) + '</p>' : '')      // nothing to check: the one card below says so, not three lines saying the same
@@ -209,7 +209,7 @@
               ['A-end', function (x) { return x.a && x.a.expected ? [x.a.expected.device, x.a.expected.port ? 'port ' + x.a.expected.port : ''].filter(Boolean).join(' ') + ': ' + (AZ[x.a.status] || 'not in these racks') : x.a && x.a.found ? 'read on ' + x.a.found.device : ''; }],
               ['Z-end', function (x) { return x.z && x.z.expected ? [x.z.expected.device, x.z.expected.port ? 'port ' + x.z.expected.port : ''].filter(Boolean).join(' ') + ': ' + (AZ[x.z.status] || 'not in these racks') : ''; }],
               ['Why', function (x) { return x.aExplained || x.zExplained || ''; }]].filter(function (col) { return col[0] !== 'Why' || c.cables.some(function (x) { return x.aExplained || x.zExplained; }); }));   // no Why column when no row has a reason
-        }).catch(function (e2) { $('az-out').innerHTML = '<p class="fx-err">' + esc(e2.message) + '. Check both racks are scanned and try again.</p>'; });
+        }).catch(function (e2) { $('az-out').innerHTML = '<p class="fx-err">' + esc(String(e2.message).replace(/\.\s*$/, '')) + '. Check both racks are scanned and try again.</p>'; });
       });
     }).catch(fail);
   }
