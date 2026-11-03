@@ -26,3 +26,11 @@ racktrack-app is the core: its video engine reads a rack from a sweep video. We 
 - The result is four parts: Rack, Devices, Layout (the rack elevation drawn from the data), Report; the compare (rack identification steps 0 to 6 with proof and confidence, then the differences) lives in the Report. Copy-in and logins are under Profile. Proof: tools/proof_flow.py, tools/proof_widths.py.
 - docs/CROSSCHECK.md (the live cross-check), docs/EVALUATION.md (tools/evaluate.py), docs/AUTH.md (sign-in, five roles, removals), docs/TODAY-STATUS.md (evening table and what is still open).
 - tools/proof_today.py, proof_afternoon.py and proof_crosscheck.py drive the old Drift tab and name-only sign-in: kept as the record, no longer runnable as they are.
+
+## Owner's UI decisions, 2 Nov evening
+- Keep the Rack, Devices and Layout tabs exactly as they are now ("I love them"). Do not change them.
+- Accent: subtle black (#1f2a3a), not green and not teal. Green, amber and red only as states.
+- Each tab is its own screen, no long scrolling, nothing repeated across tabs. The Report holds only the report, with "Compare against the database" top right: dropdown of three, confirm the verified rack id, then the drift.
+- Sign-in: simple, centred in the middle of the window. "Reading the rack" is like RT-EOS's analysing page plus racktrack-app's run page.
+- The mockup in docs/design/ is the reference for Home, Scan, the run, Sign in and the Report; it must be updated to the subtle black accent before the rebuild.
+- Later the same evening: the owner also likes the Report tab as it is now, and the Compare against the database flow on it. The remaining pages are good. So the result screens (Rack, Devices, Layout, Report with its compare flow) are APPROVED and must not be redesigned; the mockup applies only to Sign in, Home, Scan and the run screen, with the subtle black accent.
