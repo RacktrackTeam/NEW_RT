@@ -10,7 +10,7 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 export RACKTRACK_HOST=127.0.0.1
 export RACKTRACK_PORT=${RACKTRACK_PORT:-8700}
 # racktrack-app sign-in: the engine checks the session the sign-in service (./auth.sh) signs, with its JWT_SECRET.
-export RT_AUTH_ENV="$HERE/data/auth/.env"
+export RT_AUTH_ENV="${RT_AUTH_ENV:-$HERE/data/auth/.env}"
 export RACKTRACK_REPO="$HERE/engine/readers"          # RT-EOS's readers and its Models link
 export RACKTRACK_SPECS_CLI="$HERE/engine/readers/switch_specs/cli.py"
 export RACKTRACK_SPECS_AGENT="$HERE/engine/readers/switch_specs"

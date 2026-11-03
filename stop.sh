@@ -3,7 +3,7 @@
 # A service start.sh found already running (and did not start) has no pid file and is left alone.
 
 HERE=$(cd "$(dirname "$0")" && pwd)
-PIDS="$HERE/data/pids"
+PIDS="${RACKTRACK_DATA:-$HERE/data}/pids"
 for name in engine mocks sign-in; do
   f="$PIDS/$name.pid"
   [ -f "$f" ] || { echo "$name: not started by start.sh"; continue; }

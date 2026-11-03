@@ -10,7 +10,7 @@
 
 HERE=$(cd "$(dirname "$0")" && pwd)
 cd "$HERE" || exit 1
-LOGS="$HERE/data/logs"; PIDS="$HERE/data/pids"
+LOGS="${RACKTRACK_DATA:-$HERE/data}/logs"; PIDS="${RACKTRACK_DATA:-$HERE/data}/pids"
 mkdir -p "$LOGS" "$PIDS"
 ENGINE_PORT=${RACKTRACK_PORT:-8700}
 
