@@ -6,7 +6,7 @@ import sys
 import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "engine"))
 
 
 @pytest.fixture()
@@ -17,7 +17,7 @@ def sdb(tmp_path, monkeypatch):
 
 
 def test_workbook_match_and_no_drift_on_the_office_rack(sdb):
-    r = sdb.import_excel(ROOT / "modules" / "sources" / "ground_truth" / "vdo1.xlsx")
+    r = sdb.import_excel(ROOT / "server" / "mocks" / "ground_truth" / "vdo1.xlsx")
     assert r["devices"] == 18
     assert sdb.match("excel", "SP-HYD-RM01-R01-R1")["how"] == "exact"
     assert sdb.match("excel", "sp hyd rm01 r01 r1")["how"] == "close"
@@ -61,7 +61,7 @@ def _three_racks(sdb):
     """The three ground truth racks as one copy, with their sites' test positions (as the NetBox mock serves them)."""
     racks, devices = [], []
     for f in ("vdo1", "whatsapp_2143", "whatsapp_2319"):
-        g = json.loads((ROOT / "modules" / "sources" / "ground_truth" / f"{f}.json").read_text())
+        g = json.loads((ROOT / "server" / "mocks" / "ground_truth" / f"{f}.json").read_text())
         racks.append({"rack_key": g["rack"]["label"], "name": g["rack"]["label"], "label": g["rack"]["label"], "height_ru": 42,
                       "site": g["site"]["name"], "lat": g["site"].get("lat"), "lng": g["site"].get("lng")})
         devices += [{"rack_key": g["rack"]["label"], "device_key": d["name"], "name": d["name"], "kind": d["kind"], "manufacturer": d.get("manufacturer"),
@@ -71,7 +71,7 @@ def _three_racks(sdb):
 
 def test_identify_ladder_on_the_office_run(sdb):
     _three_racks(sdb)
-    run = ROOT / "data" / "runs" / "91af02c09bbc"
+    run = ROOT / "samples" / "video" / "run_of_vdo1"
     result, label = json.loads((run / "result.json").read_text()), json.loads((run / "rack_label.json").read_text())
     out = sdb.identify("netbox", "SP-HYD-RM01-R01-R1", result, None, label)
     assert [s["outcome"] for s in out["steps"]] == ["skipped", "one", "one", "narrowed", "skipped", "one"]
@@ -87,7 +87,7 @@ def test_identify_ladder_on_the_office_run(sdb):
     wrong = sdb.identify("netbox", "NETWORK RACK 2", result, None, None)
     assert wrong["named_by"] == 2 and wrong["state"] == "confirm" and "points to SP-HYD-RM01-R01-R1" in wrong["words"]
     # nothing named: the WhatsApp run of NETWORK RACK 1 with no label and units off by one gets the top matches, or a question
-    r2 = json.loads((ROOT / "data" / "runs" / "28c3c52cd91e" / "result.json").read_text())
+    r2 = json.loads((ROOT / "samples" / "video" / "run_of_whatsapp_2143" / "result.json").read_text())
     none = sdb.identify("netbox", None, r2, None, None)
     assert none["rack_key"] is None and none["state"] in ("pick", "ask")
     assert sdb._rack_number_in_label("SP-R1-U17-SW03") == 1 and sdb._rack_number_in_label("SP-HYD-RM01-R01-R2") is None
@@ -96,7 +96,7 @@ def test_identify_ladder_on_the_office_run(sdb):
 
 def test_confirmations_and_corrections_are_kept(sdb):
     _three_racks(sdb)
-    run = ROOT / "data" / "runs" / "91af02c09bbc"
+    run = ROOT / "samples" / "video" / "run_of_vdo1"
     result = json.loads((run / "result.json").read_text())
     sdb.confirm_rack("default", "SP-HYD-RM01-R01-R1", "netbox", "SP-HYD-RM01-R01-R1", "Aasritha")
     out = sdb.identify("netbox", "SP-HYD-RM01-R01-R1", result, None, None, None, sdb.confirmed("default", "SP-HYD-RM01-R01-R1", "netbox"))

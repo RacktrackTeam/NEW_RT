@@ -13,10 +13,10 @@ import pathlib
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "engine"))
 import source_db as SDB  # noqa: E402
 
-GT = ROOT / "modules" / "sources" / "ground_truth"
+GT = ROOT / "server" / "mocks" / "ground_truth"
 VIDEOS = [  # video, its ground truth, its stored run
     ("vdo1.mp4 (office rack SP-HYD-RM01-R01-R1)", "vdo1.json", "91af02c09bbc"),
     ("WhatsApp 21.43.13 (NETWORK RACK 1)", "whatsapp_2143.json", "28c3c52cd91e"),

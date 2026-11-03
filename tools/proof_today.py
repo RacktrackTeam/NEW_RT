@@ -39,7 +39,7 @@ def plant():
     sw = call("GET", SNOW + "/api/now/table/cmdb_ci_ip_switch?sysparm_query=name=SP-R1-U18-SW04")["result"][0]
     call("PATCH", f"{SNOW}/api/now/table/cmdb_ci_ip_switch/{sw['sys_id']}", {"manufacturer": "Cisco"})
     wb_path = ROOT / "data" / "sources" / "vdo1_planted.xlsx"; wb_path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy(ROOT / "modules" / "sources" / "ground_truth" / "vdo1.xlsx", wb_path)
+    shutil.copy(ROOT / "server" / "mocks" / "ground_truth" / "vdo1.xlsx", wb_path)
     wb = openpyxl.load_workbook(wb_path); ws = wb["DEVICE_INVENTORY"]; head = [c.value for c in ws[1]]
     for row in ws.iter_rows(min_row=2):
         if row[head.index("Device_Name")].value == "SP-R1-U15-SW02" or row[head.index("Device_ID")].value == "SP-R1-U15-SW02":

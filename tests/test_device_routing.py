@@ -4,7 +4,7 @@ Run: python3 -m pytest tests/test_device_routing.py -q"""
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "engine"))
 import numpy as np
 import pytest
 from PIL import Image
@@ -81,7 +81,7 @@ def test_video_routing(stubs, tmp_path):
 
 def test_runner_guards():
     """Our batch runner keeps the guards: every failure caught, a time limit per crop, his status rule, os._exit at the end."""
-    src = (pathlib.Path(P.ROOT) / "src" / "port_agents_batch.py").read_text()
+    src = (pathlib.Path(P.ROOT) / "engine" / "port_agents_batch.py").read_text()
     assert "except BaseException" in src
     assert "signal.alarm(LIMIT[0])" in src
     assert "run_agent._status(r)" in src

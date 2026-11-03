@@ -1,4 +1,4 @@
-"""The workbook's validation report before import (RT-EOS's checks from rt_eos/server/lib/workbook.js) and the copies list."""
+"""The workbook's validation report before import (RT-EOS's checks from RT-EOS's server/lib/workbook.js) and the copies list."""
 import pathlib
 import sys
 
@@ -6,7 +6,7 @@ import openpyxl
 import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "engine"))
 
 
 @pytest.fixture()
@@ -58,7 +58,7 @@ def test_missing_sheet_or_column_blocks_the_import(sdb, tmp_path):
 
 
 def test_office_workbook_reads_clean_of_errors(sdb):
-    r = sdb.validate_excel(ROOT / "modules" / "sources" / "ground_truth" / "vdo1.xlsx")
+    r = sdb.validate_excel(ROOT / "server" / "mocks" / "ground_truth" / "vdo1.xlsx")
     assert r["counts"]["errors"] == 0 and r["counts"]["devices"] == 18 and r["counts"]["ports"] == 346 and not r["blocking"]
 
 

@@ -1,0 +1,1825 @@
+{
+ "checked": "2026-10-23",
+ "stats": {
+  "3Com": {
+   "urls": 0,
+   "models": 2,
+   "confirmed": 0
+  },
+  "Adtran": {
+   "urls": 2820,
+   "models": 9,
+   "confirmed": 0
+  },
+  "Advantech Co. Ltd": {
+   "urls": 66384,
+   "models": 132,
+   "confirmed": 1
+  },
+  "Aerohive Switches": {
+   "urls": 3098,
+   "models": 2,
+   "confirmed": 0
+  },
+  "airpro": {
+   "urls": 0,
+   "models": 35,
+   "confirmed": 0
+  },
+  "Alaxala": {
+   "urls": 0,
+   "models": 20,
+   "confirmed": 0
+  },
+  "alcatel-lucent enterprise": {
+   "urls": 2115,
+   "models": 157,
+   "confirmed": 0
+  },
+  "Allied Telesis": {
+   "urls": 6131,
+   "models": 169,
+   "confirmed": 74
+  },
+  "Alpha Networks": {
+   "urls": 0,
+   "models": 19,
+   "confirmed": 0
+  },
+  "AMG Systems": {
+   "urls": 384,
+   "models": 62,
+   "confirmed": 0
+  },
+  "Antaira Technologies": {
+   "urls": 1456,
+   "models": 347,
+   "confirmed": 6
+  },
+  "Araknis": {
+   "urls": 16,
+   "models": 103,
+   "confirmed": 0
+  },
+  "Arista Networks": {
+   "urls": 0,
+   "models": 174,
+   "confirmed": 0
+  },
+  "Aruba": {
+   "urls": 0,
+   "models": 212,
+   "confirmed": 0
+  },
+  "Asterfusion Data Technologies": {
+   "urls": 596,
+   "models": 42,
+   "confirmed": 0
+  },
+  "ASUS": {
+   "urls": 40197,
+   "models": 6,
+   "confirmed": 0
+  },
+  "AvaLan Wireless Systems Inc": {
+   "urls": 0,
+   "models": 1,
+   "confirmed": 0
+  },
+  "Avaya": {
+   "urls": 5637,
+   "models": 72,
+   "confirmed": 0
+  },
+  "Beckhoff Automation": {
+   "urls": 545636,
+   "models": 6,
+   "confirmed": 5
+  },
+  "Beijer Electronics": {
+   "urls": 0,
+   "models": 144,
+   "confirmed": 0
+  },
+  "beijing fibridge": {
+   "urls": 106,
+   "models": 118,
+   "confirmed": 0
+  },
+  "Belden": {
+   "urls": 36581,
+   "models": 279,
+   "confirmed": 2
+  },
+  "Billion Electric": {
+   "urls": 503,
+   "models": 8,
+   "confirmed": 0
+  },
+  "Brainboxes": {
+   "urls": 1007,
+   "models": 32,
+   "confirmed": 0
+  },
+  "Brocade": {
+   "urls": 504,
+   "models": 27,
+   "confirmed": 0
+  },
+  "buffalo-technology": {
+   "urls": 153622,
+   "models": 16,
+   "confirmed": 0
+  },
+  "C-Data": {
+   "urls": 907,
+   "models": 34,
+   "confirmed": 19
+  },
+  "Celestica": {
+   "urls": 189,
+   "models": 16,
+   "confirmed": 0
+  },
+  "CERIO Corporation": {
+   "urls": 404,
+   "models": 21,
+   "confirmed": 0
+  },
+  "Chilinkiot": {
+   "urls": 1416,
+   "models": 9,
+   "confirmed": 0
+  },
+  "ciena": {
+   "urls": 3538,
+   "models": 12,
+   "confirmed": 1
+  },
+  "Cisco": {
+   "urls": 0,
+   "models": 822,
+   "confirmed": 0
+  },
+  "D-Link": {
+   "urls": 55674,
+   "models": 242,
+   "confirmed": 1
+  },
+  "Datto": {
+   "urls": 10277,
+   "models": 4,
+   "confirmed": 0
+  },
+  "Dell": {
+   "urls": 1967,
+   "models": 107,
+   "confirmed": 0
+  },
+  "Delta Electronics (Agema Systems)": {
+   "urls": 6547,
+   "models": 24,
+   "confirmed": 0
+  },
+  "Draytek": {
+   "urls": 712,
+   "models": 19,
+   "confirmed": 16
+  },
+  "Edgecore Networks": {
+   "urls": 746,
+   "models": 37,
+   "confirmed": 0
+  },
+  "Edimax Technology Co., Ltd": {
+   "urls": 0,
+   "models": 81,
+   "confirmed": 0
+  },
+  "egenius": {
+   "urls": 0,
+   "models": 23,
+   "confirmed": 0
+  },
+  "EtherWan": {
+   "urls": 0,
+   "models": 64,
+   "confirmed": 0
+  },
+  "Extreme": {
+   "urls": 3098,
+   "models": 153,
+   "confirmed": 1
+  },
+  "Fortinet": {
+   "urls": 26949,
+   "models": 55,
+   "confirmed": 0
+  },
+  "FS (FiberStore)": {
+   "urls": 0,
+   "models": 206,
+   "confirmed": 0
+  },
+  "H3C": {
+   "urls": 17774,
+   "models": 279,
+   "confirmed": 18
+  },
+  "HARTING": {
+   "urls": 0,
+   "models": 333,
+   "confirmed": 0
+  },
+  "Hikvision Digital Technology": {
+   "urls": 7266,
+   "models": 105,
+   "confirmed": 0
+  },
+  "HPE": {
+   "urls": 0,
+   "models": 20,
+   "confirmed": 0
+  },
+  "Huawei": {
+   "urls": 9015,
+   "models": 257,
+   "confirmed": 0
+  },
+  "ICP": {
+   "urls": 500,
+   "models": 25,
+   "confirmed": 0
+  },
+  "Intellisystem Technologies": {
+   "urls": 0,
+   "models": 49,
+   "confirmed": 0
+  },
+  "IP Infusion (OcNOS)": {
+   "urls": 1408,
+   "models": 24,
+   "confirmed": 0
+  },
+  "Juniper": {
+   "urls": 186452,
+   "models": 172,
+   "confirmed": 8
+  },
+  "Korenix Technology": {
+   "urls": 0,
+   "models": 80,
+   "confirmed": 0
+  },
+  "Kyland": {
+   "urls": 25,
+   "models": 90,
+   "confirmed": 0
+  },
+  "L-com": {
+   "urls": 56396,
+   "models": 13,
+   "confirmed": 2
+  },
+  "Lantech Communications": {
+   "urls": 0,
+   "models": 258,
+   "confirmed": 0
+  },
+  "Lantronix": {
+   "urls": 8812,
+   "models": 35,
+   "confirmed": 11
+  },
+  "Lenovo": {
+   "urls": 170682,
+   "models": 4,
+   "confirmed": 1
+  },
+  "LINKOH": {
+   "urls": 0,
+   "models": 83,
+   "confirmed": 0
+  },
+  "Linksys": {
+   "urls": 151,
+   "models": 49,
+   "confirmed": 0
+  },
+  "Luxul": {
+   "urls": 0,
+   "models": 7,
+   "confirmed": 0
+  },
+  "Maple Systems": {
+   "urls": 0,
+   "models": 8,
+   "confirmed": 0
+  },
+  "Micas Networks": {
+   "urls": 0,
+   "models": 17,
+   "confirmed": 0
+  },
+  "MICROSENS": {
+   "urls": 0,
+   "models": 21,
+   "confirmed": 0
+  },
+  "MikroTik": {
+   "urls": 1298,
+   "models": 40,
+   "confirmed": 3
+  },
+  "MOXA": {
+   "urls": 15141,
+   "models": 273,
+   "confirmed": 6
+  },
+  "NETGEAR": {
+   "urls": 21245,
+   "models": 136,
+   "confirmed": 94
+  },
+  "Nokia Networks": {
+   "urls": 39662,
+   "models": 39,
+   "confirmed": 0
+  },
+  "Nomadix": {
+   "urls": 485,
+   "models": 8,
+   "confirmed": 0
+  },
+  "NoviFlow (NoviWare OS)": {
+   "urls": 0,
+   "models": 8,
+   "confirmed": 0
+  },
+  "NSGate": {
+   "urls": 115,
+   "models": 11,
+   "confirmed": 0
+  },
+  "NVIDIA": {
+   "urls": 43703,
+   "models": 94,
+   "confirmed": 1
+  },
+  "nvt  phybridge": {
+   "urls": 1040,
+   "models": 14,
+   "confirmed": 4
+  },
+  "obsidian control systems": {
+   "urls": 225,
+   "models": 1,
+   "confirmed": 0
+  },
+  "Omnitron Systems Technology": {
+   "urls": 369,
+   "models": 11,
+   "confirmed": 0
+  },
+  "Oracle Corporation": {
+   "urls": 71320,
+   "models": 5,
+   "confirmed": 0
+  },
+  "ORing Industrial Networking": {
+   "urls": 0,
+   "models": 128,
+   "confirmed": 0
+  },
+  "Perle Systems": {
+   "urls": 2373,
+   "models": 21,
+   "confirmed": 0
+  },
+  "Phoenix Contact (including Hirschmann)": {
+   "urls": 2073,
+   "models": 273,
+   "confirmed": 0
+  },
+  "PLANET": {
+   "urls": 0,
+   "models": 260,
+   "confirmed": 0
+  },
+  "Proscend Communications Inc": {
+   "urls": 0,
+   "models": 12,
+   "confirmed": 0
+  },
+  "QNAP Systems": {
+   "urls": 0,
+   "models": 1,
+   "confirmed": 0
+  },
+  "Quanta Cloud Technology (QCT)": {
+   "urls": 0,
+   "models": 28,
+   "confirmed": 0
+  },
+  "Red Lion Controls": {
+   "urls": 0,
+   "models": 34,
+   "confirmed": 0
+  },
+  "RS PRO": {
+   "urls": 0,
+   "models": 25,
+   "confirmed": 0
+  },
+  "Rubytech": {
+   "urls": 0,
+   "models": 138,
+   "confirmed": 0
+  },
+  "RUCKUS": {
+   "urls": 0,
+   "models": 75,
+   "confirmed": 0
+  },
+  "Ruijie Networks": {
+   "urls": 0,
+   "models": 76,
+   "confirmed": 0
+  },
+  "Schneider Electric": {
+   "urls": 0,
+   "models": 26,
+   "confirmed": 0
+  },
+  "Schweitzer Engineering Laboratories": {
+   "urls": 0,
+   "models": 6,
+   "confirmed": 0
+  },
+  "Scomp Enterprises Private Limited": {
+   "urls": 0,
+   "models": 5,
+   "confirmed": 0,
+   "note": "no domain"
+  },
+  "Signamax": {
+   "urls": 0,
+   "models": 68,
+   "confirmed": 0
+  },
+  "Silicom Ltd": {
+   "urls": 0,
+   "models": 10,
+   "confirmed": 0
+  },
+  "StarTech": {
+   "urls": 0,
+   "models": 12,
+   "confirmed": 0
+  },
+  "Supermicro": {
+   "urls": 0,
+   "models": 17,
+   "confirmed": 0
+  },
+  "TE Connectivity": {
+   "urls": 0,
+   "models": 8,
+   "confirmed": 0
+  },
+  "Tejas Networks": {
+   "urls": 0,
+   "models": 7,
+   "confirmed": 0
+  },
+  "Telco": {
+   "urls": 0,
+   "models": 76,
+   "confirmed": 0,
+   "note": "no domain"
+  },
+  "Teltonika Networks": {
+   "urls": 0,
+   "models": 16,
+   "confirmed": 0
+  },
+  "Tenda": {
+   "urls": 0,
+   "models": 9,
+   "confirmed": 0
+  },
+  "TOTOLINK": {
+   "urls": 0,
+   "models": 17,
+   "confirmed": 0
+  },
+  "TP-Link": {
+   "urls": 0,
+   "models": 100,
+   "confirmed": 0
+  },
+  "TrendNet": {
+   "urls": 0,
+   "models": 93,
+   "confirmed": 0
+  },
+  "Ubiquiti": {
+   "urls": 0,
+   "models": 42,
+   "confirmed": 0
+  },
+  "UfiSpace": {
+   "urls": 0,
+   "models": 11,
+   "confirmed": 0
+  },
+  "Versa Networks": {
+   "urls": 0,
+   "models": 2,
+   "confirmed": 0
+  },
+  "Vertiv": {
+   "urls": 0,
+   "models": 24,
+   "confirmed": 0
+  },
+  "WAGO": {
+   "urls": 0,
+   "models": 12,
+   "confirmed": 0
+  },
+  "Wanglink": {
+   "urls": 0,
+   "models": 151,
+   "confirmed": 0
+  },
+  "Westermo": {
+   "urls": 0,
+   "models": 111,
+   "confirmed": 0
+  },
+  "Wi-Tek": {
+   "urls": 0,
+   "models": 7,
+   "confirmed": 0
+  },
+  "Xexagon": {
+   "urls": 0,
+   "models": 14,
+   "confirmed": 0
+  },
+  "Yamaha": {
+   "urls": 0,
+   "models": 18,
+   "confirmed": 0
+  },
+  "Yokogawa": {
+   "urls": 0,
+   "models": 3,
+   "confirmed": 0
+  },
+  "ZTE": {
+   "urls": 0,
+   "models": 126,
+   "confirmed": 0
+  },
+  "Zyxel": {
+   "urls": 0,
+   "models": 94,
+   "confirmed": 0
+  }
+ },
+ "found": {
+  "3Com": {},
+  "Adtran": {},
+  "Advantech Co. Ltd": {
+   "EN50155": {
+    "url": "https://www.advantech.com/emt/products/en50155-railway-panel-pc/sub_1e299ab8-5f51-4c38-9957-376d781c7304",
+    "status": "Current"
+   }
+  },
+  "Aerohive Switches": {},
+  "airpro": {},
+  "Alaxala": {},
+  "alcatel-lucent enterprise": {},
+  "Allied Telesis": {
+   "FS710": {
+    "url": "https://www.alliedtelesis.com/product/fs710-5/",
+    "status": "Current"
+   },
+   "FS710-16": {
+    "url": "https://www.alliedtelesis.com/product/fs71016/",
+    "status": "Current"
+   },
+   "FS710-16E": {
+    "url": "https://www.alliedtelesis.com/product/fs71016e/",
+    "status": "Current"
+   },
+   "FS710-24": {
+    "url": "https://www.alliedtelesis.com/product/fs71024/",
+    "status": "Current"
+   },
+   "FS710-5": {
+    "url": "https://www.alliedtelesis.com/product/fs7105e/",
+    "status": "Current"
+   },
+   "FS710-5E": {
+    "url": "https://www.alliedtelesis.com/product/fs7105e/",
+    "status": "Current"
+   },
+   "FS710-8": {
+    "url": "https://www.alliedtelesis.com/product/fs7108e/",
+    "status": "Current"
+   },
+   "FS710-8E": {
+    "url": "https://www.alliedtelesis.com/product/fs7108e/",
+    "status": "Current"
+   },
+   "FS750": {
+    "url": "https://www.alliedtelesis.com/product/fs750-20/",
+    "status": "Current"
+   },
+   "FS750-20": {
+    "url": "https://www.alliedtelesis.com/resource_basic/fs75020-fs75028-and-fs75028ps-v113/",
+    "status": "Current"
+   },
+   "FS750-28": {
+    "url": "https://www.alliedtelesis.com/product/fs75028/",
+    "status": "Current"
+   },
+   "FS750-28PS": {
+    "url": "https://www.alliedtelesis.com/product/fs75028ps/",
+    "status": "Current"
+   },
+   "FS980M": {
+    "url": "https://www.alliedtelesis.com/es/resource_basic/guia-de-instalacion-rapida-serie-centrecom-fs980m/",
+    "status": "Current"
+   },
+   "FS980M-18": {
+    "url": "https://www.alliedtelesis.com/product/fs980m18/",
+    "status": "Current"
+   },
+   "FS980M-18PS": {
+    "url": "https://www.alliedtelesis.com/product/fs980m18ps/",
+    "status": "Current"
+   },
+   "FS980M-28": {
+    "url": "https://www.alliedtelesis.com/product/fs980m28/",
+    "status": "Current"
+   },
+   "FS980M-28PS": {
+    "url": "https://www.alliedtelesis.com/product/fs980m28ps/",
+    "status": "Current"
+   },
+   "FS980M-52": {
+    "url": "https://www.alliedtelesis.com/product/fs980m52/",
+    "status": "Current"
+   },
+   "FS980M-52PS": {
+    "url": "https://www.alliedtelesis.com/product/fs980m52ps/",
+    "status": "Current"
+   },
+   "FS980M-9": {
+    "url": "https://www.alliedtelesis.com/product/fs980m9/",
+    "status": "Current"
+   },
+   "FS980M-9PS": {
+    "url": "https://www.alliedtelesis.com/product/fs980m9ps/",
+    "status": "Current"
+   },
+   "GEN2": {
+    "url": "https://www.alliedtelesis.com/fr/announcing-the-tq6702-gen2-wi-fi-6-8x8-access-point/",
+    "status": "Current"
+   },
+   "GS900": {
+    "url": "https://www.alliedtelesis.com/resource_basic/gs900-series/",
+    "status": "Current"
+   },
+   "GS900-8": {
+    "url": "https://www.alliedtelesis.com/product/gs9008-v2/",
+    "status": "Current"
+   },
+   "GS910": {
+    "url": "https://www.alliedtelesis.com/resource_basic/visio-stencil-gs910/",
+    "status": "Current"
+   },
+   "GS910-10XST": {
+    "url": "https://www.alliedtelesis.com/product/gs91010xst/",
+    "status": "Current"
+   },
+   "GS910-16": {
+    "url": "https://www.alliedtelesis.com/product/gs91016/",
+    "status": "Current"
+   },
+   "GS910-18XST": {
+    "url": "https://www.alliedtelesis.com/product/gs91018xst/",
+    "status": "Current"
+   },
+   "GS910-24": {
+    "url": "https://www.alliedtelesis.com/product/gs91024/",
+    "status": "Current"
+   },
+   "GS910-26XST": {
+    "url": "https://www.alliedtelesis.com/product/gs91026xst/",
+    "status": "Current"
+   },
+   "GS910-5": {
+    "url": "https://www.alliedtelesis.com/product/gs9105/",
+    "status": "Current"
+   },
+   "GS910-5E": {
+    "url": "https://www.alliedtelesis.com/product/gs9105e/",
+    "status": "Current"
+   },
+   "GS910-8": {
+    "url": "https://www.alliedtelesis.com/product/gs9108/",
+    "status": "Current"
+   },
+   "GS910-8E": {
+    "url": "https://www.alliedtelesis.com/product/gs9108e/",
+    "status": "Current"
+   },
+   "GS920": {
+    "url": "https://www.alliedtelesis.com/allied-telesis-centrecom-gs920-series-secure-unmanaged/",
+    "status": "Current"
+   },
+   "GS920-8": {
+    "url": "https://www.alliedtelesis.com/product/gs9208ps/",
+    "status": "Current"
+   },
+   "GS920-8PS": {
+    "url": "https://www.alliedtelesis.com/product/gs9208ps/",
+    "status": "Current"
+   },
+   "GS950": {
+    "url": "https://www.alliedtelesis.com/product/gs950-28ps-v2/",
+    "status": "Current"
+   },
+   "GS950-10PS": {
+    "url": "https://www.alliedtelesis.com/product/gs95010ps/",
+    "status": "Current"
+   },
+   "GS950-16": {
+    "url": "https://www.alliedtelesis.com/product/gs95016-eco-v4/",
+    "status": "Current"
+   },
+   "GS950-16PS": {
+    "url": "https://www.alliedtelesis.com/product/gs95016ps/",
+    "status": "Current"
+   },
+   "GS950-24": {
+    "url": "https://www.alliedtelesis.com/product/gs95024-eco-v3/",
+    "status": "Current"
+   },
+   "GS950-28PS": {
+    "url": "https://www.alliedtelesis.com/product/gs95028ps/",
+    "status": "Current"
+   },
+   "GS950-48": {
+    "url": "https://www.alliedtelesis.com/product/gs95048-eco-v2/",
+    "status": "Current"
+   },
+   "GS950-48PS": {
+    "url": "https://www.alliedtelesis.com/product/gs95048ps/",
+    "status": "Current"
+   },
+   "GS950-8": {
+    "url": "https://www.alliedtelesis.com/product/gs9508-eco-v2/",
+    "status": "Current"
+   },
+   "GS970M": {
+    "url": "https://www.alliedtelesis.com/allied-telesis-announces-gs970m-series/",
+    "status": "Current"
+   },
+   "GS970M-10": {
+    "url": "https://www.alliedtelesis.com/product/gs970m10/",
+    "status": "Current"
+   },
+   "GS970M-10PS": {
+    "url": "https://www.alliedtelesis.com/product/gs970m10ps/",
+    "status": "Current"
+   },
+   "GS970M-18": {
+    "url": "https://www.alliedtelesis.com/product/gs970m18/",
+    "status": "Current"
+   },
+   "GS970M-18PS": {
+    "url": "https://www.alliedtelesis.com/product/gs970m18ps/",
+    "status": "Current"
+   },
+   "GS970M-28": {
+    "url": "https://www.alliedtelesis.com/product/gs970m28/",
+    "status": "Current"
+   },
+   "GS970M-28PS": {
+    "url": "https://www.alliedtelesis.com/product/gs970m28ps/",
+    "status": "Current"
+   },
+   "GS980EM": {
+    "url": "https://www.alliedtelesis.com/product/gs980em-10h/",
+    "status": "Current"
+   },
+   "GS980EM-10H": {
+    "url": "https://www.alliedtelesis.com/resource_basic/gs980em10h-pwr300/",
+    "status": "Current"
+   },
+   "GS980EM-11PT": {
+    "url": "https://www.alliedtelesis.com/product/gs980em11pt/",
+    "status": "Current"
+   },
+   "GS980M": {
+    "url": "https://www.alliedtelesis.com/es/resource_basic/quick-installation-guide-centrecom-gs980m-series/",
+    "status": "Current"
+   },
+   "GS980M-52": {
+    "url": "https://www.alliedtelesis.com/product/gs980m52/",
+    "status": "Current"
+   },
+   "GS980M-52PS": {
+    "url": "https://www.alliedtelesis.com/product/gs980m52ps/",
+    "status": "Current"
+   },
+   "GS980MX": {
+    "url": "https://www.alliedtelesis.com/es/resource_basic/guia-de-instalacion-rapida-serie-centrecom-gs980mx/",
+    "status": "Current"
+   },
+   "GS980MX-10HSm": {
+    "url": "https://www.alliedtelesis.com/product/gs980mx10hsm/",
+    "status": "Current"
+   },
+   "GS980MX-18HSm": {
+    "url": "https://www.alliedtelesis.com/product/gs980mx18hsm/",
+    "status": "Current"
+   },
+   "GS980MX-28": {
+    "url": "https://www.alliedtelesis.com/product/gs980mx28/",
+    "status": "Current"
+   },
+   "GS980MX-28PSm": {
+    "url": "https://www.alliedtelesis.com/product/gs980mx28psm/",
+    "status": "Current"
+   },
+   "GS980MX-52": {
+    "url": "https://www.alliedtelesis.com/product/gs980mx52/",
+    "status": "Current"
+   },
+   "GS980MX-52PSm": {
+    "url": "https://www.alliedtelesis.com/product/gs980mx52psm/",
+    "status": "Current"
+   },
+   "SE250": {
+    "url": "https://www.alliedtelesis.com/product/se250-18xs/",
+    "status": "Current"
+   },
+   "x250": {
+    "url": "https://www.alliedtelesis.com/product/x250-18xtm/",
+    "status": "Current"
+   },
+   "x8106": {
+    "url": "https://www.alliedtelesis.com/resource_basic/installation-guide-switchblade-x8106-and-sbx81cfc400-controller-card/",
+    "status": "Current"
+   },
+   "x8112": {
+    "url": "https://www.alliedtelesis.com/allied-telesis-enhances-radiology-imaging-service-delivery-switchblade-x8112-platform/",
+    "status": "Current"
+   },
+   "x908": {
+    "url": "https://www.alliedtelesis.com/it/allied-telesis-launches-switchblader-x908-generation-3-solve-enterprise-and-data-center-scalability/",
+    "status": "Current"
+   },
+   "XS910": {
+    "url": "https://www.alliedtelesis.com/product/xs910-8/",
+    "status": "Current"
+   },
+   "XS916MXS": {
+    "url": "https://www.alliedtelesis.com/product/xs916mxs/",
+    "status": "Current"
+   },
+   "XS916MXT": {
+    "url": "https://www.alliedtelesis.com/product/xs916mxt/",
+    "status": "Current"
+   }
+  },
+  "Alpha Networks": {},
+  "AMG Systems": {},
+  "Antaira Technologies": {
+   "IP67": {
+    "url": "https://www.antaira.com/products/IP67-Rated",
+    "status": "Current"
+   },
+   "LMP-1600G-M12-67-24": {
+    "url": "https://www.antaira.com/Home/pressreleases/01182022_LMP1600GM126724_PressRelease",
+    "status": "Current"
+   },
+   "LMP-LMX-1802G-M12-10G-SFP-67": {
+    "url": "https://www.antaira.com/Home/pressreleases/112321-LMPLMX1802GM1210GSFP6724-Series",
+    "status": "Current"
+   },
+   "LNP-0800": {
+    "url": "https://www.antaira.com/Home/pressreleases/06072022_LNP0800G24",
+    "status": "Current"
+   },
+   "LNP-0800G": {
+    "url": "https://www.antaira.com/Home/pressreleases/06072022_LNP0800G24",
+    "status": "Current"
+   },
+   "LNP-0800G-24": {
+    "url": "https://www.antaira.com/Home/pressreleases/06072022_LNP0800G24",
+    "status": "Current"
+   }
+  },
+  "Araknis": {},
+  "Arista Networks": {},
+  "Aruba": {},
+  "Asterfusion Data Technologies": {},
+  "ASUS": {},
+  "AvaLan Wireless Systems Inc": {},
+  "Avaya": {},
+  "Beckhoff Automation": {
+   "CU2005": {
+    "url": "https://www.beckhoff.com/de-de/produkte/i-o/infrastruktur-shy-komponenten/cuxxxx-epxxxx-ethernet-switche-komponenten/cu2005.html",
+    "status": "Current"
+   },
+   "CU2008": {
+    "url": "https://www.beckhoff.com/de-de/produkte/i-o/infrastruktur-shy-komponenten/cuxxxx-epxxxx-ethernet-switche-komponenten/cu2008.html",
+    "status": "Current"
+   },
+   "CU2016": {
+    "url": "https://www.beckhoff.com/de-de/produkte/i-o/infrastruktur-shy-komponenten/cuxxxx-epxxxx-ethernet-switche-komponenten/cu2016.html",
+    "status": "Current"
+   },
+   "CU2208": {
+    "url": "https://www.beckhoff.com/de-de/produkte/i-o/infrastruktur-shy-komponenten/cuxxxx-epxxxx-ethernet-switche-komponenten/cu2208.html",
+    "status": "Current"
+   },
+   "EL6614": {
+    "url": "https://www.beckhoff.com/de-de/produkte/i-o/ethercat-klemmen/el-ed6xxx-kommunikation/el6614.html",
+    "status": "Current"
+   }
+  },
+  "Beijer Electronics": {},
+  "beijing fibridge": {},
+  "Belden": {
+   "MACH1040": {
+    "url": "https://www.belden.com/products/industrial-networking-cybersecurity/managed-switches/rack-mount/mach1040",
+    "status": "Current"
+   },
+   "RS20": {
+    "url": "https://belden.com/products/industrial-networking-cybersecurity/managed-switches/din-rail-compact/rs20-30-40-managed-switch-configurator",
+    "status": "Current"
+   }
+  },
+  "Billion Electric": {},
+  "Brainboxes": {},
+  "Brocade": {},
+  "buffalo-technology": {},
+  "C-Data": {
+   "CC1000S": {
+    "url": "https://www.cdatatec.com/products/cc1000s/",
+    "status": "Current"
+   },
+   "CS2080GP": {
+    "url": "https://www.cdatatec.com/products/cs2080gp/",
+    "status": "Current"
+   },
+   "CS2080GPA": {
+    "url": "https://www.cdatatec.com/products/cs2080gpa/",
+    "status": "Current"
+   },
+   "CS2082GSPA": {
+    "url": "https://www.cdatatec.com/products/cs2082gspa/",
+    "status": "Current"
+   },
+   "CS2162GSP": {
+    "url": "https://www.cdatatec.com/products/cs2162gsp/",
+    "status": "Current"
+   },
+   "CS2242GSPE": {
+    "url": "https://www.cdatatec.com/products/cs2242gspe/",
+    "status": "Current"
+   },
+   "CS3084GS": {
+    "url": "https://www.cdatatec.com/products/cs3084gs/",
+    "status": "Current"
+   },
+   "FD1304E": {
+    "url": "https://www.cdatatec.com/products/fd1304e-4-port-epon-olt/",
+    "status": "Current"
+   },
+   "FD1304S": {
+    "url": "https://www.cdatatec.com/products/fd1304s-b2/",
+    "status": "Current"
+   },
+   "FD1700S": {
+    "url": "https://www.cdatatec.com/expandable-olt-fd1700s-your-gateway-to-future-proof-networking-by-c-data.html",
+    "status": "Current"
+   },
+   "FD1801S": {
+    "url": "https://www.cdatatec.com/products/fd1801s-c1/",
+    "status": "Current"
+   },
+   "FD1816S": {
+    "url": "https://www.cdatatec.com/products/fd1816s-b1/",
+    "status": "Current"
+   },
+   "FD5004THB": {
+    "url": "https://www.cdatatec.com/products/fd5004thb/",
+    "status": "Current"
+   },
+   "FD5008B": {
+    "url": "https://www.cdatatec.com/products/fd5008bf/",
+    "status": "Current"
+   },
+   "FD5008B(F)": {
+    "url": "https://www.cdatatec.com/products/fd5008bf/",
+    "status": "Current"
+   },
+   "FD5016B": {
+    "url": "https://www.cdatatec.com/products/fd5016bf/",
+    "status": "Current"
+   },
+   "FD5016B(F)": {
+    "url": "https://www.cdatatec.com/products/fd5016bf/",
+    "status": "Current"
+   },
+   "FD5024B": {
+    "url": "https://www.cdatatec.com/products/fd5024bf/",
+    "status": "Current"
+   },
+   "FD5024B(F)": {
+    "url": "https://www.cdatatec.com/products/fd5024bf/",
+    "status": "Current"
+   }
+  },
+  "Celestica": {},
+  "CERIO Corporation": {},
+  "Chilinkiot": {},
+  "ciena": {
+   "3903X": {
+    "url": "https://www.ciena.com/products/3903x",
+    "status": "Current"
+   }
+  },
+  "Cisco": {},
+  "D-Link": {
+   "DGS-1016S": {
+    "url": "https://www.dlink.com/es/es/products/dgs1016s-switch-gigabit-bajo-perfil",
+    "status": "Current"
+   }
+  },
+  "Datto": {},
+  "Dell": {},
+  "Delta Electronics (Agema Systems)": {},
+  "Draytek": {
+   "FX2120": {
+    "url": "https://www.draytek.com/products/vigorswitch-fx2120/",
+    "status": "Current"
+   },
+   "G1080": {
+    "url": "https://www.draytek.com/products/vigorswitch-g1080/",
+    "status": "Current"
+   },
+   "G1282": {
+    "url": "https://www.draytek.com/products/vigorswitch-g1282/",
+    "status": "Current"
+   },
+   "G2100": {
+    "url": "https://www.draytek.com/products/vigorswitch-g2100/",
+    "status": "Current"
+   },
+   "G2282x": {
+    "url": "https://www.draytek.com/products/vigorswitch-g2282x/",
+    "status": "Current"
+   },
+   "P1281x": {
+    "url": "https://www.draytek.com/products/vigorswitch-p1281x/",
+    "status": "Current"
+   },
+   "P1282": {
+    "url": "https://www.draytek.com/products/vigorswitch-p1282/",
+    "status": "Current"
+   },
+   "P2100": {
+    "url": "https://www.draytek.com/products/vigorswitch-p2100/",
+    "status": "Current"
+   },
+   "P2282x": {
+    "url": "https://www.draytek.com/products/vigorswitch-p2282x/",
+    "status": "Current"
+   },
+   "PQ2121X": {
+    "url": "https://www.draytek.com/products/vigorswitch-pq2121x/",
+    "status": "Current"
+   },
+   "PQ2200xb": {
+    "url": "https://www.draytek.com/products/vigorswitch-pq2200xb/",
+    "status": "Current"
+   },
+   "PQ2300xb": {
+    "url": "https://www.draytek.com/products/vigorswitch-pq2300xb/",
+    "status": "Current"
+   },
+   "Q2121x": {
+    "url": "https://www.draytek.com/products/vigorswitch-q2121x/",
+    "status": "Current"
+   },
+   "Q2200x": {
+    "url": "https://www.draytek.com/products/vigorswitch-q2200x/",
+    "status": "Current"
+   },
+   "Q2300x": {
+    "url": "https://www.draytek.com/products/vigorswitch-q2300x/",
+    "status": "Current"
+   },
+   "Q60x": {
+    "url": "https://www.draytek.com/products/vigorswitch-q60x/",
+    "status": "Current"
+   }
+  },
+  "Edgecore Networks": {},
+  "Edimax Technology Co., Ltd": {},
+  "egenius": {},
+  "EtherWan": {},
+  "Extreme": {
+   "X620": {
+    "url": "https://www.extremenetworks.com/products/switches/extremexos-switches/x620",
+    "status": "Current"
+   }
+  },
+  "Fortinet": {},
+  "FS (FiberStore)": {},
+  "H3C": {
+   "BS216": {
+    "url": "https://www.h3c.com/cn/Products_And_Solution/IntelligentTerminalProducts/Star_Products/Magic/BS/BS216/",
+    "status": "Current"
+   },
+   "IE4300": {
+    "url": "https://www.h3c.com/cn/Products_And_Solution/InterConnect/Products/Switches/Products/IE_MS/IE/IE4300-M/",
+    "status": "Current"
+   },
+   "IE4320": {
+    "url": "https://www.h3c.com/cn/Products_And_Solution/InterConnect/Products/Switches/Products/IE_MS/IE/IE4320/",
+    "status": "Current"
+   },
+   "S10500": {
+    "url": "https://www.h3c.com/cn/Products_And_Solution/InterConnect/Products/Switches/Products/Data_Center_Switch/S10500/S10500X/",
+    "status": "Current"
+   },
+   "S10500X": {
+    "url": "https://www.h3c.com/cn/Products_And_Solution/InterConnect/Products/Switches/Products/Data_Center_Switch/S10500/S10500X/",
+    "status": "Current"
+   },
+   "S12500R": {
+    "url": "https://www.h3c.com/cn/Products_And_Solution/InterConnect/Products/Switches/Products/Data_Center_Switch/S12500/S12500R/",
+    "status": "Current"
+   },
+   "S5850": {
+    "url": "https://www.h3c.com/cn/Products_And_Solution/InterConnect/Products/Switches/Products/Data_Center_Switch/S5800/S5850/",
+    "status": "Current"
+   },
+   "S6800": {
+    "url": "https://www.h3c.com/cn/Products_And_Solution/InterConnect/Products/Switches/Products/Data_Center_Switch/S6800/S6890/",
+    "status": "Current"
+   },
+   "S6805": {
+    "url": "https://www.h3c.com/cn/Products_And_Solution/InterConnect/Products/Switches/Products/Data_Center_Switch/S6800/S6805/",
+    "status": "Current"
+   },
+   "S6850": {
+    "url": "https://www.h3c.com/cn/Products_And_Solution/InterConnect/Products/Switches/Products/Data_Center_Switch/S6800/S6850/",
+    "status": "Current"
+   },
+   "S7500E": {
+    "url": "https://www.h3c.com/cn/Products_And_Solution/InterConnect/Products/Switches/Products/Park_Switches/S7500E/S7500X-X/",
+    "status": "Current"
+   },
+   "S7500X": {
+    "url": "https://www.h3c.com/cn/Products_And_Solution/InterConnect/Products/Switches/Products/Data_Center_Switch/S7500X/S7500X-G/",
+    "status": "Current"
+   },
+   "S9800": {
+    "url": "https://www.h3c.com/cn/Products_And_Solution/InterConnect/Products/Switches/Products/Data_Center_Switch/S9800/S9825/",
+    "status": "Current"
+   },
+   "S9810": {
+    "url": "https://www.h3c.com/cn/About_H3C/New_Media_Marketing/3D_Products/S9810/",
+    "status": "Current"
+   },
+   "S9820": {
+    "url": "https://www.h3c.com/cn/Products_And_Solution/InterConnect/Products/Switches/Products/Data_Center_Switch/S9800/S9820/",
+    "status": "Current"
+   },
+   "S9825": {
+    "url": "https://www.h3c.com/cn/Products_And_Solution/InterConnect/Products/Switches/Products/Data_Center_Switch/S9800/S9825/",
+    "status": "Current"
+   },
+   "S9850": {
+    "url": "https://www.h3c.com/cn/Products_And_Solution/InterConnect/Products/Switches/Products/Data_Center_Switch/S9800/S9850/",
+    "status": "Current"
+   },
+   "S9855": {
+    "url": "https://www.h3c.com/cn/Products_And_Solution/InterConnect/Products/Switches/Products/Data_Center_Switch/S9800/S9855/",
+    "status": "Current"
+   }
+  },
+  "HARTING": {},
+  "Hikvision Digital Technology": {},
+  "HPE": {},
+  "Huawei": {},
+  "ICP": {},
+  "Intellisystem Technologies": {},
+  "IP Infusion (OcNOS)": {},
+  "Juniper": {
+   "EX2300": {
+    "url": "https://www.juniper.net/fr/fr/products/switches/ex-series/ex2300-c-fanless-switch/specs.html",
+    "status": "Current"
+   },
+   "EX2300-C": {
+    "url": "https://www.juniper.net/documentation/us/en/quick-start/hardware/qsg/ex2300c/topics/topic-map/step-2-up-and-running.html",
+    "status": "Current"
+   },
+   "EX3400": {
+    "url": "https://www.juniper.net/fr/fr/products/switches/ex-series/ex3400-access-switch/specs.html",
+    "status": "Current"
+   },
+   "EX4300": {
+    "url": "https://www.juniper.net/fr/fr/products/switches/ex-series/ex4300-enterprise-switch/specs.html",
+    "status": "Current"
+   },
+   "EX4600": {
+    "url": "https://www.juniper.net/fr/fr/products/switches/ex-series/ex4600-top-of-rack-switch/specs.html",
+    "status": "Current"
+   },
+   "EX9200": {
+    "url": "https://www.juniper.net/fr/fr/products/switches/ex-series/ex9200-programmable-network-switch/specs.html",
+    "status": "Current"
+   },
+   "EX9250": {
+    "url": "https://www.juniper.net/fr/fr/products/switches/ex-series/ex9250-core-and-aggregation-switches/specs.html",
+    "status": "Current"
+   },
+   "QFX5240": {
+    "url": "https://www.juniper.net/fr/fr/products/switches/qfx-series/qfx5240-data-center-switches/specs.html",
+    "status": "Current"
+   }
+  },
+  "Korenix Technology": {},
+  "Kyland": {},
+  "L-com": {
+   "100FX": {
+    "url": "https://www.l-com.com/ethernet-converters-etherwan-10-100tx-to-100fx-industrial-fast-ethernet-media-converters-10c-to-60c-with-poe-pse",
+    "status": "Current"
+   },
+   "100TX": {
+    "url": "https://www.l-com.com/ethernet-converters-etherwan-10-100tx-to-100fx-industrial-fast-ethernet-media-converters-10c-to-60c-with-poe-pse",
+    "status": "Current"
+   }
+  },
+  "Lantech Communications": {},
+  "Lantronix": {
+   "S8TB": {
+    "url": "https://www.lantronix.com/product-notifications/s8tb-resource-update/",
+    "status": "Current"
+   },
+   "SM12DP2XA": {
+    "url": "https://www.lantronix.com/product-notifications/sm12dp2xa-new-product-release/",
+    "status": "Current"
+   },
+   "SM12XPA": {
+    "url": "https://www.lantronix.com/products/sm12xpa/",
+    "status": "Current"
+   },
+   "SM24DP4XA": {
+    "url": "https://www.lantronix.com/product-notifications/sm24dp4xa-new-product-release/",
+    "status": "Current"
+   },
+   "SM24T6DPA": {
+    "url": "https://www.lantronix.com/product-notifications/sm24t6dpa-resource-update/",
+    "status": "Current"
+   },
+   "SM24TAT4XB": {
+    "url": "https://www.lantronix.com/product-notifications/sm24tat4xb-new-product-release/",
+    "status": "Current"
+   },
+   "SM24TBT2DPB": {
+    "url": "https://www.lantronix.com/product-notifications/sm24tbt2dpb-new-product-release/",
+    "status": "Current"
+   },
+   "SM24TBT4SA": {
+    "url": "https://www.lantronix.com/products/sm24tbt4sa/",
+    "status": "Current"
+   },
+   "SM24TBT4XPA": {
+    "url": "https://www.lantronix.com/products/sm24tbt4xpa/",
+    "status": "Current"
+   },
+   "SM4T4DPA": {
+    "url": "https://www.lantronix.com/products/sm4t4dpa-2/",
+    "status": "Current"
+   },
+   "SM8TBT2SA": {
+    "url": "https://www.lantronix.com/products/sm8tbt2sa/",
+    "status": "Current"
+   }
+  },
+  "Lenovo": {
+   "NE2552E": {
+    "url": "https://www.lenovo.com/ar/es/p/servers-storage/networking/ethernet-switches/lenovo-thinksystem-ne2552e-flex-switch/77nwlem2552",
+    "status": "Current"
+   }
+  },
+  "LINKOH": {},
+  "Linksys": {},
+  "Luxul": {},
+  "Maple Systems": {},
+  "Micas Networks": {},
+  "MICROSENS": {},
+  "MikroTik": {
+   "RB2011UiAS": {
+    "url": "https://mikrotik.com/product/RB2011UiAS-IN",
+    "status": "Current"
+   },
+   "RB260GS": {
+    "url": "https://mikrotik.com/product/RB260GS",
+    "status": "Current"
+   },
+   "RB260GSP": {
+    "url": "https://mikrotik.com/product/RB260GSP",
+    "status": "Current"
+   }
+  },
+  "MOXA": {
+   "2GTXSFP": {
+    "url": "https://www.moxa.com/en/products/phased-out-products/iks-6726-2gtxsfp-iks-6728-4gtxsfp-series",
+    "status": "Current"
+   },
+   "4508B": {
+    "url": "https://www.moxa.com/en/products/industrial-network-infrastructure/ethernet-switches/en-50155-switches/tn-4500b-series/tn-4508b-ct-t",
+    "status": "Current"
+   },
+   "4512B": {
+    "url": "https://www.moxa.com/en/products/industrial-network-infrastructure/ethernet-switches/en-50155-switches/tn-4500b-series/tn-4512b-4g-8gp-ct-t",
+    "status": "Current"
+   },
+   "4516B": {
+    "url": "https://www.moxa.com/en/products/industrial-network-infrastructure/ethernet-switches/en-50155-switches/tn-4500b-series/tn-4516b-12gp-4gbp-ct-t",
+    "status": "Current"
+   },
+   "4520B": {
+    "url": "https://www.moxa.com/en/products/industrial-network-infrastructure/ethernet-switches/en-50155-switches/tn-4500b-series/tn-4520b-12p-4g-4gp-ct-t",
+    "status": "Current"
+   },
+   "4528B": {
+    "url": "https://www.moxa.com/en/products/industrial-network-infrastructure/ethernet-switches/layer-2-managed-switches/tn-4500b-series/tn-4528b-20p-4g-4gp-ct-t",
+    "status": "Current"
+   }
+  },
+  "NETGEAR": {
+   "FS116": {
+    "url": "https://www.netgear.com/support/product/fs116",
+    "status": "Current"
+   },
+   "FS726T": {
+    "url": "https://www.netgear.com/support/product/fs726t",
+    "status": "Current"
+   },
+   "GS105": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs105/",
+    "status": "Current"
+   },
+   "GS108": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs108/",
+    "status": "Current"
+   },
+   "GS108Ev4": {
+    "url": "https://www.netgear.com/support/product/gs108ev4",
+    "status": "Current"
+   },
+   "GS108LP": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs108lp/",
+    "status": "Current"
+   },
+   "GS108MX": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs108mx/",
+    "status": "Current"
+   },
+   "GS108PP": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs108pp/",
+    "status": "Current"
+   },
+   "GS108Tv3": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/gs108tv3/",
+    "status": "Current"
+   },
+   "GS108X": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs108x/",
+    "status": "Current"
+   },
+   "GS110EMX": {
+    "url": "https://www.netgear.com/support/product/gs110emx",
+    "status": "Current"
+   },
+   "GS110TP": {
+    "url": "https://www.netgear.com/support/product/gs110tp",
+    "status": "Current"
+   },
+   "GS116": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs116/",
+    "status": "Current"
+   },
+   "GS116LP": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs116lp/",
+    "status": "Current"
+   },
+   "GS116PP": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs116pp/",
+    "status": "Current"
+   },
+   "GS305": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs305/",
+    "status": "Current"
+   },
+   "GS305EP": {
+    "url": "https://www.netgear.com/business/wired/switches/easy-smart/gs305ep/",
+    "status": "Current"
+   },
+   "GS305EPP": {
+    "url": "https://www.netgear.com/business/wired/switches/easy-smart/gs305epp/",
+    "status": "Current"
+   },
+   "GS305PP": {
+    "url": "https://www.netgear.com/support/product/gs305pp",
+    "status": "Current"
+   },
+   "GS305PV3": {
+    "url": "https://www.netgear.com/support/product/gs305pv3",
+    "status": "Current"
+   },
+   "GS308": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs308/",
+    "status": "Current"
+   },
+   "GS308EP": {
+    "url": "https://www.netgear.com/business/wired/switches/easy-smart/gs308ep/",
+    "status": "Current"
+   },
+   "GS308EPP": {
+    "url": "https://www.netgear.com/business/wired/switches/easy-smart/gs308epp/",
+    "status": "Current"
+   },
+   "GS308PP": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs308pp/",
+    "status": "Current"
+   },
+   "GS316": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs316/",
+    "status": "Current"
+   },
+   "GS316EP": {
+    "url": "https://www.netgear.com/business/wired/switches/easy-smart/gs316ep/",
+    "status": "Current"
+   },
+   "GS316EPP": {
+    "url": "https://www.netgear.com/business/wired/switches/easy-smart/gs316epp/",
+    "status": "Current"
+   },
+   "GS316P": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs316p/",
+    "status": "Current"
+   },
+   "GS324PP": {
+    "url": "https://www.netgear.com/support/product/gs324pp",
+    "status": "Current"
+   },
+   "GS348": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs348/",
+    "status": "Current"
+   },
+   "GS348PP": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs348pp/",
+    "status": "Current"
+   },
+   "GS510TPP": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/gs510tpp/",
+    "status": "Current"
+   },
+   "GS516": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs516/",
+    "status": "Current"
+   },
+   "GS605V5": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/gs605v5/",
+    "status": "Current"
+   },
+   "GS724T": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/gs724t/",
+    "status": "Current"
+   },
+   "GS724TP": {
+    "url": "https://www.netgear.com/support/product/gs724tp",
+    "status": "Current"
+   },
+   "GS724TPP": {
+    "url": "https://www.netgear.com/support/product/gs724tpp",
+    "status": "Current"
+   },
+   "GS724TPPv3": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/gs724tppv3/",
+    "status": "Current"
+   },
+   "GS724TPv3": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/gs724tpv3/",
+    "status": "Current"
+   },
+   "GS724Tv6": {
+    "url": "https://www.netgear.com/support/product/gs724tv6",
+    "status": "Current"
+   },
+   "GS728TPP": {
+    "url": "https://www.netgear.com/support/product/gs728tpp",
+    "status": "Current"
+   },
+   "GS728TPPv2": {
+    "url": "https://www.netgear.com/support/product/gs728tppv2",
+    "status": "Current"
+   },
+   "GS728TPPv3": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/gs728tppv3/",
+    "status": "Current"
+   },
+   "GS728TPv2": {
+    "url": "https://www.netgear.com/support/product/gs728tpv2",
+    "status": "Current"
+   },
+   "GS728TPv3": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/gs728tpv3/",
+    "status": "Current"
+   },
+   "GS728TXPv3": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/gs728txpv3/",
+    "status": "Current"
+   },
+   "GS748T": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/gs748tv6/",
+    "status": "Current"
+   },
+   "GS748Tv6": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/gs748tv6/",
+    "status": "Current"
+   },
+   "GS752TP": {
+    "url": "https://www.netgear.com/support/product/gs752tp",
+    "status": "Current"
+   },
+   "GS752TPP": {
+    "url": "https://www.netgear.com/support/product/gs752tpp",
+    "status": "Current"
+   },
+   "GS752TPPv3": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/gs752tppv3/",
+    "status": "Current"
+   },
+   "GS752TPv3": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/gs752tpv3/",
+    "status": "Current"
+   },
+   "GS752TXPv3": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/gs752txpv3/",
+    "status": "Current"
+   },
+   "GSM4210PD": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/gsm4210pd/",
+    "status": "Current"
+   },
+   "GSM4210PX": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/gsm4210px/",
+    "status": "Current"
+   },
+   "GSM4212": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/gsm4212ux/",
+    "status": "Current"
+   },
+   "GSM4212 UX": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/gsm4212ux/",
+    "status": "Current"
+   },
+   "GSM4230P": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/gsm4230p/",
+    "status": "Current"
+   },
+   "GSM4230UP": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/gsm4230up/",
+    "status": "Current"
+   },
+   "GSM4248P": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/gsm4248p/",
+    "status": "Current"
+   },
+   "GSM4248UX": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/gsm4248ux/",
+    "status": "Current"
+   },
+   "GSM4328": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/gsm4328/",
+    "status": "Current"
+   },
+   "GSM4352": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/gsm4352/",
+    "status": "Current"
+   },
+   "JGS516": {
+    "url": "https://www.netgear.com/support/product/jgs516",
+    "status": "Current"
+   },
+   "JGS524": {
+    "url": "https://www.netgear.com/support/product/jgs524v2",
+    "status": "Current"
+   },
+   "JGS524PE": {
+    "url": "https://www.netgear.com/support/product/jgs524pe",
+    "status": "Current"
+   },
+   "MS105": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/ms105/",
+    "status": "Current"
+   },
+   "MS108EUP": {
+    "url": "https://www.netgear.com/business/wired/switches/easy-smart/ms108eup/",
+    "status": "Current"
+   },
+   "MS108TUP": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/ms108tup/",
+    "status": "Current"
+   },
+   "MS108UP": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/ms108up/",
+    "status": "Current"
+   },
+   "MS305": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/ms305/",
+    "status": "Current"
+   },
+   "MS324TXUP": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/ms324txup/",
+    "status": "Current"
+   },
+   "MS510TXM": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/ms510txm/",
+    "status": "Current"
+   },
+   "MS510TXPP": {
+    "url": "https://www.netgear.com/support/product/ms510txpp",
+    "status": "Current"
+   },
+   "MS510TXUP": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/ms510txup/",
+    "status": "Current"
+   },
+   "MSM4214X": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/msm4214x/",
+    "status": "Current"
+   },
+   "MSM4352": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/msm4352/",
+    "status": "Current"
+   },
+   "VSM4320C": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/vsm4320c/",
+    "status": "Current"
+   },
+   "XS505M": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/xs505m/",
+    "status": "Current"
+   },
+   "XS508M": {
+    "url": "https://www.netgear.com/business/wired/switches/unmanaged/xs508m/",
+    "status": "Current"
+   },
+   "XS508TM": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/xs508tm/",
+    "status": "Current"
+   },
+   "XS512EM": {
+    "url": "https://www.netgear.com/support/product/xs512em",
+    "status": "Current"
+   },
+   "XS516TM": {
+    "url": "https://www.netgear.com/business/wired/switches/smart-cloud/xs516tm/",
+    "status": "Current"
+   },
+   "XS708T": {
+    "url": "https://www.netgear.com/support/product/xs708t",
+    "status": "Current"
+   },
+   "XS724EM": {
+    "url": "https://www.netgear.com/support/product/xs724em",
+    "status": "Current"
+   },
+   "XS728T": {
+    "url": "https://www.netgear.com/support/product/xs728t",
+    "status": "Current"
+   },
+   "XS748T": {
+    "url": "https://www.netgear.com/support/product/xs748t",
+    "status": "Current"
+   },
+   "XSM4216F": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/xsm4216f/",
+    "status": "Current"
+   },
+   "XSM4328CV": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/xsm4328cv/",
+    "status": "Current"
+   },
+   "XSM4328FV": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/xsm4328fv/",
+    "status": "Current"
+   },
+   "XSM4340CV": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/xsm4340cv/",
+    "status": "Current"
+   },
+   "XSM4340FV": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/xsm4340fv/",
+    "status": "Current"
+   },
+   "XSM4340V": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/xsm4340v/",
+    "status": "Current"
+   },
+   "XSM4344C": {
+    "url": "https://www.netgear.com/business/wired/switches/fully-managed/xsm4344c/",
+    "status": "Current"
+   }
+  },
+  "Nokia Networks": {},
+  "Nomadix": {},
+  "NoviFlow (NoviWare OS)": {},
+  "NSGate": {},
+  "NVIDIA": {
+   "Quantum-2": {
+    "url": "https://www.nvidia.com/en-gb/networking/quantum2/",
+    "status": "Current"
+   }
+  },
+  "nvt  phybridge": {
+   "CLEER24": {
+    "url": "https://www.nvtphybridge.com/cleer24-ec4-now-ul-approved/",
+    "status": "Current"
+   },
+   "EC10": {
+    "url": "https://www.nvtphybridge.com/it/portfolio-item/nv-ec10/",
+    "status": "Current"
+   },
+   "FLEX24": {
+    "url": "https://www.nvtphybridge.com/flex24-10g-avaya-compliant/",
+    "status": "Current"
+   },
+   "FLEX8": {
+    "url": "https://www.nvtphybridge.com/flex8-launch/",
+    "status": "Current"
+   }
+  },
+  "obsidian control systems": {},
+  "Omnitron Systems Technology": {},
+  "Oracle Corporation": {},
+  "ORing Industrial Networking": {},
+  "Perle Systems": {},
+  "Phoenix Contact (including Hirschmann)": {},
+  "PLANET": {},
+  "Proscend Communications Inc": {},
+  "QNAP Systems": {},
+  "Quanta Cloud Technology (QCT)": {},
+  "Red Lion Controls": {},
+  "RS PRO": {},
+  "Rubytech": {},
+  "RUCKUS": {},
+  "Ruijie Networks": {},
+  "Schneider Electric": {},
+  "Schweitzer Engineering Laboratories": {},
+  "Signamax": {},
+  "Silicom Ltd": {},
+  "StarTech": {},
+  "Supermicro": {},
+  "TE Connectivity": {},
+  "Tejas Networks": {},
+  "Teltonika Networks": {},
+  "Tenda": {},
+  "TOTOLINK": {},
+  "TP-Link": {},
+  "TrendNet": {},
+  "Ubiquiti": {},
+  "UfiSpace": {},
+  "Versa Networks": {},
+  "Vertiv": {},
+  "WAGO": {},
+  "Wanglink": {},
+  "Westermo": {},
+  "Wi-Tek": {},
+  "Xexagon": {},
+  "Yamaha": {},
+  "Yokogawa": {},
+  "ZTE": {},
+  "Zyxel": {}
+ }
+}

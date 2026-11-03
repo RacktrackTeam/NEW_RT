@@ -19,7 +19,7 @@ import sys
 import openpyxl
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-SRC = ROOT / "modules" / "sources" / "ground_truth" / "vdo1.xlsx"
+SRC = ROOT / "server" / "mocks" / "ground_truth" / "vdo1.xlsx"
 RACK, OTHER = "SP-HYD-RM01-R01-R1", "SP-HYD-RM01-R02-R2"
 NOTE = "PLANTED for the features proof, not a real cable"
 

@@ -30,7 +30,7 @@ import openpyxl
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src")); sys.path.insert(0, str(ROOT / "tests"))
+sys.path.insert(0, str(ROOT / "engine")); sys.path.insert(0, str(ROOT / "tests"))
 OUT = ROOT / "docs" / "proof" / "afternoon"
 APP = "http://127.0.0.1:8700"
 RUN = "91af02c09bbc"
@@ -117,7 +117,7 @@ class Shim:
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     broken = book(WORK / "broken_workbook.xlsx", {"RACK_INVENTORY": RACKS, "DEVICE_INVENTORY": DEVS})
-    plain = WORK / "vdo1.xlsx"; shutil.copy(ROOT / "modules" / "sources" / "ground_truth" / "vdo1.xlsx", plain)
+    plain = WORK / "vdo1.xlsx"; shutil.copy(ROOT / "server" / "mocks" / "ground_truth" / "vdo1.xlsx", plain)
     planted = plant_ports(plain, WORK / "vdo1_ports_planted.xlsx")
     shim, seen = Shim() if SHIM else None, {}
     with sync_playwright() as p:

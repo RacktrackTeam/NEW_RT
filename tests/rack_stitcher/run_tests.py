@@ -14,7 +14,7 @@ import cv2
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE.parents[1] / "src"))
+sys.path.insert(0, str(HERE.parents[1] / "engine"))
 sys.path.insert(0, str(HERE))
 
 from rack_stitcher import DEFAULT_OUTPUT_DIR, RackStitchError, stitch_rack  # noqa: E402

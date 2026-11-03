@@ -1,9 +1,0 @@
-# Treat binary assets as binary (no LFS on this repo)
-*.jpg binary
-*.png binary
-*.mp4 binary
-*.zip binary
-*.pt binary
-*.pth binary
-*.onnx binary
-*.xlsx binary

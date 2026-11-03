@@ -6,7 +6,7 @@ import sys
 import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "engine"))
 
 
 @pytest.fixture()
@@ -47,7 +47,7 @@ def test_combo_ports_are_counted_once():
 def test_device_labels_pair_one_record_device_each(tmp_path, monkeypatch, run):
     import source_db as SDB
     monkeypatch.setattr(SDB, "DB", tmp_path / "sources.db")
-    SDB.import_excel(ROOT / "modules" / "sources" / "ground_truth" / "vdo1.xlsx")
+    SDB.import_excel(ROOT / "server" / "mocks" / "ground_truth" / "vdo1.xlsx")
     st3 = next(s for s in SDB.identify("excel", None, run)["steps"] if s["n"] == 3)
     names = [w.split(" (")[0] for w in (st3["ranked"][0]["which"] if st3["ranked"] else [])]
     assert len(names) == len(set(names)), names

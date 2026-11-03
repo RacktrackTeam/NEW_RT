@@ -18,10 +18,10 @@ import sys
 import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "engine"))
 import source_db as SDB  # noqa: E402
 
-WORKBOOK = ROOT / "modules" / "sources" / "ground_truth" / "vdo1.xlsx"
+WORKBOOK = ROOT / "server" / "mocks" / "ground_truth" / "vdo1.xlsx"
 
 
 def main():

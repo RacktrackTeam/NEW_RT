@@ -1,4 +1,4 @@
-"""Port drift from the Excel copy's PORT_INVENTORY (RT-EOS's rules from rt_eos/server/lib/sheet_check.js), on vdo1's stored run."""
+"""Port drift from the Excel copy's PORT_INVENTORY (RT-EOS's rules from RT-EOS's server/lib/sheet_check.js), on vdo1's stored run."""
 import json
 import pathlib
 import shutil
@@ -8,8 +8,8 @@ import openpyxl
 import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
-RUN = ROOT / "data" / "runs" / "91af02c09bbc" / "result.json"
+sys.path.insert(0, str(ROOT / "engine"))
+RUN = ROOT / "samples" / "video" / "run_of_vdo1" / "result.json"
 RACK = "SP-HYD-RM01-R01-R1"
 
 
@@ -54,7 +54,7 @@ def test_rules_on_a_small_case(sdb):
 
 @pytest.mark.skipif(not RUN.exists(), reason="vdo1's stored run is not on this machine")
 def test_vdo1_port_rows(sdb, tmp_path):
-    sdb.import_excel(plant_ports(ROOT / "modules" / "sources" / "ground_truth" / "vdo1.xlsx", tmp_path / "vdo1_ports.xlsx"))
+    sdb.import_excel(plant_ports(ROOT / "server" / "mocks" / "ground_truth" / "vdo1.xlsx", tmp_path / "vdo1_ports.xlsx"))
     result = json.loads(RUN.read_text())
     d = sdb.drift(result, sdb.devices("excel", RACK), sdb.ports("excel", RACK))
     by = {(r["type"], r.get("port"), r["device"].split(" / ")[0]): r for r in d["rows"]}

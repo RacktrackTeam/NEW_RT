@@ -3,7 +3,7 @@
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))   # project root: src/occupancy.py and friends
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "engine"))   # project root: src/occupancy.py and friends
 import pytest
 
 import fit_advisor as fa

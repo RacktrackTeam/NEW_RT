@@ -1,4 +1,4 @@
-"""rt_session.py - the engine trusts the RT-EOS sign-in service (rt_eos/server/auth_service.js).
+"""rt_session.py - the engine trusts the RT-EOS sign-in service (server/auth/auth_service.js).
 
 The service signs an access token (HS256, issuer "racktrack", audience "racktrack-app") and sets it as the rt_access
 cookie; the native app sends it as "Authorization: Bearer". This module checks it exactly as RT-EOS's requireAuth does:
@@ -30,7 +30,7 @@ CURRENT = contextvars.ContextVar("rt_principal", default=None)     # the signed-
 
 
 def _settings():
-    """KEY=VALUE lines of the service's settings file (the same format as rt_eos/server/lib/load_env.js)."""
+    """KEY=VALUE lines of the service's settings file (the same format as RT-EOS's server/lib/load_env.js)."""
     out = {}
     try:
         for line in ENV_FILE.read_text(encoding="utf-8").splitlines():

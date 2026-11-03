@@ -1,10 +1,10 @@
 # RackTrack - the iOS and Android app
 
-A Capacitor 6 shell, set up the same way as the team's apps (dark_mobile, RT-EOS). It opens a small start page (`www/`), finds the RackTrack server and then loads the server's app (`../mobile/`). The screens live in one place, `mobile/`, so an app update needs no rebuild: restart the server and reopen the app.
+A Capacitor 6 shell, set up the same way as the team's apps (dark_mobile, RT-EOS). It opens a small start page (`www/`), finds the RackTrack server and then loads the server's app (`web/app/` in this folder). The screens live in one place, `web/app/`, so an app update needs no rebuild: restart the server and reopen the app.
 
 - App id `com.racktrack.sweep`, name "RackTrack" (its id does not clash with the team's `com.racktrack.app`).
 - The server address is remembered on the phone. Profile > Change server, or "change" under the sign-in, goes back to the start page.
-- The default address comes from `www/config.js`: `npm run server -- http://<mac-ip>:8600`, then sync.
+- The default address comes from `www/config.js`: `npm run server -- http://<mac-ip>:8700`, then sync.
 
 ## Build
 
@@ -32,4 +32,4 @@ npx cap sync android && (cd android && ./gradlew assembleDebug)
 ## The camera
 
 - **Record** and **Choose** (the phone's own camera, or a video file) work over plain http.
-- **Guided** (the team's live guide) needs https, like any browser camera: start the server with `./server/run.sh --https`, connect to `https://<mac-ip>:8600`, and trust `server/cert.pem` on the phone once (iOS: install the profile, then Settings > General > About > Certificate Trust Settings).
+- **Guided** (the team's live guide) needs https, like any browser camera: start the server with `./server/run.sh --https`, connect to `https://<mac-ip>:8700`, and trust `server/cert.pem` on the phone once (iOS: install the profile, then Settings > General > About > Certificate Trust Settings).

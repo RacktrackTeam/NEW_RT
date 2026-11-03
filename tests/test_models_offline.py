@@ -2,7 +2,7 @@
 
 Pass 2 found every scan failing (two models pickled under numpy 2) and the model load reaching huggingface.co and
 github.com; the suite passed anyway because nothing loaded a model. These tests load them. Run the suite under
-scripts/with-model-lock.sh: the Ensemble test loads five models (about a minute on this Mac)."""
+tools/with-model-lock.sh: the Ensemble test loads five models (about a minute on this Mac)."""
 import os
 import pathlib
 import pickle

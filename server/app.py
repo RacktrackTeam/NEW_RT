@@ -1,5 +1,5 @@
-"""RackTrack engine: the API behind the mobile application (mobile/) and the video runs, a private service behind the sign-in
-service (./auth.sh, rt_eos/server/auth_service.js).
+"""RackTrack engine: the API behind the app (web/app/) and the video runs, a private service behind the sign-in
+service (./auth.sh, server/auth/auth_service.js).
 
     ./engine.sh                                # http://127.0.0.1:8700 (RACKTRACK_PORT to change it)
 
@@ -10,7 +10,7 @@ What it does
                  every run lives in data/runs/<org>/<site>/<id>/ (video, rack picture, result.json, report/) and survives a restart
   close-ups      a close-up of one device is read and kept with its run; the report is rebuilt
   databases      the organization's Excel, NetBox and ServiceNow CMDB copies, the rack match and the drift (src/source_db.py)
-  reports        each run's 15-step report (scripts/video/build_report.py), served uncached
+  reports        each run's 15-step report (engine/video_report.py), served uncached
 Everything heavy runs one job at a time on 2 threads (this Mac overheats otherwise); the engine is src/.
 """
 import datetime
@@ -31,8 +31,7 @@ import threading
 import time
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "src"))
-sys.path.insert(0, str(ROOT / "scripts" / "video"))
+sys.path.insert(0, str(ROOT / "engine"))
 import local_models  # noqa: E402,F401  (first: model caches inside this folder, hub lookups off)
 os.environ.setdefault("OMP_NUM_THREADS", "2")
 
@@ -54,7 +53,7 @@ import rack_stitch  # noqa: E402
 import rack_video  # noqa: E402
 import rack_label  # noqa: E402
 import patch_panels  # noqa: E402
-import build_report as video_report  # noqa: E402
+import video_report  # noqa: E402
 import source_db as SDB  # noqa: E402
 import connections as CONN  # noqa: E402
 import rt_session  # noqa: E402  (racktrack-app sign-in: the RT-EOS session)
@@ -62,11 +61,11 @@ import rt_session  # noqa: E402  (racktrack-app sign-in: the RT-EOS session)
 # ------------------------------------------------------------------ settings
 PORT = int(os.environ.get("RACKTRACK_PORT", "8700"))          # never 8600, the live app's port
 HOST = os.environ.get("RACKTRACK_HOST", "127.0.0.1")           # this machine only: the sign-in service is the front door
-MOBILE = ROOT / "mobile"
+MOBILE = ROOT / "web" / "app"
 DATA = pathlib.Path(os.environ.get("RACKTRACK_DATA") or ROOT / "data")   # runtime data (runs, copies, checks, uploads); a test engine sets its own
 RUNS = pathlib.Path(os.environ.get("RACKTRACK_RUNS") or DATA / "runs"); RUNS.mkdir(parents=True, exist_ok=True)
 SAMPLE_DIR = ROOT / "data" / "video"
-SAMPLES = {"vdo1": {"title": "Demo rack (stored run)", "video": SAMPLE_DIR / "vdo1.mp4", "truth": ROOT / "data" / "ground_truth" / "SP-HYD-RM01-R01-R1" / "netbox_devices.csv",
+SAMPLES = {"vdo1": {"title": "Demo rack (stored run)", "video": SAMPLE_DIR / "vdo1.mp4", "truth": ROOT / "samples" / "ground_truth" / "SP-HYD-RM01-R01-R1" / "netbox_devices.csv",
                     "run": ROOT / "results" / "video_experiment" / "vdo1", "report": ROOT / "reports" / "video" / "vdo1"}}
 MAX_PHOTO = 25 * 1024 * 1024
 MAX_VIDEO = 600 * 1024 * 1024
@@ -74,7 +73,7 @@ DISPLAY_MAX = 2000
 NO_CACHE = {"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0", "Pragma": "no-cache", "Expires": "0"}
 
 class ModelLock:
-    """One model call at a time in this server, and on the whole machine: the same lock directory scripts/with-model-lock.sh uses
+    """One model call at a time in this server, and on the whole machine: the same lock directory tools/with-model-lock.sh uses
     (RT_MODEL_LOCK_DIR, default /tmp/one_racktrack_model.lock), taken only around a model run, so an idle server never holds it."""
     def __init__(self):
         self._t = threading.Lock()
@@ -152,7 +151,7 @@ def keep_only(chosen):
 
 # ------------------------------------------------------------------ sign-in: the RT-EOS session (server/rt_session.py)
 # racktrack-app sign-in (auth merge): the name-only /api/login is gone. Every /api route except health needs the session
-# the sign-in service (auth.sh, rt_eos/server/auth_service.js) signs; a run of another organization or site is not there.
+# the sign-in service (auth.sh, server/auth/auth_service.js) signs; a run of another organization or site is not there.
 OPEN_PATHS = ("/", "/app", "/app/", "/manifest.webmanifest", "/sw.js", "/api/health", "/api/auth-service", "/favicon.ico", "/logo.jpg", "/api/contact",
               "/api/auth/state")
 RUN_PATH = re.compile(r"^/(?:api/video|video-report)/([A-Za-z0-9_-]+)(?:/|$)")
@@ -497,7 +496,7 @@ def api_rack_label(job: str):
 
 
 def _when_words(t=None):
-    """The one date style every screen uses (mobile/app.js when()): 3 Nov 2026, 09:41."""
+    """The one date style every screen uses (web/app/app.js when()): 3 Nov 2026, 09:41."""
     t = t or datetime.datetime.now()
     return f"{t.day} {t.strftime('%b %Y, %H:%M')}"
 
@@ -824,7 +823,7 @@ def video_report_file(job: str, path: str):
 
 
 def themed_page(f: pathlib.Path):
-    """A report page in the app's look: mobile/report-theme.css is added after the page's own styles, so old reports get it too."""
+    """A report page in the app's look: web/app/report-theme.css is added after the page's own styles, so old reports get it too."""
     html = f.read_text(encoding="utf-8") + '<link rel="stylesheet" href="/app/report-theme.css?v=11">'
     return Response(html, media_type="text/html; charset=utf-8", headers={"Cache-Control": "no-cache"})
 
@@ -1052,7 +1051,7 @@ KINDS = ("Switch", "Router", "Firewall", "Gateway", "Patch Panel", "Server", "St
 
 
 # ------------------------------------------------------------------ specifications of an identified model (RT-EOS's switch_specs agent: local knowledge base, then its web lookup)
-SPECS_CLI = pathlib.Path(os.environ.get("RACKTRACK_SPECS_CLI", ROOT / "rt_eos" / "switch_specs" / "cli.py"))
+SPECS_CLI = pathlib.Path(os.environ.get("RACKTRACK_SPECS_CLI", ROOT / "engine" / "readers" / "switch_specs" / "cli.py"))
 SPECS_CACHE = DATA / "specs_cache.json"
 SPEC_FIELDS = (("port_config", "Ports", ""), ("uplink_config", "Uplinks", ""), ("port_speed_max_gbps", "Max port speed", " Gbps"), ("switching_capacity_gbps", "Switching capacity", " Gbps"),
                ("poe_standard", "PoE", ""), ("poe_budget_w", "PoE budget", " W"), ("power_max_w", "Power max", " W"), ("layer", "Layer", ""), ("rack_units", "Height", "U"), ("nos", "Network OS", ""))
@@ -1543,7 +1542,7 @@ def api_closeup_picture(cid: str, name: str):
 def models_overview():
     f = ROOT / "reports" / "video" / "overview" / "index.html"
     if not f.exists():
-        raise HTTPException(404, "Not built yet: python3 scripts/video/build_report.py")
+        raise HTTPException(404, "Not built yet: python3 engine/video_report.py")
     return themed_page(f)
 
 

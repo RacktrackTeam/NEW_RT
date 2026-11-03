@@ -7,7 +7,7 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-RUNNER = ROOT / "src" / "port_agents_batch.py"
+RUNNER = ROOT / "engine" / "port_agents_batch.py"
 
 
 def test_timeout_is_not_an_exception():
@@ -17,7 +17,7 @@ def test_timeout_is_not_an_exception():
 
 
 def test_runner_never_imports_our_src():
-    """The agents' folder is the only project path: our src/ is removed even though python adds the script's folder."""
+    """The agents' folder is the only project path: our engine/ is removed even though python adds the script's folder."""
     src = RUNNER.read_text()
     assert "sys.path = [p for p in sys.path if pathlib.Path(p or \".\").resolve() != HERE]" in src
 
@@ -25,8 +25,8 @@ def test_runner_never_imports_our_src():
 def test_batch_survives_a_broken_agent(tmp_path, monkeypatch):
     """A fake agent module in place of the real one: crop 1 raises, crop 2 writes half a json, crop 3 maps, crop 4 maps the
     same model (early stop after it), crop 5 is skipped. The batch ends with os._exit(0) and every crop has an answer."""
-    fake = tmp_path / "port_agents"; (fake / "router_agent" / "router_mapper").mkdir(parents=True)
-    (fake / "run_agent.py").write_text((ROOT / "port_agents" / "run_agent.py").read_text())
+    fake = tmp_path / "engine" / "port_agents"; (fake / "router_agent" / "router_mapper").mkdir(parents=True)   # engine/port_agents beside engine/port_agents_batch.py
+    (fake / "run_agent.py").write_text((ROOT / "engine" / "port_agents" / "run_agent.py").read_text())
     (fake / "router_agent" / "router_mapper" / "__init__.py").write_text("")
     (fake / "router_agent" / "router_mapper" / "pipeline.py").write_text('''
 import json, pathlib
@@ -36,7 +36,7 @@ def map_router(photo, vendor=None, model=None, out_dir=None, log=print, **k):
     if n == "c2": (out / "result.json").write_text("{\\"ports\\": ["); return
     (out / "result.json").write_text(json.dumps({"vendor": "Cisco", "model": "ISR4331", "mode": "template", "ports": [{"id": 1, "type": "rj45", "status": "empty", "polygon": [[0, 0], [1, 0], [1, 1], [0, 1]]}]}))
 ''')
-    runner = tmp_path / "src" / "port_agents_batch.py"; runner.parent.mkdir()
+    runner = tmp_path / "engine" / "port_agents_batch.py"; runner.parent.mkdir(exist_ok=True)
     runner.write_text(RUNNER.read_text())
     jobs = []
     for i in range(1, 6):

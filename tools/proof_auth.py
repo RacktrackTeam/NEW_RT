@@ -166,7 +166,7 @@ def test_runs(auth, engine):
 # ------------------------------------------------------------------ 3 copies and connections per organization
 def test_copies_and_connections(auth, engine):
     admin, admin2 = Who(auth, engine, "admint"), Who(auth, engine, "admin2")
-    wb = ROOT / "modules" / "sources" / "ground_truth" / "vdo1.xlsx"
+    wb = ROOT / "server" / "mocks" / "ground_truth" / "vdo1.xlsx"
     with open(wb, "rb") as f:
         rep = admin.e("POST", "/api/sources/excel", files={"workbook": ("vdo1.xlsx", f, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}).json()
     imp = admin.e("POST", "/api/sources/excel/import", json={"upload": rep.get("upload")})
