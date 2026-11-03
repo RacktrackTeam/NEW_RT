@@ -1217,6 +1217,6 @@ body[data-dir="back"] .rpart.mo > *, body[data-dir="back"] #dv-one.mo > * { anim
 .umbtns, .umjoin { display:flex; flex-wrap:wrap; gap:8px; } .umbtns .btn { flex:1; min-height:44px; } .umjoin .btn { flex:1 1 45%; min-height:40px; font-size:13.5px; } .umjoin .pline { flex-basis:100%; margin:0; }
 .umdone { font-size:13px; color:var(--t2); } .adddev.nudge { animation:nudge .5s var(--ease); }
 
-/* racktrack-app sign-in: the links under the sign-in form and the Google / Apple / Facebook buttons (shown only when the service has keys) */
+/* racktrack-app sign-in: the links under the sign-in form */
 .si-links { margin:4px 0 0; font-size:var(--fs-sub); text-align:center; } .si-links a { color:var(--ink); font-weight:600; }
 #forgot #fg-step2 { display:flex; flex-direction:column; gap:14px; } #forgot #fg-step2[hidden] { display:none; }

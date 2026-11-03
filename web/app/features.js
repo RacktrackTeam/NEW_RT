@@ -244,7 +244,7 @@
     root().onclick = null;
     if (run === 'site') return site();
     if (!run) return;
-    if (!RUNNERS[tool]) tool = 'find';                  // an old link to a removed tool (Read again, Physical layer, SFP, Topology) opens Find a port
+    if (!RUNNERS[tool]) tool = 'find';                  // an old link to a removed tool (Read again, Physical layer, SFP, the old cable drawing) opens Find a port
     root().innerHTML = '<div class="fx-page">' + loading('Loading ' + NAME[tool].toLowerCase() + '...') + '</div>';
     RUNNERS[tool](run, q);
   }

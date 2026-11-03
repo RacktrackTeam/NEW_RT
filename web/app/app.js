@@ -597,7 +597,7 @@
       : '<span><i class="sig live"></i> Reading the rack label…</span>';
     if (!v.rack_label && !v.rack_label_running && !RES.labelAsked) { RES.labelAsked = RES.id; api('/api/video/' + RES.id + '/rack-label', { method: 'POST' }).catch(quiet('reading the rack label')); }
     if (!v.rack_label) { clearTimeout(RES.labelT); RES.labelT = setTimeout(function () { if ((location.hash || '').indexOf('#result/' + RES.id) === 0) loadView(false); }, 12000); }
-    // the elevation: RT-EOS's own Topology tab (2D diagram and 3D scene, mobile/rt/ built from RT-EOS by tools/rt-topology), fed this run as its "detail"
+    // the elevation: RT-EOS's own cable drawing tab (2D diagram and 3D scene, mobile/rt/ built from RT-EOS by tools/rt-topology), fed this run as its "detail"
     var unum = function (s) { return parseInt(String(s).replace(/\D/g, ''), 10); };
     var cards = {}; devs.forEach(function (d) { var ps = PORT_KINDS[d.kind] ? devState(d, v) : null, L = d.layout || {}, ports = L.ports || [], on = ports.filter(function (p) { return p.status === 'connected'; }).length, off = ports.filter(function (p) { return p.status === 'empty'; }).length;
       cards[d.index] = { crop: d.crop, unit: URANGE(d.top, d.bottom, d.height), size: d.height + 'U', kind: d.kind && d.kind !== 'Other' ? d.kind : 'Not sure', state: ps ? ps.word : null, stateKey: ps ? ps.key : null,
