@@ -71,7 +71,7 @@ function OrgSection({ s, isOwner, onRenamed }) {
       {isOwner ? (
         <Field label="Name" required value={f.name} onChange={set('name')} onBlur={saveName} error={errs.name || nameFail} autoComplete="organization" />
       ) : (
-        <Field label="Name" value={p.name || ''} readOnly hint="Only the owner can rename the organization." />
+        <Field label="Name" value={p.name || ''} readOnly hint="Only the platform owner (RackTrack) can rename the organization." />
       )}
       <SelectField
         label="Time zone"
