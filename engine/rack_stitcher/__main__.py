@@ -28,10 +28,10 @@ def summary(r) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="rack_stitcher", description="Stitch a rack video into one rack image.")
-    p.add_argument("video", nargs="?", help="file name in the input folder (default data/video) or a path")
+    p.add_argument("video", nargs="?", help="file name in the input folder (default samples/video) or a path")
     p.add_argument("--all", action="store_true", help="process every video in the input folder")
-    p.add_argument("--input-dir", help="input folder (default data/video)")
-    p.add_argument("--output-dir", help="output folder (default results/stitched)")
+    p.add_argument("--input-dir", help="input folder (default samples/video)")
+    p.add_argument("--output-dir", help="output folder (default data/stitched)")
     p.add_argument("--output-name", help="output file name (single video only)")
     p.add_argument("--start-frame", type=int, default=0)
     p.add_argument("--keyframes", type=int, default=36, help="target number of stitched keyframes")

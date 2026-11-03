@@ -1,10 +1,9 @@
-"""The video-experiment report for one sample, built from its stored run (results/video_experiment/<sample>/) and
-its inputs (data/video/): reports/video/<sample>/index.html with the pictures beside it in pics/.
+"""The rack report of a finished run: <run>/report/index.html with the pictures beside it in pics/ (served at
+/video-report/<run>/ by the engine and opened inside the app's Report).
 
 Tabs: Input · Frames · How it works · Unit detection · Unit occupancy · Device detection · Why each device · Report.
-· Why each device · Image vs frames · How it works.
 
-    python3 engine/video_report.py --sample vdo1
+    python3 engine/video_report.py <run folder>          builds the report of that run again
 """
 import argparse
 import html
@@ -19,7 +18,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-ROOT = pathlib.Path(__file__).resolve().parents[2]
+ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "engine"))
 import rack_video as RV       # noqa: E402  (frame registration, for the "where a frame lands" picture)
 
@@ -342,11 +341,11 @@ def occ_kinds(items):
 def _eval_numbers():
     """Accuracy of each step from our own evaluation files (nothing typed in by hand)."""
     J = lambda f: json.load(open(ROOT / f))
-    u = J("results/units/eval/summary.json")["stages"]; uh = J("results/units/eval_highres250/summary.json")["stages"]; ub = J("results/units/eval_bottom100/summary.json")["stages"]
+    u = J("engine/report_data/units/eval/summary.json")["stages"]; uh = J("engine/report_data/units/eval_highres250/summary.json")["stages"]; ub = J("engine/report_data/units/eval_bottom100/summary.json")["stages"]
     occ_m = {k: J(f"models/v2/{k}_eval.json")["val_accuracy"] for k in ("ensemble", "yolo11s_cls", "embed_dinov2", "teammate", "classical")}
-    fun = J("data/eval/ensemble_portal/data.json"); f_ = fun["funnel"]; ts = fun["testsets"]["overall"]
+    fun = J("engine/report_data/eval/ensemble_portal/data.json"); f_ = fun["funnel"]; ts = fun["testsets"]["overall"]
     occ_m["ensemble"] = f_["right"] / f_["units"]            # one definition for the headline and the bar
-    dm = {m: J(f"results/devices/grade_devices_test_{m}.json") for m in ("model", "model_only", "logic")}
+    dm = {m: J(f"engine/report_data/devices/grade_devices_test_{m}.json") for m in ("model", "model_only", "logic")}
     cls_f = ROOT / "models" / "device_cls" / "convnext_tiny" / "other_stats.json"   # the device classifier's own test metrics (handover 2026-10-19)
     ue = u["rteos_logic"]
     members = fun.get("members") or []
@@ -509,15 +508,6 @@ def video_facts(path, dst_first):
     if ok:
         im = Image.fromarray(fr[:, :, ::-1]); im.thumbnail((700, 700)); im.save(dst_first, quality=86)
     return {"w": w, "h": h, "frames": nfr, "fps": fps, "seconds": nfr / fps if fps else 0}
-
-
-def build(sample):
-    """A stored sample's report: reports/video/<sample>/."""
-    S = SAMPLES[sample]; src = ROOT / "data" / "video"
-    res = ROOT / "results" / "video_experiment" / sample
-    rack = res / "rack.png" if (res / "rack.png").exists() else src / S["rack"]       # the picture the run stitched from the video
-    return build_from(res, ROOT / "reports" / "video" / sample, rack, src / S["video"],
-                      S["title"], sample, src / S["selected"], src / S["frames"], S.get("rack_id"))
 
 
 def build_from(res_dir, out, rack_path, video_path, title, name, selected_path=None, frames_dir=None, rack_id=None, pending=False):
@@ -1918,26 +1908,15 @@ function esc2(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){retur
 """
 
 
-def build_overview(sample="vdo1"):
-    """reports/video/overview/index.html: every step of the pipeline, its model, approach, accuracy and where the rest goes."""
-    r = json.load(open(ROOT / "results" / "video_experiment" / sample / "result.json"))
-    body = integration_tab(r["ladder"], r["rack"], r["occupancy_frames"]["summary"], r["rack"]["occupancy"], r["devices"])
-    body = body.replace("<h2>The full pipeline, step by step</h2>", "<h2>Models and accuracy, step by step</h2>")
-    out = ROOT / "reports" / "video" / "overview"; out.mkdir(parents=True, exist_ok=True)
-    js = ("<script>(function(){var e=false;try{e=!!(window.frameElement&&window.frameElement.id==='voverview');}catch(x){} if(e)document.documentElement.classList.add('embed');})();</script>")
-    page = ('<!doctype html><meta charset="utf-8"><title>Models and Accuracy</title>' + CSS
-            + '<div class="page"><div class="stick"><header><div class="brand">RackTrack</div><h1>Models and Accuracy</h1><p class="info">Every step of the rack analysis: the model, why we chose it, and how accurate it is</p></header></div>'
-            + body + "</div>" + js)
-    (out / "index.html").write_text(page)
-    return out / "index.html"
-
-
 def main():
-    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("--sample", default="vdo1", choices=sorted(SAMPLES))
-    args = ap.parse_args()
-    out = build(args.sample); build_overview()
-    print(out / "index.html", sum(f.stat().st_size for f in (out / "pics").iterdir()) // 1024, "KB of pictures")
+    """Build the report of one finished run folder again: engine/video_report.py <run folder>."""
+    ap = argparse.ArgumentParser(description="The rack report of one finished run (result.json and its pictures) into <run>/report/.")
+    ap.add_argument("run", type=pathlib.Path)
+    a = ap.parse_args()
+    st = json.loads((a.run / "status.json").read_text()) if (a.run / "status.json").exists() else {}
+    video = next((p for p in a.run.glob("video*") if p.suffix in (".mp4", ".mov")), None)
+    out = build_from(a.run, a.run / "report", a.run / "rack.png", video, st.get("title") or "Your rack", st.get("name") or a.run.name)
+    print(out)
 
 
 if __name__ == "__main__":

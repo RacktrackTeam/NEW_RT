@@ -1,7 +1,7 @@
 """rack_stitcher: turn a top-to-bottom video of a server rack into one image of the rack.
 
     from rack_stitcher import stitch_rack
-    result = stitch_rack("vdo1.mp4")            # reads data/video, writes results/stitched
+    result = stitch_rack("vdo1.mp4")            # reads samples/video, writes data/stitched
     print(result.output_path)
 """
 from .paths import DEFAULT_INPUT_DIR, DEFAULT_OUTPUT_DIR, list_videos

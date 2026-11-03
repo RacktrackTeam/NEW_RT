@@ -103,3 +103,9 @@ table td, .dftable td { font-size:14px; padding:12px var(--s2) !important; borde
 #dv-list .prow .stat { grid-column:2; grid-row:2; justify-self:start; }
 #dv-list .prow .arr { grid-column:3; grid-row:1 / span 2; }
 #dv-list .prow .iu { grid-column:1; grid-row:1 / span 2; }
+
+/* On a phone the screen's primary action drops under the title, still at the right (STANDARD.md, Page header) */
+@media (max-width:999px) {
+  .phead { display:flex !important; flex-direction:column !important; align-items:stretch !important; }
+  .phead > .btn, .phead > a.btn { align-self:flex-end !important; margin-left:auto !important; }
+}
