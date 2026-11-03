@@ -3,6 +3,7 @@
     python3 src/train_embed.py clip     # CLIP ViT-B/32 (semantic, web-scale)
     python3 src/train_embed.py dinov2   # DINOv2 ViT-B/14 (self-supervised, fine visual structure)
 """
+import local_models  # noqa: F401  (model caches inside this folder, hub lookups off)
 import json
 import pathlib
 import sys
@@ -88,7 +89,7 @@ if __name__ == "__main__":
         if cv > best_cv:
             best_name, best_cv = n, cv
     clf = cands[best_name].fit(Xtr, ytr)
-    # joblib pickle of our own freshly-trained sklearn model — trusted, local artefact.
+    # joblib pickle of our own freshly-trained sklearn model - trusted, local artefact.
     joblib.dump({"backbone": kind, "head": best_name, "clf": clf}, OUT / f"embed_{kind}_clf.joblib")
 
     p = clf.predict_proba(Xva)[:, 1]

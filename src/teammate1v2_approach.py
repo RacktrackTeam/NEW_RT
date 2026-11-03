@@ -15,6 +15,7 @@ run their labels exactly as delivered.
 Units come from our RT-EOS ladder, like every other approach. The gallery pickle was inspected before
 loading: it holds only numpy arrays and plain numbers.
 """
+import local_models  # noqa: F401  (model caches inside this folder, hub lookups off)
 import json
 import pathlib
 import pickle
@@ -45,7 +46,8 @@ def _model():
         from torchvision import transforms
         dev = torch.device("mps" if torch.backends.mps.is_available()
                            else "cuda" if torch.cuda.is_available() else "cpu")
-        m = torch.hub.load("facebookresearch/dinov2", DINO_MODEL).to(dev).eval()
+        from local_models import dinov2_hub
+        m = dinov2_hub(DINO_MODEL).to(dev).eval()
         # Rack units are wide strips: resize the whole unit (no centre crop) so DINOv2 sees every part of it.
         tf = transforms.Compose([transforms.Resize(IMAGE_SIZE), transforms.ToTensor(),
                                  transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])

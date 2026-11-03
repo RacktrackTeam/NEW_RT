@@ -165,6 +165,8 @@ def read_patch_panel(run_dir, index, crop_path, timeout=1200):
     for f in (PKG / "out").glob(f"*_{name}.csv"):                      # the package's out/ keeps only its own gallery files
         f.unlink()
     shutil.rmtree(PKG / "out" / f"overlays_{name}", ignore_errors=True)
+    for f in (PKG / "out" / "cache").glob(f"test_{name}_*.npz"):        # this panel's embeddings: runtime data, not the package's
+        f.unlink()
     # a port hidden behind a cable gets no box: when at least SEEN_SHARE of a standard panel size is seen, the panel is that size
     size = next((n for n in STANDARD_SIZES if len(ports) <= n), None)
     below = max((n for n in STANDARD_SIZES if n < len(ports)), default=None)

@@ -34,8 +34,7 @@ import device_join as DJ    # noqa: E402
 import device_logic as DL   # noqa: E402
 
 WEIGHTS = ROOT / "weights" / "device_detector_deimv2.pth"
-_DEIM_DEFAULT = ROOT.parent / "tools" / "DEIMv2"                      # a clone of the DEIMv2 repo next to this repo
-DEIMV2_DIR = os.environ.get("DEIMV2_DIR") or (str(_DEIM_DEFAULT) if (_DEIM_DEFAULT / "engine").is_dir() else "")
+DEIMV2_DIR = os.environ.get("DEIMV2_DIR") or str(pathlib.Path(__file__).resolve().parent / "third_party" / "DEIMv2")   # the DEIMv2 code, inside this folder
 SCORE, COVER = 0.5, 0.4     # a box counts from this confidence; a unit belongs to a box covering this share of it
 INPUT = 640                 # the detector sees the photo resized to INPUT x INPUT
 CACHE_MIN_SCORE = 0.05      # every box at or above this is kept in the cache, so SCORE can be moved without rerunning

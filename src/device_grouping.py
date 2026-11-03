@@ -14,6 +14,7 @@ device finder flagged) still shows up, marked "check" instead of "confirmed".
 The model file models/v2/device_pairs.pt is their slot_models.pt; it holds only weights and numpy arrays and is
 loaded with torch's weights_only loader.
 """
+import local_models  # noqa: F401  (model caches inside this folder, hub lookups off)
 import pathlib
 
 import cv2

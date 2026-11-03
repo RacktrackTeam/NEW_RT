@@ -5,6 +5,7 @@
 2. Crop   - each row is cut out and squashed to 224x224, exactly like the training crops.
 3. Classify - the chosen approach returns P(occupied) per row.
 """
+import local_models  # noqa: F401  (model caches inside this folder, hub lookups off)
 import json
 import os
 import pathlib

@@ -1,9 +1,9 @@
 """Second teammate's approach (delivered as rack_occupancy/, folded in here): three votes per unit, fused.
 
-  a) YOLO vote  — the device detector's class for the object covering the unit:
+  a) YOLO vote  - the device detector's class for the object covering the unit:
                   Closed Unit / Empty -> 0.5 + 0.5*conf empty, any device -> 0.5 - 0.5*conf empty
-  b) CLIP probe — ViT-B-32-quickgelu (OpenAI) embedding -> linear 3-class probe (open / closed / occupied)
-  c) Edge logic — 10 edge/texture features inside the unit -> logistic regression
+  b) CLIP probe - ViT-B-32-quickgelu (OpenAI) embedding -> linear 3-class probe (open / closed / occupied)
+  c) Edge logic - 10 edge/texture features inside the unit -> logistic regression
   P(empty) = (0.8*yolo + 0.1*clip + 0.1*edge) / 1.0   (their weights, tuned on their valid split);
   a unit no object covers (>= 40 % of its area) is judged by CLIP + edge alone.
 
@@ -13,9 +13,10 @@ Adaptations, none of which changes their logic:
   * Units come from our RT-EOS ladder, like every other approach.
   * The YOLO vote uses RT-EOS Models/device_finder.pt (their device_annotation_v2_seg_best.pt lives on a
     D:\\ drive that is not here). Its class ids match theirs: 0 = Closed Unit, 1 = Empty.
-  * Their "closed" (blank panel) counts as empty, as in the v2 dataset — so it is a v2 approach.
+  * Their "closed" (blank panel) counts as empty, as in the v2 dataset - so it is a v2 approach.
 fusion_t2_probes.npz is plain arrays (loaded with allow_pickle=False).
 """
+import local_models  # noqa: F401  (model caches inside this folder, hub lookups off)
 import json
 import pathlib
 
@@ -102,8 +103,8 @@ class FusionApproach:
     key = "fusion_t2"
     name = "YOLO + CLIP + Edge fusion (teammate 2)"
     short = "Fusion (teammate 2)"
-    description = ("Teammate 2's approach: three votes per unit — the device detector's class, a CLIP "
-                   "probe (open / closed / occupied) and edge-texture logic — fused 0.8 / 0.1 / 0.1. "
+    description = ("Teammate 2's approach: three votes per unit - the device detector's class, a CLIP "
+                   "probe (open / closed / occupied) and edge-texture logic - fused 0.8 / 0.1 / 0.1. "
                    "Units come from the same RT-EOS ladder as every other approach.")
 
     def __init__(self, version="v2"):

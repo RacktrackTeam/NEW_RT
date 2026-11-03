@@ -22,9 +22,16 @@ export RACKTRACK_WORKERS=1
 # setting is on reach the makers' pages; leave it off here.
 export SWITCH_MAPPER_WEB_SEARCH=0
 export RACKTRACK_ONLINE_LOOKUPS=0
+# No model load reaches the internet either: every pretrained weight is read from models/ inside this folder
+# (src/local_models.py names them), and the Hugging Face, torch hub and Ultralytics lookups are off.
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_HUB_DISABLE_TELEMETRY=1 YOLO_OFFLINE=1
+export HF_HOME="$HERE/models/huggingface" TORCH_HOME="$HERE/models/torch" EASYOCR_MODULE_PATH="$HERE/models/easyocr"
+export YOLO_CONFIG_DIR="$HERE/_cache/ultralytics"; mkdir -p "$YOLO_CONFIG_DIR"
 
 cd "$HERE" || exit 1
 export OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2
 # No lock wrapper: the server takes the machine-wide model lock itself, only around a model run (server/app.py ModelLock),
 # so an idle server never holds it.
-exec "$HERE/_cache/venv/bin/python" "$HERE/server/app.py"
+# The engine's own environment (tools/make_engine_env.py: racktrack-app's tested packages, numpy 2); the RT-EOS readers it
+# calls run in RT-EOS's environment, _cache/venv, as child processes (src/rt_features.py RTEOS_PYTHON).
+exec "$HERE/_cache/venv-engine/bin/python" "$HERE/server/app.py"

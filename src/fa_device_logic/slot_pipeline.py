@@ -8,6 +8,7 @@ Updated approach: rack occupancy from 1U slots only (no device model).
           seam line between them, texture difference). Occupied neighbours that look like
           the same device are merged, so a 4U server is one device occupying 4U.
 """
+import local_models  # noqa: F401  (model caches inside this folder, hub lookups off)
 import time
 from dataclasses import dataclass, field
 from pathlib import Path

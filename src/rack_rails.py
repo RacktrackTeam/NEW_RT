@@ -214,15 +214,19 @@ def on_base_in_frames(row, views, rails_x=None, min_frames=2):
     return False
 
 
-def off_rail_rows(bgr, rows, pitch, views, rails_x=None, limit=2):
+def off_rail_rows(bgr, rows, pitch, views, rails_x=None, limit=2, owned=None):
     """How many units at the bottom are on the base frame and not on the rail: most of the unit is on the bar in the
-    picture, and the frames agree. Never more than `limit`."""
+    picture, and the frames agree. Never more than `limit`. A unit a device sits on (owned(row) true: the device
+    detector's box covers it) is never the frame: a plain patch panel at the bottom can look like one solid bar (vdo1's
+    patch panel at U1-U2 was cut to U1 and every unit above renumbered one lower, 3 Nov 2026)."""
     top = base_bar_top(bgr, rows, pitch, rails_x)
     if top is None:
         return 0, None
     n = 0
     for r in reversed(sorted(rows, key=lambda x: x["box"][1])):
         if (r["box"][1] + r["box"][3]) / 2 > top and n < limit:
+            if owned is not None and owned(r):
+                break
             seen = [views[i] for i in (r.get("frames_seen") or []) if i in views]
             if not on_base_in_frames(r, seen, rails_x):
                 break

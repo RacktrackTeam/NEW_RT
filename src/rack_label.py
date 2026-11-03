@@ -7,6 +7,7 @@ pipeline/ocr_labels.py); the readings are pooled and a label wins by its summed 
 
     python3 src/rack_label.py data/runs/<id>      prints what it reads (no file written)
 """
+import local_models  # noqa: F401  (model caches inside this folder, hub lookups off)
 import json
 import os
 import pathlib
