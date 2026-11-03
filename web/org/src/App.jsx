@@ -13,7 +13,7 @@ import { setupDecision, setupUnknown } from './utils/setupGuard';
 import { clearPendingScan, fetchScanJob, getPendingScan } from './utils/pendingScan';
 import { isAdmin, isManager } from './utils/format';
 import { ORG_ONLY, rememberBack } from './utils/orgOnly';
-import BackToApp, { ToApp } from './components/BackToApp.jsx';
+import BackToApp, { Refused, ToApp } from './components/BackToApp.jsx';
 import SignInPage from './pages/SignInPage.jsx';
 import AcceptInvitePage from './pages/AcceptInvitePage.jsx';
 import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx';
@@ -54,7 +54,7 @@ function Protected({ children, allow }) {
   if (!isAuthed && booting) return <Loading />;
   if (!isAuthed) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   if (orgNotActive(user)) return <Navigate to="/pending" replace />;
-  if (allow && !allow(user?.role)) return <Navigate to="/" replace />;
+  if (allow && !allow(user?.role)) return ORG_ONLY ? <Refused /> : <Navigate to="/" replace />;
   return children;
 }
 
