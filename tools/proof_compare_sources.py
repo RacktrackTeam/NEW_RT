@@ -10,7 +10,7 @@ from playwright.sync_api import sync_playwright
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs" / "proof" / "tabbar"
 ENGINE = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8700"
-SIGNIN = "http://127.0.0.1:8700"      # the sign-in service allows the main engine's origin; the session cookie is shared by every port of 127.0.0.1
+SIGNIN = ENGINE                       # sign in on the engine being proved (its sign-in service must allow that origin); the cookie is shared by every port of 127.0.0.1
 RUN = "fx1hyd000001"                          # the Test Organization's run: proofs never change the Demo Organization
 USERS = ("owner", "orgownert", "techt")
 import proof_guard  # noqa: E402

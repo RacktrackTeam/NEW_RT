@@ -18,9 +18,9 @@ import source_db as SDB  # noqa: E402
 
 GT = ROOT / "server" / "mocks" / "ground_truth"
 VIDEOS = [  # video, its ground truth, its stored run
-    ("vdo1.mp4 (office rack SP-HYD-RM01-R01-R1)", "vdo1.json", "91af02c09bbc"),
-    ("WhatsApp 21.43.13 (NETWORK RACK 1)", "whatsapp_2143.json", "28c3c52cd91e"),
-    ("WhatsApp 23.19.19 (NETWORK RACK 2)", "whatsapp_2319.json", "501bcd981b64"),
+    ("vdo1.mp4 (office rack SP-HYD-RM01-R01-R1)", "vdo1.json", "run_of_vdo1"),
+    ("WhatsApp 21.43.13 (NETWORK RACK 1)", "whatsapp_2143.json", "run_of_whatsapp_2143"),
+    ("WhatsApp 23.19.19 (NETWORK RACK 2)", "whatsapp_2319.json", "run_of_whatsapp_2319"),
 ]
 
 
@@ -36,7 +36,8 @@ def units(start, height):
 
 def evaluate(truth, result):
     rec = record_of(truth)
-    checkable = [r for r in rec if r["ru_start"] is not None and (r["kind"] or "").lower() not in SDB.NOT_SEEN_KINDS]
+    top = SDB.units_read(result)                      # a device above the units the video read is not checked (as the drift says)
+    checkable = [r for r in rec if r["ru_start"] is not None and (r["kind"] or "").lower() not in SDB.NOT_SEEN_KINDS and r["ru_start"] <= top]
     run = SDB.run_devices(result)
     # pairing by the largest unit overlap, greedy
     cand = sorted(((len(units(r["ru_start"], r["ru_height"]) & units(s["ru_start"], s["ru_height"])), i, j) for i, r in enumerate(checkable) for j, s in enumerate(run)), reverse=True)
@@ -72,7 +73,7 @@ def evaluate(truth, result):
 def main():
     out = []
     for label, gt_name, run in VIDEOS:
-        rf = ROOT / "data" / "runs" / run / "result.json"
+        rf = ROOT / "samples" / "video" / run / "result.json"
         if not rf.is_file():
             print(f"{label}: no run"); continue
         n, detail, agree = evaluate(json.loads((GT / gt_name).read_text()), json.loads(rf.read_text()))

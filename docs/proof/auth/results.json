@@ -1,10 +1,10 @@
 {
- "when": "2026-11-02 15:44",
+ "when": "2026-11-03 12:00",
  "checks": [
   {
    "check": "no engine route answers without a session (no cookie, and a token signed with another key)",
    "ok": true,
-   "detail": "48 routes called twice"
+   "detail": "49 routes called twice"
   },
   {
    "check": "health stays open",
@@ -64,7 +64,7 @@
   {
    "check": "database copies are per organization",
    "ok": true,
-   "detail": "first 2, second 0"
+   "detail": "first 6, second 0"
   },
   {
    "check": "the second organization cannot delete the first one's copy",

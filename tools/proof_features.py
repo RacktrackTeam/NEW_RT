@@ -2,7 +2,7 @@
 
     RT_PROOF_PASSWORD=... _cache/venv/bin/python tools/proof_features.py [--engine http://127.0.0.1:8702] [--auth http://127.0.0.1:3305] [--setup]
 
-Needs the sign-in service and the engine running (auth.sh, engine.sh) and the vdo1 run in data/runs/<org>/<site>/91af02c09bbc.
+Needs the sign-in service and the engine running (auth.sh, engine.sh) and the Test Organization's run of vdo1 (fx1hyd000001, made by tools/proof_auth.py --fixtures).
 The password is read from RT_PROOF_PASSWORD or data/auth/seed-password.txt; it is never printed.
 --setup first plants the data (once): the planted workbook (tools/plant_features_workbook.py) read and imported as an Excel copy,
 the run checked against it, the site's position set through the sign-in service, vdo1.mp4 uploaded again with a phone position, a
@@ -20,7 +20,7 @@ from http.cookiejar import CookieJar
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs" / "proof" / "features"
-RUN = "91af02c09bbc"
+RUN = "fx1hyd000001"                          # the Test Organization's run of vdo1: proofs never change the Demo Organization
 PY = sys.executable
 
 
@@ -57,16 +57,16 @@ def call(op, url, body=None, method=None, form=None, headers=None):
 
 
 def setup(op, engine, auth):
-    wb = ROOT / "data" / "proof_features" / "vdo1_planted.xlsx"; wb.parent.mkdir(parents=True, exist_ok=True)
+    wb = pathlib.Path(os.environ.get("RACKTRACK_DATA") or ROOT / "data") / "proof_features" / "vdo1_planted.xlsx"; wb.parent.mkdir(parents=True, exist_ok=True)
     subprocess.run([PY, str(ROOT / "tools" / "plant_features_workbook.py"), str(wb)], check=True)
     rep = call(op, engine + "/api/sources/excel", form={"workbook": wb})
     imp = call(op, engine + "/api/sources/excel/import", {"upload": rep["upload"]})
     call(op, f"{engine}/api/video/{RUN}/database", {"source": "excel", "confirmed": True})
     me = call(op, engine + "/api/me")
-    site = call(op, f"{auth}/api/setup/{me['site']}/datacentre", {"lat": 17.4486, "lng": 78.3908}, method="PUT", headers={"Origin": "http://127.0.0.1"})
+    site = call(op, f"{auth}/api/setup/{me['site']}/datacentre", {"lat": 17.4486, "lng": 78.3908}, method="PUT", headers={"Origin": engine})   # an origin the sign-in service allows
     up = call(op, engine + "/api/video", form={"video": ROOT / "samples" / "video" / "vdo1.mp4", "lat": "17.4489", "lng": "78.3911", "accuracy": "35"})
     shots = {}
-    run_dir = next((ROOT / "data" / "runs").glob(f"*/*/{RUN}"))
+    run_dir = next(pathlib.Path(os.environ.get("RACKTRACK_DATA") or ROOT / "data", "runs").glob(f"*/*/{RUN}"))
     shots["real_crop_D5"] = call(op, engine + "/api/closeup", form={"file": run_dir / "section_D5_clean.jpg", "job": RUN, "device": "5", "ids_only": "1"}).get("ids")
     for d, lines in ((5, ["TP-Link JetStream TL-SG2428P", "S/N: TPL2231X9ZZ", "Asset Tag: SP-AT-00415", "SP-R1-U15-SW02", "CBL-PLANT-L1-A"]), (4, ["TP-Link TL-SG2428P", "S/N: SGP2231A0BC"])):
         pic = OUT / f"synthetic_closeup_D{d}.jpg"
@@ -80,8 +80,7 @@ def answers(op, engine):
     drift = v("drift")
     out = {"identify": [{k: st.get(k) for k in ("n", "title", "outcome", "proof")} for st in drift["identify"]["steps"]] + [drift["identify"]["words"]],
            "drift_ids": [x["words"] for x in drift["drift"]["rows"] if x["type"] in ("serial", "asset_tag")],
-           "cables": v("cables"), "find_port": v("find-port?device=4&port=9"), "worklist_count": len(v("worklist")["items"]),
-           "physical_counts": v("physical-layer")["counts"], "sfp": v("sfp-advice")["items"], "topology_cables": v("topology")["cables_in_matrix"]}
+           "cables": v("cables"), "find_port": v("find-port?device=4&port=9"), "connections": len(v("connections")["devices"]), "sfp": v("sfp-advice")["items"]}
     az = call(op, engine + "/api/cables/az", {"a": RUN, "z": RUN})
     out["az"] = {"counts": az["counts"], "accuracy": az["accuracy"], "id": az["id"]}
     csv = call(op, f"{engine}/api/cables/az/{az['id']}.csv")
@@ -110,28 +109,20 @@ def screens(engine, user, pw):
                 pg.wait_for_timeout(wait)
                 pg.screenshot(path=str(OUT / f"{name}_{width}.png"), full_page=True)
 
-            shot("tools_list", f"tools/{RUN}", ".ft-list")
-            shot("find_port", f"tools/{RUN}/find/4-9", ".ft-found", 2000)
-            shot("connections", f"tools/{RUN}/connections", ".ft-dev")
+            shot("find_port", f"tools/{RUN}/find/4-9", ".fx-right", 2000)
+            shot("connections", f"tools/{RUN}/connections", ".fx-card")
             shot("cables", f"tools/{RUN}/cables", "#az-form")
             pg.click("#az-form button[type=submit]"); pg.wait_for_selector("#az-csv", timeout=30000); pg.wait_for_timeout(600)
             pg.screenshot(path=str(OUT / f"cables_az_{width}.png"), full_page=True)
-            shot("worklist", f"tools/{RUN}/worklist", ".ft-wl")
-            shot("read_again", f"tools/{RUN}/again", ".ft-again")
-            shot("physical_layer", f"tools/{RUN}/physical", ".ft-table")
-            pg.goto(f"{engine}/api/video/{RUN}/physical-layer.html"); pg.wait_for_timeout(600)
-            pg.screenshot(path=str(OUT / f"physical_layer_page_{width}.png"), full_page=True)
-            shot("sfp_advice", f"tools/{RUN}/sfp", ".ft-sfp")
-            shot("topology", f"tools/{RUN}/topology", "#ft-topo svg, #ft-topo canvas", 2500)
+
             shot("site_position", "tools/site", "#st-form")
             pg.goto(f"{engine}/app/#result/{RUN}/devices"); pg.wait_for_selector("#dv-list .prow", timeout=30000); pg.wait_for_timeout(800)
             pg.click('#dv-list .prow[data-dev="5"]'); pg.wait_for_selector(".ft-ids", timeout=15000); pg.wait_for_timeout(1500)
             pg.locator(".ft-ids").scroll_into_view_if_needed(); pg.wait_for_timeout(400)
             pg.locator("#res-dev").screenshot(path=str(OUT / f"device_ids_{width}.png"))          # the device card only (the page is long)
             pg.goto(f"{engine}/app/#result/{RUN}/report"); pg.wait_for_timeout(5000)
+            pg.click("#cmp-btn"); pg.click('[data-cmpsrc="excel"]'); pg.wait_for_selector(".idcard", timeout=30000); pg.wait_for_timeout(800)
             pg.locator("#sec-compare").screenshot(path=str(OUT / f"record_location_{width}.png"))  # the compare in the Report, with the identification steps
-            pg.locator("#sec-tools").scroll_into_view_if_needed(); pg.wait_for_timeout(500)
-            pg.locator("#sec-tools").screenshot(path=str(OUT / f"report_tools_{width}.png"))       # the rack tools as a section inside the Report
             pg.close()
         b.close()
     return errors

@@ -1,7 +1,7 @@
 """Proof for sign-in and organizations: the RT-EOS sign-in service (auth.sh) in front of the engine (engine.sh).
 
   1 No engine route answers without a session: every route in server/app.py is called with no cookie (and with a token
-    signed by the wrong key); only /api/health, /api/auth-service and /api/contact (Contact us, public on purpose) answer.
+    signed by the wrong key); only /api/health, /api/auth-service, /api/auth/state and /api/contact (public on purpose) answer.
   2 A technician sees only the runs of their own site; another site's run, another organization's run and a run from
     before sign-in answer 404 (history, view, report, delete). The organization admin sees the organization's runs, the
     platform owner every run.
@@ -119,7 +119,7 @@ def routes():
 
 
 def test_no_session(engine):
-    open_ok = {"/api/health", "/api/auth-service", "/api/contact", "/", "/manifest.webmanifest", "/sw.js", "/favicon.ico", "/logo.jpg"}
+    open_ok = {"/api/health", "/api/auth-service", "/api/contact", "/api/auth/state", "/", "/manifest.webmanifest", "/sw.js", "/favicon.ico", "/logo.jpg"}   # auth/state: only whether a session is there, never who
     bad = []
     forged = jwt.encode({"sub": 1, "role": "owner", "iss": "racktrack", "aud": "racktrack-app", "exp": int(time.time()) + 600}, "a-different-key-that-the-service-never-used-0123456789", algorithm="HS256")
     n = 0

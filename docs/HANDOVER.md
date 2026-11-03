@@ -34,3 +34,9 @@ racktrack-app is the core: its video engine reads a rack from a sweep video. We 
 - Sign-in: simple, centred in the middle of the window. "Reading the rack" is like RT-EOS's analysing page plus racktrack-app's run page.
 - The mockup in docs/design/ is the reference for Home, Scan, the run, Sign in and the Report; it must be updated to the subtle black accent before the rebuild.
 - Later the same evening: the owner also likes the Report tab as it is now, and the Compare against the database flow on it. The remaining pages are good. So the result screens (Rack, Devices, Layout, Report with its compare flow) are APPROVED and must not be redesigned; the mockup applies only to Sign in, Home, Scan and the run screen, with the subtle black accent.
+
+## State at 3 Nov (pass 2 fixed, the folder restructured)
+- Start everything with `./start.sh` (sign-in 3302, mocks 3303 and 3304 when no real login is saved, engine 8700), stop with `./stop.sh`. The layout is in docs/STRUCTURE.md; README.md has install, accounts, tests and proofs.
+- The engine runs in `_cache/venv-engine` (racktrack-app's own packages, numpy 2, made offline by tools/make_engine_env.py); the RT-EOS readers stay in `_cache/venv`. Every model loads from `models/` with the hubs offline; `models/MANIFEST.txt` lists every model and sample file.
+- docs/VERIFY-2.md ends with "Fixed in pass 2", one line per finding. The fresh run of vdo1 matches the stored run on units, devices and label but not on three kinds and three not-sure units (the stored run is older than this Mac's torch and the engine's code; see finding 1 there).
+- Demo Organization holds one clean copy per source; proofs use Test Organization accounts only (tools/proof_guard.py).

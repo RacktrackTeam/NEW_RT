@@ -7,7 +7,7 @@ racktrack-app now has one sign-in: RT-EOS's. A small Node service (the sign-in s
 1. `./auth.sh` - the sign-in service on http://127.0.0.1:3302.
    On the first start it:
    - makes `data/auth/.env` (a new JWT_SECRET, the database path `data/auth/db/auth.db`, the mail outbox `data/auth/outbox`, the engine's addresses as allowed origins),
-   - builds the RT-EOS screens into `rt_eos/client/dist-org` with the base path `/org/`,
+   - builds the RT-EOS screens into `web/org/dist-org` with the base path `/org/`,
    - seeds the accounts below.
    Set `RT_SEED_PASSWORD` before the first start to choose the password. Without it a strong one is generated. Either way it is written to `data/auth/seed-password.txt` (mode 600, never committed, never printed).
 2. `./engine.sh` - the engine on http://127.0.0.1:8700 (set `RACKTRACK_PORT` for another port). It reads `JWT_SECRET` and the database path from `data/auth/.env`.
@@ -29,11 +29,11 @@ All five use the password in `data/auth/seed-password.txt`.
 | manager | site manager | Demo Organization | Hyderabad DC |
 | tech | technician | Demo Organization | Hyderabad DC |
 
-The proof's fixtures (`tools/proof_auth.py --fixtures`, through `node rt_eos/server/scripts/seed-auth.js --org ... --site ... --suffix ...`) add Second Organization (admin2, tech2, orgowner2, manager2; Pune DC) and Test Organization with two sites: Test Hyderabad DC (admint, techt, orgownert, managert) and Test Chennai DC (admin3, tech3, orgowner3, manager3). The Demo Organization holds one stored run of our rack (dm1hyd000001, Hyderabad DC), so the five seeded accounts can walk it. The proof takes out the sign-up and invite accounts it makes when it ends.
+The proof's fixtures (`tools/proof_auth.py --fixtures`, through `node server/auth/scripts/seed-auth.js --org ... --site ... --suffix ...`) add Second Organization (admin2, tech2, orgowner2, manager2; Pune DC) and Test Organization with two sites: Test Hyderabad DC (admint, techt, orgownert, managert) and Test Chennai DC (admin3, tech3, orgowner3, manager3). The Demo Organization holds one stored run of our rack (dm1hyd000001, Hyderabad DC), so the five seeded accounts can walk it. The proof takes out the sign-up and invite accounts it makes when it ends.
 
 ## The five roles
 
-The roles are exactly five. The value stored for each stays RT-EOS's, so its checks keep working; every screen shows the name in the first column. `requireRole` in rt_eos/server/auth.js holds the list (ROLES) and lets an organization owner through wherever an admin may go.
+The roles are exactly five. The value stored for each stays RT-EOS's, so its checks keep working; every screen shows the name in the first column. `requireRole` in server/auth/auth.js holds the list (ROLES) and lets an organization owner through wherever an admin may go.
 
 | Role | Stored as | Who | What they may do |
 |---|---|---|---|
@@ -43,12 +43,12 @@ The roles are exactly five. The value stored for each stays RT-EOS's, so its che
 | Site manager | `site_manager` | Runs one site | The site's people (technicians: invite, password, on or off), the site's runs. |
 | Technician | `member` (shown as Technician everywhere) | Scans racks | Scan, see the runs of their own site, compare with the organization's copies. Never gated by setup. |
 
-Checked by name in: auth.js (requireRole, canManageOrg, canAccessSite, member edit and remove), lib/estate.js, lib/estate_profile.js, lib/rack_access.js, lib/scan_site.js, lib/site_scope.js, lib/tenant.js, routes/home.js, routes/org_data.js; the engine's server/rt_session.py (which runs a person sees); the screens' utils/format.js, utils/setupGuard.js, SitePage.jsx, SetupPage.jsx and mobile/app.js (the Profile entries and the setup redirect).
+Checked by name in: auth.js (requireRole, canManageOrg, canAccessSite, member edit and remove), lib/estate.js, lib/estate_profile.js, lib/rack_access.js, lib/scan_site.js, lib/site_scope.js, lib/tenant.js, routes/home.js, routes/org_data.js; the engine's server/rt_session.py (which runs a person sees); the screens' utils/format.js, utils/setupGuard.js, SitePage.jsx, SetupPage.jsx and web/app/app.js (the Profile entries and the setup redirect).
 
 ## Removed by the owner's order (2 Nov 2026)
 
-- Google, Apple and Facebook sign-in: rt_eos/server/socialAuth.js, lib/oauthProviders.js, their routes in auth_service.js and app.js, the buttons on the engine's sign-in screen and RT-EOS's invite page, AuthCallbackPage, SocialSignIn and utils/socialSession.js, and the provider settings in rt_eos/.env and .env.example. The social_identities and oauth_states tables stay in the schema, empty; no code path offers them. GET /api/auth/providers answers 404.
-- Logical network features: a search of the served code and screens (mobile/, server/, rt_eos/server/auth_service.js and the routes it mounts, rt_eos/client/src) for firmware, marketplace, EVE-NG, Lab, Netdisco and SSH found none (only words like "hasShelf"). The switch_specs lookups stay. RT-EOS's full server (rt_eos/server/app.js) is not started by this app.
+- Google, Apple and Facebook sign-in: server/auth/socialAuth.js, lib/oauthProviders.js, their routes in auth_service.js and app.js, the buttons on the engine's sign-in screen and RT-EOS's invite page, AuthCallbackPage, SocialSignIn and utils/socialSession.js, and the provider settings in rt_eos/.env and .env.example. The social_identities and oauth_states tables stay in the schema, empty; no code path offers them. GET /api/auth/providers answers 404.
+- Logical network features: a search of the served code and screens (mobile/, server/, server/auth/auth_service.js and the routes it mounts, web/org/src) for firmware, marketplace, EVE-NG, Lab, Netdisco and SSH found none (only words like "hasShelf"). The switch_specs lookups stay. RT-EOS's full server (server/auth/app.js) is not started by this app.
 
 ## What a person sees
 
@@ -108,7 +108,7 @@ RT-EOS's own server tests for these parts still pass: smoke, setup, setup mount,
 
 - **Unchanged**: `auth.js` (sign-in, sign-up, codes, refresh, invites, organizations, sites, members, approval), `routes/setup.js`, `routes/home.js`, `routes/org_data.js`, `routes/scan_sites.js`, `lib/estate.js` and the libraries they need, and the React screens for sign-in, setup, sites, people, invites, settings and the console.
 - **Changed**:
-  - `rt_eos/server/auth_service.js` (new): app.js's security headers, CORS, CSRF check, credential rate limit and the routers above. Nothing else is mounted, and the /org/ screens are served from it.
+  - `server/auth/auth_service.js` (new): app.js's security headers, CORS, CSRF check, credential rate limit and the routers above. Nothing else is mounted, and the /org/ screens are served from it.
   - `auth.js`: an outbox mail provider when `RT_MAIL_OUTBOX` is set and no SMTP is configured.
   - `routes/owner_console.js` (new): the logs and dashboard routes moved unchanged out of app.js, so the service can serve the console too. app.js mounts them where they were.
   - `scripts/seed-auth.js` (new, from seed-local-pilot.js): the four accounts, no password in the code.

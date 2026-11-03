@@ -5,13 +5,13 @@
     "n": 0,
     "title": "Confirmed before",
     "outcome": "one",
-    "proof": "Confirmed by admin on 2026-11-02: the rack labelled SP-HYD-RM01-R01-R1 is the record SP-HYD-RM01-R01-R1."
+    "proof": "Confirmed by admint on 3 Nov 2026: the rack labelled SP-HYD-RM01-R01-R1 is the record SP-HYD-RM01-R01-R1."
    },
    {
     "n": 1,
     "title": "Location",
-    "outcome": "one",
-    "proof": "1 rack within 300 m of the phone's position (accuracy 35 m). Taken at Hyderabad DC, 50 m from its position."
+    "outcome": "skipped",
+    "proof": "No position was sent with this run."
    },
    {
     "n": 2,
@@ -71,35 +71,35 @@
      "words": "Cable CBL-PL-002 (A-end, to SP-R2-U1-PP1 port 2 in SP-HYD-RM01-R02-R2) should be on port 2 of SP-R1-U20-ACT; the video shows the port empty."
     },
     {
-     "cable": "CBL-PL-019",
-     "cable_id": "CBL-PL-019",
-     "connection_id": "CONN-PL-019",
-     "row_no": 20,
+     "cable": "CBL-PL-032",
+     "cable_id": "CBL-PL-032",
+     "connection_id": "CONN-PL-032",
+     "row_no": 33,
      "end": "A",
      "device": "SP-R1-U18-SW04 / D3",
      "index": 3,
      "unit": "U18",
      "port": 21,
-     "other": "SP-R2-U1-PP1 port 19 in SP-HYD-RM01-R02-R2",
+     "other": "SP-R2-U1-PP1 port 32 in SP-HYD-RM01-R02-R2",
      "type_record": "Cat6 UTP",
      "colour_record": "Blue",
      "type": "wrong_port",
      "what": "Wrong port",
      "record": "port 21",
      "read": "port 24",
-     "words": "Cable CBL-PL-019 should be on port 21 of SP-R1-U18-SW04; port 21 is empty and port 24 has a cable no row names, so it is likely in port 24."
+     "words": "Cable CBL-PL-032 should be on port 21 of SP-R1-U18-SW04; port 21 is empty and port 24 has a cable no row names, so it is likely in port 24."
     },
     {
      "cable": "CBL-PLANT-L1",
-     "cable_id": "CBL-PL-008",
-     "connection_id": "CONN-PL-008",
-     "row_no": 9,
+     "cable_id": "CBL-PL-020",
+     "connection_id": "CONN-PL-020",
+     "row_no": 21,
      "end": "A",
      "device": "SP-R1-U17-SW03 / D4",
      "index": 4,
      "unit": "U17",
      "port": 9,
-     "other": "SP-R2-U1-PP1 port 8 in SP-HYD-RM01-R02-R2",
+     "other": "SP-R2-U1-PP1 port 20 in SP-HYD-RM01-R02-R2",
      "type_record": "Cat6 UTP",
      "colour_record": "Blue",
      "type": "wrong_port",
@@ -120,13 +120,13 @@
      "words": "Port 23 of SP-R1-U17-SW03 has a cable; no row of the matrix puts one there."
     }
    ],
-   "cables": 19,
-   "ends_checked": 21,
+   "cables": 32,
+   "ends_checked": 34,
    "ends_not_read": 0,
    "ends_elsewhere": 0,
    "rack_id": "SP-HYD-RM01-R01-R1",
    "rack_key": "SP-HYD-RM01-R01-R1",
-   "words": "19 cables of the matrix have an end in SP-HYD-RM01-R01-R1."
+   "words": "32 cables of the matrix have an end in SP-HYD-RM01-R01-R1."
   },
   "find_port": {
    "index": 4,
@@ -134,6 +134,184 @@
    "kind": "Switch",
    "unit": "U17",
    "port": 9,
+   "placed": "crop",
+   "crop_file": "layout_D4_cut.jpg",
+   "crop_box": [
+    437.3,
+    41.9,
+    459.0,
+    57.5
+   ],
+   "port_boxes": {
+    "1": [
+     322.5,
+     36.6,
+     346.5,
+     53.9
+    ],
+    "2": [
+     322.0,
+     66.0,
+     346.1,
+     89.2
+    ],
+    "3": [
+     350.0,
+     38.2,
+     374.1,
+     55.2
+    ],
+    "4": [
+     349.6,
+     67.1,
+     373.8,
+     90.0
+    ],
+    "5": [
+     376.9,
+     40.2,
+     399.7,
+     56.7
+    ],
+    "6": [
+     376.5,
+     68.3,
+     399.5,
+     90.4
+    ],
+    "7": [
+     402.0,
+     42.1,
+     423.9,
+     57.9
+    ],
+    "8": [
+     401.7,
+     69.3,
+     423.7,
+     90.5
+    ],
+    "9": [
+     437.3,
+     41.9,
+     459.0,
+     57.5
+    ],
+    "10": [
+     437.1,
+     68.9,
+     459.0,
+     89.9
+    ],
+    "11": [
+     461.3,
+     41.9,
+     483.4,
+     57.3
+    ],
+    "12": [
+     461.2,
+     68.7,
+     483.5,
+     90.2
+    ],
+    "13": [
+     486.7,
+     41.1,
+     508.7,
+     56.9
+    ],
+    "14": [
+     486.8,
+     68.3,
+     508.4,
+     89.6
+    ],
+    "15": [
+     510.9,
+     37.7,
+     532.4,
+     56.3
+    ],
+    "16": [
+     511.0,
+     67.5,
+     532.5,
+     88.1
+    ],
+    "17": [
+     545.5,
+     39.0,
+     567.8,
+     54.7
+    ],
+    "18": [
+     545.4,
+     65.8,
+     567.3,
+     86.8
+    ],
+    "19": [
+     570.4,
+     38.0,
+     593.0,
+     53.7
+    ],
+    "20": [
+     569.8,
+     64.9,
+     592.8,
+     86.6
+    ],
+    "21": [
+     596.3,
+     37.1,
+     618.7,
+     53.1
+    ],
+    "22": [
+     596.1,
+     64.1,
+     618.4,
+     85.5
+    ],
+    "23": [
+     620.9,
+     34.5,
+     642.0,
+     52.7
+    ],
+    "24": [
+     620.4,
+     63.1,
+     641.3,
+     83.2
+    ],
+    "25": [
+     665.1,
+     63.0,
+     686.8,
+     78.0
+    ],
+    "26": [
+     688.4,
+     62.0,
+     711.3,
+     77.8
+    ],
+    "27": [
+     713.0,
+     61.9,
+     737.4,
+     78.0
+    ],
+    "28": [
+     739.0,
+     62.0,
+     762.6,
+     78.8
+    ]
+   },
    "found": true,
    "read": {
     "n": 9,
@@ -198,7 +376,7 @@
     "end": "A",
     "other": {
      "device": "SP-R2-U1-PP1",
-     "port": "8",
+     "port": "20",
      "rack": "SP-HYD-RM01-R02-R2"
     },
     "type": "Cat6 UTP",
@@ -216,20 +394,9 @@
     974.3,
     599.0
    ],
-   "picture": "/api/video/91af02c09bbc/find-port.jpg?device=4&port=9"
+   "picture": "/api/video/fx1hyd000001/find-port.jpg?device=4&port=9"
   },
-  "worklist_count": 32,
-  "physical_counts": {
-   "ports": 336,
-   "connected": 239,
-   "empty": 21,
-   "unknown": 76,
-   "cables_by_color": {
-    "Blue": 1,
-    "White": 36,
-    "Black": 4
-   }
-  },
+  "connections": 10,
   "sfp": [
    {
     "index": 4,
@@ -241,7 +408,7 @@
     "suggestion": {
      "optic": "SFP 1 Gbps: 1000BASE-SX (multimode) or 1000BASE-LX (single mode)",
      "cable": "Cat6 UTP",
-     "note": "The sheet lists Cat6 UTP for this device, so the optic follows that fibre."
+     "note": "The workbook lists Cat6 UTP for this device, so the optic follows that fibre."
     }
    },
    {
@@ -253,8 +420,8 @@
     "count": 4,
     "suggestion": {
      "optic": "SFP 1 Gbps: 1000BASE-SX (multimode) or 1000BASE-LX (single mode)",
-     "cable": "LC-LC duplex, OM3 or OM4 multimode (up to 300 m at 10G); LC-LC duplex, OS2 single mode (up to 10 km)",
-     "note": "No cable type for this device in the sheet."
+     "cable": "LC-LC duplex, OM3 or OM4 multimode; LC-LC duplex, OS2 single mode (up to 10 km)",
+     "note": "The workbook names no cable type for this device."
     }
    },
    {
@@ -266,43 +433,27 @@
     "count": 4,
     "suggestion": {
      "optic": "SFP 1 Gbps: 1000BASE-SX (multimode) or 1000BASE-LX (single mode)",
-     "cable": "LC-LC duplex, OM3 or OM4 multimode (up to 300 m at 10G); LC-LC duplex, OS2 single mode (up to 10 km)",
-     "note": "No cable type for this device in the sheet."
+     "cable": "LC-LC duplex, OM3 or OM4 multimode; LC-LC duplex, OS2 single mode (up to 10 km)",
+     "note": "The workbook names no cable type for this device."
     }
    }
   ],
-  "topology_cables": 19,
   "az": {
    "counts": {
     "matched": 0,
-    "wrongPort": 1,
+    "wrongPort": 2,
     "notInSheet": 0,
-    "notFound": 16,
-    "missingCable": 2
+    "notFound": 29,
+    "missingCable": 1
    },
    "accuracy": {
     "labelsRead": 1,
-    "labelsExpected": 19,
-    "readRate": 0.053
+    "labelsExpected": 32,
+    "readRate": 0.031
    },
-   "id": "289849ff6f",
-   "csv_lines": 39
+   "id": "f9c57a5376",
+   "csv_lines": 65
   }
  },
- "screen_errors": [
-  "1280: 401 2/api/me",
-  "1280: 404 2/api/video/91af02c09bbc/crop/5/2",
-  "1280: 404 2/api/video/91af02c09bbc/crop/5/1",
-  "1280: 404 2/api/video/91af02c09bbc/crop/5/2?r=1793616216426",
-  "1280: 404 2/api/video/91af02c09bbc/crop/5/1?r=1793616216439",
-  "1280: 404 2/api/video/91af02c09bbc/crop/5/1",
-  "1280: 404 2/api/video/91af02c09bbc/crop/5/2",
-  "1280: 404 2/api/video/91af02c09bbc/crop/5/2?r=1793616217925",
-  "1280: 404 2/api/video/91af02c09bbc/crop/5/1?r=1793616217939",
-  "1280: 404 2/api/video/91af02c09bbc/crop/5/1?r=1793616218463",
-  "1280: 404 2/api/video/91af02c09bbc/crop/5/2?r=1793616218476",
-  "1280: 404 2/api/video/91af02c09bbc/crop/5/1?r=1793616219963",
-  "1280: 404 2/api/video/91af02c09bbc/crop/5/2?r=1793616219976",
-  "400: 401 2/api/me"
- ]
+ "screen_errors": []
 }

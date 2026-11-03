@@ -29,7 +29,7 @@ def main():
             def shot(name):
                 pg.wait_for_timeout(500); pg.screenshot(path=str(OUT / f"compare_{name}_{width}.png"), full_page=True)
             vis = lambda s: pg.is_visible(s)
-            if vis("#df-top > *") or vis("#diff-top > *") or vis("#sec-tools") or vis("#cmp-menu") or not vis("#cmp-btn"):
+            if vis("#df-top > *") or vis("#diff-top > *") or vis("#cmp-menu") or not vis("#cmp-btn"):
                 bad.append(f"{width}: the report is not clean before the button")
             shot("1_before")
             pg.click("#cmp-btn"); pg.wait_for_selector("#cmp-menu", state="visible"); shot("2_dropdown")
@@ -38,7 +38,8 @@ def main():
             if vis(".idcard"): bad.append(f"{width}: confirm panel still shown after Confirm")
             shot("4_drift")
             pg.click('[data-dfmode="detailed"]'); pg.wait_for_timeout(300)
-            pg.click("#more-link"); pg.wait_for_selector("#res-tools .grow", timeout=5000)
+            if not vis("#diff-top .card"): bad.append(f"{width}: the detailed drift is not shown")
+            shot("5_detailed")
             pg.close()
     print("PROBLEMS:", bad or "none"); sys.exit(1 if bad else 0)
 
