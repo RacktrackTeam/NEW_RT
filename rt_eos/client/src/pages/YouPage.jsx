@@ -44,7 +44,7 @@ export function placesFor(role, { siteName, orgName, dataset } = {}) {
     ['Help', '/help', 'help', null],
     ['Contact support', '/contact', 'mail', null],
   ];
-  return ORG_ONLY ? [work] : [work, help];      // the /org/ build: help and contact are the app's
+  return (ORG_ONLY ? [work] : [work, help]).filter((g) => g.length);      // the /org/ build: help and contact are the app's; a technician has no row there
 }
 
 /** The items behind the three dots: [label, key]. The same for every role. */

@@ -63,7 +63,9 @@
 
   // ------------------------------------------------------------ the tools
   var VIEW = {};
-  function nameBar(v) { var n = $('rnav'); if (n && v) n.dataset.rack = (v.rack_id && v.rack_id.id) || v.title || ''; return v; }
+  // the rack's name in the tab bar and, on a phone, under the header title, on every tool screen as on the result tabs (finding 27)
+  function nameBar(v) { var n = $('rnav'), r = v ? ((v.rack_id && v.rack_id.id) || v.title || '') : ''; if (n && v) n.dataset.rack = r;
+    var t = $('topsub'); if (t && v && /^#tools\//.test(location.hash)) { t.textContent = r; t.hidden = !r; } return v; }
   function view(run) { return VIEW[run] ? Promise.resolve(nameBar(VIEW[run])) : api('/api/video/' + encodeURIComponent(run) + '/view').then(function (v) { VIEW[run] = v; return nameBar(v); }); }
   function unitOf(d) { var a = parseInt(String(d.top).replace(/\D/g, ''), 10), b = parseInt(String(d.bottom).replace(/\D/g, ''), 10); return a === b ? 'U' + a : 'U' + Math.min(a, b) + '-' + Math.max(a, b); }
   function devLabel(d) { var L = d.layout || {}; return 'D' + d.index + ' · ' + unitOf(d) + ' · ' + (d.kind || 'Not sure') + (L.vendor ? ' · ' + L.vendor + (L.model ? ' ' + L.model : '') : ''); }
@@ -130,10 +132,13 @@
           if (r.placed === 'crop') pic = fig(fileUrl(run, r.crop_file), Object.keys(r.port_boxes).map(function (k) { return { box: r.port_boxes[k], n: k, cls: (String(k) === String(r.port) ? 'hl' : ''), tip: 'Port ' + k }; }), 'fx-find');
           else pic = '<figure class="fx-fig"><img src="' + esc(r.picture) + '" alt=""></figure>';
           var note = r.placed ? 'Tap another port on the picture to look at it.' : 'Port ' + r.port + ' could not be placed on the picture: the ports of this device were counted, not located.';
-          var kv = [['Port type', p.type ? String(p.type).toUpperCase() : null], ['State', stateWord(p.state)], ['Cable', c ? c.cable : null], ['Label', c ? c.label : null], ['Other end', c ? [c.other.device, c.other.port ? 'port ' + c.other.port : ''].filter(Boolean).join(' ') : null], ['Cable type', c ? c.type : null], ['Colour read', p.colour], ['Connector', p.connector]];
+          // what is missing says why: the cable, label, other end and cable type come from the record; the colour and connector from the video (finding 28)
+          var kv = [['Port type', p.type ? String(p.type).toUpperCase() : null, 'not read'], ['State', stateWord(p.state), 'not read'], ['Cable', c ? c.cable : null, 'not in the record'], ['Label', c ? c.label : null, 'not in the record'],
+            ['Other end', c ? [c.other.device, c.other.port ? 'port ' + c.other.port : ''].filter(Boolean).join(' ') : null, 'not in the record'], ['Cable type', c ? c.type : null, 'not in the record'], ['Colour read', p.colour, 'not read'],
+            ['Connector', p.connector ? String(p.connector).replace(/^RJ-?45$/i, 'RJ45') : null, 'not read']];
           out.innerHTML = '<div class="fx-two"><div class="fx-left">' + pic + '<p class="fx-note">' + esc(note) + '</p></div><div class="fx-right fx-in"><span class="fx-eye">' + esc(r.device) + ' · ' + esc(r.unit) + '</span>'
             + (r.found ? '<h2>Port ' + r.port + '</h2><div class="fx-pills">' + pill(stateWord(p.state), stCls(p.state)) + (r.kind ? pill(r.kind) : '') + '</div>' : '<h2>Port ' + r.port + ' was not read</h2><p class="muted">Ports read: ' + esc((r.ports || []).join(', ') || 'none') + '.</p>')
-            + '<dl class="fx-kv">' + kv.map(function (x) { return '<dt>' + x[0] + '</dt><dd>' + (x[1] ? esc(x[1]) : '<em>none</em>') + '</dd>'; }).join('') + '</dl></div></div>';
+            + '<dl class="fx-kv">' + kv.map(function (x) { return '<dt>' + x[0] + '</dt><dd>' + (x[1] ? esc(x[1]) : '<em>' + x[2] + '</em>') + '</dd>'; }).join('') + '</dl></div></div>';
           fitFigs(out);
         }).catch(function (e) { if (my === seq) out.innerHTML = '<p class="fx-err">' + esc(e.message) + '. Try another port.</p>'; });
       }
@@ -154,6 +159,7 @@
   }
   // ---- Connections: each device's crop with its ports coloured by state, the problems and a port card beside it
   function connections(run) {
+    view(run).catch(function () { return null; });                      // the rack's name in the header
     api('/api/video/' + encodeURIComponent(run) + '/connections').then(function (r) {
       root().innerHTML = shell('Connections', run, '<p class="fx-key">' + pill('Cable plugged in', 'on') + pill('Empty', 'off') + pill('Not sure', 'na') + '</p>'
         + (r.devices.length ? '<div class="fx-grid">' + r.devices.map(function (d, i) {

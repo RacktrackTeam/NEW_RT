@@ -77,7 +77,10 @@ def repack(d, out):
             if not src.is_file():
                 continue
             data = src.read_bytes()
-            z.writestr(p, data)
+            zi = zipfile.ZipInfo(p, date_time=(2026, 1, 1, 0, 0, 0))
+            zi.external_attr = (src.stat().st_mode & 0xFFFF) << 16          # keep the executable bit (playwright's driver, torch's tools)
+            zi.compress_type = zipfile.ZIP_DEFLATED
+            z.writestr(zi, data)
             rows.append((p, "sha256=" + base64.urlsafe_b64encode(hashlib.sha256(data).digest()).rstrip(b"=").decode(), str(len(data))))
         buf = io.StringIO()
         csv.writer(buf, lineterminator="\n").writerows(rows + [(f"{info.name}/RECORD", "", "")])
@@ -100,7 +103,7 @@ def main():
     if not (VENV / "bin" / "python").exists():
         subprocess.run([sys.executable, "-m", "venv", str(VENV)], check=True)
     py = str(VENV / "bin" / "python")
-    subprocess.run([py, "-m", "pip", "install", "--quiet", "--no-index", "--no-deps", *map(str, wheels)], check=True)
+    subprocess.run([py, "-m", "pip", "install", "--quiet", "--no-index", "--no-deps", "--force-reinstall", *map(str, wheels)], check=True)
     subprocess.run([py, "-m", "pip", "check"], check=False)
     with open(ROOT / "_cache" / "venv-engine.txt", "w") as f:
         subprocess.run([py, "-m", "pip", "freeze"], stdout=f, check=True)

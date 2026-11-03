@@ -15,9 +15,9 @@
 <link rel="preload" href="/app/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/app/app.css?v=127">
 <link rel="stylesheet" href="/app/rt/rt-topology.css?v=12">
-<link rel="stylesheet" href="/app/flow.css?v=17">
+<link rel="stylesheet" href="/app/flow.css?v=18">
 <link rel="stylesheet" href="/app/features.css?v=5"><!-- wt/features -->
-<link rel="stylesheet" href="/app/standard.css?v=3">
+<link rel="stylesheet" href="/app/standard.css?v=5">
 <style>
 /* the Drift tab: the database the run is checked against, the matched record, the differences */
 #df-top { display:flex; flex-direction:column; gap:12px; width:100%; }
@@ -232,9 +232,9 @@
         <p class="muted small" id="run-leave">You can leave this page. The reading carries on, and the rack is under Home when you come back.</p>
         <p class="err" id="job-err" hidden></p>
         <div class="runact">
-          <a class="btn primary big" id="job-open" href="#" hidden>Open the result</a>
-          <a class="btn big" id="job-retry" href="#sweep" hidden>Try again</a>
           <button class="btn danger" id="job-del" type="button" hidden><svg class="ic"><use href="#i-trash"/></svg><span>Remove this run</span></button>
+          <a class="btn primary big" id="job-retry" href="#sweep" hidden>Try again</a>
+          <a class="btn primary big" id="job-open" href="#" hidden>Open the result</a>
         </div>
       </div>
     </div>
@@ -260,7 +260,7 @@
       <div id="dv-one" hidden>
         <div class="card onecard" id="res-dev"></div>
         <aside class="webside" id="dev-side"></aside>
-        <div class="oneacts"><button class="btn primary big" id="dv-another" type="button">Pick another device</button><button class="btn ghost big" id="dv-rack" type="button">Back to the rack</button></div>
+        <div class="oneacts"><button class="btn ghost big" id="dv-rack" type="button">Back to the rack</button><button class="btn primary big" id="dv-another" type="button">Pick another device</button></div>
       </div>
     </div>
     <div class="rpart" id="res-layout">
@@ -366,7 +366,7 @@
 <div id="lb" hidden><img id="lbimg" alt=""><span>tap to close</span></div>
 <script src="/app/topology.js?v=1"></script>
 <script src="/app/rt/rt-topology.js?v=12" defer></script>
-<script src="/app/app.js?v=160"></script>
-<script src="/app/features.js?v=7"></script><!-- wt/features -->
+<script src="/app/app.js?v=162"></script>
+<script src="/app/features.js?v=8"></script><!-- wt/features -->
 </body>
 </html>

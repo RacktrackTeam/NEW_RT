@@ -301,7 +301,8 @@ def _summary(res):
         fitted = sum(1 for d in devs if (d.get("layout") or {}).get("ports") or (d.get("closeup") or {}).get("ports"))
         return {"units": res["ladder"]["units"], "occupied": s["occupied"], "free": s["free"], "uncertain": s["uncertain"],
                 "devices": len(devs), "named": kinds, "layouts": fitted, "warnings": len((res.get("stitch") or {}).get("warnings") or [])}
-    except Exception:
+    except Exception as ex:  # noqa: BLE001  a result without its summary still opens; the reason goes to the log
+        print(f"[racktrack] run summary not made: {type(ex).__name__}: {ex}", file=sys.stderr)
         return None
 
 
@@ -319,7 +320,8 @@ def load_runs():
         d = f.parent
         try:
             j = json.loads(f.read_text())
-        except ValueError:
+        except ValueError as ex:
+            print(f"[racktrack] run at {f.parent} left out: its status.json does not read ({ex})", file=sys.stderr)
             continue
         vf = pathlib.Path(j["video_file"]) if j.get("video_file") else None
         if vf is not None and ROOT not in vf.resolve().parents:            # a path into another folder (a run copied in): its file in this run folder instead
@@ -334,8 +336,8 @@ def load_runs():
             try:
                 j["result"] = json.loads((d / "result.json").read_text())
                 j["summary"] = _summary(j["result"])                          # from the result itself, so an edit after the run counts
-            except ValueError:
-                pass
+            except ValueError as ex:
+                print(f"[racktrack] run {j.get('id')}: result.json does not read ({ex}); it shows without its result", file=sys.stderr)
         JOBS[j["id"]] = j
 
 
@@ -613,8 +615,8 @@ async def _start_video(request, video, sample, capture, stride, lat, lng, accura
         if lat is None and (td / "position.json").is_file():          # wt/features: the position the camera guide sent with the take
             try:
                 q = json.loads((td / "position.json").read_text()); lat, lng, accuracy = q.get("lat"), q.get("lng"), q.get("accuracy")
-            except ValueError:
-                pass
+            except ValueError as ex:
+                print(f"[racktrack] capture position not read ({ex}); the run has no position", file=sys.stderr)
     elif sample:
         smp = SAMPLES.get(sample)
         if smp is None or not smp["video"].exists():
@@ -1086,7 +1088,8 @@ def api_specs(vendor: str = "", model: str = ""):
     key = re.sub(r"[^a-z0-9]", "", (vendor + " " + model).lower())
     try:
         cache = json.loads(SPECS_CACHE.read_text()) if SPECS_CACHE.exists() else {}
-    except ValueError:
+    except ValueError as ex:
+        print(f"[racktrack] specs cache does not read ({ex}); starting an empty one", file=sys.stderr)
         cache = {}
     if key in cache:
         hit = cache[key]

@@ -3,7 +3,7 @@
 @media (min-width:1000px) { :root { --std-gutter:32px; } }
 
 /* one gutter, full width, one gap between blocks */
-body.signed main { padding-left:var(--std-gutter) !important; padding-right:var(--std-gutter) !important; }
+body.signed main { width:100% !important; max-width:none !important; box-sizing:border-box; padding-left:var(--std-gutter) !important; padding-right:var(--std-gutter) !important; }   /* one gutter each side: an older 90 % / 95 % width left 83 px on the right */
 body.signed .screen { max-width:none !important; gap:var(--s3) !important; }
 
 /* page header: title left, primary action right on the same line, the lead under the title */
@@ -48,3 +48,57 @@ table td, .dftable td { font-size:14px; padding:12px var(--s2) !important; borde
 
 /* Side bar: the role and the site each on a line of their own, never broken mid-way (verify pass 2, finding 9) */
 .side .brand small span { display: block; white-space: nowrap; line-height: 1.35; }
+
+/* Report > Devices, top to bottom, on a phone: one row per device as a small grid (unit, then the device and its make), so no
+   word is broken mid-way and no unit range is cut (verify pass 2, finding 22) */
+@media (max-width:700px) {
+  .rptable thead { display:none; }
+  .rptable, .rptable tbody { display:block; width:100%; }
+  .rptable tr { display:grid; grid-template-columns:64px minmax(0, 1fr); column-gap:var(--s1); row-gap:4px; padding:12px var(--s2); border-top:1px solid var(--std-line); }
+  .rptable tr:first-child { border-top:0; }
+  .rptable td { display:block; padding:0 !important; border:0 !important; text-align:left !important; word-break:normal !important; overflow-wrap:break-word; white-space:normal; }
+  .rptable td:nth-child(3) { grid-column:2; }
+  .rptable td .kd { display:inline; margin-left:6px; }
+  .rptable td.mono { white-space:nowrap; }
+}
+
+/* Database copies on a phone: the source name never broken mid-word, the version and the date each on one line (finding 23) */
+.cptable td b { word-break:normal !important; overflow-wrap:normal !important; hyphens:none; }
+.cptable .cpwhen > span { display:block; white-space:nowrap; }
+
+/* The primary action at the right of its block, the secondary ones before it (finding 24) */
+.scanfoot { display:flex; justify-content:flex-end; }
+.runact { justify-content:flex-end; }
+.runact .btn { flex:0 0 auto !important; }
+.oneacts { display:flex; justify-content:flex-end; gap:var(--s1); flex-wrap:wrap; }
+.up.slim { display:flex; flex-direction:column; align-items:flex-end; }
+@media (max-width:999px) { .phead > .btn, .phead > a.btn { width:auto !important; flex:0 0 auto !important; } }
+
+/* Pickers on the tool screens stay inside the 16 px gutter on a phone (finding 29) */
+.fx-page select, .fx-page input, .fx-page label { box-sizing:border-box; max-width:100%; }
+
+/* Rack tab, the device list beside the picture: the kind on its own line under the device number, never cut (finding 25) */
+.sidelist .srow { display:grid !important; grid-template-columns:62px minmax(0, 1fr) auto; column-gap:var(--s1); row-gap:2px; align-items:center; }
+.sidelist .srow .iu { grid-column:1; grid-row:1 / span 2; }
+.sidelist .srow b { grid-column:2; grid-row:1; }
+.sidelist .srow .sk { grid-column:2; grid-row:2; white-space:normal !important; overflow:visible !important; text-overflow:clip !important; }
+.sidelist .srow .sp { grid-column:3; grid-row:1 / span 2; }
+
+/* Confirm panel, the rack label crop on a phone: shown at a readable height, scrolling sideways, not a thin strip (finding 26) */
+@media (max-width:700px) {
+  .lblstrip { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .lblstrip img { height:96px !important; width:auto !important; max-width:none !important; display:block; }
+}
+
+/* Sign in: Forgot password and Contact us centred under the form at every width (finding 37) */
+.auth.signin .si-links { width:100%; align-self:stretch; box-sizing:border-box; }
+
+/* Devices list: the state pill under the title, so a long make and model read off a panel has the row's width and is never
+   broken one letter per line (verify pass 2 follow-up on finding 8) */
+#dv-list .prow { display:grid !important; grid-template-columns:64px minmax(0, 1fr) 16px; column-gap:var(--s2); row-gap:4px; align-items:center; }
+#dv-list .prow .pthumb { grid-column:1; grid-row:1 / span 2; }
+#dv-list .prow .pt { grid-column:2; grid-row:1; }
+#dv-list .prow .pt b { overflow-wrap:anywhere; word-break:normal; }
+#dv-list .prow .stat { grid-column:2; grid-row:2; justify-self:start; }
+#dv-list .prow .arr { grid-column:3; grid-row:1 / span 2; }
+#dv-list .prow .iu { grid-column:1; grid-row:1 / span 2; }
