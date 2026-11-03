@@ -90,7 +90,7 @@ export default function YouPage() {
   const fileRef = useRef(null);
   const role = user?.role;
   const name = personName(user?.name || user?.displayName || user?.username);
-  const { data: matrix } = useJSON(isManager(role) ? '/api/matrix' : null);
+  const { data: matrix } = useJSON(isManager(role) && !ORG_ONLY ? '/api/matrix' : null);   // the /org/ build has no Excel dataset page, so it does not ask for one
   const orgName = user?.organization?.name || (role === 'owner' ? 'Every organization' : '');
   const siteName = user?.tenant?.name || (isAdmin(role) ? 'Every site' : '');
   const line = [roleWord(role), orgName, siteName].filter(Boolean).join(', ');
