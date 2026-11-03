@@ -52,7 +52,7 @@ Checked by name in: auth.js (requireRole, canManageOrg, canAccessSite, member ed
 
 ## What a person sees
 
-- **Sign in** (engine app): email or username and password, Forgot password? (a code by mail, then a new password), Create an organization (opens RT-EOS's own sign-up at /org/login). There is no Google, Apple or Facebook sign-in (removed, see below).
+- **Sign in** (engine app): email or username and password, Forgot password? (a code by mail, then a new password), Contact us (the message is kept in data/contact, nothing is sent; RackTrack creates organizations, there is no sign-up on this screen). There is no Google, Apple or Facebook sign-in (removed, see below).
 - **Invite link**: `/app/#invite/<code>` shows the organization and site and asks for a username and password. RT-EOS's own link `/org/invite/<code>` works too.
 - **Waiting**: someone whose organization is not yet approved sees "Waiting for approval". The engine answers 403 to every call until the platform owner approves.
 - **First-run setup**: an organization admin whose organization is not set up is sent to RT-EOS's four-step setup popup at /org/setup. A technician is never sent there (RT-EOS decides this, as before).
