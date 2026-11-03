@@ -3,10 +3,10 @@
 import { createRequire } from 'node:module';
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-const RT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../rt_eos/client');   // the RT-EOS client copied into this folder (its node_modules link into _cache)
+const RT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../web/org');   // the organization pages (RT-EOS's client) in this folder (its node_modules link into _cache)
 const require = createRequire(path.join(RT, 'package.json'));
 const esbuild = require('esbuild');
-const here = path.dirname(new URL(import.meta.url).pathname), out = path.resolve(here, '../../mobile/rt');
+const here = path.dirname(new URL(import.meta.url).pathname), out = path.resolve(here, '../../web/app/rt');
 await esbuild.build({
   entryPoints: [path.join(here, 'entry.jsx')], bundle: true, minify: true, format: 'iife', target: 'es2019', outfile: path.join(out, 'rt-topology.js'),
   jsx: 'automatic', loader: { '.module.css': 'local-css', '.css': 'css', '.woff2': 'empty', '.woff': 'empty', '.png': 'dataurl', '.svg': 'dataurl', '.jpg': 'dataurl' },

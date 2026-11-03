@@ -6,7 +6,7 @@ service (./auth.sh, server/auth/auth_service.js).
 What it does
   sign-in        none of its own: every route but the open ones needs the RT-EOS session (server/rt_session.py), and the
                  writes check the role (ROLE_RULES, docs/AUTH.md)
-  sweeps         a rack video (an upload, a camera-guide take, or the stored sample) runs the 15 steps in a background thread;
+  sweeps         a rack video (an upload or a camera-guide take) runs the 15 steps in a background thread;
                  every run lives in data/runs/<org>/<site>/<id>/ (video, rack picture, result.json, report/) and survives a restart
   close-ups      a close-up of one device is read and kept with its run; the report is rebuilt
   databases      the organization's Excel, NetBox and ServiceNow CMDB copies, the rack match and the drift (src/source_db.py)
@@ -64,9 +64,6 @@ HOST = os.environ.get("RACKTRACK_HOST", "127.0.0.1")           # this machine on
 MOBILE = ROOT / "web" / "app"
 DATA = pathlib.Path(os.environ.get("RACKTRACK_DATA") or ROOT / "data")   # runtime data (runs, copies, checks, uploads); a test engine sets its own
 RUNS = pathlib.Path(os.environ.get("RACKTRACK_RUNS") or DATA / "runs"); RUNS.mkdir(parents=True, exist_ok=True)
-SAMPLE_DIR = ROOT / "data" / "video"
-SAMPLES = {"vdo1": {"title": "Demo rack (stored run)", "video": SAMPLE_DIR / "vdo1.mp4", "truth": ROOT / "samples" / "ground_truth" / "SP-HYD-RM01-R01-R1" / "netbox_devices.csv",
-                    "run": ROOT / "results" / "video_experiment" / "vdo1", "report": ROOT / "reports" / "video" / "vdo1"}}
 MAX_PHOTO = 25 * 1024 * 1024
 MAX_VIDEO = 600 * 1024 * 1024
 DISPLAY_MAX = 2000
@@ -164,7 +161,6 @@ ROLE_RULES = (
     (("POST",), re.compile(r"^/api/sources/(?:excel|excel/import|[a-z]+/import)/?$"), ADMINS, 403, "Only an organization admin can copy a database in."),
     (("DELETE",), re.compile(r"^/api/sources/copies/[^/]+/?$"), ADMINS, 403, "Only an organization admin can remove a database copy."),
     (("DELETE",), re.compile(r"^/api/video/[A-Za-z0-9_-]+/?$"), ADMINS | {"site_manager"}, 403, "Only a site manager or an organization admin can remove a scan."),
-    (None, re.compile(r"^/(?:racks-report/|api/racks-report/|models-overview/?$)"), frozenset({"owner"}), 404, "Not found."),
 )
 
 
@@ -341,17 +337,7 @@ def load_runs():
 
 
 def job_or_none(job):
-    """A run, or the stored demo run ("example-<name>") as a finished one."""
-    if job.startswith("example-"):
-        me = rt_session.current()
-        if me is not None and not rt_session.can_see(me, {"id": job}):     # the stored demo is the platform owner's only
-            return None
-        name = job[len("example-"):]; smp = SAMPLES.get(name)
-        if smp is None or not (smp["run"] / "result.json").exists():
-            return None
-        d = smp["run"]
-        return {"id": job, "status": "done", "progress": "done", "error": "", "dir": d, "title": smp["title"], "name": name,
-                "result": json.loads((d / "result.json").read_text()), "rack_path": d / "rack.png", "video_path": smp["video"], "report": smp["report"]}
+    """A run the signed-in person may open, or None."""
     j, me = JOBS.get(job), rt_session.current()          # a background thread has no principal and sees every run
     return j if j is None or me is None or rt_session.can_see(me, j) else None     # a stranger's run is not there
 
@@ -426,7 +412,7 @@ def _rack_label_thread(job):
 
 def start_rack_label(job):
     j = job_or_none(job)
-    if j is None or job in RACK_LABEL_RUNNING or job.startswith("example-") or rack_label_of(j) is not None:
+    if j is None or job in RACK_LABEL_RUNNING or rack_label_of(j) is not None:
         return
     RACK_LABEL_RUNNING.add(job)
     threading.Thread(target=_rack_label_thread, args=(job,), daemon=True).start()
@@ -447,7 +433,7 @@ def rack_id_options(j):
     me = rt_session.current()
     # "here" is the run's own organization and site, and only runs the signed-in person may open: one organization never
     # sees another's rack ids (rule 11)
-    here = [o for o in JOBS.values() if o is not j and not o["id"].startswith("example-") and str(o.get("org")) == str(j.get("org"))
+    here = [o for o in JOBS.values() if o is not j and str(o.get("org")) == str(j.get("org"))
             and str(o.get("site")) == str(j.get("site")) and (me is None or rt_session.can_see(me, o))]
     for o in sorted(here, key=lambda x: x.get("started") or "", reverse=True):
         rid = (o.get("rack_id") or {}).get("id")
@@ -563,7 +549,7 @@ def _same_video_run(path):
         for chunk in iter(lambda: fh.read(1 << 20), b""):
             h.update(chunk)
     want = h.hexdigest()
-    done = [o for o in sorted(JOBS.values(), key=lambda x: x.get("started") or "", reverse=True) if o.get("status") == "done" and o.get("result") is not None and not o["id"].startswith("example-")
+    done = [o for o in sorted(JOBS.values(), key=lambda x: x.get("started") or "", reverse=True) if o.get("status") == "done" and o.get("result") is not None
             and rt_session.can_see(rt_session.current(), o)]                       # only the runs this person may open
     for o in done:
         if _video_md5(o) == want:
@@ -577,10 +563,10 @@ def _same_video_run(path):
 
 
 @app.post("/api/video")
-async def api_video(request: Request, video: UploadFile | None = File(None), sample: str | None = Form(None), capture: str | None = Form(None),
+async def api_video(request: Request, video: UploadFile | None = File(None), capture: str | None = Form(None),
                     stride: int = Form(rack_video.STRIDE), lat: float | None = Form(None), lng: float | None = Form(None),
                     accuracy: float | None = Form(None)):   # wt/features: the phone's accuracy in metres (location.js)
-    """Start a sweep: a video upload, a take from the camera guide (capture = "<source>/<folder>") or the stored sample."""
+    """Start a sweep: a video upload or a take from the camera guide (capture = "<source>/<folder>")."""
     with STATE_LOCK:                                   # one run at a time, stitching included (the model lock covers only the model part)
         busy = MODEL_LOCK.locked() or any(v.get("status") == "running" and not v.get("partial") for v in JOBS.values()) or RUN_STARTING["n"]
         if not busy:
@@ -588,7 +574,7 @@ async def api_video(request: Request, video: UploadFile | None = File(None), sam
     if busy:
         raise HTTPException(409, "Another rack is being read. Wait for it to finish; one runs at a time on this server.")
     try:
-        return await _start_video(request, video, sample, capture, stride, lat, lng, accuracy)
+        return await _start_video(request, video, capture, stride, lat, lng, accuracy)
     finally:
         RUN_STARTING["n"] = 0
 
@@ -596,9 +582,9 @@ async def api_video(request: Request, video: UploadFile | None = File(None), sam
 RUN_STARTING = {"n": 0}                    # a run being set up (its upload still arriving), so a second one waits
 
 
-async def _start_video(request, video, sample, capture, stride, lat, lng, accuracy):
+async def _start_video(request, video, capture, stride, lat, lng, accuracy):
     who = rt_session.name(request)
-    job = hashlib.sha1(f"{datetime.datetime.now().isoformat()}{who}{sample}".encode()).hexdigest()[:12]
+    job = hashlib.sha1(f"{datetime.datetime.now().isoformat()}{who}{secrets.token_hex(4)}".encode()).hexdigest()[:12]
     me = rt_session.current()
     d = rt_session.run_dir(RUNS, job, me); d.mkdir(parents=True, exist_ok=True)      # data/runs/<org>/<site>/<run>
     truth_path, title, name, from_guide = None, None, None, False
@@ -616,11 +602,6 @@ async def _start_video(request, video, sample, capture, stride, lat, lng, accura
                 q = json.loads((td / "position.json").read_text()); lat, lng, accuracy = q.get("lat"), q.get("lng"), q.get("accuracy")
             except ValueError as ex:
                 print(f"[racktrack] capture position not read ({ex}); the run has no position", file=sys.stderr)
-    elif sample:
-        smp = SAMPLES.get(sample)
-        if smp is None or not smp["video"].exists():
-            raise HTTPException(404, "That sample is not on this server.")
-        video_path, truth_path, title, name = smp["video"], smp["truth"], f"Demo rack, new run by {who}", sample
     elif video is not None and video.filename:
         video_path = d / ("video" + (pathlib.Path(video.filename).suffix.lower() or ".mp4"))
         video_path.write_bytes(await video.read(MAX_VIDEO + 1))
@@ -631,7 +612,7 @@ async def _start_video(request, video, sample, capture, stride, lat, lng, accura
             return {"job": same, "reused": True}
         title, name = f"{who}'s rack, {_when_words()}", "upload"
     else:
-        raise HTTPException(400, "Send a rack video, a take, or ask for the sample.")
+        raise HTTPException(400, "Send a rack video or a take.")
     j = {"id": job, "status": "running", "progress": "queued", "result": None, "dir": d, "error": "", "started": datetime.datetime.now().isoformat(timespec="seconds"),
          "title": title, "name": name, "from_guide": from_guide, "stride": max(1, min(30, int(stride))), "by": who,
          "position": _features_position(lat, lng, accuracy),   # the phone's position when the scan started (optional); it only narrows the racks
@@ -648,7 +629,7 @@ def api_video_history():
     """Every run on this server, newest first."""
     orgs, sites = rt_session.place_names()
     rows = [dict(public_job(j), **_rack_state(j), org=j.get("org"), site=j.get("site"), org_name=orgs.get(str(j.get("org"))), site_name=sites.get(str(j.get("site"))))
-            for j in JOBS.values() if rt_session.can_see(rt_session.current(), j)]       # a rack is one rack within its organization and site       # the stored demo is not listed (user, 2026-10-27); it stays reachable as example-<name>
+            for j in JOBS.values() if rt_session.can_see(rt_session.current(), j)]       # a rack is one rack within its organization and site
     rows.sort(key=lambda x: x["started"] or "", reverse=True)
     return rows
 
@@ -753,7 +734,7 @@ def _kind_of(d, when=None):
 def api_video_delete(job: str):
     """Remove a run and its folder (not the stored demo run, not a run that is going)."""
     j = JOBS.get(job)
-    if j is None or job.startswith("example-"):
+    if j is None:
         raise HTTPException(404, "No such run, or it cannot be removed.")
     if j.get("status") == "running":
         raise HTTPException(409, "That run is still going.")
@@ -761,52 +742,6 @@ def api_video_delete(job: str):
         JOBS.pop(job, None)
     shutil.rmtree(j["dir"], ignore_errors=True)
     return {"ok": True}
-
-
-RACK_REPORTS = {"racks_report.html", "racks_report_2.html", "rack_nr1_report.html", "rack_nr2_report.html"}
-RACKS_REBUILD = {"state": "done", "error": None, "at": None}
-
-
-@app.get("/racks-report/{name}")
-def racks_report(name: str):
-    """The rack reports, live (user, 2026-10-30: "in the report as well I want to fix what is uncertain"): served from
-    reports/racks so their answer buttons reach this server."""
-    if name not in RACK_REPORTS:
-        raise HTTPException(404, "No such report.")
-    f = ROOT / "reports" / "racks" / name
-    if not f.exists():
-        raise HTTPException(404, "Not built yet.")
-    return FileResponse(f, media_type="text/html", headers={"Cache-Control": "no-cache"})
-
-
-def _racks_rebuild():
-    import subprocess
-    try:
-        for job in ("91af02c09bbc", "28c3c52cd91e", "501bcd981b64"):   # the report's runs: answers and removals since, drawn again first
-            if (RUNS / job / "result.json").exists():
-                rack_video.redraw_run(RUNS / job)
-        for cmd in ([sys.executable, str(ROOT / "reports" / "racks" / "build_racks_report.py")], 
-                    ["node", str(ROOT / "reports" / "racks" / "pdf.mjs")]):
-            out = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=900)
-            if out.returncode != 0 and cmd[0] != "node":
-                raise RuntimeError((out.stderr or out.stdout)[-400:])
-        RACKS_REBUILD.update(state="done", error=None, at=datetime.datetime.now().isoformat(timespec="seconds"))
-    except Exception as ex:  # noqa: BLE001
-        RACKS_REBUILD.update(state="failed", error=f"{type(ex).__name__}: {ex}")
-
-
-@app.post("/api/racks-report/rebuild")
-def api_racks_rebuild():
-    """Build the rack reports again (after an answer), in the background; one build at a time."""
-    if RACKS_REBUILD["state"] != "running":
-        RACKS_REBUILD.update(state="running", error=None)
-        threading.Thread(target=_racks_rebuild, daemon=True).start()
-    return dict(RACKS_REBUILD)
-
-
-@app.get("/api/racks-report/status")
-def api_racks_status():
-    return dict(RACKS_REBUILD)
 
 
 @app.api_route("/video-report/{job}/{path:path}", methods=["GET", "HEAD"])
@@ -1415,7 +1350,7 @@ def api_fix_kind(job: str, index: int, body: KindFix, request: Request):
     """The person corrects what a device is (the classifier is wrong now and then). Kept in result.json as kind_override with
     who and when; the model's own answer stays in classification. kind null removes the correction."""
     j = job_or_none(job)
-    if j is None or job.startswith("example-"):
+    if j is None:
         raise HTTPException(404, "No such run." if j is None else "The stored demo cannot be changed.")
     if body.kind is not None and body.kind not in KINDS:
         raise HTTPException(400, "Unknown kind.")
@@ -1460,10 +1395,7 @@ def api_read_ports(job: str, index: int):
 
 def _closeup_rebuild(j):
     try:
-        if j["id"].startswith("example-"):
-            video_report.build(j["name"])
-        else:
-            video_report.build_from(j["dir"], pathlib.Path(j["dir"]) / "report", j["rack_path"], j["video_path"], j.get("title") or "Your rack", j.get("name") or j["id"])
+        video_report.build_from(j["dir"], pathlib.Path(j["dir"]) / "report", j["rack_path"], j["video_path"], j.get("title") or "Your rack", j.get("name") or j["id"])
     except Exception as ex:  # noqa: BLE001
         print(f"[racktrack] report of run {j.get('id')} not rebuilt: {type(ex).__name__}: {ex}", file=sys.stderr)
 
@@ -1535,15 +1467,6 @@ def api_closeup_picture(cid: str, name: str):
     if c is None or name not in c["pictures"]:
         raise HTTPException(404, "No such close-up picture.")
     return Response(jpeg_bytes(Image.open(c["pictures"][name]).convert("RGB")), media_type="image/jpeg")
-
-
-# ------------------------------------------------------------------ reference pages and the app itself
-@app.get("/models-overview")
-def models_overview():
-    f = ROOT / "reports" / "video" / "overview" / "index.html"
-    if not f.exists():
-        raise HTTPException(404, "Not built yet: python3 engine/video_report.py")
-    return themed_page(f)
 
 
 @app.get("/")
@@ -1756,7 +1679,7 @@ def api_video_drift(job: str):
 def api_video_database(job: str, request: Request, body: dict = Body(...)):
     """Choose the source for this run's rack, and optionally the record (rack_key) instead of the automatic match."""
     j = job_or_none(job)
-    if j is None or j.get("result") is None or job.startswith("example-"):
+    if j is None or j.get("result") is None:
         raise HTTPException(404, "No such run.")
     source = body.get("source")
     if source not in SDB.SOURCES:
@@ -1966,143 +1889,11 @@ def api_features_connections(job: str):
     return {"rack_id": rid, "rack_key": key, "devices": RTF.connections(result, record, drift["rows"], cab["rows"])}
 
 
-@app.get("/api/video/{job}/worklist")
-def api_features_worklist(job: str):
-    j = _features_job(job)
-    return {"items": RTF.worklist(j["result"]), "kinds": list(KINDS)}
-
-
-@app.post("/api/video/{job}/worklist/{item}")
-@edits_run
-def api_features_worklist_answer(job: str, item: str, request: Request, body: dict = Body(...)):
-    """Confirm or correct one item: a device's kind (as the device page corrects it) or a port's state (connected or empty)."""
-    j = _features_job(job)
-    if job.startswith("example-"):
-        raise HTTPException(404, "The stored demo cannot be changed.")
-    m = re.fullmatch(r"d(\d{1,3})|p(\d{1,3})-(\d{1,4})", item)
-    if not m:
-        raise HTTPException(404, "No such item.")
-    if m.group(1):
-        return api_fix_kind(job, int(m.group(1)), KindFix(kind=body.get("answer")), request)
-    if body.get("answer") not in ("connected", "empty"):
-        raise HTTPException(400, "Answer connected or empty.")
-    rf = pathlib.Path(j["dir"]) / "result.json"; r = json.loads(rf.read_text())
-    if not RTF.set_port_state(r, int(m.group(2)), m.group(3), body["answer"], rt_session.name(request)):
-        raise HTTPException(404, "No such port.")
-    rf.write_text(json.dumps(r, indent=1)); j["result"] = r
-    return {"ok": True}
-
-
-def _features_read_again_thread(job):
-    """Phase 2 again on every device (its ports, make and model with the current models), one at a time; what people gave and what
-    close-ups read is put back afterwards."""
-    j = JOBS[job]; rf = pathlib.Path(j["dir"]) / "result.json"
-    j["read_again"] = {"state": "running", "done": 0, "of": 0, "started": datetime.datetime.now().isoformat(timespec="seconds")}; _save(j)
-    try:
-        before = json.loads(rf.read_text()); kept = RTF.kept_before_read_again(before); answers = before.get("port_answers") or {}
-        devs = [(d["index"], SDB.device_kind(d)["kind"]) for d in before.get("devices") or []]
-        j["read_again"]["of"] = len(devs); _save(j)
-        for n, (i, kind) in enumerate(devs, start=1):
-            j.setdefault("ports", {})[str(i)] = "running"
-            (_read_panel_thread if kind == "Patch Panel" else _read_ports_thread)(job, i)
-            j["read_again"]["done"] = n; _save(j)
-        r = RTF.put_back(json.loads(rf.read_text()), kept, answers)
-        r["port_answers"] = answers
-        rf.write_text(json.dumps(r, indent=1)); j["result"] = r; j["summary"] = _summary(r)
-        j["read_again"].update(state="done", finished=datetime.datetime.now().isoformat(timespec="seconds"))
-    except Exception as ex:  # noqa: BLE001  never left "running" for good
-        print(f"[racktrack] read again of {job} failed: {type(ex).__name__}: {ex}", file=sys.stderr)
-        j["read_again"].update(state="failed", finished=datetime.datetime.now().isoformat(timespec="seconds"), error="The rack could not be read again. Try again.")
-        for k, v in list((j.get("ports") or {}).items()):
-            if v == "running":
-                j["ports"][k] = "failed"
-    finally:
-        _save(j)
-
-
-@app.post("/api/video/{job}/read-again")
-def api_features_read_again(job: str):
-    j = _features_job(job)
-    if job.startswith("example-"):
-        raise HTTPException(404, "The stored demo cannot be read again.")
-    if (j.get("read_again") or {}).get("state") == "running" or any(v == "running" for v in (j.get("ports") or {}).values()):
-        return {"state": "running", "read_again": j.get("read_again")}
-    threading.Thread(target=_features_read_again_thread, args=(job,), daemon=True).start()
-    return {"state": "running"}
-
-
-@app.get("/api/video/{job}/read-again")
-def api_features_read_again_state(job: str):
-    j = _features_job(job)
-    return j.get("read_again") or {"state": None}
-
-
-@app.get("/api/video/{job}/physical-layer")
-def api_features_physical(job: str):
-    j = _features_job(job)
-    rid, key, result, record, _ = _features_record(j)
-    return RTF.physical_layer(result, rid or job, rack_label_of(j), record)
-
-
-@app.get("/api/video/{job}/physical-layer.html")
-def api_features_physical_page(job: str):
-    """The physical layer document as a page to print (white, plain, one table per unit)."""
-    import html as H
-    doc = api_features_physical(job)
-    e = lambda v: H.escape("" if v is None else str(v))
-    rows = []
-    for u in doc["units"]:
-        for d in u["devices"]:
-            pc = d["ports"]; con = sum(p["status"] == "connected" for p in pc); emp = sum(p["status"] == "empty" for p in pc)
-            rows.append(f"<tr><td>{e(u['unit'].upper().replace(',', ', '))}</td><td>{e(d['device'])}</td><td>{e(d['record_name'] or '-')}</td><td>{e(d['device_type'])}</td>"
-                        f"<td>{e(d['ocr']['make'] or '-')} {e(d['ocr']['model'] or '')}</td><td>{e(d['serial'] or '-')}</td><td>{e(d['asset_tag'] or '-')}</td>"
-                        f"<td>{e((d['label'] or {}).get('text') or '-')}</td><td>{len(pc)} ({con} cabled, {emp} empty, {len(pc) - con - emp} unknown)</td></tr>")
-    cab = "".join(f"<tr><td>{e(c['unit'].upper())}</td><td>{e(c['device_type'])}</td><td>{e(c['port_number'])}</td><td>{e(c['port_type'])}</td><td>{e(c['connector'] or '-')}</td><td>{e(c['color'] or '-')}</td></tr>" for c in doc["cables"])
-    c = doc["counts"]
-    page = f"""<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Physical layer {e(doc['rack_id'])}</title>
-<style>body{{font:14px/1.45 Inter,system-ui,sans-serif;color:#111;background:#fff;margin:0;padding:24px}}h1{{font-size:22px;margin:0 0 4px}}h2{{font-size:16px;margin:28px 0 8px}}
-p{{margin:4px 0;color:#444}}table{{width:100%;border-collapse:collapse;font-size:13px}}th,td{{text-align:left;padding:6px 8px;border-bottom:1px solid #e5e7eb;vertical-align:top}}
-th{{color:#555;font-weight:600}}.wrap{{overflow-x:auto}}button{{font:inherit;padding:8px 14px;border:1px solid #d1d5db;background:#fff;border-radius:8px}}@media print{{button{{display:none}}body{{padding:0}}}}</style></head>
-<body><h1>Physical layer: {e(doc['rack_id'])}</h1><p>Rack label {e(doc['rack']['label']['text'] or 'not read')} ({e(doc['rack']['label']['source'])}). {doc['units_count']} units, {doc['devices_count']} devices, made {e(doc['generated_at'])} from the video.</p>
-<p>{c['ports']} ports: {c['connected']} cabled, {c['empty']} empty, {c['unknown']} unknown.</p><p><button onclick="print()">Print</button></p>
-<h2>Devices</h2><div class="wrap"><table><tr><th>Units</th><th>Device</th><th>Record</th><th>Kind</th><th>Make and model</th><th>Serial</th><th>Asset tag</th><th>Label</th><th>Ports</th></tr>{''.join(rows)}</table></div>
-<h2>Cables seen</h2><div class="wrap"><table><tr><th>Units</th><th>Kind</th><th>Port</th><th>Port type</th><th>Connector</th><th>Colour</th></tr>{cab or '<tr><td colspan="6">No cable colour or connector read.</td></tr>'}</table></div>
-<p style="margin-top:24px">Nothing here is invented: a device with no label read has none, a port the video could not read is unknown.</p></body></html>"""
-    return Response(page, media_type="text/html", headers=NO_CACHE)
-
-
 @app.get("/api/video/{job}/sfp-advice")
 def api_features_sfp(job: str):
     j = _features_job(job)
     rid, key, result, record, cables = _features_record(j)
     return RTF.sfp_advice(result, record, cables)
-
-
-@app.get("/api/video/{job}/topology")
-def api_features_topology(job: str):
-    """The run as RT-EOS's RackTopology "detail": its devices and ports, each port with the matrix's cable on it (expected.other), so the
-    diagram draws the cables between this rack's devices and to the racks they leave for."""
-    j = _features_job(job)
-    rid, key, result, record, cables = _features_record(j)
-    name = {s["index"]: r.get("name") for r, s in RTF.pair_devices(result, record)}
-    ends = {}
-    for c in cables:
-        for e, o in (("a", "z"), ("z", "a")):
-            if not c.get(f"{e}_rack") or SDB._norm(c[f"{e}_rack"]) == SDB._norm(key):
-                ends[(SDB._norm(c.get(f"{e}_device")), RTF.port_no(c.get(f"{e}_port")))] = {"cableLabel": c.get("cable_label"), "cableType": c.get("cable_type"),
-                                                                                            "other": {"device": c.get(f"{o}_device"), "port": c.get(f"{o}_port"), "rack": c.get(f"{o}_rack")}}
-    devices, ubox = [], SDB.unit_boxes(result)
-    for d in result.get("devices") or []:
-        start, h = RTF._span(d); L = d.get("layout") or {}
-        nm = name.get(d["index"])
-        ports = [{"portNo": p["n"], "kind": "sfp" if re.match(r"^(sfp|qsfp|osfp|lc|sc|fc)", str(p["type"] or ""), re.I) else "main", "type": p["type"], "state": p["state"],
-                  "cableColor": p["colour"], "cableConnector": p["connector"], "expected": ends.get((SDB._norm(nm), p["n"]))} for p in RTF._detail_ports(d, ubox) if p["n"] is not None]
-        devices.append({"deviceId": d["index"], "name": nm or (" ".join(x for x in (L.get("vendor"), L.get("model")) if x) or f"D{d['index']}"), "sheetName": nm,
-                        "type": SDB.device_kind(d)["kind"] or "unidentified", "heightU": h or 1, "unitTop": (start + h - 1) if start else None, "unitBottom": start,
-                        "make": L.get("vendor"), "model": L.get("model"), "ports": ports})
-    return {"scanId": job, "rackLabel": key or rid or j.get("title"), "unitsTotal": SDB.units_read(result), "devices": devices,
-            "matrix": bool(cables), "cables_in_matrix": len(cables)}
-# ====================================================================== end wt/features
 
 
 @app.exception_handler(HTTPException)

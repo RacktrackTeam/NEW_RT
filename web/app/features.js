@@ -14,11 +14,7 @@
   var TOOLS = [
     ['find', 'Find a port', 'Pick a device and a port number: it is marked on the rack picture with its cable and label.'],
     ['connections', 'Connections', 'Per device: its problems and a card of its ports.'],
-    ['cables', 'Cables', 'The Excel matrix against the ports the video read, and the A-end / Z-end check with its CSV.'],
-    ['again', 'Read again', 'Read every device again with the current models. Your corrections are kept.'],
-    ['physical', 'Physical layer', 'The physical layer document: JSON and a page to print.'],
-    ['sfp', 'SFP advice', 'Which optic and cable fit the fibre and SFP ports.'],
-    ['topology', 'Topology', 'The devices and the cables between them, drawn.']
+    ['cables', 'Cables', 'The Excel matrix against the ports the video read, and the A-end / Z-end check with its CSV.']
   ];
   var NAME = {}; TOOLS.forEach(function (t) { NAME[t[0]] = t[1]; });
   var STATE = { connected: 'Cable plugged in', empty: 'Empty', unknown: 'Not sure', 'not seen': 'Not seen' };
@@ -29,20 +25,6 @@
   }
   function fail(e) { root().innerHTML = '<div class="fx-page"><p class="fx-err">' + esc(e.message || 'Something went wrong') + '. Go back to the rack and try again.</p></div>'; }
 
-  // ------------------------------------------------------------ step 6 of the result: the list of tools
-  function toolList(run) {
-    return '<div class="card group ft-list">' + TOOLS.map(function (t) {
-      return '<a class="grow" href="#tools/' + esc(run) + '/' + t[0] + '"><span class="ft-t"><b>' + esc(t[1]) + '</b><small>' + esc(t[2]) + '</small></span><span class="arr">→</span></a>';
-    }).join('') + '</div>';
-  }
-  function fillResult(run) {
-    var el = $('res-tools'); if (!el) return;
-    el.innerHTML = '<div class="card group ft-list">' + TOOLS.map(function (t) {
-      return '<a class="grow" href="#tools/' + esc(run) + '/' + t[0] + '"><span class="ft-t"><b>' + esc(t[1]) + '</b><small>' + esc(t[2]) + '</small></span><span class="arr">→</span></a>';
-    }).join('') + '</div>';
-  }
-
-  // ------------------------------------------------------------ the device page: serial, asset tag, labels (close-up)
   function idsBlock(d, run) {
     var x = d.ids || {};
     var rows = [['Serial', x.serial], ['Asset tag', x.asset_tag], ['Labels read', (x.labels || []).join(', ')], ['Cable labels read', (x.cables || []).join(', ')]];
@@ -217,54 +199,6 @@
     }).catch(fail);
   }
 
-  var againTimer = null;
-  function again(run) {
-    clearInterval(againTimer);
-    var draw = function (s) {
-      var st = s.state;
-      root().innerHTML = head('Read again', 'Every device of this run is read again with the models as they are today: its make, model and ports. What people corrected (kinds, makes and models, port states) and what close-ups read stay as they are.', run)
-        + '<div class="card ft-again"><p>' + (st === 'running' ? 'Reading device ' + Math.min((s.done || 0) + 1, s.of || 1) + ' of ' + (s.of || '?') + '. One device takes about a minute; you can leave this page.'
-          : st === 'done' ? 'Read again on ' + esc(window.RTWHEN ? window.RTWHEN(s.finished) : s.finished) + ': ' + s.of + ' devices.' : 'Not read again yet.') + '</p>'
-        + (st === 'running' ? '<div class="ft-bar"><i style="width:' + Math.round(100 * (s.done || 0) / (s.of || 1)) + '%"></i></div>' : '<button class="btn primary" id="ag-go" type="button">Read again</button>') + '</div>';
-      var b = $('ag-go'); if (b) b.addEventListener('click', function () { b.disabled = true; post('/api/video/' + encodeURIComponent(run) + '/read-again', {}).then(function () { delete VIEW[run]; again(run); }).catch(fail); });
-      if (st === 'running') againTimer = setTimeout(function () { if ((location.hash || '').indexOf('/again') > 0) again(run); }, 4000);
-    };
-    api('/api/video/' + encodeURIComponent(run) + '/read-again').then(draw).catch(fail);
-  }
-
-  function physical(run) {
-    api('/api/video/' + encodeURIComponent(run) + '/physical-layer').then(function (d) {
-      var c = d.counts, devs = [];
-      d.units.forEach(function (u) { u.devices.forEach(function (x) { devs.push(Object.assign({ unit: u.unit }, x)); }); });
-      root().innerHTML = head('Physical layer', 'The physical layer document of this rack: every device with its label, make, model, serial and asset tag, every port with its state and the cable on it. Nothing is invented.', run)
-        + '<div class="card"><p><b>' + esc(d.rack_id) + '</b>, rack label ' + esc(d.rack.label.text || 'not read') + '. ' + d.units_count + ' units, ' + d.devices_count + ' devices. ' + c.ports + ' ports: ' + c.connected + ' cabled, ' + c.empty + ' empty, ' + c.unknown + ' unknown. ' + d.cables.length + ' cables with a colour or connector read.</p>'
-        + '<div class="ft-btns"><a class="btn primary" href="/api/video/' + esc(run) + '/physical-layer.html" target="_blank" rel="noopener">Open the page to print</a><a class="btn" href="/api/video/' + esc(run) + '/physical-layer" download="physical-layer-' + esc(run) + '.json">Download the JSON</a></div></div>'
-        + table(devs, [['Units', function (x) { return x.unit.toUpperCase().replace(/,/g, ', '); }], ['Device', function (x) { return x.device; }], ['Record', function (x) { return x.record_name; }], ['Kind', function (x) { return x.device_type; }],
-          ['Make and model', function (x) { return [x.ocr.make, x.ocr.model].filter(Boolean).join(' '); }], ['Serial', function (x) { return x.serial; }], ['Asset tag', function (x) { return x.asset_tag; }],
-          ['Ports', function (x) { var k = x.ports.filter(function (p) { return p.status === 'connected'; }).length; return x.port_count + ' (' + k + ' cabled)'; }]]);
-    }).catch(fail);
-  }
-
-  function sfp(run) {
-    api('/api/video/' + encodeURIComponent(run) + '/sfp-advice').then(function (r) {
-      root().innerHTML = head('SFP advice', 'For each switch, router, firewall or gateway with fibre or SFP ports: which optic and which cable fit them, from the port type the video read, the model read on the device and the cable types the Excel matrix lists for it.', run)
-        + (r.items.length ? r.items.map(function (x) {
-          return '<div class="card ft-sfp"><span class="eyebrow">' + esc(x.unit) + ' · D' + x.index + (x.model ? ' · ' + esc(x.model) : '') + '</span><h2>' + esc(x.device) + ': ' + x.count + ' ' + esc(x.port_type) + (x.count === 1 ? ' port' : ' ports') + '</h2>'
-            + '<div class="ft-kv"><span>Optic</span><b>' + esc(x.suggestion.optic) + '</b></div><div class="ft-kv"><span>Cable</span><b>' + esc(x.suggestion.cable) + '</b></div>' + (x.suggestion.note ? '<p class="muted small">' + esc(x.suggestion.note) + '</p>' : '') + '</div>';
-        }).join('') : '<div class="card"><p>No fibre or SFP port was read on a switch, router, firewall or gateway of this rack.</p></div>');
-    }).catch(fail);
-  }
-
-  function topology(run) {
-    api('/api/video/' + encodeURIComponent(run) + '/topology').then(function (detail) {
-      root().innerHTML = head('Topology', 'The devices read on the video and the cables the Excel matrix puts on their ports' + (detail.matrix ? ' (' + detail.cables_in_matrix + ' in the matrix)' : '; the Excel copy has no cable rows for this rack, so only the devices show') + '. Tap a device or a cable.', run)
-        + '<div class="rteos ft-topo" id="ft-topo"></div>';
-      var mount = function () { if (!window.RTEOSTopology) return setTimeout(mount, 150); window.RTEOSTopology.mount($('ft-topo'), detail, function (o) { if (o && o.deviceId != null) location.hash = '#result/' + run + '/devices'; }); };
-      mount();
-    }).catch(fail);
-  }
-
-  // ------------------------------------------------------------ Profile > Site position (the sign-in service's PUT /api/setup/:site/datacentre)
   function authBase() { return fetch('/api/auth-service', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) { return j.url ? j.url.replace(/\/+$/, '') : location.protocol + '//' + location.hostname + ':' + (j.port || 3302); }); }
   function site() {
     Promise.all([api('/api/me'), authBase()]).then(function (x) {
@@ -288,23 +222,21 @@
     }).catch(fail);
   }
 
-  var RUNNERS = { find: find, connections: connections, cables: cables, again: again, physical: physical, sfp: sfp, topology: topology };
+  var RUNNERS = { find: find, connections: connections, cables: cables };
   var SHOWN = null;                                   // the tool on screen: the app routes again now and then (session checks), which must not reload it
   function open(run, tool, q) {
     var key = [run, tool, q].join('/'); if (key === SHOWN && root().children.length) return; SHOWN = key;
-    clearInterval(againTimer); root().onclick = null;
+    root().onclick = null;
     if (run === 'site') return site();
     if (!run) return;
-    if (!RUNNERS[tool]) {
-      root().innerHTML = head('Rack tools', 'Everything else RackTrack does with this rack.', run) + toolList(run); return;
-    }
+    if (!RUNNERS[tool]) tool = 'find';                  // an old link to a removed tool (Read again, Physical layer, SFP, Topology) opens Find a port
     root().innerHTML = '<div class="fx-page">' + loading('Loading ' + NAME[tool].toLowerCase() + '...') + '</div>';
     RUNNERS[tool](run, q);
   }
   function onHash() {
     var h = (location.hash || '').slice(1).split('/');
     if (h[0] !== 'tools' || [h[1], h[2], h[3]].join('/') !== SHOWN) SHOWN = null;
-    if (h[0] === 'result' && h[1]) { delete VIEW[h[1]]; fillResult(h[1]); }
+    if (h[0] === 'result' && h[1]) delete VIEW[h[1]];
   }
   window.addEventListener('hashchange', onHash); onHash();
   // SFP advice on a device's own page: which optic and cable fit the fibre or SFP ports read on it (nothing for a device without them)
@@ -317,5 +249,5 @@
         return '<h2>' + x.count + ' ' + esc(x.port_type) + (x.count === 1 ? ' port' : ' ports') + '</h2><div class="ft-kv"><span>Optic</span><b>' + esc(x.suggestion.optic) + '</b></div><div class="ft-kv"><span>Cable</span><b>' + esc(x.suggestion.cable) + '</b></div>' + (x.suggestion.note ? '<p class="muted small">' + esc(x.suggestion.note) + '</p>' : ''); }).join('') + '</div>');
     }).catch(function (e) { if (window.console) console.warn('RackTrack: SFP advice failed: ' + ((e && e.message) || e)); });
   }
-  window.RTFEAT = { open: open, idsBlock: idsBlock, fillResult: fillResult, sfpInto: sfpInto };
+  window.RTFEAT = { open: open, idsBlock: idsBlock, sfpInto: sfpInto };
 })();

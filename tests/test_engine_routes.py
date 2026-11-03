@@ -110,16 +110,15 @@ def test_run_delete_by_role(eng):
         app.JOBS.pop(rid, None)
 
 
-def test_platform_reports_are_owner_only(eng):
+def test_removed_pages_are_gone(eng):
+    """The racks report built from three old runs, the models overview and the removed tabs' routes are not there for anyone."""
     app, client, _ = eng
-    before = dict(app.RACKS_REBUILD)
-    for who in ("orgowner", "admin", "manager", "tech", "tech2"):
+    for who in ("owner", "orgowner", "admin", "tech"):
         c = _as(client, who)
-        for method, path in (("GET", "/racks-report/racks_report.html"), ("GET", "/racks-report/rack_nr1_report.html"), ("GET", "/models-overview"),
-                             ("POST", "/api/racks-report/rebuild"), ("GET", "/api/racks-report/status")):
-            assert c.request(method, path).status_code == 404, (who, path)
-    assert app.RACKS_REBUILD == before                            # nobody started a rebuild
-    assert _as(client, "owner").get("/api/racks-report/status").status_code == 200
+        for method, path in (("GET", "/racks-report/racks_report.html"), ("GET", "/models-overview"), ("POST", "/api/racks-report/rebuild"),
+                             ("GET", "/api/video/x/worklist"), ("GET", "/api/video/x/read-again"), ("GET", "/api/video/x/physical-layer"),
+                             ("GET", "/api/video/x/topology")):
+            assert c.request(method, path).status_code in (404, 405), (who, path)
 
 
 def test_runs_seen_by_role(eng):

@@ -28,9 +28,8 @@ def test_tools_read_the_ports_the_result_screen_shows(run):
         drift = {p["n"]: p["state"] for p in SDB.run_ports(d, ub) if not p.get("combo")}
         assert drift == {int(p["id"]): p["status"] for p in screen if str(p["id"]).isdigit()}
     con = {x["index"]: x["counts"] for x in RTF.connections(run, [], [], [])}
-    pl = RTF.physical_layer(run, "R", None, [])
-    assert sum(c["connected"] for c in con.values()) == pl["counts"]["connected"]
-    assert pl["units_count"] == SDB.units_read(run) == run["ladder"]["units"]
+    assert sum(c["connected"] for c in con.values()) == sum(1 for d in run["devices"] for p in SDB.screen_ports(d)["ports"] if p.get("status") == "connected")
+    assert SDB.units_read(run) == run["ladder"]["units"]
 
 
 def test_combo_ports_are_counted_once():

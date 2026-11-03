@@ -367,7 +367,7 @@
         renderRun(j, id);
         $('job-err').hidden = !failed; $('job-err').textContent = j.error || 'The analysis failed.';
         $('job-open').hidden = !ready; $('job-open').href = '#result/' + id; $('job-retry').hidden = !failed;
-        $('job-del').hidden = j.status === 'running' || id.indexOf('example-') === 0 || !canRemoveRun();
+        $('job-del').hidden = j.status === 'running' || !canRemoveRun();
         var files = j.files || [], pic = files.indexOf('rack.png') >= 0 ? '/api/video/' + id + '/file/rack.png' : (FIRST[id] || null);
         if (pic && pic !== shown) { shown = pic; $('run-img').src = pic; $('run-img').hidden = false; $('run-ph').hidden = true; }
         if (j.status !== 'running') clearInterval(pollTimer);
@@ -554,7 +554,7 @@
   function openResult(id, tab) {
     if (!id) return go('history');
     var fresh = RES.id !== id;
-    if (fresh) { RES.cmpUi = 'idle'; if (typeof cmpMode === 'function') cmpMode(false); RES.sel = null; RES.view = null; RES.pick = null; RES.labelAsked = null; RES.cmp = null; RES.cmpSrc = null; RES.cmpUi = 'idle'; RES.cmpPick = false; RES.diffMode = null; $('cmp-menu').hidden = true; $('sec-tools').hidden = true; $('df-top').innerHTML = ''; $('diff-top').innerHTML = ''; }
+    if (fresh) { RES.cmpUi = 'idle'; if (typeof cmpMode === 'function') cmpMode(false); RES.sel = null; RES.view = null; RES.pick = null; RES.labelAsked = null; RES.cmp = null; RES.cmpSrc = null; RES.cmpUi = 'idle'; RES.cmpPick = false; RES.diffMode = null; $('cmp-menu').hidden = true; $('df-top').innerHTML = ''; $('diff-top').innerHTML = ''; }
     RES.id = id; clearInterval(RES.timer); remember(id);
     RES.tab = tab; $('res-eyebrow').textContent = 'Result'; $('rep-full').hidden = NATIVE;   // only the open tab shows (data-tab)
     loadView(true);
@@ -993,10 +993,9 @@
     if (d.drift.notes.length) h += '<details class="card"><summary>Not checked (' + d.drift.notes.length + ')</summary><ul class="muted small">' + d.drift.notes.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('') + '</ul></details>';
     el.innerHTML = h;
   }
-    document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('#cmp-btn, #cmp-back, #more-link, #cmp-change, [data-cmpsrc], #cmp-use, #cmp-continue, [data-cmppick], [data-dfmode]'); if (!t) return;
+    document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('#cmp-btn, #cmp-back, #cmp-change, [data-cmpsrc], #cmp-use, #cmp-continue, [data-cmppick], [data-dfmode]'); if (!t) return;
     if (t.id === 'cmp-back') { e.preventDefault(); RES.cmpUi = 'idle'; cmpMode(false); window.scrollTo(0, 0); return; }
     if (t.id === 'cmp-btn') { var mn = $('cmp-menu'); mn.hidden = !mn.hidden; t.setAttribute('aria-expanded', String(!mn.hidden)); return; }
-    if (t.id === 'more-link') { e.preventDefault(); var st = $('sec-tools'); st.hidden = !st.hidden; if (!st.hidden) { if (window.RTFEAT && !$('res-tools').children.length) window.RTFEAT.fillResult(RES.id); st.scrollIntoView({ block: 'nearest' }); } return; }
     if (t.id === 'cmp-change') { RES.cmpPick = !RES.cmpPick; renderCompare(RES.cmp); var ty0 = $('cmp-type'); if (ty0) ty0.focus(); return; }
     var src = RES.cmpSrc || (RES.cmp && RES.cmp.source) || 'excel';
     if (t.dataset.dfmode) { RES.diffMode = t.dataset.dfmode; return renderDiff(RES.cmp, true); }

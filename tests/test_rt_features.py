@@ -92,7 +92,7 @@ def test_close_up_ids_reach_the_drift_the_identification_and_the_az_check(env):
     assert csv[0].startswith("Cable label,Connection ID") and any("CBL-PLANT-L1" in x and "wrong_port" in x for x in csv)
 
 
-def test_find_port_connections_worklist_physical_sfp(env):
+def test_find_port_connections_sfp(env):
     SDB, RTF, r = env
     rec, cab = SDB.devices("excel", RACK), RTF.cables_for([RACK])
     fp = RTF.find_port(r, rec, cab, RACK, 4, 9)
@@ -100,15 +100,6 @@ def test_find_port_connections_worklist_physical_sfp(env):
     conn = RTF.connections(r, rec, SDB.drift(r, rec, SDB.ports("excel", RACK))["rows"], RTF.cable_check(r, rec, cab, RACK)["rows"])
     sw03 = next(c for c in conn if c["name"] == "SP-R1-U17-SW03")
     assert {p["what"] for p in sw03["problems"]} >= {"Extra cable", "Wrong port type"} and sw03["ports"]
-    wl = RTF.worklist(r)
-    assert wl and all(i["confidence"] < 0.65 for i in wl) and sum(i["index"] == 6 for i in wl) <= 8
-    port = next(i for i in wl if i["kind"] == "port")
-    assert RTF.set_port_state(r, port["index"], port["port"], "empty", "admin")
-    assert port["id"] not in {i["id"] for i in RTF.worklist(r)}
-    kept = RTF.kept_before_read_again(r)
-    assert RTF.put_back(json.loads(json.dumps(r)), kept, r["port_answers"])
-    doc = RTF.physical_layer(r, RACK, None, rec)
-    assert doc["schema"] == "racktrack-physical-layer/1" and doc["counts"]["ports"] == sum(len(d["ports"]) for u in doc["units"] for d in u["devices"])
     sfp = RTF.sfp_advice(r, rec, cab)["items"]
     assert {x["device"] for x in sfp} >= {"SP-R1-U17-SW03", "SP-R1-U15-SW02"} and all(x["port_type"] == "SFP" for x in sfp)
 

@@ -9,8 +9,6 @@
     az_check, az_csv        the A-end / Z-end check of two runs, its CSV     RT-EOS's server/lib/checks.js run() and toCsv()
     find_port               a device's port on the rack picture              rt_eos client FindPort
     connections             per device its problems and a port card         rt_eos client Connections
-    worklist                the least sure readings                         RT-EOS's server/lib/worklist.js
-    physical_layer          the physical layer document                     engine/readers/pipeline/physical_layer.py build()
     sfp_advice              optics and cables for fibre ports               RT-EOS's server/lib/sfp_advice.js advise()
 Nothing here writes to a source; only the run's own files and this app's copies change.
 """
@@ -568,113 +566,7 @@ def connections(result, record, drift_rows, cable_rows):
 LOW_DEVICE, PORTS_PER_DEVICE = 0.65, 8
 
 
-def worklist(result):
-    """worklist.js on one run: a device whose kind was read below 65 per cent (and no person or faceplate settled it), and up to 8 ports
-    per device whose state the video could not tell. Least sure first."""
-    items, ubox = [], SDB.unit_boxes(result)
-    for d in (result or {}).get("devices") or []:
-        k = SDB.device_kind(d)
-        cl = d.get("classification") or {}
-        prob = float(cl.get("prob") or 0)
-        if k["from"] not in ("corrected", "faceplate", "ports") and prob < LOW_DEVICE:
-            items.append({"id": f"d{d['index']}", "kind": "device", "index": d["index"], "unit": SDB._units(*_span(d)), "read": k["kind"] or cl.get("class") or "Not sure",
-                          "confidence": round(prob, 2), "question": f"What is the device at {SDB._units(*_span(d))}?",
-                          "why": f"The picture read {cl.get('class') or 'nothing sure'} at {round(100 * prob)} %.", "cut": None, "box": None})
-        n = 0
-        for p in _detail_ports(d, ubox):
-            if p["n"] is None or p["state"] in ("connected", "empty"):
-                continue
-            items.append({"id": f"p{d['index']}-{p['id'] if str(p['id']).isdigit() else p['n']}", "kind": "port", "index": d["index"], "port": p["n"], "unit": SDB._units(*_span(d)), "read": "not sure",
-                          "confidence": 0.0, "question": f"Is there a cable in port {p['n']} of D{d['index']}?", "why": "The video could not tell whether a cable is plugged in.",
-                          "cut": cut_boxes(d)[0], "box": cut_boxes(d)[1].get(str(p["id"])), "type": p["type"]})
-            n += 1
-            if n >= PORTS_PER_DEVICE:
-                break
-    items.sort(key=lambda x: (x["confidence"], x["kind"] != "device"))
-    return items
-
-
-def set_port_state(result, index, port, state, by):
-    """A person's answer for a port's state, kept on the port (and in the run's answers, so a read again keeps it)."""
-    d = _dev(result, index)
-    if d is None:
-        return False
-    hit = False
-    for holder in (d.get("closeup") or {}, d.get("layout") or {}):
-        for lst in (holder.get("ports") or [], (holder.get("port_details") or {}).get("ports") or []):
-            for p in lst:
-                if str(p.get("id")) == str(port):
-                    p["status"], p["state_by"] = state, by; hit = True
-    if hit:
-        result.setdefault("port_answers", {})[f"{index}-{port}"] = {"state": state, "by": by, "when": datetime.datetime.now().isoformat(timespec="seconds")}
-    return hit
-
-
 KEEP_ON_READ_AGAIN = ("kind_override", "ids", "serial", "asset_tag", "label_read", "closeup")
-
-
-def kept_before_read_again(result):
-    """What a person gave or a close-up read, per device, to put back after the read again."""
-    return {d["index"]: {k: d[k] for k in KEEP_ON_READ_AGAIN if k in d} | {"typed": (d.get("layout") or {}).get("typed")} for d in (result or {}).get("devices") or []}
-
-
-def put_back(result, kept, answers):
-    for d in (result or {}).get("devices") or []:
-        k = kept.get(d["index"]) or {}
-        for f in KEEP_ON_READ_AGAIN:
-            if f in k:
-                d[f] = k[f]
-        if k.get("typed"):
-            d["layout"] = dict(d.get("layout") or {}, typed=k["typed"])
-    for key, a in (answers or {}).items():
-        i, _, p = key.partition("-")
-        set_port_state(result, int(i), p, a["state"], a["by"])
-    return result
-
-
-def physical_layer(result, rack_id, label, record):
-    """physical_layer.py build() from a video run: the rack's id and label, each unit's devices with their label, make, model, serial and
-    asset tag, every port with its state and the cable on it, the cables and the counts. Nothing invented: a device with no label read
-    carries label null; a port the video did not read stays unknown."""
-    name = {s["index"]: r.get("name") for r, s in pair_devices(result, record)}
-    lab = (label or {}).get("id") or (label or {}).get("name") or {}
-    counts = {"ports": 0, "connected": 0, "empty": 0, "unknown": 0, "cables_by_color": {}}
-    units, cables, labels_seen, ubox = {}, [], [], SDB.unit_boxes(result)
-    for d in (result or {}).get("devices") or []:
-        start, h = _span(d)
-        key = ",".join(f"u{start + i:02d}" for i in range(h)) if start else "unplaced"
-        k = SDB.device_kind(d)
-        L = d.get("layout") or {}
-        ids = d.get("ids") or {}
-        lt = ids.get("labels")[0] if ids.get("labels") else None
-        if lt:
-            labels_seen.append(lt)
-        entry = {"device": f"D{d['index']}", "device_type": k["kind"] or "Unidentified", "confidence": round(float((d.get("classification") or {}).get("prob") or 0), 3),
-                 "kind_from": k["words"], "record_name": name.get(d["index"]),
-                 "label": {"text": lt, "source": "close-up" if lt else None},
-                 "ocr": {"make": L.get("vendor") or (L.get("typed") or {}).get("vendor"), "model": L.get("model") or (L.get("typed") or {}).get("model"),
-                         "raw_text": ids.get("raw_text"), "source": "person" if L.get("typed") and not L.get("vendor") else ("faceplate" if L.get("vendor") else "not read")},
-                 "serial": ids.get("serial") or d.get("serial"), "asset_tag": ids.get("asset_tag") or d.get("asset_tag")}
-        ports = []
-        for p in _detail_ports(d, ubox):
-            if p["n"] is None:
-                continue
-            stt = p["state"] if p["state"] in ("connected", "empty") else "unknown"
-            q = {"port_number": p["n"], "port_type": (p["type"] or "port").upper(), "status": stt}
-            if stt == "connected" and (p["colour"] or p["connector"]):
-                q["cable"] = {"connector": p["connector"], "color": p["colour"]}
-                cables.append({"unit": key, "device_type": entry["device_type"], "port_type": q["port_type"], "port_number": p["n"], "connector": p["connector"], "color": p["colour"]})
-                counts["cables_by_color"][str(p["colour"])] = counts["cables_by_color"].get(str(p["colour"]), 0) + 1
-            counts["ports"] += 1; counts[stt] += 1
-            ports.append(q)
-        entry["port_count"] = len(ports); entry["ports"] = ports
-        units.setdefault(key, []).append(entry)
-    return {"schema": "racktrack-physical-layer/1", "rack_id": rack_id, "generated_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "source": "video", "units_count": SDB.units_read(result), "devices_count": len((result or {}).get("devices") or []),
-            "rack": {"id": rack_id, "label": {"text": lab.get("text"), "conf": lab.get("confidence"), "source": "rack label read on the video" if lab else "not read"}, "name": lab.get("text")},
-            "labels": {"devices": labels_seen},
-            "units": [{"unit": k, "devices": v} for k, v in sorted(units.items(), key=lambda kv: -(SDB._unum(kv[0].split(",")[-1]) or 0))],
-            "cables": cables, "counts": counts}
 
 
 SFP_STANDARDS = {"SFP": ("1 Gbps", "1000BASE-SX (multimode) or 1000BASE-LX (single mode)"), "SFP+": ("10 Gbps", "10GBASE-SR (multimode) or 10GBASE-LR (single mode)"),
