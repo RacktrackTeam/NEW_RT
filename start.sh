@@ -47,7 +47,7 @@ start() {     # start <name> <health url> <seconds> <command...>
 start sign-in "http://127.0.0.1:3302/api/health" 120 "$HERE/auth.sh"
 
 # 2 the local NetBox and ServiceNow, unless an organization saved a login to a real one (Profile > Connections)
-REAL=$("$HERE/_cache/venv-engine/bin/python" - "$HERE/data" <<'PY'
+REAL=$("$HERE/_cache/venv-engine/bin/python" - "${RACKTRACK_DATA:-$HERE/data}" <<'PY'
 import pathlib, sqlite3, sys, urllib.parse
 n = 0
 for db in [pathlib.Path(sys.argv[1]) / "sources.db", *pathlib.Path(sys.argv[1]).glob("sources_by_org/*/sources.db")]:
