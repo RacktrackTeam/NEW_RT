@@ -44,3 +44,7 @@ racktrack-app is the core: its video engine reads a rack from a sweep video. We 
 
 ## State at 3 Nov afternoon (pass 3)
 - docs/VERIFY-3.md: the main flow walked twice at 1280 and 400 for orgownert, techt and managert on a scratch copy; six faults fixed (start scripts honour RACKTRACK_DATA and RT_AUTH_ENV, the free space pill space, Connections groups a problem across ports, Cables says nothing to check once, a picked other rack no longer shows the found rack's confidence, the auto acceptance wording), pass 1 item 49 fixed (two old logins removed from data/sources.db); 133 Python tests (model test skipped to keep the Mac cool), 118 sign-in, 285 organization page tests pass; the second walk found nothing.
+
+## State at 3 Nov (pass 4)
+- docs/VERIFY-4.md: a fresh-eyes walk on a scratch copy (engine 8708, sign-in 3312) at 1280 and 400 for orgownert, techt and managert; ten faults fixed (tab bar marks Report on a phone, Change keeps the rack ID until a new one, Find a port picker follows a rack tap, Cables names scans by site and time, port differences name their device, the auto acceptance wording and a person's confirmation kept, the You page 404, the rename hint, a refused organization page says so, AUTH.md); 133 Python (model test skipped), 118 sign-in, 285 organization page tests pass; the second walk found nothing; no shared data changed.
+
