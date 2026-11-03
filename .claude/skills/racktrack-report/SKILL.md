@@ -50,7 +50,7 @@ Fix it before showing it.
 - Units are not devices: never use unit or occupancy results as evidence for a device classifier.
 
 ## Words never on a page
-- "NetBox" — say "ground truth". Ground truth is never shown in a UI at all; it lives only in result files.
+- "NetBox" - say "ground truth". Ground truth is never shown in a UI at all; it lives only in result files.
 - Device types on video pages: labels are `D<i> · <n>U` only, no class names in text, tables or pictures.
 - "teammate", "packet", resizing / working-copy sizes, internal file chatter.
 

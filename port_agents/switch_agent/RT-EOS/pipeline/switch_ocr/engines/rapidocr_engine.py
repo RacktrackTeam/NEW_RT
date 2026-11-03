@@ -1,4 +1,4 @@
-"""RapidOCR backend — PP-OCR models running on ONNX Runtime.
+"""RapidOCR backend - PP-OCR models running on ONNX Runtime.
 
 Same model family as the Paddle backend but with a much lighter dependency
 footprint (no paddlepaddle). Slightly behind PaddleOCR's newest models in
@@ -58,7 +58,7 @@ class RapidEngine(BaseEngine):
                     self._ocr = RapidOCR(params=params)
                 except Exception as exc:
                     log.warning("RapidOCR rejected tuned params (%s); using defaults "
-                                "— tiny text recall will suffer", exc)
+                                "- tiny text recall will suffer", exc)
                     self._ocr = RapidOCR()
             else:
                 try:
@@ -71,7 +71,7 @@ class RapidEngine(BaseEngine):
                     )
                 except TypeError as exc:
                     log.warning("RapidOCR rejected tuned params (%s); using defaults "
-                                "— tiny text recall will suffer", exc)
+                                "- tiny text recall will suffer", exc)
                     self._ocr = RapidOCR()
             return self._ocr
 

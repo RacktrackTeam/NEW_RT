@@ -143,7 +143,7 @@ summary = f"""
 </div>
 <h2>The test set</h2>
 <div class="tablewrap"><table><tr><th>Test set</th><th>Photos</th><th>Logic alone</th><th>RT-EOS units</th><th>RT-EOS units + logic</th></tr>
-{"".join(f'<tr><td>{esc(x["name"].replace(" (current test set)", ""))}</td><td class="n">{x["photos"]}</td><td class="n">{pct(x["logic"])}</td><td class="n">{pct(x["rteos"])}</td><td class="n"><b>{pct(x["best"]) if x.get("best") is not None else "–"}</b></td></tr>' for x in TSETS)}</table></div>
+{"".join(f'<tr><td>{esc(x["name"].replace(" (current test set)", ""))}</td><td class="n">{x["photos"]}</td><td class="n">{pct(x["logic"])}</td><td class="n">{pct(x["rteos"])}</td><td class="n"><b>{pct(x["best"]) if x.get("best") is not None else "-"}</b></td></tr>' for x in TSETS)}</table></div>
 <p class="muted">How a unit is scored: see Test data.</p>"""
 
 # ---------------------------------------------------------------- 2. how it works
@@ -366,7 +366,7 @@ for k, f in enumerate(F):
 ticks = "".join(f'<line x1="{pad}" x2="{W - 10}" y1="{ys(t):.1f}" y2="{ys(t):.1f}" class="gl"/><text x="{pad - 8}" y="{ys(t) + 4:.1f}" class="cy">{t * 100:.0f} %</text>' for t in (0.5, 0.6, 0.7, 0.8))
 stair = (f'<div class="chartwrap"><svg viewBox="0 0 {W} {H}" role="img" aria-label="Best development score after each family of settings">{ticks}{"".join(cols)}'
          f'<polyline points="{" ".join(pts)}" class="run"/></svg></div>')
-fam = "".join(f'<tr><td class="n">{k + 1}</td><td><b>{esc(f["name"])}</b><div class="muted">{esc(f["goal"])}</div></td><td>{esc(f["use"] if not f["use"].startswith(("Nothing", "Replaced")) else f["concl"])}</td><td class="n">{pct(max(f["scores"])) if f["scores"] else "–"}</td></tr>' for k, f in enumerate(F))
+fam = "".join(f'<tr><td class="n">{k + 1}</td><td><b>{esc(f["name"])}</b><div class="muted">{esc(f["goal"])}</div></td><td>{esc(f["use"] if not f["use"].startswith(("Nothing", "Replaced")) else f["concl"])}</td><td class="n">{pct(max(f["scores"])) if f["scores"] else "-"}</td></tr>' for k, f in enumerate(F))
 
 tried = f"""
 <div class="tstrip"><div><b>{n_ideas}</b><span>ideas tried</span></div><div><b>3</b><span>parts in use: the model, the logic, the end check</span></div><div><b>{pct(RL.mean())}</b><span>best, on the test set</span></div></div>
@@ -393,7 +393,7 @@ PAR_TXT = (" With all 15 cores of the laptop each working on a different photo (
 TKEYS = (("logic", "Logic alone"), ("model", "RT-EOS units"), ("both", "RT-EOS units + logic"))
 if TIMING:
     trows = "".join(f'<tr><td>{esc(x["name"].replace(" (current test set)", ""))}</td><td class="n">{x["photos"]}</td>'
-                    + "".join(f'<td class="n">{secs(set_time(x, k)[0])} · {secs(set_time(x, k)[1])}</td>' if set_time(x, k)[0] is not None else '<td class="n">–</td>' for k, _ in TKEYS) + "</tr>" for x in TSETS)
+                    + "".join(f'<td class="n">{secs(set_time(x, k)[0])} · {secs(set_time(x, k)[1])}</td>' if set_time(x, k)[0] is not None else '<td class="n">-</td>' for k, _ in TKEYS) + "</tr>" for x in TSETS)
     timing_html = f"""<h2>Time</h2>
 <p class="lead">Seconds per photo, then for the whole set, one photo at a time on an Apple M5 Pro laptop (CPU only, model already loaded, photo already read from disk).</p>
 <div class="tablewrap"><table><tr><th>Test set</th><th>Photos</th>{"".join(f"<th>{n}: per photo · whole set</th>" for _, n in TKEYS)}</tr>{trows}</table></div>
@@ -408,7 +408,7 @@ testdata = f"""
 <div class="card"><h3>Per rack, then averaged</h3><p>Each photo's score is its right units divided by the larger of the hand-drawn and drawn counts, so extra units cost score. The photos are then averaged.</p></div></div>
 <h2>The test set</h2>
 <div class="tablewrap"><table><tr><th>Test set</th><th>Photos</th><th>Logic alone</th><th>RT-EOS units</th><th>RT-EOS units + logic</th></tr>
-{"".join(f'<tr><td>{esc(x["name"].replace(" (current test set)", ""))}</td><td class="n">{x["photos"]}</td><td class="n">{pct(x["logic"])}</td><td class="n">{pct(x["rteos"])}</td><td class="n"><b>{pct(x["best"]) if x.get("best") is not None else "–"}</b></td></tr>' for x in TSETS)}</table></div>
+{"".join(f'<tr><td>{esc(x["name"].replace(" (current test set)", ""))}</td><td class="n">{x["photos"]}</td><td class="n">{pct(x["logic"])}</td><td class="n">{pct(x["rteos"])}</td><td class="n"><b>{pct(x["best"]) if x.get("best") is not None else "-"}</b></td></tr>' for x in TSETS)}</table></div>
 <p class="muted">The test set shares {SAT["overlap_with_tuning"]["best"]} photos with the photos the end check was tuned on; {UNSEEN_TXT}. It is one set since 14 October 2026: the former best 50, 100, 200 and whole-rack sets merged, each photo once, after the quality rule and two reviews by eye.</p>
 {timing_html}
 <h2>Rack sizes</h2>

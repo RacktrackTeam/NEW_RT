@@ -91,7 +91,7 @@ LABELS = {
 
 
 def _norm(s) -> str:
-    """Lowercase, keep only alphanumerics — for robust token matching."""
+    """Lowercase, keep only alphanumerics - for robust token matching."""
     return re.sub(r"[^a-z0-9]", "", str(s).lower())
 
 
@@ -485,7 +485,7 @@ class SpecAgent:
 
     def _is_sparse(self, rec: dict) -> bool:
         """A row is 'sparse' if it has <2 useful fields and <3 features
-        and no extra_specs — i.e. the UI would show almost nothing.
+        and no extra_specs - i.e. the UI would show almost nothing.
         """
         useful = sum(1 for k in self._USEFUL_FIELDS if rec.get(k) not in (None, "", 0))
         feats = len(rec.get("features") or [])
@@ -528,7 +528,7 @@ class SpecAgent:
         except Exception as e:
             logger.warning("auto-enrich persist failed: %s", e)
         logger.info(
-            "Auto-enriched %s/%s — added %d fields",
+            "Auto-enriched %s/%s - added %d fields",
             merged.get("vendor"),
             merged.get("model"),
             added,
@@ -615,7 +615,7 @@ class SpecAgent:
         field_conf = getattr(rec, "confidence", {}) or {}
         return {
             "type": "spec",
-            "message": "Not in the local DB — fetched live from the web "
+            "message": "Not in the local DB - fetched live from the web "
             "(now cached for instant future lookups):",
             "result": result,
             "confidence": "live-web",
@@ -636,7 +636,7 @@ class SpecAgent:
             for r in records:
                 v = r.get(k)
                 if v is None or v == "":
-                    v = "—"
+                    v = "-"
                 elif isinstance(v, list):
                     v = ", ".join(map(str, v))
                 row += str(v).ljust(wc)

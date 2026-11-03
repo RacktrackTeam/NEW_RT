@@ -1,11 +1,11 @@
 /**
- * Smoke tests — exercise the most load-bearing routes without spinning the
+ * Smoke tests - exercise the most load-bearing routes without spinning the
  * full worker pool or hitting external services. Run with:
  *
  *   node --test test/smoke.test.js
  *
  * Required env:
- *   JWT_SECRET   — any non-empty string (overrides the generated signing key)
+ *   JWT_SECRET   - any non-empty string (overrides the generated signing key)
  *   NODE_ENV=test, PORT=0
  */
 
@@ -15,7 +15,7 @@ const http = require('node:http');
 
 // Background timers (the orphan collector, log rotation) keep the event loop
 // alive past the last test. Force-exit once all tests
-// have reported — equivalent to Node 22's --test-force-exit flag but works
+// have reported - equivalent to Node 22's --test-force-exit flag but works
 // on the Node 20 baseline the repo currently targets.
 after(() => { setImmediate(() => process.exit(0)); });
 
@@ -226,7 +226,7 @@ test('a refresh token replayed after its grace window is treated as theft', asyn
   assert.equal(replay.status, 401);
   assert.match(replay.body, /reuse/i);
 
-  // And the response must kill the whole family, not just this chain — the
+  // And the response must kill the whole family, not just this chain - the
   // point of detection is that the legitimate session is compromised too.
   const live = db.prepare('SELECT COUNT(*) c FROM refresh_tokens WHERE user_id = ? AND revoked_at IS NULL')
                  .get(userId).c;
@@ -269,7 +269,7 @@ test('logout revokes the refresh token even with no access token', async (t) => 
   const login = await postJson(port, '/api/auth/login', { username, password });
   const refresh = cookieVal(login.headers['set-cookie'], 'rt_refresh');
 
-  // Deliberately no rt_access — a browser whose 15-minute token already
+  // Deliberately no rt_access - a browser whose 15-minute token already
   // expired must still be able to end its session.
   const out = await postJson(port, '/api/auth/logout', undefined,
     { Cookie: `rt_refresh=${refresh}`, Origin: 'http://127.0.0.1' });

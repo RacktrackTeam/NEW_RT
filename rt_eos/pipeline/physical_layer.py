@@ -1,5 +1,5 @@
 """
-physical_layer.py — the physical layer report for one scanned rack.
+physical_layer.py - the physical layer report for one scanned rack.
 
 One file per rack, built only from what the scan actually produced, in the
 order the rack ladder asks for it:

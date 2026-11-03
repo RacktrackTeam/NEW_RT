@@ -1929,7 +1929,7 @@ function drawSteps() {
 function drawClfKpis() {
   const R = HAND.results, M = HAND.other && HAND.other.metrics;
   byId('clf-kpis').innerHTML = [['Chosen model', 'ConvNeXt-Tiny', '28.6 M parameters · free to use', true], ['Training crops', '__NTRAIN__', 'from photos of 1 MP or more', false],
-    ['Training length', R ? `${R.epochs_run} rounds` : '–', R ? `best after round ${R.best_epoch + 1}` : '', false], ['Test', M ? pc(M.accuracy) : '–', M ? `accuracy · macro-F1 ${pc(M.macro_f1)}` : '', false]]
+    ['Training length', R ? `${R.epochs_run} rounds` : '-', R ? `best after round ${R.best_epoch + 1}` : '', false], ['Test', M ? pc(M.accuracy) : '-', M ? `accuracy · macro-F1 ${pc(M.macro_f1)}` : '', false]]
     .map(([k, v, f, t]) => `<div class="kpi"><div class="k">${k}</div><div class="v${t ? ' t' : ''}">${v}</div><div class="f">${f}</div></div>`).join('');
 }
 function drawClfTest() {
@@ -1961,7 +1961,7 @@ function groupedBars(id, cats, series, opt) {
       if (opt.labels) el('text', {x: x + cw / 2, y: yv - 4, 'text-anchor': 'middle', 'font-size': 10.5, fill: 'var(--ink)'}, s, v.toFixed(opt.dp == null ? 1 : opt.dp));
     });
     xLabel(s, cx, top + ph + 15, c, bw);
-    el('rect', {x: left + i * bw, y: top, width: bw, height: ph, fill: 'transparent', 'data-tip': `<b>${c}</b><br>` + series.map(sr => `${sr.name} ${sr.v[i] == null ? '–' : sr.v[i].toFixed(1) + (opt.unit || '')}`).join('<br>')}, s);
+    el('rect', {x: left + i * bw, y: top, width: bw, height: ph, fill: 'transparent', 'data-tip': `<b>${c}</b><br>` + series.map(sr => `${sr.name} ${sr.v[i] == null ? '-' : sr.v[i].toFixed(1) + (opt.unit || '')}`).join('<br>')}, s);
   });
   el('line', {x1: left, x2: w - right, y1: y(lo), y2: y(lo), stroke: 'var(--base)'}, s);
   if (lo > 0) el('text', {x: left, y: 12, 'font-size': 11, fill: 'var(--muted)'}, s, 'axis starts at ' + lo + (opt.unit || ''));
@@ -2007,7 +2007,7 @@ function classTable(id, m, label, C) {
   const counts = m.confusion.map(r => r.reduce((a, b) => a + b, 0));
   byId(id).innerHTML = `<thead><tr><th>Class</th><th>${label} crops</th><th>Recall</th><th>Precision</th><th>F1</th><th class="l">Most confused with</th></tr></thead><tbody>` +
     C.map((c, i) => { const row = m.confusion[i].map((v, j) => [v, j]).filter(([v, j]) => j !== i && v > 0).sort((a, b) => b[0] - a[0])[0];
-      return `<tr><td>${c}</td><td>${counts[i]}</td><td>${(m.recall[i] * 100).toFixed(1)} %</td><td>${(m.precision[i] * 100).toFixed(1)} %</td><td><b>${(m.f1[i] * 100).toFixed(1)} %</b></td><td style="text-align:left">${row ? `${C[row[1]]} (${row[0]})` : '–'}</td></tr>`; }).join('') +
+      return `<tr><td>${c}</td><td>${counts[i]}</td><td>${(m.recall[i] * 100).toFixed(1)} %</td><td>${(m.precision[i] * 100).toFixed(1)} %</td><td><b>${(m.f1[i] * 100).toFixed(1)} %</b></td><td style="text-align:left">${row ? `${C[row[1]]} (${row[0]})` : '-'}</td></tr>`; }).join('') +
     `<tr class="tot"><td>All</td><td>${m.n}</td><td colspan="2">accuracy ${(m.acc * 100).toFixed(1)} %</td><td><b>macro ${(m.macro_f1 * 100).toFixed(1)} %</b></td><td></td></tr></tbody>`;
 }
 function drawRun() {
@@ -2021,9 +2021,9 @@ function drawRun() {
     : `Training now on the high-resolution set. ${H.length} of up to ${r.max_epochs} epochs done. This page is rebuilt after every epoch that sets a new best.`;
   const bv = b ? b.val : null;
   byId('run-kpis').innerHTML = [
-    ['Best valid macro-F1', bv ? (bv.macro_f1 * 100).toFixed(1) + ' %' : '–', bv ? `at epoch ${bi + 1} of ${H.length}` : 'no epoch yet'],
-    ['Valid accuracy', bv ? (bv.acc * 100).toFixed(1) + ' %' : '–', 'at the best epoch'],
-    done ? ['Test macro-F1', HAND.other && HAND.other.metrics ? (HAND.other.metrics.macro_f1 * 100).toFixed(1) + ' %' : '–', HAND.other && HAND.other.metrics ? `accuracy ${(HAND.other.metrics.accuracy * 100).toFixed(1)} %; details in Evaluation` : ''] : ['Epochs done', `${H.length} / ${r.max_epochs}`, `about ${(secs / 60).toFixed(1)} min each · up to ${eta} min left`],
+    ['Best valid macro-F1', bv ? (bv.macro_f1 * 100).toFixed(1) + ' %' : '-', bv ? `at epoch ${bi + 1} of ${H.length}` : 'no epoch yet'],
+    ['Valid accuracy', bv ? (bv.acc * 100).toFixed(1) + ' %' : '-', 'at the best epoch'],
+    done ? ['Test macro-F1', HAND.other && HAND.other.metrics ? (HAND.other.metrics.macro_f1 * 100).toFixed(1) + ' %' : '-', HAND.other && HAND.other.metrics ? `accuracy ${(HAND.other.metrics.accuracy * 100).toFixed(1)} %; details in Evaluation` : ''] : ['Epochs done', `${H.length} / ${r.max_epochs}`, `about ${(secs / 60).toFixed(1)} min each · up to ${eta} min left`],
     ['Page updated', r.updated, done ? 'final' : 'rebuilt on each new best epoch']
   ].map(([k, v, f]) => `<div class="kpi"><div class="k">${k}</div><div class="v">${v}</div><div class="f">${f}</div></div>`).join('');
   byId('run-note').innerHTML = done ? '' : `<div class="callout"><span class="ic">i</span><p>Running at half duty cycle so the Mac stays cool. ${H.length && H.length - 1 - bi >= 1 ? `${H.length - 1 - bi} epoch${H.length - 1 - bi > 1 ? 's' : ''} without a gain; training stops after 8.` : 'The last epoch was a new best.'} ${r.last_step ? 'Last log line: <code>' + r.last_step + '</code>' : ''}</p></div>`;
@@ -2086,7 +2086,7 @@ function drawMetrics() {
     <dt>F1</dt><dd>One number that is high only when both are high. A model that says "${worst}" for everything would have 100 % recall but tiny precision, and a low F1.</dd>
     <dt>Macro</dt><dd>Work out the score for each of the ${C.length} classes, then take the plain average. That is why one weak class pulls macro F1 down.</dd></dl>`;
   // reliability
-  const R = M.reliability; groupedBars('c-run-rel', R.map(b => `${Math.round(b[0] * 100)}–${Math.round(b[1] * 100)} %`), [{name: 'actual accuracy', c: 'var(--s1)', v: R.map(b => b[3] * 100)}], {lo: 0, hi: 100, step: 20, unit: ' %', h: 280, labels: true, dp: 0});
+  const R = M.reliability; groupedBars('c-run-rel', R.map(b => `${Math.round(b[0] * 100)}-${Math.round(b[1] * 100)} %`), [{name: 'actual accuracy', c: 'var(--s1)', v: R.map(b => b[3] * 100)}], {lo: 0, hi: 100, step: 20, unit: ' %', h: 280, labels: true, dp: 0});
   // scorecard
   byId('run-scorecard').innerHTML = '<thead><tr><th>Class</th><th>Crops</th><th>Precision</th><th>Recall</th><th>F1</th><th>Confidence</th></tr></thead><tbody>' +
     C.slice().sort((a, b) => pcs[b].f1 - pcs[a].f1).map(c => { const q = pcs[c]; return `<tr><td>${c}</td><td>${q.support}</td><td><span class="lic ${col3(q.precision)}">${pc(q.precision)}</span></td><td><span class="lic ${col3(q.recall)}">${pc(q.recall)}</span></td><td><span class="lic ${col3(q.f1)}">${pc(q.f1)}</span></td><td>${pc(q.mean_conf)}</td></tr>`; }).join('') + '</tbody>';
@@ -2137,7 +2137,7 @@ const noteFor = (q, key) => {
   return `<span class="gp">${q.other ? 'different types' : 'same type'}</span>`;
 };
 const howRow = (q, key) => `<div class="hrow"><img src="data:image/jpeg;base64,${q.img}" alt="">
-    <div class="sc">${q.said.map(([n, v], i) => `<div><span>${n}</span><i${i ? ' class="l"' : ''} style="width:${v == null ? 0 : 100 * v}%"></i><b>${v == null ? '–' : Math.round(100 * v) + ' %'}</b></div>`).join('')}</div>
+    <div class="sc">${q.said.map(([n, v], i) => `<div><span>${n}</span><i${i ? ' class="l"' : ''} style="width:${v == null ? 0 : 100 * v}%"></i><b>${v == null ? '-' : Math.round(100 * v) + ' %'}</b></div>`).join('')}</div>
     <div class="arr">→</div><div class="out ${q.other ? 'oth' : 'ok'}">${q.other ? `<b>Other</b>${SUBTXT[key].no(q)}` : `<b>${q.pred}</b>${SUBTXT[key].yes}`}${noteFor(q, key)}</div></div>`;
 const ruleFor = key => key === 'm1' ? ruleNote() : key === 'm2' ? `<p class="rule1"><b>The rule:</b> if Model 2 finds no box on the device, or its box score is below ${CUT2() != null ? CUT2().toFixed(2) : 'the cut-off'}, the answer is Other. The cut-off was set on the valid photos so that Model 2 says Other as often as Model 1.</p>`
   : '<p class="rule1"><b>The rule:</b> the answer is Model 1\'s, and it goes out only when Model 2 names the same type. A different type, or no box from Model 2, means Other.</p>';
@@ -2156,7 +2156,7 @@ function drawWhy() {
     ['Answers right after Other', pc(E.right / E.answered), `${fmt(E.right)} of ${fmt(E.answered)} answers`],
     ['Still wrong', fmt(E.wrong), `of ${fmt(E.n)} test crops`],
     ['In racks', fmt(E.racks.length), (() => { const top = E.racks.filter(r => r.n >= 3); return `${top.length} racks hold ${top.reduce((a, r) => a + r.n, 0)} of the ${E.wrong}`; })()],
-    WR0 ? [`Without the ${WR0.k} worst racks`, pc(WR0.o_right / (WR0.o_right + WR0.o_wrong)), `of answers right after Other, ${WR0.o_wrong} wrong`] : ['How sure it was', E.min_prob != null ? `≥ ${Math.round(100 * E.min_prob)} %` : '–', 'on every one of them']
+    WR0 ? [`Without the ${WR0.k} worst racks`, pc(WR0.o_right / (WR0.o_right + WR0.o_wrong)), `of answers right after Other, ${WR0.o_wrong} wrong`] : ['How sure it was', E.min_prob != null ? `≥ ${Math.round(100 * E.min_prob)} %` : '-', 'on every one of them']
   ].map(([k, v, f]) => `<div class="kpi"><div class="k">${k}</div><div class="v">${v}</div><div class="f">${f}</div></div>`).join('');
   const cnt = k => E.cases.filter(c => c.why === k).length, keys = Object.keys(EWHY).filter(k => cnt(k)).sort((a, b) => cnt(b) - cnt(a)), mx = Math.max(...keys.map(cnt));
   byId('edge-why-t').textContent = `Why ${E.wrong} are still wrong`;
@@ -2201,7 +2201,7 @@ function drawMis() {
     ['Mistakes', TA ? `${fmt(TB.wrong)} → ${fmt(W.wrong)}` : fmt(W.wrong), `of ${fmt(W.n)} test crops: Other off, then on. This page shows the ${fmt(W.wrong)} left with Other on.`],
     TA && ['Wrong answers turned Other', fmt(TA.caught), `of the ${fmt(TB.wrong)} mistakes: caught by Other, no longer wrong`],
     TA && ['Right answers turned Other', fmt(TA.lost), `of ${fmt(TB.right)} right answers: the cost of Other`],
-    O.length ? ['Biggest mix-up', `${O[0].n}`, `${O[0].label} called ${O[0].pred}`] : ['Biggest mix-up', '–', 'no mistakes left']
+    O.length ? ['Biggest mix-up', `${O[0].n}`, `${O[0].label} called ${O[0].pred}`] : ['Biggest mix-up', '-', 'no mistakes left']
   ].filter(Boolean).map(([k, v, f]) => `<div class="kpi"><div class="k">${k}</div><div class="v">${v}</div><div class="f">${f}</div></div>`).join('');
   if (!O.length) { byId('mis-list').innerHTML = ''; byId('mis-detail').innerHTML = '<p>No mistakes are left on these photos.</p>'; byId('mis-list-t').textContent = 'No mix-ups left'; return; }
   const mx = O[0].n;
@@ -2287,7 +2287,7 @@ function drawApr() {
       <dl><dt>${sw(C.r)}Right</dt><dd>${fmt(r.right)}</dd><dt>${sw(C.w)}Wrong</dt><dd>${r.wrong}</dd>${note ? `<dt class="in">${note}</dt><dd class="in"></dd>` : ''}</dl></div>`).join('');
   byId('apr-2-lg').innerHTML = [[C.r, 'answered right'], [C.or, 'Other, answer would have been right'], [C.ow, 'Other, answer would have been wrong'], [C.w, 'answered wrong']].map(([c, l]) => `<span><i style="background:${c}"></i>${l}</span>`).join('');
   byId('apr-2').innerHTML = [['Model 1 + Other', 'Other when the top two scores are close, or the crop looks unlike training.', o1],
-    ['Model 2 + Other', `Other when no box is found, or its score is below ${A.cut2 != null ? A.cut2.toFixed(2) : '–'} (set on the valid photos so Model 2 says Other as often as Model 1).`, o2],
+    ['Model 2 + Other', `Other when no box is found, or its score is below ${A.cut2 != null ? A.cut2.toFixed(2) : '-'} (set on the valid photos so Model 2 says Other as often as Model 1).`, o2],
     ['Model 1 + Model 2', 'The answer goes out only when both name the same type; otherwise Other.', bo]]
     .map(([n, d, r]) => `<div class="mcd${r === bo ? ' top' : ''}"><h3>${n}${r === bo ? '<span class="chip do">best</span>' : ''}</h3><p class="sub">${d}</p><div class="big">${pc(r.answers_right)}<small>of answers right</small></div>
       <div class="bastack">${seg(r.right, C.r, 'answered right')}${seg(r.other_right, C.or, 'Other, would have been right', true)}${seg(r.other_wrong, C.ow, 'Other, would have been wrong')}${seg(r.wrong, C.w, 'answered wrong')}</div>
@@ -2310,7 +2310,7 @@ function drawApr() {
   const ck = (ok, t, d, st) => `<div class="ck"><span class="ic ${ok ? 'y' : 't'}">${ok ? '✓' : '!'}</span><div><b>${t}</b><span>${d}</span></div><span class="st"><span class="chip ${ok ? 'do' : 'dq'}">${st}</span></span></div>`;
   byId('apr-check').innerHTML = [
     ck(true, 'Other goes to a person, never into the inventory', 'A device the models are not sure about is shown as Other for someone to confirm. A missing answer is fixed in seconds; a wrong one stays hidden. This is the standard way to use a model you cannot make perfect.', 'right way'),
-    ck(true, 'Every cut-off was set on the valid photos', `Model 1's Other rule and Model 2's score cut-off (${A.cut2 != null ? A.cut2.toFixed(2) : '–'}) were set on the valid photos. The ${fmt(t.n)} test crops were only scored, never used to choose a setting.`, 'right way'),
+    ck(true, 'Every cut-off was set on the valid photos', `Model 1's Other rule and Model 2's score cut-off (${A.cut2 != null ? A.cut2.toFixed(2) : '-'}) were set on the valid photos. The ${fmt(t.n)} test crops were only scored, never used to choose a setting.`, 'right way'),
     ck(true, 'The agreement rule has nothing to tune', 'Same type: answered. Different: Other. With no setting to adjust, it cannot be fitted to the test crops.', 'right way'),
     ck(false, 'Model 2 must not have trained on the test photos', `If any of the ${fmt(t.photos)} test photos were in Model 2's training set, its numbers here are too high. To confirm with the team, then re-score if needed.`, 'to confirm'),
     ck(false, `The last ${bo.wrong} cannot be caught by any rule`, `Both models are sure and agree, so no score or vote can flag them. Most are racks full of one look-alike model; some labels may be wrong. They need the network team's label check, or the rack context (unit height, neighbours).`, 'next step'),
@@ -2332,8 +2332,8 @@ function drawOv() {
   const ta = T && T.tally_after, tb = T && T.tally_before, A = t => t.right / Math.max(1, t.right + t.wrong), CL = EDGE && EDGE.clear;
   byId('ov-kpis').innerHTML = [
     ['Accuracy', pc(M.accuracy), `${fmt(Math.round(M.accuracy * M.n))} of ${fmt(M.n)} test crops right`],
-    ['With Other', ta ? pc(A(ta)) : '–', ta ? `of its answers right; ${ta.wrong} wrong, ${ta.other} answered Other` : ''],
-    ['Without blurry or tilted', CL ? pc(A(CL.clear.o_right ? {right: CL.clear.o_right, wrong: CL.clear.o_wrong} : {right: 0, wrong: 1})) : '–', CL ? `of answers right with Other on ${fmt(CL.clear.n)} clear crops` : ''],
+    ['With Other', ta ? pc(A(ta)) : '-', ta ? `of its answers right; ${ta.wrong} wrong, ${ta.other} answered Other` : ''],
+    ['Without blurry or tilted', CL ? pc(A(CL.clear.o_right ? {right: CL.clear.o_right, wrong: CL.clear.o_wrong} : {right: 0, wrong: 1})) : '-', CL ? `of answers right with Other on ${fmt(CL.clear.n)} clear crops` : ''],
     ['Macro-F1', pc(M.macro_f1), 'every type counts the same, large or small']
   ].map(([k, v, f]) => `<div class="kpi"><div class="k">${k}</div><div class="v">${v}</div><div class="f">${f}</div></div>`).join('');
   const D = DS.hi, R0 = HAND.results;
@@ -2419,7 +2419,7 @@ function drawRes() {
   byId('res-classes').innerHTML = '<thead><tr><th class="l">Class</th><th>Test crops</th><th>Right, full detail</th><th>Right, half detail</th></tr></thead><tbody>' +
     Object.entries(R.per_class).sort((a, b) => a[1].acc - b[1].acc).map(([c, q]) => `<tr><td><b>${c}</b></td><td>${q.n}</td><td>${pc(full.per_class[c])}</td><td>${pc(half.per_class[c])}</td></tr>`).join('') + '</tbody>';
   byId('res-canvas').innerHTML = !CC ? '' : '<thead><tr><th class="l">Box</th><th>Accuracy</th><th>Macro-F1</th><th>Fixed / broke vs 512 × 128</th><th>Chance (p)</th><th>Compute</th></tr></thead><tbody>' +
-    CC.map(c => `<tr><td><b>${c.canvas.replace('x', ' × ')}</b></td><td>${pc(c.acc)}</td><td>${pc(c.macro_f1)}</td><td>${c.fixed == null ? '–' : `${c.fixed} / ${c.broke}`}</td><td>${c.p == null ? '–' : c.p.toFixed(3)}</td><td>${b0 ? (c.secs_per_epoch / b0.secs_per_epoch).toFixed(1) + '×' : '–'}</td></tr>`).join('') + '</tbody>';
+    CC.map(c => `<tr><td><b>${c.canvas.replace('x', ' × ')}</b></td><td>${pc(c.acc)}</td><td>${pc(c.macro_f1)}</td><td>${c.fixed == null ? '-' : `${c.fixed} / ${c.broke}`}</td><td>${c.p == null ? '-' : c.p.toFixed(3)}</td><td>${b0 ? (c.secs_per_epoch / b0.secs_per_epoch).toFixed(1) + '×' : '-'}</td></tr>`).join('') + '</tbody>';
 }
 
 /* ---------- unknown answers ---------- */
@@ -2433,7 +2433,7 @@ function drawUnk() {
   byId('unk-cl-t').textContent = C.length > 1 ? `${C[0].name} and ${C[1].name} become Other most often` : 'Device types answered Other';
   byId('unk-classes').innerHTML = C.slice(0, 5).map(c => `<div class="rr" style="--c1:150px"><div class="lb"><b>${c.name}</b><span>${c.other} of ${c.n} crops</span></div><div class="tk"><div style="width:${100 * c.other / c.n / mx}%;background:var(--base)"></div></div><span class="v">${pc(c.other / c.n)}</span></div>`).join('');
   byId('unk-table').innerHTML = '<thead><tr><th class="l">Device type</th><th>Test crops</th><th>Answered Other</th><th>Would have been wrong</th><th>Would have been right</th><th class="l">Instead of</th></tr></thead><tbody>' +
-    C.map(c => `<tr><td><b>${c.name}</b></td><td>${c.n}</td><td>${c.other}</td><td>${c.would_wrong}</td><td>${c.other - c.would_wrong}</td><td style="text-align:left">${c.top.map(([k, v]) => `${k} ${v}`).join(' · ') || '–'}</td></tr>`).join('') + '</tbody>';
+    C.map(c => `<tr><td><b>${c.name}</b></td><td>${c.n}</td><td>${c.other}</td><td>${c.would_wrong}</td><td>${c.other - c.would_wrong}</td><td style="text-align:left">${c.top.map(([k, v]) => `${k} ${v}`).join(' · ') || '-'}</td></tr>`).join('') + '</tbody>';
   const NM = {'unsure': 'Weak scores', 'unlike any training crop': 'Unlike any training crop', 'close call': 'Top two too close'}, rm = Math.max(...U.reasons.map(r => r[1]));
   byId('unk-reasons').innerHTML = U.reasons.map(([r, n]) => `<div class="rr" style="--c1:170px"><div class="lb"><b>${NM[r] || r}</b><span>${n} crops</span></div><div class="tk"><div style="width:${100 * n / rm}%;background:var(--base)"></div></div><span class="v">${pc(n / U.other)}</span></div>`).join('');
   const tm = U.torn.length ? U.torn[0][1] : 1;

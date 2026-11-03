@@ -3,8 +3,8 @@ Model-backed occlusion gate for uploaded rack photos.
 
 This replaces the hand-tuned heuristic in quality_check.check_occlusion() with
 the trained MobileNetV2 classifier (Models/photo_quality_check.pth). It runs at the
-same point in the pipeline as every other quality check — on upload, before the
-image enters analysis — and returns the SAME contract, so nothing downstream
+same point in the pipeline as every other quality check - on upload, before the
+image enters analysis - and returns the SAME contract, so nothing downstream
 (worker, server, client modal) has to change:
 
     {"ok": True,  "metrics": {...}}                       # clear
@@ -12,7 +12,7 @@ image enters analysis — and returns the SAME contract, so nothing downstream
     {"ok": False, "kind": "occlusion", "retryable": True} # severe -> offer re-capture
 
 Why swap the heuristic out: it inferred "cables" indirectly from edge-orientation
-ratios and colour saturation. That misfires both ways — a rack of vividly
+ratios and colour saturation. That misfires both ways - a rack of vividly
 labelled devices reads as cable clutter, while a wall of grey/white cables (the
 common case) barely moves either signal. The classifier was trained on actual
 clear vs occluded racks, so it judges the thing we care about instead of a proxy.
@@ -34,20 +34,20 @@ _DEFAULT_MODEL = _REPO_ROOT / "Models" / "photo_quality_check.pth"
 # Env override for deployments that stage weights elsewhere.
 MODEL_FILE = pathlib.Path(os.environ.get("RACK_CLASSIFIER_PATH", str(_DEFAULT_MODEL)))
 
-# Confidence at or above which "occluded" is treated as SEVERE — a hard stop that
+# Confidence at or above which "occluded" is treated as SEVERE - a hard stop that
 # offers multi-angle re-capture. Below it, "occluded" is a soft warning and the
 # scan proceeds.
 #
 # 0.55 sits just above the 0.50 argmax boundary, so in practice an image the
 # model calls occluded is surfaced as a block rather than a warning; the warning
 # band is the narrow 0.50-0.55 sliver where the model is genuinely undecided.
-# That is the intent — an occluded rack should prompt for side-angle photos, not
+# That is the intent - an occluded rack should prompt for side-angle photos, not
 # a note the user scrolls past.
 #
 # Checked against the nine Test_Image racks before choosing it: the eight clear
 # ones score p_occluded between 0.013 and 0.149, so there is a wide margin below
 # this threshold and none of them trip it. The heavily-cabled patch-panel rack
-# scores 0.601 and does. Re-measure if the model is retrained — this is tuned to
+# scores 0.601 and does. Re-measure if the model is retrained - this is tuned to
 # THIS checkpoint's confidence distribution, not a universal constant.
 OCCLUSION_HARD_CONF = float(os.environ.get("RACK_CLASSIFIER_HARD_CONF", "0.55"))
 
@@ -77,7 +77,7 @@ def _ensure_loaded():
 
 
 def available():
-    """True if the classifier is usable — lets callers report which detector ran."""
+    """True if the classifier is usable - lets callers report which detector ran."""
     _ensure_loaded()
     return _model is not None
 
@@ -104,7 +104,7 @@ def classify_occlusion(bgr_img):
         pil = Image.fromarray(cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB))
         label, confidence, probs = predict_image(pil, _model, _classes)
     except Exception:
-        # Never let an inference error break an upload — fall back.
+        # Never let an inference error break an upload - fall back.
         return None
 
     metrics = {
@@ -138,7 +138,7 @@ def classify_occlusion(bgr_img):
         "ok": True,
         "warning": "occlusion",
         "warning_msg": (
-            "Cables cover much of the rack — some devices behind cable bundles may "
+            "Cables cover much of the rack - some devices behind cable bundles may "
             "not be detected. Side-angle photos would improve accuracy."
         ),
         "metrics": metrics,

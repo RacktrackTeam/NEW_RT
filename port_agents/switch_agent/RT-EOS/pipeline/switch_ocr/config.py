@@ -48,7 +48,7 @@ class OCRConfig:
     # Detection sensitivity (passed to the PaddleOCR detector)
     # ------------------------------------------------------------------ #
     #: Cap on the longest image side fed to the detector. Higher keeps tiny
-    #: text legible at the cost of speed/memory. Must be generous — the
+    #: text legible at the cost of speed/memory. Must be generous - the
     #: pipeline's own upscaling is pointless if the detector shrinks the
     #: image back down.
     det_limit_side_len: int = 2560
@@ -83,7 +83,7 @@ class OCRConfig:
     ])
     #: Target size (longest side, px) for the upscaled variant.
     upscale_target: int = 2200
-    #: Also make sure the SHORTEST side reaches this many px — rescues wide,
+    #: Also make sure the SHORTEST side reaches this many px - rescues wide,
     #: low “rack strip” photos where text height is what matters.
     upscale_min_side: int = 700
     #: Never upscale beyond this factor (avoids inventing detail).
@@ -115,7 +115,7 @@ class OCRConfig:
     # ------------------------------------------------------------------ #
     #: When the first pass finds no model (or a weak identification), crop
     #: around the text it DID find, magnify + enhance each region and OCR
-    #: again — the way a human zooms into a photo.
+    #: again - the way a human zooms into a photo.
     zoom_retry: bool = True
     #: Run the zoom pass when device confidence is below this (or the model
     #: is missing entirely).
@@ -135,14 +135,14 @@ class OCRConfig:
     # Rotate-and-retry (tilted rack photos) + per-image time budget
     # ------------------------------------------------------------------ #
     #: When zoom still hasn't resolved the device, retry the (enhanced)
-    #: image at small rotations — rack photos are rarely perfectly level.
+    #: image at small rotations - rack photos are rarely perfectly level.
     rotate_retry: bool = True
     rotate_angles: List[float] = field(default_factory=lambda: [-8.0, -4.0, 4.0, 8.0])
 
     # ------------------------------------------------------------------ #
-    # Orientation retry (coarse 90-degree steps — sideways/upside-down)
+    # Orientation retry (coarse 90-degree steps - sideways/upside-down)
     # ------------------------------------------------------------------ #
-    #: Retry at 90/180/270 degrees — catches photos with no (or wrong)
+    #: Retry at 90/180/270 degrees - catches photos with no (or wrong)
     #: EXIF orientation tag (common for screenshots, WhatsApp re-saves,
     #: PNG/WebP which don't carry EXIF at all).
     orientation_retry: bool = True
@@ -159,14 +159,14 @@ class OCRConfig:
     # Perspective correction (angled photos of the device body)
     # ------------------------------------------------------------------ #
     #: Detect the device's quadrilateral outline and warp it to
-    #: fronto-parallel before a retry — recovers foreshortened labels on
+    #: fronto-parallel before a retry - recovers foreshortened labels on
     #: photos taken from an angle rather than straight-on.
     perspective_retry: bool = True
 
     # ------------------------------------------------------------------ #
     # Glare repair (flash / reflective-metal blowout)
     # ------------------------------------------------------------------ #
-    #: Inpaint blown-out specular highlights and retry — only pays the
+    #: Inpaint blown-out specular highlights and retry - only pays the
     #: inpaint+OCR cost when a meaningful blown-out fraction is actually
     #: detected (cheap check first), so clean photos skip it for free.
     deglare_retry: bool = True
@@ -177,7 +177,7 @@ class OCRConfig:
     # Best-contrast-channel retry (colour silkscreen that grayscale hides)
     # ------------------------------------------------------------------ #
     #: Retry using whichever raw B/G/R channel has the strongest local
-    #: contrast instead of the standard luminance mix — rescues colour
+    #: contrast instead of the standard luminance mix - rescues colour
     #: combinations (e.g. white-on-light-blue) that nearly cancel out in
     #: grayscale.
     channel_retry: bool = True
@@ -186,7 +186,7 @@ class OCRConfig:
     # Multi-engine ensemble
     # ------------------------------------------------------------------ #
     #: Run every installed OCR backend (paddle + rapidocr + tesseract, or
-    #: whichever are actually importable) and pool all their readings —
+    #: whichever are actually importable) and pool all their readings -
     #: strictly more recall than any single engine. Only takes effect when
     #: ``engine == "auto"``; an explicit --engine choice is always honoured
     #: as-is. Harmless when only one backend is installed (falls back to

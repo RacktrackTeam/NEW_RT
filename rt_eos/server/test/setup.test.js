@@ -3,7 +3,7 @@
  * seeded database.
  *
  * Same shape as tenant_isolation.test.js: a throwaway auth.db is seeded before
- * the modules load, and every rule is asserted in BOTH directions — the right
+ * the modules load, and every rule is asserted in BOTH directions - the right
  * people get in, the wrong people do not, and completeness moves from all
  * false to canScan true only when all three mandatory facts hold.
  *
@@ -193,7 +193,7 @@ test('spaces nest, refuse duplicates at one level, and cannot be moved beneath t
   rowA = r.json.space;
   assert.equal(rowA.parent_id, hall.id);
 
-  // Same name, same level — refused. Same name under a different parent — fine.
+  // Same name, same level - refused. Same name under a different parent - fine.
   assert.equal((await call('POST', `${A1}/spaces`, { user: MGR_A1, body: { name: 'hall 1' } })).status, 409,
     'names compare case-insensitively at one level');
   r = await call('POST', `${A1}/spaces`, { user: MGR_A1, body: { name: 'Hall 1', parent_id: hall.id } });
@@ -268,7 +268,7 @@ test('racks are upserted by rack_id: the second call updates, never duplicates',
   // Shape is checked: a rack id is RK- plus a hash, nothing else.
   assert.equal((await call('POST', `${A1}/spaces/${rowA.id}/racks`, { user: MGR_A1, body: { rack_id: '../../etc' } })).status, 400);
   assert.equal((await call('POST', `${A1}/spaces/${rowA.id}/racks`, { user: MGR_A1, body: {} })).status, 400);
-  // The same rack id in ANOTHER Site is that Site's own row — ids are scoped.
+  // The same rack id in ANOTHER Site is that Site's own row - ids are scoped.
   const b1 = await call('GET', `/api/setup/${SITE_B1}`, { user: ADMIN_B });
   const bHall = b1.json.spaces[0];
   r = await call('POST', `/api/setup/${SITE_B1}/spaces/${bHall.id}/racks`, { user: ADMIN_B, body: { rack_id: RACK_A1 } });

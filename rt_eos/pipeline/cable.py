@@ -9,7 +9,7 @@ from torchvision import models, transforms
 # Input geometry must match the training script exactly (cable_type_and_colour):
 #   transforms.Resize((256, 256))
 #   transforms.ToTensor()
-# The new model was trained WITHOUT ImageNet normalization — adding one back
+# The new model was trained WITHOUT ImageNet normalization - adding one back
 # (or using the wrong size) makes the softmax collapse to near-uniform, so
 # predictions look random regardless of class order.
 IMG_HW = (256, 256)
@@ -18,7 +18,7 @@ IMG_SIZE = IMG_HW  # back-compat alias for any caller that imported it
 # Class order = sorted(os.listdir(train_dir)) from the cable_type_and_colour training
 # run. The folder names mix a hyphen (`RJ-45 Violet`) with underscores, and
 # ASCII '-' (0x2D) sorts before '_' (0x5F), so `RJ-45 Violet` lands at index 1
-# — right after `LC_Aqua` — NOT down among the other RJ_45 colors. The exact
+# - right after `LC_Aqua` - NOT down among the other RJ_45 colors. The exact
 # strings/order here are the argmax→label contract; keep them verbatim.
 FALLBACK_CABLE_CLASSES = [
     "LC_Aqua",
@@ -143,12 +143,12 @@ def preprocess_image(img):
 
 
 # Which connectors can physically be present in a given port category. An SFP
-# cage takes an optical transceiver — LC or SC — and cannot accept an RJ-45
+# cage takes an optical transceiver - LC or SC - and cannot accept an RJ-45
 # plug; the reverse is equally true of an RJ-45 jack. The classifier has no idea
 # which port it is looking at, and 12 of its 14 classes are RJ-45 colours, so on
 # an SFP port it reliably answered with an RJ-45 colour. That is the report
 # "when we are saying the cable type in sfp ports then the type also should be
-# SFP" — the port already tells us the answer cannot be RJ-45.
+# SFP" - the port already tells us the answer cannot be RJ-45.
 _CONNECTOR_PREFIXES_BY_CATEGORY = {
     "sfp": ("LC", "SC"),  # fibre only
     "main": ("RJ", "RJ-45", "RJ_45"),  # copper only
@@ -159,14 +159,14 @@ def _category_allows(label, port_category):
     """True when `label` names a connector that can exist in this port type."""
     allowed = _CONNECTOR_PREFIXES_BY_CATEGORY.get(port_category)
     if not allowed or not label:
-        return True  # console/other/unknown — no physical constraint to apply
+        return True  # console/other/unknown - no physical constraint to apply
     head = label.replace("_", "-").split("-")[0].split(" ")[0].upper()
     return any(head == a.replace("_", "-").split("-")[0].upper() for a in allowed)
 
 
 def classify_cable(img, model, classes=None, device: str = "cpu", port_category=None):
     """Classify a cable crop. Returns (label, confidence) where confidence is
-    the softmax probability of the chosen class (0.0–1.0).
+    the softmax probability of the chosen class (0.0-1.0).
 
     `port_category` constrains the answer to connectors that can physically be
     present in that port. We do NOT simply relabel the winner: we pick the
@@ -199,7 +199,7 @@ def classify_cable(img, model, classes=None, device: str = "cpu", port_category=
         if _category_allows(label, port_category):
             return label, float(probs[0, idx].item())
 
-    # Nothing the port can hold scored at all — say nothing rather than guess.
+    # Nothing the port can hold scored at all - say nothing rather than guess.
     return None, 0.0
 
 

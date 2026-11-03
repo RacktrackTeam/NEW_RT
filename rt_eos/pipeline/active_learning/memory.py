@@ -1,8 +1,8 @@
 """Image fingerprint + nearest-correction lookup.
 
 Two-tier matching identical to Active Learning CDP/*.py:
-  1. Perceptual hash (Hamming distance <= HAMMING_TOL) — fast/exact path
-  2. ResNet18 deep-feature cosine similarity (>= SIM_THRESH) — robust path
+  1. Perceptual hash (Hamming distance <= HAMMING_TOL) - fast/exact path
+  2. ResNet18 deep-feature cosine similarity (>= SIM_THRESH) - robust path
 
 The ResNet18 embedder is lazy-loaded so importing this module is cheap; the
 ~3s model load only happens on the first embed() call.

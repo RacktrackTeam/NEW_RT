@@ -1,6 +1,6 @@
 """Port geometry, numbering and patch-panel reconciliation.
 
-Everything here is the pure half of port_pattern.py — box maths, row/column
+Everything here is the pure half of port_pattern.py - box maths, row/column
 clustering and index assignment. No model weights: the detector output is
 hand-built, which is exactly the point, because the numbering bugs this module
 has had (a port re-numbered, or dropped from a column) are geometry bugs, not
@@ -57,7 +57,7 @@ def centers(ports):
 def test_box_iou_identical_disjoint_and_partial():
     assert _box_iou([0, 0, 10, 10], [0, 0, 10, 10]) == 1.0
     assert _box_iou([0, 0, 10, 10], [20, 20, 30, 30]) == 0.0
-    # Edge-touching boxes share zero area — must be 0, not a divide-by-zero.
+    # Edge-touching boxes share zero area - must be 0, not a divide-by-zero.
     assert _box_iou([0, 0, 10, 10], [10, 0, 20, 10]) == 0.0
     assert _box_iou([0, 0, 10, 10], [5, 0, 15, 10]) == pytest.approx(1 / 3)
 
@@ -103,8 +103,8 @@ def test_nms_drops_a_nested_box_that_iou_alone_would_keep():
     """The containment rule is the whole reason _nms isn't plain IoU NMS.
 
     A small box wholly inside a much larger one has a LOW IoU (asserted below),
-    so an IoU-only pass keeps both and the same physical port gets detected —
-    and numbered — twice. Containment is what catches it.
+    so an IoU-only pass keeps both and the same physical port gets detected -
+    and numbered - twice. Containment is what catches it.
     """
     inner = det(40, 40, 50, 50, conf=0.4)
     outer = det(0, 0, 100, 100, conf=0.9)
@@ -119,7 +119,7 @@ def test_nms_drops_a_large_low_conf_box_enclosing_a_kept_small_one():
 
 
 def test_nms_keeps_genuinely_separate_ports():
-    # Side-by-side ports touch but don't overlap — NMS must keep all 8.
+    # Side-by-side ports touch but don't overlap - NMS must keep all 8.
     dets = [det(i * 20, 0, i * 20 + 16, 16) for i in range(8)]
     assert len(_nms(dets)) == 8
 
@@ -200,7 +200,7 @@ def test_two_rows_split_despite_perspective_skew():
 
 
 def test_unpaired_uplink_port_is_assigned_to_the_nearer_row():
-    # Four clean columns plus one extra port on the top row only — it must land
+    # Four clean columns plus one extra port on the top row only - it must land
     # in top (5) not be dropped or shunted to bottom (4).
     ports = row_of(4, y=0) + row_of(4, y=20) + [port(100, 0, 116, 16)]
     rows = _split_into_rows(ports)
@@ -210,7 +210,7 @@ def test_unpaired_uplink_port_is_assigned_to_the_nearer_row():
 
 def test_rows_on_different_pitches_split_via_the_y_gap_fallback():
     # No x-pairing possible (bottom row is offset and sparser), but the rows are
-    # well separated vertically — the fallback must still find two rows.
+    # well separated vertically - the fallback must still find two rows.
     top = row_of(6, y=0, pitch=20)
     bottom = row_of(2, y=60, x0=7, pitch=50)
     rows = _split_into_rows(top + bottom)
@@ -224,7 +224,7 @@ def test_rows_on_different_pitches_split_via_the_y_gap_fallback():
 def test_two_row_numbering_is_column_major():
     ports = row_of(4, y=0) + row_of(4, y=20)
     _index_in_place(ports)
-    # 1,3,5,7 on top; 2,4,6,8 underneath — the numbering printed on a switch.
+    # 1,3,5,7 on top; 2,4,6,8 underneath - the numbering printed on a switch.
     assert [(p["index"], p["center"][1]) for p in ports] == [
         (1, 8),
         (2, 28),
@@ -360,7 +360,7 @@ def test_reconcile_synthesises_up_to_the_standard_count():
     out = _reconcile_patchpanel(list(ports))
     assert len(out) == 24
     assert sum(1 for p in out if p.get("synthesized")) == 4
-    # Synthetic slots default to 'empty' — never claim an unseen port is patched.
+    # Synthetic slots default to 'empty' - never claim an unseen port is patched.
     assert all(p["status"] == "empty" for p in out if p.get("synthesized"))
 
 
@@ -430,7 +430,7 @@ def test_grid_ports_boxes_stay_inside_the_crop():
 
 
 def test_grid_ports_takes_status_from_the_status_model_boxes():
-    # A code-drawn cell must inherit connected/empty from the status model —
+    # A code-drawn cell must inherit connected/empty from the status model -
     # the whole point of passing status_dets in.
     img = np.zeros((50, 400, 3), dtype=np.uint8)
     grid = grid_ports(

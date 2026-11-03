@@ -54,7 +54,7 @@ export default [
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
 
-      // Pragmatic defaults — keep the build unblocked
+      // Pragmatic defaults - keep the build unblocked
       'no-unused-vars': 'warn',
       'no-undef': 'warn',
       'no-empty': 'warn',
@@ -67,7 +67,7 @@ export default [
       'no-control-regex': 'off',
 
       // Accessibility (WCAG) checks caught at code-writing time. Warnings for
-      // now — the browser sweep is the hard gate — so existing screens don't
+      // now - the browser sweep is the hard gate - so existing screens don't
       // block the build while they're brought up to standard.
       'jsx-a11y/alt-text': 'warn',
       'jsx-a11y/anchor-has-content': 'warn',

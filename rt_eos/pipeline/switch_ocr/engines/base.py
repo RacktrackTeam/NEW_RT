@@ -23,7 +23,7 @@ class BaseEngine(ABC):
         """OCR one BGR image and return raw line-level detections.
 
         ``variant`` is the preprocessing-variant name ("original",
-        "enhanced", "upscaled") — engines may use it to pick
+        "enhanced", "upscaled") - engines may use it to pick
         cost/quality trade-offs, or ignore it.
         """
 

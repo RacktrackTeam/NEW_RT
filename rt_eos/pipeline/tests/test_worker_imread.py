@@ -1,5 +1,5 @@
 """The warm worker replaces cv2.imread process-wide, so every library loaded
-beside it — easyocr above all — reads its pictures through that replacement.
+beside it - easyocr above all - reads its pictures through that replacement.
 A stand-in for cv2.imread has to return what cv2.imread returns, shape
 included: easyocr's get_image_list unpacks a grayscale read as
 `maximum_y, maximum_x = img.shape` and dies on anything with a third axis.
@@ -45,7 +45,7 @@ def test_colour_read_keeps_its_three_channels(picture):
 
 
 def test_it_matches_opencvs_own_decode(picture):
-    """Same bytes, same flags, same array — the patch is a transport detail."""
+    """Same bytes, same flags, same array - the patch is a transport detail."""
     with open(picture, "rb") as f:
         expected = cv2.imdecode(np.frombuffer(f.read(), np.uint8), cv2.IMREAD_GRAYSCALE)
     assert np.array_equal(_safe_imread(picture, cv2.IMREAD_GRAYSCALE), expected)

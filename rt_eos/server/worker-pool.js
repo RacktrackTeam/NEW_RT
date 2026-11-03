@@ -40,14 +40,14 @@ function wcount(event) {
 //
 // A worker that answers {ok:false} is normally still healthy: the REQUEST
 // failed, the process did not. CUDA is the exception. Once a CUDA context is
-// invalidated — driver TDR reset, sleep/resume, GPU dropping off the bus — every
+// invalidated - driver TDR reset, sleep/resume, GPU dropping off the bus - every
 // later call in that process returns the same error forever. Nothing short of a
 // new process recovers it.
 //
 // The pool used to hand such a worker straight back to the rotation, because an
 // {ok:false} reply is a well-formed response and only `exit` and `timeout`
 // recycled anything. So a single GPU fault became an unbroken wall of identical
-// failures until someone restarted the server — production logged nine
+// failures until someone restarted the server - production logged nine
 // consecutive "CUDA error: unknown error" scans from one fault, and would have
 // logged nine hundred. Worse, the four workers share one GPU, so a device-level
 // fault poisons all of them at the same instant.
@@ -100,13 +100,13 @@ class Worker extends EventEmitter {
       if (!s) return;
       // Python writes ALL its diagnostics to stderr, including "[worker] ready"
       // on every start. Logging the lot at warn meant a healthy boot produced
-      // dozens of warnings — 56 of the 66 warnings in a 400-row sample were
-      // workers announcing they had started — which buries the warnings that
+      // dozens of warnings - 56 of the 66 warnings in a 400-row sample were
+      // workers announcing they had started - which buries the warnings that
       // matter and makes the Console look like something is wrong when it is
       // not. Classify by content: only genuine failures are warnings.
       // No leading \b: Python exception names are compounds, so "RuntimeError"
       // and "ConnectionRefusedError" must match. Erring toward warn is correct
-      // here — a false warning is noticed and dismissed, a missed error is not.
+      // here - a false warning is noticed and dismissed, a missed error is not.
       const looksBad = /(error|exception|traceback|failed|fatal|cannot|refused|denied|critical|warn)/i.test(s);
       wlog(looksBad ? 'warn' : 'info', { worker: index, kind: 'worker.stderr' }, s);
     });
@@ -128,7 +128,7 @@ class Worker extends EventEmitter {
       // A failed spawn (e.g. python3 not on PATH) emits 'error' and 'close' but
       // NEVER 'exit'. Without this, the dead worker stayed in the pool marked
       // not-ready, the respawn/backoff path never ran, and every queued request
-      // hung forever with no response and no error — the server looked healthy
+      // hung forever with no response and no error - the server looked healthy
       // while /api/analyze, /api/detect and /api/select silently stopped working.
       for (const { reject } of this.pending.values()) {
         reject(new Error(`worker failed to start: ${err.message}`));
@@ -191,9 +191,9 @@ class Worker extends EventEmitter {
           this.busy = false;
           wcount('timeout');
           wlog('error', { worker: this.index, kind: 'worker.timeout', command, timeoutMs },
-            `worker ${this.index} request '${command}' timed out after ${timeoutMs}ms — recycling worker`);
+            `worker ${this.index} request '${command}' timed out after ${timeoutMs}ms - recycling worker`);
           reject(new Error(`pipeline worker timed out after ${timeoutMs}ms`));
-          this.kill(); // a hung worker won't recover — kill it; the pool respawns it
+          this.kill(); // a hung worker won't recover - kill it; the pool respawns it
         }, timeoutMs);
       }
       const payload = JSON.stringify({ id, command, ...params }) + '\n';
@@ -267,7 +267,7 @@ class WorkerPool extends EventEmitter {
       const delay = Math.min(30000, 2000 * Math.pow(2, Math.max(0, n - 1)));
       if (n >= 1) {
         wlog('warn', { worker: index, crashes: n, delay, kind: 'worker.backoff' },
-          `worker ${index} died fast (${n}x) — respawning in ${delay}ms`);
+          `worker ${index} died fast (${n}x) - respawning in ${delay}ms`);
       }
       setTimeout(() => this._spawn(index), delay);
     });
@@ -284,7 +284,7 @@ class WorkerPool extends EventEmitter {
     }
   }
 
-  /** Recycle budget check — trims the window, then reports headroom. */
+  /** Recycle budget check - trims the window, then reports headroom. */
   _mayRecycle() {
     const now = Date.now();
     this._recycles = this._recycles.filter(t => now - t < RECYCLE_WINDOW_MS);
@@ -312,14 +312,14 @@ class WorkerPool extends EventEmitter {
       // wedged. Surface the error instead of rebuilding workers that will only
       // fail the same way.
       wlog('error', { worker: worker.index, kind: 'worker.device_down', err },
-        `worker ${worker.index} hit a fatal device error and the recycle budget is spent — ` +
+        `worker ${worker.index} hit a fatal device error and the recycle budget is spent - ` +
         `the GPU looks down, not wedged; failing fast instead of respawning`);
       return task.resolve(res);
     }
 
     this._recycles.push(Date.now());
     wlog('error', { worker: worker.index, kind: 'worker.poisoned', err },
-      `worker ${worker.index} hit a fatal device error — its CUDA context is unusable for the ` +
+      `worker ${worker.index} hit a fatal device error - its CUDA context is unusable for the ` +
       `rest of the process; killing it so a fresh one replaces it`);
     worker.kill(); // the 'exit' handler respawns with a clean context
 

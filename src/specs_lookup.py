@@ -1,4 +1,4 @@
-"""Rack-unit height from the RackTrack specs agent (Agent/Agent_scrap — the same agent
+"""Rack-unit height from the RackTrack specs agent (Agent/Agent_scrap - the same agent
 switch_mapper, dark_mobile and RT-EOS call; the first copy found in AGENT_DIRS is used).
 
 Called the way RT-EOS server/lib/device_lookup.js calls it: local database first (no network);

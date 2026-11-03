@@ -25,7 +25,7 @@ BOX_W = 30
 BOX_H = 35
 
 # Minimum confidence required to call a port 'connected' or 'empty'. Below
-# this we return 'unknown' — the downstream cable / port-type classifiers
+# this we return 'unknown' - the downstream cable / port-type classifiers
 # only run on high-confidence calls, which cuts false positives on blurry
 # or ambiguous ports.
 PORT_STATUS_CONF_MIN = 0.35
@@ -94,7 +94,7 @@ def get_port_detections(img, model, conf: float = CONF):
 
     Uses per-class NMS at iou=0.45. Cross-category overlap (e.g. an SFP
     detection and a main detection firing on the same physical jack)
-    is intentionally NOT suppressed here — port_pattern.classify_ports_by_pattern
+    is intentionally NOT suppressed here - port_pattern.classify_ports_by_pattern
     handles that with category-priority rules (SFP > console > main).
 
     Each detection carries its bbox so the classifier can build port
@@ -249,7 +249,7 @@ def draw_classified(img, classified, highlight_idx=None, highlight_category="mai
 
     # ── A dot + index for every port ── (the numbering shift applies to the
     # MAIN row only; console/sfp/other keep their own C/S/O sequences).
-    # Only drawn when NO port is selected — the browse view shows all ports and
+    # Only drawn when NO port is selected - the browse view shows all ports and
     # their numbers so the user can pick one. Once a port is located
     # (highlight_idx set), we show ONLY that port and skip every other marker.
     if highlight_idx is None:

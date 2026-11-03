@@ -64,7 +64,7 @@ class SwitchTextReader:
 
     def read(self, image: ImageLike) -> OCRResult:
         """OCR one image (path or BGR numpy array). Never raises on OCR
-        problems — check ``result.ok`` / ``result.error``."""
+        problems - check ``result.ok`` / ``result.error``."""
         start = time.perf_counter()
         source = str(image) if not isinstance(image, np.ndarray) else "<ndarray>"
         try:
@@ -123,7 +123,7 @@ class SwitchTextReader:
                      "channel", "rotate")
             # Computed once and reused by every stage below that needs it
             # (orientation/deskew/perspective/rotate all start from the same
-            # contrast-enhanced base) — four of these stages used to each
+            # contrast-enhanced base) - four of these stages used to each
             # recompute the identical denoise+CLAHE+unsharp pass
             # independently whenever more than one stage fired on a hard
             # image, which is pure wasted CPU time with zero effect on the
@@ -249,7 +249,7 @@ class SwitchTextReader:
 
     def _rotate_pass(self, img: np.ndarray, enhanced: np.ndarray,
                      deadline: float = float("inf")) -> List[TextDetection]:
-        """Retry at small rotations — rack photos are rarely level."""
+        """Retry at small rotations - rack photos are rarely level."""
         out: List[TextDetection] = []
         h, w = img.shape[:2]
         for angle in self.config.rotate_angles:
@@ -263,7 +263,7 @@ class SwitchTextReader:
 
     def _orientation_pass(self, img: np.ndarray, enhanced: np.ndarray,
                           deadline: float = float("inf")) -> List[TextDetection]:
-        """Retry at coarse 90-degree rotations — catches sideways or
+        """Retry at coarse 90-degree rotations - catches sideways or
         upside-down photos that carry no (or wrong) EXIF orientation tag
         (screenshots, re-saved WhatsApp images, PNG/WebP with no EXIF)."""
         out: List[TextDetection] = []
@@ -280,7 +280,7 @@ class SwitchTextReader:
     def _deskew_pass(self, img: np.ndarray, enhanced: np.ndarray,
                      deadline: float = float("inf")) -> List[TextDetection]:
         """Auto-detect the fine tilt angle (Hough line voting) and rotate by
-        exactly that — sharper than guessing from ``rotate_angles``' fixed
+        exactly that - sharper than guessing from ``rotate_angles``' fixed
         set, and catches skews outside that set entirely."""
         if time.perf_counter() >= deadline:
             return []
@@ -296,7 +296,7 @@ class SwitchTextReader:
     def _perspective_pass(self, img: np.ndarray, enhanced: np.ndarray,
                           deadline: float = float("inf")) -> List[TextDetection]:
         """Detect the device's quadrilateral outline and warp it to
-        fronto-parallel — recovers labels foreshortened by an off-angle
+        fronto-parallel - recovers labels foreshortened by an off-angle
         camera position, which no amount of in-plane rotation fixes."""
         if time.perf_counter() >= deadline:
             return []
@@ -332,7 +332,7 @@ class SwitchTextReader:
     def _channel_pass(self, img: np.ndarray,
                       deadline: float = float("inf")) -> List[TextDetection]:
         """Retry using whichever raw colour channel has the strongest local
-        contrast — rescues silkscreen colour combinations that nearly
+        contrast - rescues silkscreen colour combinations that nearly
         cancel out in a standard luminance-based grayscale conversion."""
         if time.perf_counter() >= deadline:
             return []

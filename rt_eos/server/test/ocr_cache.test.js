@@ -38,7 +38,7 @@ test('what goes in comes back, for that image and that kind only', () => {
   assert.equal(cache.get('closeup_fast', a), null);    // a different question
 });
 
-test('it survives a restart — the answer is on disk, not only in memory', () => {
+test('it survives a restart - the answer is on disk, not only in memory', () => {
   const a = cache.hashFile(imageA);
   delete require.cache[require.resolve('../lib/ocr_cache')];
   const fresh = require('../lib/ocr_cache');

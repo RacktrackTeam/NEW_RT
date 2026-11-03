@@ -115,7 +115,7 @@ free_list = "".join(f"<li><b>{esc(f['range'])}</b><span>{f['size']} U</span></li
 fit = d["fit"]
 fit_units = set()
 if fit["suggestions"]:
-    rng = fit["suggestions"][0]["range"].replace("–", "-").split("-")
+    rng = fit["suggestions"][0]["range"].replace("\u2013", "-").split("-")
     lo, hi = int(rng[0][1:]), int(rng[-1][1:])
     fit_units = {f"u{k:02d}" for k in range(lo, hi + 1)}
 fit_list = "".join(f"<li><b>{esc(s['range'])}</b> {esc(s['reason'])}</li>" for s in fit["suggestions"])
@@ -243,7 +243,7 @@ DEV_PILL = {"confirmed": "<span class='pill occupied'>Confirmed</span>", "check"
 if G:
     dev_rows = "".join(
         f"<tr><th>D{x['id']}</th><td>{esc(x['range_label'])}</td><td class='n'>{x['height_u']} U</td>"
-        f"<td>{esc((x['device_seen'] or '—').split(' (')[0])}</td><td>{DEV_PILL[x['status']]}</td></tr>"
+        f"<td>{esc((x['device_seen'] or '-').split(' (')[0])}</td><td>{DEV_PILL[x['status']]}</td></tr>"
         for x in G["devices"])
     joined = [p for p in G["pairs"] if p["joined"]]
     split = [p for p in G["pairs"] if not p["joined"] and not p["why"].startswith("not")]

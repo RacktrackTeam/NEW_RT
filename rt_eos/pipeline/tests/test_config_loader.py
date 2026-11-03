@@ -1,4 +1,4 @@
-"""Config loader — the first thing runner.py does, so a regression here takes
+"""Config loader - the first thing runner.py does, so a regression here takes
 the whole pipeline down before a single model is loaded."""
 
 import json
@@ -19,7 +19,7 @@ def test_loads_valid_json(tmp_path):
 
 def test_missing_file_raises_with_path_in_message(tmp_path):
     # runner.py surfaces this straight to the operator, so the path has to be
-    # in the message — "config not found" alone is unactionable.
+    # in the message - "config not found" alone is unactionable.
     missing = tmp_path / "nope.json"
     with pytest.raises(FileNotFoundError) as exc:
         load_json_config(str(missing))
@@ -27,7 +27,7 @@ def test_missing_file_raises_with_path_in_message(tmp_path):
 
 
 def test_malformed_json_raises_json_error(tmp_path):
-    # Must NOT be swallowed into an empty dict — a silently empty config would
+    # Must NOT be swallowed into an empty dict - a silently empty config would
     # make runner.py fall through to its defaults and load the wrong models.
     p = tmp_path / "bad.json"
     p.write_text('{"models": {"ports_typed": ')
@@ -71,7 +71,7 @@ def test_shipped_config_has_the_keys_runner_indexes_directly():
     """Contract test for the repo's own config.json.
 
     runner.py reads these three with `config["models"][...]` (not .get), so a
-    rename or a dropped key is an immediate KeyError on every job — not a
+    rename or a dropped key is an immediate KeyError on every job - not a
     fallback. Cheap to pin, and it needs no weights.
     """
     cfg = load_json_config(os.path.join(REPO_ROOT, "config.json"))

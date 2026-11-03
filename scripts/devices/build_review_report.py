@@ -477,7 +477,7 @@ document.querySelectorAll('.tabs button').forEach(function(b){{ b.addEventListen
 (function(){{ var h = location.hash.slice(1); var b = document.querySelector('.tabs button[data-t="' + h + '"]'); if (b) b.click(); }})();
 </script>
 """
-    assert "–" not in page and "—" not in page, "long dash on the page"
+    assert "\u2013" not in page and "\u2014" not in page, "long dash on the page"
     OUT.mkdir(parents=True, exist_ok=True); (OUT / "index.html").write_text(page)
     print(f"written {OUT / 'index.html'} ({len(page) / 1e6:.2f} MB)")
 

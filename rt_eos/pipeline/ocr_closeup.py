@@ -1,15 +1,15 @@
 """
-ocr_closeup.py — identify one device from a close-up photo of its label.
+ocr_closeup.py - identify one device from a close-up photo of its label.
 
 Rack-photo OCR (ocr_devices.py) fails on a device when that device's slice of
 the frame carries too few pixels for the model string to survive. The
 preprocessing chain compensates by upscaling, but upscaling only interpolates
-detail the camera never captured — which is why "Vendor not detected" on a
+detail the camera never captured - which is why "Vendor not detected" on a
 rack photo is usually a resolution problem, not a legibility one.
 
 This module reads a photo of a SINGLE device: one the tech walked up to and
 framed on the model label, where those pixels are real. Same engine, same
-identifier, same vendor/model parser as ocr_devices.py — the only structural
+identifier, same vendor/model parser as ocr_devices.py - the only structural
 difference is that the whole frame belongs to one device, so every text
 detection is its own and there is no box to assign labels to.
 
@@ -35,7 +35,7 @@ Output (stdout, one JSON line):
   "alternates": [ { "make": "Netgear", "model": "GS1100", "conf": 0.55 } ]
 }
 
-Never exits non-zero on a failed READ — an unreadable photo is an ordinary
+Never exits non-zero on a failed READ - an unreadable photo is an ordinary
 outcome the UI handles by falling back to manual entry, not an error. Only a
 crash (missing file, engine failure) sets ok=false.
 """
@@ -72,8 +72,8 @@ from pipeline.model_read import model_in_text, settle as settle_model  # noqa: E
 def closeup_config(escalate: bool = False):
     """OCR preset for a single-device close-up.
 
-    ``accurate()`` is tuned for the opposite problem — a rack photo where the
-    model string may be 20px tall — so it buys server models, a 2600px
+    ``accurate()`` is tuned for the opposite problem - a rack photo where the
+    model string may be 20px tall - so it buys server models, a 2600px
     upscale target, every variant and every retry, and costs ~24s a call. On
     a close-up the text is already large, so most of that budget buys
     nothing, and a read the user waits 24s for is one they would rather have
@@ -81,11 +81,11 @@ def closeup_config(escalate: bool = False):
 
     Neither fits, so this is two configs used in sequence (see ``run``):
 
-    ``escalate=False`` — baseline only. On a close-up that came out well this
+    ``escalate=False`` - baseline only. On a close-up that came out well this
     lands the answer in ~1-5s, because the retry stages are what dominate the
     clock, not the recognizer.
 
-    ``escalate=True`` — the same baseline plus the retries that target how a
+    ``escalate=True`` - the same baseline plus the retries that target how a
     close-up actually goes wrong: shot at an angle from below (deskew,
     perspective), phone torch bouncing off a metal faceplate (deglare), and
     an orientation the EXIF tag doesn't describe. Dropped as not worth their
@@ -190,7 +190,7 @@ def _identify(labels: list[dict]) -> tuple[str | None, str | None, float, list[d
 def _read_and_identify(img, preset: str) -> dict:
     """One OCR pass over the frame, parsed into a make/model answer."""
     labels = _read_whole_image(get_reader(preset), img)
-    # The frame IS the device, so reading order is only cosmetic — except that
+    # The frame IS the device, so reading order is only cosmetic - except that
     # the concatenated text feeds the regex parser below, and a model number
     # split across two detections only rejoins correctly in reading order.
     labels.sort(key=lambda l: (round(l["cy"] / 12.0), l["cx"]))
@@ -253,7 +253,7 @@ def run(image_path: str, preset: str = "closeup") -> dict:
     if preset != "closeup":
         return _read_and_identify(img, preset)
 
-    # Baseline first. The retry stages — deskew, perspective, deglare, zoom —
+    # Baseline first. The retry stages - deskew, perspective, deglare, zoom -
     # are what dominate the clock (measured: ~1-5s baseline vs ~8-13s with
     # everything on), and a close-up the tech framed well doesn't need any of
     # them. Paying for them up front would tax every good photo to rescue the
@@ -264,7 +264,7 @@ def run(image_path: str, preset: str = "closeup") -> dict:
 
     # Short of a full answer, spend the retries: this is the photo that was
     # shot at an angle, or into a torch reflection, or sideways. Worst case
-    # the user waits for both passes — still bounded, and still the outcome
+    # the user waits for both passes - still bounded, and still the outcome
     # they were heading for anyway (manual entry) if we stopped here.
     escalated = _read_and_identify(img, "closeup_escalated")
     if escalated["make"] and escalated["model"]:
@@ -283,10 +283,10 @@ def main():
     ap.add_argument("image_path")
     group = ap.add_mutually_exclusive_group()
     group.add_argument(
-        "--fast", action="store_true", help="Single-pass preset — fastest, lowest recall."
+        "--fast", action="store_true", help="Single-pass preset - fastest, lowest recall."
     )
     group.add_argument(
-        "--accurate", action="store_true", help="Rack-photo preset — slowest, highest recall."
+        "--accurate", action="store_true", help="Rack-photo preset - slowest, highest recall."
     )
     args = ap.parse_args()
 

@@ -1,5 +1,5 @@
 /**
- * Contact-form attachments — /api/support/contact.
+ * Contact-form attachments - /api/support/contact.
  *
  * The form posts multipart when the user attaches a screenshot and JSON when
  * they do not, and both shapes have to reach the same handler. These tests
@@ -78,7 +78,7 @@ async function login(port, username, password) {
   return res.json?.token || null;
 }
 
-// Minimal multipart/form-data encoder — enough for text fields plus files, and
+// Minimal multipart/form-data encoder - enough for text fields plus files, and
 // preferable to pulling a dependency into the test suite for six lines.
 function multipart(fields, files) {
   const boundary = '----racktracktest' + Math.floor(process.hrtime()[1]).toString(16);
@@ -115,7 +115,7 @@ async function authedPort(t) {
 }
 
 // A validation failure must be answered as a 400 the form can show, never as a
-// 500 — a user picking the wrong file is not a server fault, and these were the
+// 500 - a user picking the wrong file is not a server fault, and these were the
 // responses most likely to regress into an uncaught multer error.
 test('an attachment over the per-file limit is refused as a 400', async (t) => {
   const { port, token } = await authedPort(t);
@@ -171,7 +171,7 @@ test('too many attachments are refused as a 400', async (t) => {
   assert.match(res.json?.error || '', /at most 5 files/i);
 });
 
-// The message body is still validated on the multipart path — the check must
+// The message body is still validated on the multipart path - the check must
 // not be skipped just because the request arrived as form-data.
 test('a multipart request with too short a message is still refused', async (t) => {
   const { port, token } = await authedPort(t);
@@ -192,13 +192,13 @@ test('a multipart request with too short a message is still refused', async (t) 
 });
 
 // The positive case. With no mail transport configured in test, a request that
-// passes every check reaches the send and fails there — 502, not 400. That
+// passes every check reaches the send and fails there - 502, not 400. That
 // distinguishes "the multipart body was parsed and accepted" from "rejected",
 // which is what these tests exist to pin.
 test('a valid image attachment passes validation and reaches the mail transport', async (t) => {
   const { port, token } = await authedPort(t);
   const { boundary, body } = multipart(
-    { message: 'The unit grid is off by one — screenshot attached.', subject: 'Wrong unit numbers' },
+    { message: 'The unit grid is off by one - screenshot attached.', subject: 'Wrong unit numbers' },
     [{ filename: 'rack.png', contentType: 'image/png', content: PNG }],
   );
   const res = await request(port, 'POST', '/api/support/contact', {

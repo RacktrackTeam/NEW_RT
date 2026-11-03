@@ -169,7 +169,7 @@ def stats() -> dict:
 
 
 # ─────────────────────────────────────────────────────────────────────
-# Verified port store — HIGHEST PRIORITY, bypasses YOLO on next upload
+# Verified port store - HIGHEST PRIORITY, bypasses YOLO on next upload
 # ─────────────────────────────────────────────────────────────────────
 
 
@@ -250,7 +250,7 @@ def find_verified_port_layout(image_path: str) -> dict | None:
 
 
 # ─────────────────────────────────────────────────────────────────────
-# Confirmed-rack alias store — a perceptual cache so a re-uploaded photo of
+# Confirmed-rack alias store - a perceptual cache so a re-uploaded photo of
 # a rack the user already CONFIRMED serves the confirmed result instead of
 # re-detecting it. Keyed by the rack image's pHash (fast) + ResNet embedding
 # (robust to angle/lighting), value is the prior rackId. Rack-level matching
@@ -259,7 +259,7 @@ def find_verified_port_layout(image_path: str) -> dict | None:
 # ─────────────────────────────────────────────────────────────────────
 
 # Near-duplicate only. A false match shows the WRONG rack's data, which is
-# worse than just re-detecting, so this is deliberately strict — a re-shoot
+# worse than just re-detecting, so this is deliberately strict - a re-shoot
 # from a very different angle will (safely) fall through to fresh detection
 # rather than risk serving another rack.
 _RACK_SIM_THRESH = 0.96

@@ -69,7 +69,7 @@ class TemplateResult:
 def clean_name(text: str) -> str:
     """Vendor / model as typed or pasted: drop a trailing description after ':' or
     ' - ' ("CRS328-24P-4S+RM: 24 ports"), quotes and repeated spaces."""
-    text = re.split(r"\s*:\s|\s+[-–]\s+", (text or "").strip(), maxsplit=1)[0]
+    text = re.split(r"\s*:\s|\s+[-\u2013]\s+", (text or "").strip(), maxsplit=1)[0]
     text = text.strip(" \"'`").rstrip(":")
     return re.sub(r"\s+", " ", text)
 

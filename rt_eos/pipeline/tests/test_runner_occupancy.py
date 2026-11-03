@@ -1,10 +1,10 @@
 """Coverage for the two pipeline correctness fixes in runner.py.
 
-HIGH  — the cable classifier has 14 outputs, all cable COLOURS and NO empty /
+HIGH  - the cable classifier has 14 outputs, all cable COLOURS and NO empty /
         no-cable class, so its confidence must never be thresholded to decide
         port occupancy. An untagged port is UNKNOWN, not a guessed connected/
         empty.
-MEDIUM — a port-detection crash must be distinguishable in the output from a
+MEDIUM - a port-detection crash must be distinguishable in the output from a
         device that genuinely has no ports, even though both demote to
         "Unidentified".
 
@@ -48,7 +48,7 @@ def test_unknown_is_distinct_from_empty_in_the_output_shape():
 
 class _FixedLogitsModel(nn.Module):
     """Stand-in for the cable classifier that returns fixed 14-way logits
-    regardless of the crop — lets us prove the confidence contract without the
+    regardless of the crop - lets us prove the confidence contract without the
     real weights or any real image."""
 
     def __init__(self, logits):
@@ -62,7 +62,7 @@ class _FixedLogitsModel(nn.Module):
 
 def test_cable_confidence_is_high_even_on_a_crop_with_no_cable():
     """Root cause: softmax over 14 colours sums to 1, so the top-class
-    confidence is high whenever ONE colour dominates — even for a blank crop
+    confidence is high whenever ONE colour dominates - even for a blank crop
     that holds no cable. The old code thresholded exactly this number at 0.55
     and called the port 'connected'. This documents why that was invalid."""
     blank = np.zeros((16, 16, 3), dtype=np.uint8)  # a crop with no cable in it

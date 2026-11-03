@@ -78,7 +78,7 @@ def estimate_noise(gray: np.ndarray) -> float:
 
 
 def _denoise_if_noisy(l_chan: np.ndarray, cfg: OCRConfig) -> np.ndarray:
-    """Denoise only when the image actually is noisy — CLAHE and sharpening
+    """Denoise only when the image actually is noisy - CLAHE and sharpening
     amplify sensor noise into text-shaped garbage, but denoising a clean
     image just wastes time and softens strokes."""
     if cfg.denoise_strength <= 0:
@@ -144,7 +144,7 @@ def variant_upscaled(img: np.ndarray, cfg: OCRConfig) -> Tuple[np.ndarray, float
     """
     h, w = img.shape[:2]
     scale = _upscale_factor(h, w, cfg)
-    if scale <= 1.05:  # already big enough — enhance instead of upscale
+    if scale <= 1.05:  # already big enough - enhance instead of upscale
         return variant_enhanced(img, cfg)
 
     lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
@@ -163,7 +163,7 @@ def variant_binarized(img: np.ndarray, cfg: OCRConfig) -> Tuple[np.ndarray, floa
 
     Rescues glare, washed-out printing and white-on-dark chassis labels
     that survive contrast enhancement but still trip up the recognizer on
-    raw grey levels — a hard binary pass sometimes reads what a
+    raw grey levels - a hard binary pass sometimes reads what a
     grey-level pass cannot.
     """
     return otsu_binarize(img), 1.0
@@ -173,7 +173,7 @@ def variant_gamma(img: np.ndarray, cfg: OCRConfig) -> Tuple[np.ndarray, float]:
     """Auto gamma correction toward mid-grey.
 
     Rescues silkscreen text lost in deep shadow (dim rack photos) or
-    blown out by camera flash glare — cases CLAHE's local contrast alone
+    blown out by camera flash glare - cases CLAHE's local contrast alone
     doesn't fully recover because the whole frame is off-exposure, not
     just low-contrast.
     """
@@ -203,7 +203,7 @@ def estimate_skew_angle(img: np.ndarray, max_angle: float = 20.0) -> float:
     (e.g. -12.3 deg) instead of guessing from a small discrete set.
     Returns degrees to rotate (matching :func:`rotate_image`'s
     convention), or ``0.0`` when there isn't enough line evidence to
-    trust — callers must skip the pass rather than rotate on a guess.
+    trust - callers must skip the pass rather than rotate on a guess.
     """
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 50, 150, apertureSize=3)
@@ -253,7 +253,7 @@ def find_device_quad(img: np.ndarray) -> Optional[np.ndarray]:
     """Locate the largest plausible 4-corner outline (device body or
     faceplate) for perspective correction.
 
-    Returns 4 points or ``None`` when no confident quad is found —
+    Returns 4 points or ``None`` when no confident quad is found -
     callers must skip the pass rather than warp on a guess.
     """
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -306,7 +306,7 @@ def plan_zoom_regions(img_shape, detections, cfg: OCRConfig) -> List[List[int]]:
     """Choose regions worth a magnified second look.
 
     Around every first-pass detection (model numbers live NEXT TO the text
-    we already found — usually right below the logo), generously expanded.
+    we already found - usually right below the logo), generously expanded.
     If the first pass found almost nothing, fall back to overlapping bands
     across the faceplate. Overlapping regions are merged; the best
     ``cfg.zoom_max_regions`` are returned.
@@ -404,7 +404,7 @@ def _interior_blowout_mask(gray: np.ndarray) -> np.ndarray:
 
 def glare_fraction(img: np.ndarray) -> float:
     """Fraction of the frame covered by INTERIOR blown-out blobs (genuine
-    highlights, not background) — cheap check run BEFORE paying for an
+    highlights, not background) - cheap check run BEFORE paying for an
     inpaint + OCR pass, so clean photos never pay for glare repair they
     don't need."""
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -414,7 +414,7 @@ def glare_fraction(img: np.ndarray) -> float:
 
 def deglare(img: np.ndarray, cfg: OCRConfig) -> np.ndarray:
     """Inpaint blown-out specular highlights (camera flash off shiny metal
-    chassis, glossy plastic) — text UNDER the highlight is unrecoverable,
+    chassis, glossy plastic) - text UNDER the highlight is unrecoverable,
     but text at its EDGE, half-clipped by it, often survives once the
     highlight itself is filled in from surrounding texture instead of
     OCR'd as a wall of solid white."""
@@ -448,7 +448,7 @@ def best_contrast_channel(img: np.ndarray, cfg: OCRConfig) -> np.ndarray:
     instead of always using the standard luminance mix.
 
     Rescues silkscreen text whose colour combination (e.g. white-on-light-
-    blue) nearly cancels out in a normal grayscale conversion — the
+    blue) nearly cancels out in a normal grayscale conversion - the
     channels aren't mixed evenly, so one of them alone often shows the
     stroke/background split sharply where the luminance blend hides it.
     """

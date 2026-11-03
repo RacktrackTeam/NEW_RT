@@ -1,6 +1,6 @@
 import statistics
 
-"""Port detection wrapper — typed-model + status-model flow.
+"""Port detection wrapper - typed-model + status-model flow.
 
 This module replaces the old pattern-based classifier. The model topology is
 now:
@@ -15,14 +15,14 @@ now:
     Carries no type signal.
 
 ports_13 replaced the nine class ports_9. It keeps those nine classes at the
-same indices and adds four: the fibre connectors FC / LC / SC, and `empty` —
+same indices and adds four: the fibre connectors FC / LC / SC, and `empty` -
 a port POSITION with nothing fitted in it (a bare keystone hole, a vacant SFP
 cage). `empty` is a type, not a status: whether a fitted port has a cable in it
 is still port_connected_or_empty.pt's answer and only ever port_connected_or_empty.pt's answer.
 
 The other thing ports_13 brought is patch panels, which ports_9 was never
 trained on. That is why patch panels used to be read by the STATUS model
-standing in as a detector — it was the only model that could see their jacks at
+standing in as a detector - it was the only model that could see their jacks at
 all. It no longer has to: the typed model reads a panel directly, so panels now
 go through the same typed + status flow as every other device, and the status
 model is back to answering only the question it was trained for.
@@ -63,7 +63,7 @@ from pipeline.port import (  # re-export so existing imports keep working
 # 1000base-t copper would be a plain lie about the hardware.
 #
 # `empty` is a slot with nothing fitted, so its connector family is exactly
-# what nobody can tell — the model can see the aperture, not what belongs in
+# what nobody can tell - the model can see the aperture, not what belongs in
 # it. It goes to `other`, the
 # one bucket that asserts no family. The slot is still a real position and is
 # still counted as one; we just decline to name it.
@@ -91,7 +91,7 @@ def _nms(detections, iou_thresh=0.5, containment_thresh=0.75):
     (containment > containment_thresh).
 
     The containment check catches nested/duplicate boxes of very different
-    sizes firing on the same physical port — those have low IoU but high
+    sizes firing on the same physical port - those have low IoU but high
     containment, so an IoU-only pass would keep both and number the same
     port twice. (Adopted from the new ports.py reference.)
     """
@@ -125,7 +125,7 @@ def _nms(detections, iou_thresh=0.5, containment_thresh=0.75):
 
 def _detections_from(model, img, conf):
     """Run a YOLO model on `img` and return a list of {bbox, class_name,
-    confidence} dicts. NMS not applied here — callers run _nms with their
+    confidence} dicts. NMS not applied here - callers run _nms with their
     own thresholds.
     """
     res = model.predict(img, conf=conf, verbose=False)
@@ -265,13 +265,13 @@ def _to_port_dict(d, category):
 
 
 # Row/column clustering thresholds (from the new ports.py reference).
-#   COLUMN_GROUP_GAP_FACTOR — top/bottom ports within this × the average port
+#   COLUMN_GROUP_GAP_FACTOR - top/bottom ports within this × the average port
 #                            width of each other count as the same column.
-#   ROW_SPLIT_PAIR_FRACTION — primary two-row signal: if at least this fraction
+#   ROW_SPLIT_PAIR_FRACTION - primary two-row signal: if at least this fraction
 #                            of a class's ports fall into clean top+bottom
 #                            x-column pairs, treat it as a 2-row grid. Immune
 #                            to perspective skew (see _split_into_rows).
-#   ROW_SPLIT_GAP_FACTOR   — fallback signal: a vertical gap must exceed this ×
+#   ROW_SPLIT_GAP_FACTOR   - fallback signal: a vertical gap must exceed this ×
 #                            the average port height before we call a class two
 #                            rows (only used when x-pairing finds no grid).
 COLUMN_GROUP_GAP_FACTOR = 0.6
@@ -288,16 +288,16 @@ def _split_into_rows(plist):
     """Decide whether a set of same-category ports forms one row or two, and
     return [row] or [top, bottom].
 
-    PRIMARY signal — paired x-columns: a real 2-row port grid has a top and a
+    PRIMARY signal - paired x-columns: a real 2-row port grid has a top and a
     bottom port stacked at (almost) the same x in most columns. We check this
     FIRST, independently of any y-gap, because it's immune to perspective skew:
     real device photos often have the whole row's y drifting steadily left→right
     (the rack tilts slightly toward/away from the camera), which smears the gap
-    between the two rows across many small steps instead of one clean jump — the
+    between the two rows across many small steps instead of one clean jump - the
     very thing that breaks a "biggest y-gap" test. Two ports stacked at the same
     x stay paired regardless of that drift.
 
-    FALLBACK signal — a single dominant y-gap: covers genuinely 2-row layouts
+    FALLBACK signal - a single dominant y-gap: covers genuinely 2-row layouts
     that AREN'T column-aligned (a sparser bottom row on a different pitch), where
     x-pairing finds no matches but the rows are still well separated vertically.
     """
@@ -342,7 +342,7 @@ def _split_into_rows(plist):
         )
 
         # An x-cluster that ISN'T a clean pair (a port with no match on the
-        # other row — e.g. a couple of extra uplink ports) still has to land
+        # other row - e.g. a couple of extra uplink ports) still has to land
         # in top or bottom: assign by whichever row's mean cy it's nearer.
         for c in x_clusters:
             if len(c) == 2:
@@ -381,7 +381,7 @@ def _group_into_columns(top_row, bottom_row):
     vice versa, closest pair first) rather than left-to-right chaining. Chaining
     let 3+ ports that were each individually within the cluster gap of their
     neighbor collapse into a single column, silently dropping every top/bottom
-    in that chain except the last one seen — a real bug on rows where the bottom
+    in that chain except the last one seen - a real bug on rows where the bottom
     ports are offset half a pitch from the top ports (very common), since then
     EVERY port in the row is "close" to the next one.
     """
@@ -467,7 +467,7 @@ def _index_in_place(plist):
 
 
 def _index_left_to_right(plist):
-    """Number ports 1..N strictly left→right by x-center — a single sequence
+    """Number ports 1..N strictly left→right by x-center - a single sequence
     (P01, P02, …). Used for patch panels and PDU outlets, which are one row of
     identical jacks, so the column-major/two-row logic doesn't apply. Reorders
     the list in place so list position == index (callers select by position).
@@ -529,7 +529,7 @@ def classify_ports_by_pattern(
     `status_dets` lets a caller pass in already-computed status detections so
     the status model isn't run twice.
 
-    `skip_first_n_ports` is accepted for API compatibility but ignored —
+    `skip_first_n_ports` is accepted for API compatibility but ignored -
     the typed model handles SFP/console placement directly, so the old
     leading-SFP skip is no longer meaningful.
     """
@@ -736,12 +736,12 @@ def even_out_sfp(sfp, img_width=None, taken=None):
 
 def grid_ports(img, target_count, existing=None, status_dets=None):
     """Lay out exactly `target_count` main ports as a clean grid across the crop
-    — two rows when the count is even and the face is short & wide (a typical
-    switch), else a single row — numbered column-major. Shared by the relabel
+    - two rows when the count is even and the face is short & wide (a typical
+    switch), else a single row - numbered column-major. Shared by the relabel
     handler and the select path so both agree on the layout.
 
     These cells are drawn by CODE, not detected by the type model, so they get
-    their connected/empty status the same way a real port does — by matching
+    their connected/empty status the same way a real port does - by matching
     against the STATUS model (port_connected_or_empty.pt) detections. Order of preference:
 
       1. the status model box that overlaps this cell  ← the real signal
@@ -772,7 +772,7 @@ def grid_ports(img, target_count, existing=None, status_dets=None):
 
     def _status_from_model(box, cx, cy):
         """Bind this synthesized cell to the status model's connected/empty
-        boxes — the same signal real ports get, matched geometrically.
+        boxes - the same signal real ports get, matched geometrically.
         """
         if not sdets:
             return None
@@ -827,7 +827,7 @@ def classify_ports_with_target_count(img, model, target_count, conf=CONF, status
     when they later pick a port (port 24 = the 24th position, not the 20th).
     """
     # Run the status model ONCE and reuse its detections for both the real
-    # ports and any code-drawn grid cells — so a synthesized port gets a real
+    # ports and any code-drawn grid cells - so a synthesized port gets a real
     # connected/empty status instead of falling through to 'unknown'.
     sdets = status_detections(status_model, img, conf=conf)
 
@@ -904,13 +904,13 @@ def detect_pdu_ports(img, model, conf=CONF):
 PATCHPANEL_STANDARD_COUNTS = (24, 48)
 
 # Every port count real switch hardware actually ships with. A detected count
-# that is not in here did not come off a faceplate — it came from the detector
+# that is not in here did not come off a faceplate - it came from the detector
 # miscounting, and publishing it makes the app assert something impossible.
 # Testers put it plainly: "there is no switch contains 53 there must be 52".
 # Live scans currently hold 46, 49, 28, 25, 18 and 9; of those only 28, 18 and 9
 # are real, and the other three are miscounts.
 #
-# The list is the whole rule, so keep it comprehensive rather than tidy — a count
+# The list is the whole rule, so keep it comprehensive rather than tidy - a count
 # missing from here gets rounded away, and rounding a genuine 18-port switch up
 # to 24 is a worse error than leaving 49 alone. Add sizes as hardware turns up.
 # 26 and 44 are deliberately absent even though such hardware exists. Including a
@@ -929,7 +929,7 @@ def snap_switch_port_count(n):
     port detectors UNDER-count far more than they over-count (glare, dark jacks,
     a cable hiding the socket), so discarding a real detection is riskier than
     synthesising a missing one. Overshoot costs 1 per slot, undershoot 2. On a
-    tie the larger count wins — synthesise rather than throw a real port away.
+    tie the larger count wins - synthesise rather than throw a real port away.
 
     That weighting is what makes the observed miscounts land correctly:
     53 -> 52, 49 -> 48, 46 -> 48, 25 -> 24, while 28, 18 and 9 are already
@@ -954,8 +954,8 @@ def _pp_closest_standard(n):
     We only support 24 and 48 (there is deliberately no 12 option), so any
     small count rounds up to 24.
 
-    Patch-panel port models UNDER-detect far more than they over-count — dark,
-    occluded or dust-capped jacks get missed — so dropping a genuinely detected
+    Patch-panel port models UNDER-detect far more than they over-count - dark,
+    occluded or dust-capped jacks get missed - so dropping a genuinely detected
     port is much riskier than synthesising a missing one. We weight the two
     directions asymmetrically: overshoot (n <= c, synthesise) costs 1 per slot,
     undershoot (n > c, discard a real detection) costs 3 per slot. On a tie we
@@ -1064,9 +1064,9 @@ def detect_patch_panel_ports(img, model, conf=CONF, status_model=None, status_de
     says which of them have a cable in.
 
     `model` is the TYPED model (port_type_finder.pt) and `status_model` is the status
-    model (port_connected_or_empty.pt). It used to be the other way round — the status model
+    model (port_connected_or_empty.pt). It used to be the other way round - the status model
     was handed the panel on its own and its Connected_port / Empty_port boxes
-    were used as slot positions — because ports_9 had never been shown a patch
+    were used as slot positions - because ports_9 had never been shown a patch
     panel and found almost nothing on one. ports_13 was trained on panels, so
     the detector job goes back to the detector.
 
@@ -1075,7 +1075,7 @@ def detect_patch_panel_ports(img, model, conf=CONF, status_model=None, status_de
     and the count had to be snapped up, where the typed model finds 48 and 48
     outright.
 
-    Every slot on a panel is the same physical thing — a keystone position —
+    Every slot on a panel is the same physical thing - a keystone position -
     whether a jack is fitted, a fibre adapter is fitted, or nothing is. So they
     all stay in one sequence and one bucket rather than being split by connector
     type, which is also what the rest of the code already assumes a panel is
@@ -1084,7 +1084,7 @@ def detect_patch_panel_ports(img, model, conf=CONF, status_model=None, status_de
     rather than being relabelled RJ45 the way they used to be.
 
     Count and numbering are unchanged: snap the total to the nearest standard
-    panel size (24 / 48), then number as one sequence — left→right for a single
+    panel size (24 / 48), then number as one sequence - left→right for a single
     row, column-wise (top then bottom of each column) for two rows.
     """
     # Looser NMS than a switch gets: a panel's slots sit shoulder to shoulder,

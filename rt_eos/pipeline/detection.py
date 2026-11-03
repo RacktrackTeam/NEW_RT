@@ -7,8 +7,8 @@ from ultralytics import YOLO
 # Step 02: Detection utilities (new dual-model + rack-crop flow)
 #
 # Models:
-#   - best 33.pt ("server" model)  — contributes ONLY its `server` class
-#   - best 32.pt ("general" model) — contributes every class EXCEPT `server`
+#   - best 33.pt ("server" model)  - contributes ONLY its `server` class
+#   - best 32.pt ("general" model) - contributes every class EXCEPT `server`
 #
 # Class names from YOLO are normalized to the Title-Case forms the rest of
 # the pipeline (and the Node server's label codes) expect.
@@ -149,13 +149,13 @@ def detect_rack_bounds(img):
 
 # ── Dual-model device detection ────────────────────────────────
 #
-# Logic mirrors device_detection.py::_detect_devices exactly — that
+# Logic mirrors device_detection.py::_detect_devices exactly - that
 # detector is field-tested at ~99% accuracy and is the source of truth
 # for "what's in this rack image". We keep this function's signature
 # (conf params, return shape) so runner.py and the rest of the pipeline
 # don't have to change.
 
-# Label normalisation table — same dataset as device_detection.py.
+# Label normalisation table - same dataset as device_detection.py.
 _VALID_LABELS_DUAL = {
     "Closed Unit",
     "Empty",
@@ -210,7 +210,7 @@ def _normalize_label_dual(raw: str) -> str:
 def detect_devices_dual(
     img, model_server, model_general, conf_server=0.25, conf_general=0.2, iou_thresh=0.5
 ):
-    """Dual-model device detection — mirrors device_detection.py.
+    """Dual-model device detection - mirrors device_detection.py.
 
     Pass 1: model_server (best 33.pt) → Server class only.
     Pass 2: model_general (best 32.pt) → every other class, IoU dedup vs Pass 1.
@@ -309,7 +309,7 @@ def detect_devices_dual(
 # `seg_devices.pt` is a YOLO seg model with 12 classes:
 #   closed unit, empty, firewall, gateway, patchpanel, pdu, psu,
 #   router, server, storage unit, switch, ups
-# We only consume its bbox output here — mask polygons are ignored
+# We only consume its bbox output here - mask polygons are ignored
 # because the rest of the mini-app pipeline (port assignment, unit
 # grid) keys off rectangular device regions.
 
@@ -440,7 +440,7 @@ def detect_devices_retry(
     conf_general=0.08,
     iou_thresh=0.5,
 ):
-    """Low-conf retry pass — DISABLED.
+    """Low-conf retry pass - DISABLED.
 
     The primary `detect_devices_dual` now mirrors device_detection.py and is
     field-tested at ~99% accuracy on the rack imagery, so the second-pass
@@ -774,7 +774,7 @@ def _snap_to_edge(gray_roi, approx_y, half=45):
 
 def normalize_units(units, img):
     """Snap each unit's top/bottom edge to the nearest strong horizontal
-    gradient in the grayscale image — aligns unit boundaries to visible rack
+    gradient in the grayscale image - aligns unit boundaries to visible rack
     rails. No-op when the YOLO grid is empty.
     """
     if not units:
@@ -852,7 +852,7 @@ def build_unit_grid_from_devices(img, devices, unit_h):
       (≥ 0.5 × unit_h is guaranteed at least one slice).
     - Each device span becomes `round(device_h / unit_h)` slices so
       `assign_devices_to_units` still has a unit per device.
-    - Grid spans full image height — so UPS/PDU chassis above or below
+    - Grid spans full image height - so UPS/PDU chassis above or below
       the detected devices still get rows.
 
     Returns unit dicts labeled u01..uNN top-to-bottom.
@@ -931,13 +931,13 @@ def remove_overlapping_devices(devices, max_overlap_ratio=0.01):
 def normalize_device_stack(devices, gap_close_factor=0.4):
     """Enforce the physical-rack invariants the detector can violate by a few
     pixels:
-      (1) every device is the SAME width — align each box to the median
+      (1) every device is the SAME width - align each box to the median
           left/right edge, and
       (2) vertically adjacent devices share an edge (bottom of the upper =
           top of the lower) with ZERO overlap.
 
-    Real empty slots are preserved: only a SMALL overlap or gap — one under
-    `gap_close_factor` × the median device height — is snapped shut. A larger
+    Real empty slots are preserved: only a SMALL overlap or gap - one under
+    `gap_close_factor` × the median device height - is snapped shut. A larger
     gap is a genuine blank U and is left untouched. Assumes
     `remove_overlapping_devices` already dropped gross duplicates, so any
     residual vertical overlap here is a small boundary artifact.
@@ -947,17 +947,17 @@ def normalize_device_stack(devices, gap_close_factor=0.4):
 
     devices.sort(key=lambda d: d["box"][1])
 
-    # (1) Uniform width — snap every box to the median left/right edge.
+    # (1) Uniform width - snap every box to the median left/right edge.
     x1s = sorted(d["box"][0] for d in devices)
     x2s = sorted(d["box"][2] for d in devices)
     cx1 = x1s[len(x1s) // 2]
     cx2 = x2s[len(x2s) // 2]
-    if cx2 - cx1 >= 10:  # sanity guard — never collapse to a sliver
+    if cx2 - cx1 >= 10:  # sanity guard - never collapse to a sliver
         for d in devices:
             _, y1, _, y2 = d["box"]
             d["box"] = [int(cx1), int(y1), int(cx2), int(y2)]
 
-    # (2) Snap adjacent shared edges — only small overlaps / gaps.
+    # (2) Snap adjacent shared edges - only small overlaps / gaps.
     heights = sorted(d["box"][3] - d["box"][1] for d in devices)
     ref_h = heights[len(heights) // 2] if heights else 0
     close_thresh = gap_close_factor * ref_h  # 0 when ref_h==0 → only fix overlaps
@@ -1048,7 +1048,7 @@ def assign_devices_to_units(devices, units):
       - 3U devices get 3, etc.
 
     This is independent of whether the YOLO grid over-slices 1U slots into
-    halves — a 1U device straddling two half-units at 50/50 still ends up
+    halves - a 1U device straddling two half-units at 50/50 still ends up
     claiming only one. Orphaned grid units (overlap with a device but not
     picked in the top-N) are cleaned up by `cleanup_duplicate_units` so
     they don't show up as phantom "Empty" rows in the report.
@@ -1082,7 +1082,7 @@ def assign_devices_to_units(devices, units):
                 candidates.append((unit, overlap))
 
         if not candidates:
-            # Device doesn't overlap any grid unit — fall back to nearest by
+            # Device doesn't overlap any grid unit - fall back to nearest by
             # y-center. Rare, but keeps the picker label sane.
             nearest = min(units, key=lambda u: abs(dev["center"][1] - u["center_y"]))
             dev["units"].append(nearest["label"])
@@ -1106,10 +1106,10 @@ def assign_devices_to_units(devices, units):
 def cleanup_duplicate_units(devices, units):
     """Drop grid units that overlap a device but weren't picked by any
     device in the top-N pass. These are the half-height duplicates that
-    the YOLO grid over-detected — keeping them around would show as
+    the YOLO grid over-detected - keeping them around would show as
     phantom "Empty" rows in the unit report.
 
-    Truly empty units (no overlap with any device) are preserved — they
+    Truly empty units (no overlap with any device) are preserved - they
     represent real rack gaps.
     """
     if not units or not devices:
@@ -1126,7 +1126,7 @@ def cleanup_duplicate_units(devices, units):
             continue
         overlaps_a_device = any(_intersection_area(unit["box"], d["box"]) > 0 for d in devices)
         if overlaps_a_device:
-            # Orphan duplicate — a device covers this region but chose a
+            # Orphan duplicate - a device covers this region but chose a
             # different grid unit for it. Drop.
             continue
         kept.append(unit)
@@ -1147,7 +1147,7 @@ def cleanup_duplicate_units(devices, units):
 
 
 # Classes the model treats as real rack equipment. Used to anchor the unit
-# grid — so a rack rail / frame / nameplate misclassified as "Closed Unit"
+# grid - so a rack rail / frame / nameplate misclassified as "Closed Unit"
 # at the very top or bottom doesn't pull the grid into the ceiling / floor.
 _REAL_EQUIP_CLASSES = {
     "Switch",
@@ -1179,7 +1179,7 @@ def build_contiguous_unit_grid(devices, unit_h, rack_bounds=None, img_shape=None
         (Switch, Patch Panel, Server, UPS, PDU, ...), so a rack rail
         misclassified as 'Closed Unit' doesn't pull the grid off.
       - If Hough-detected rack bounds extend ≥ 0.6 × unit_h above the top
-        anchor (or below the bottom anchor), add that many extra rows —
+        anchor (or below the bottom anchor), add that many extra rows -
         those are almost certainly undetected chassis, not rack frame.
       - Labels follow standard rack convention: **u01 at the BOTTOM**,
         increasing upward (u01, u02, ... uNN).
@@ -1301,7 +1301,7 @@ def fill_unit_grid_gaps(units, unit_h, img_w, img_h, rack_bounds=None):
     """Extend the YOLO unit grid by tiling any uncovered y-range with
     `unit_h`-tall synthetic unit boxes. Ensures the grid spans the full
     rack (or full image, when Hough detection failed) even in regions
-    where the YOLO unit model missed slots — so areas with undetected
+    where the YOLO unit model missed slots - so areas with undetected
     devices (top UPS, bottom PDU, etc.) still get a row in the grid.
 
     Does NOT relabel; caller should reapply u01..uNN after this runs.
@@ -1357,7 +1357,7 @@ def fill_unit_grid_gaps(units, unit_h, img_w, img_h, rack_bounds=None):
 
 def ensure_every_unit_has_device(devices, units):
     """Guarantee every grid unit has a device entry. For any unit that no
-    real detection claims — even after the low-confidence retry pass —
+    real detection claims - even after the low-confidence retry pass -
     synthesize an 'Unidentified' placeholder. We deliberately don't call
     these 'Empty' because a rack row almost always contains *something*;
     'Empty' would be a false certainty.

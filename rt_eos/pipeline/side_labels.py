@@ -1,17 +1,17 @@
 """
-side_labels.py — extract device-identifier labels from rack-side strips.
+side_labels.py - extract device-identifier labels from rack-side strips.
 
 Targeted complement to ocr_devices.py: instead of OCR'ing each detected
 device's chassis crop (which fails when CV missed the device entirely),
 this pass crops the LEFT and RIGHT margins of the rack image and looks
-for identifier-shaped text — the "SWHOME / SWFIBRA1 / DB-PROD-04" chips
+for identifier-shaped text - the "SWHOME / SWFIBRA1 / DB-PROD-04" chips
 that techs stick on the rails. These are the highest-truth signal in
 the photo because they're high-contrast, fixed-position, and one per
 device.
 
 Output is sorted top-to-bottom and includes a Y-position so the caller
 can match each label to a CV-detected device band (or notice that the
-label has no matching device — the recall gap we want to surface).
+label has no matching device - the recall gap we want to surface).
 
 Usage:
     python -m pipeline.side_labels <rack_id> --dir <engine dir>
@@ -106,7 +106,7 @@ NEGATIVE_TERMS = {
     "MGMT",
     "PWR",
     # Common fascia model fragments (these aren't *identifiers*, they're
-    # model numbers — handled by ocr_devices.py)
+    # model numbers - handled by ocr_devices.py)
     "CRS",
     "CRS328",
     "CRS326",
@@ -124,12 +124,12 @@ def _is_identifier(text: str) -> bool:
         return False
     if norm in NEGATIVE_TERMS:
         return False
-    # Rack-section labels (RACK1, RACK2, RACK 3) — these identify rack
+    # Rack-section labels (RACK1, RACK2, RACK 3) - these identify rack
     # positions on the cabinet rail, not specific devices. They'd show up
     # as false-positive "unmatched" entries in the recall gap banner.
     if re.fullmatch(r"RACK\d{0,3}", norm):
         return False
-    # U-position labels (U10, U37) — same story; rail measurements.
+    # U-position labels (U10, U37) - same story; rail measurements.
     if re.fullmatch(r"U\d{1,3}", norm):
         return False
     # Pure numbers, port labels
@@ -359,7 +359,7 @@ def extract_side_labels(image_path: str, reader=None) -> dict:
     except Exception:
         pass
 
-    # Dedupe — sometimes the same chip is read twice (slight bbox jitter).
+    # Dedupe - sometimes the same chip is read twice (slight bbox jitter).
     seen = set()
     deduped = []
     for l in sorted(labels, key=lambda x: x["yPct"]):

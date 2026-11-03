@@ -3,13 +3,13 @@
  *
  * Why this file exists: the existing rack_access tests pass a hand-written
  * stub for the tenant store, so they only ever prove the branching is right.
- * Mutation testing showed what that misses — `tenant.rackInOrg` could be
+ * Mutation testing showed what that misses - `tenant.rackInOrg` could be
  * replaced with `return true` (every org admin reads every other org's racks)
  * and `tenantOwnsRack` with `return false` (every member locked out), and the
  * whole suite stayed green.
  *
  * These tests seed a throwaway database, point the real modules at it, and
- * assert BOTH directions — that the right people get in, and the wrong people
+ * assert BOTH directions - that the right people get in, and the wrong people
  * do not. Asserting only the deny direction is how the earlier suite passed
  * with an empty database where every answer was "no".
  */
@@ -21,7 +21,7 @@ const os = require('node:os');
 const path = require('node:path');
 const Database = require('better-sqlite3');
 
-// Point the modules at a scratch DB before they are required — both read the
+// Point the modules at a scratch DB before they are required - both read the
 // path at module load.
 const DB_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'rt-tenant-'));
 const DB_PATH = path.join(DB_DIR, 'auth.db');
@@ -99,7 +99,7 @@ test('an org_admin stranded outside their org still reaches their own Site', () 
   // The live case this was written for: a user is created as org_admin of a new
   // organization, but that organization never gets a Site of its own, so the
   // account stays on the legacy default tenant. rackInOrg then matches nothing,
-  // and the org_admin branch used to return early — leaving the person who took
+  // and the org_admin branch used to return early - leaving the person who took
   // the scan unable to open it, while a plain member of the same Site could.
   const STRANDED = { role: 'org_admin', organizationId: 999, tenantId: SITE_A1 };
   assert.equal(canAccessRack(STRANDED, RACK_A1, tenant), true,
@@ -161,6 +161,6 @@ test('a Site-less principal is denied even if the store would say yes', () => {
 
 test('tenant ids compare by value, not by type', () => {
   // A string id from a JSON body must not silently mean "no access" on one
-  // guard while meaning "access" on another — the two-guards-disagree defect.
+  // guard while meaning "access" on another - the two-guards-disagree defect.
   assert.equal(canAccessRack({ role: 'member', tenantId: String(SITE_A1) }, RACK_A1, tenant), true);
 });

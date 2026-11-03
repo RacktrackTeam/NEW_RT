@@ -333,7 +333,7 @@ def live_lookup(
         return None
 
     # Drop pages that look like multi-product catalogs or don't mention
-    # the queried model at all — they're the reason TEG-30284 was getting
+    # the queried model at all - they're the reason TEG-30284 was getting
     # 12-port / 240-Gbps numbers from some other model in a TRENDnet
     # product catalog PDF.
     filtered = _filter_pages_to_model(pages, query)
@@ -342,7 +342,7 @@ def live_lookup(
                     remaining(), len(filtered), len(pages))
         pages = filtered
     else:
-        logger.info("[%.1fs left] Model-match filter rejected all pages — "
+        logger.info("[%.1fs left] Model-match filter rejected all pages - "
                     "falling back to all sources (low confidence)",
                     remaining())
     logger.info("[%.1fs left] Got %d/%d pages",
@@ -386,7 +386,7 @@ def live_lookup(
         logger.warning("Final record not minimally valid (no datasheet either)")
         return None
     if not extraction.fields:
-        logger.info("No specs parsed (no-LLM limit) — returning datasheet only")
+        logger.info("No specs parsed (no-LLM limit) - returning datasheet only")
 
     # ----- Step 6: persist for next time -----
     if persist:
@@ -420,7 +420,7 @@ def _looks_like_model(s: str) -> bool:
 
 
 def _best_model_name(query: str, extractions: dict[str, dict[str, str]]) -> str:
-    # 1. Trust the user's query first — strip vendor/category words and
+    # 1. Trust the user's query first - strip vendor/category words and
     #    keep the rest if it carries a model number ("FortiSwitch 448E").
     words = re.findall(r"[A-Za-z0-9][A-Za-z0-9\-\+\._/]*", query)
     kept = [w for w in words if w.lower() not in _VENDOR_WORDS]
@@ -446,7 +446,7 @@ def _best_model_name(query: str, extractions: dict[str, dict[str, str]]) -> str:
 
 def _vendor_from_sources(extractions: dict[str, dict[str, str]]) -> Optional[str]:
     """Pick the vendor from the highest-confidence source whose domain
-    is recognised. Confidence-weighted — a Cisco doc that just *mentions*
+    is recognised. Confidence-weighted - a Cisco doc that just *mentions*
     a competitor no longer wins over an NVIDIA PDF in the same fetch."""
     best = (None, -1.0)
     for url in extractions:
@@ -497,7 +497,7 @@ _SKU_TOKEN = re.compile(r"\b[A-Z][A-Z]+[-]?\d{2,}[\w\-]*\b")
 def _filter_pages_to_model(pages: dict[str, bytes], query: str) -> dict[str, bytes]:
     """Keep only pages that genuinely describe the queried model.
 
-    Fast (no PDF library calls — raw bytes scan + URL check):
+    Fast (no PDF library calls - raw bytes scan + URL check):
       - URL that names the model -> trusted, kept immediately
       - otherwise the bytes must contain the model SKU AND not look
         like a multi-product catalog (>12 distinct SKU patterns).
@@ -525,11 +525,11 @@ def _filter_pages_to_model(pages: dict[str, bytes], query: str) -> dict[str, byt
         except Exception:
             continue
         if norm not in re.sub(r"[^a-z0-9]", "", text):
-            logger.debug("filter: %s drops — %r not in content", url, key)
+            logger.debug("filter: %s drops - %r not in content", url, key)
             continue
         skus = set(_SKU_TOKEN.findall(text[:30_000].upper()))
         if len(skus) > 12:
-            logger.debug("filter: %s drops — catalog (%d SKUs)", url, len(skus))
+            logger.debug("filter: %s drops - catalog (%d SKUs)", url, len(skus))
             continue
         kept[url] = content
     return kept

@@ -63,11 +63,11 @@ from pipeline.selection import crop_device_with_origin, select_device
 
 # ── Occupancy honesty ────────────────────────────────────────────────────────
 # The cable classifier (Models/cable_type_and_colour) has FOURTEEN outputs and every
-# one of them is a cable COLOUR (LC_Aqua … SC_Yellow) — verified at the weights
+# one of them is a cable COLOUR (LC_Aqua … SC_Yellow) - verified at the weights
 # level, classifier.1.weight is (14, 1280). There is NO empty / no-cable class,
 # so its softmax always sums to 1 across colours: its top-class confidence
 # answers "which colour" and can be arbitrarily high on a crop that holds no
-# cable at all. It therefore MUST NOT be thresholded to decide occupancy — doing
+# cable at all. It therefore MUST NOT be thresholded to decide occupancy - doing
 # so fabricated connected/empty results. Occupancy
 # comes only from the status sweep; a port the sweep didn't tag is genuinely
 # UNKNOWN, and we say so rather than guess.
@@ -79,8 +79,8 @@ def resolve_port_occupancy(sweep_status):
 
     `sweep_status` is whatever the status model tagged the port with. That is
     the only signal that measures presence, so anything other than a real
-    occupancy state ("connected" / "empty") — including "unknown", "invalid",
-    None or a stray string — resolves to "unknown". We never synthesize
+    occupancy state ("connected" / "empty") - including "unknown", "invalid",
+    None or a stray string - resolves to "unknown". We never synthesize
     connected/empty from the cable-colour classifier's confidence.
     """
     return sweep_status if sweep_status in _OCCUPANCY_STATES else "unknown"
@@ -210,7 +210,7 @@ def build_unit_device_lines(units, devices):
     for unit in units:
         if unit["label"] not in assigned_units:
             idx = unit_label_to_index(unit["label"])
-            # Never claim "Empty" for an unclaimed row — we don't know
+            # Never claim "Empty" for an unclaimed row - we don't know
             # what's there. Racks almost always have a device in every
             # slot; reserve "Empty" for what the model actually classified.
             lines.append((idx, f"U{idx} Unidentified"))
@@ -230,7 +230,7 @@ def _analysed_map_devices(json_path):
     """The device list from an existing device_unit_map.json that has already
     been through the port-analysis pass, or None.
 
-    "Analysed" means at least one port-bearing device carries a port_count —
+    "Analysed" means at least one port-bearing device carries a port_count -
     the field only the --detect_only branch writes. Used by the select path to
     tell an analysed map (must be preserved and indexed against) from a bare or
     absent one (safe to overwrite).
@@ -248,7 +248,7 @@ def _analysed_map_devices(json_path):
             for d in devices
         ):
             return devices
-        # Every device has a box but none has ports — a map written by a
+        # Every device has a box but none has ports - a map written by a
         # previous select, or a rack with genuinely no port-bearing devices.
         # Still preserve it for indexing if the boxes are there.
         if all(isinstance(d, dict) and d.get("box") for d in devices):
@@ -267,7 +267,7 @@ def enrich_cables_on_map(img, output_dir, cable_model_path):
     Reuses the same recipe the single-port /api/select path uses: crop the
     port box enlarged to ~4× (connector + a chunk of cable body) out of the
     device crop, run the cable classifier, parse into connector + colour.
-    Idempotent — re-running just recomputes the same fields.
+    Idempotent - re-running just recomputes the same fields.
     """
     json_path = os.path.join(output_dir, "device_unit_map.json")
     if not os.path.exists(json_path):
@@ -310,7 +310,7 @@ def enrich_cables_on_map(img, output_dir, cable_model_path):
 
     enriched = 0
     for dev in devices:
-        # Any occupied port can carry a cable — RJ45 on main, fiber (LC/SC) on
+        # Any occupied port can carry a cable - RJ45 on main, fiber (LC/SC) on
         # SFP. Console/other rarely, but classify whatever reads 'connected'.
         port_lists = ["ports", "sfp_ports", "other_ports"]
         has_connected = any(
@@ -327,7 +327,7 @@ def enrich_cables_on_map(img, output_dir, cable_model_path):
                 if port.get("status") == "connected":
                     if _classify_port(dev_crop, port):
                         enriched += 1
-        # connected_ports is a snapshot list — rebuild it so it carries the
+        # connected_ports is a snapshot list - rebuild it so it carries the
         # freshly-attached cable_* fields too.
         dev["connected_ports"] = [
             p for p in (dev.get("ports") or []) if p.get("status") == "connected"
@@ -419,7 +419,7 @@ def main():
     ensure_dir(output_dir)
 
     # Device-detection mode is selectable. Both checkpoint sets stay
-    # registered in config.json — flipping config.detection.device_detect_mode
+    # registered in config.json - flipping config.detection.device_detect_mode
     # ("dual" or "seg") is the whole switch.
     #   dual: detect_devices_dual(server, general)  → best 33.pt + best 32.pt
     #   seg : detect_devices_seg(seg_model)         → seg_devices.pt
@@ -487,7 +487,7 @@ def main():
     # ── Background cable-enrichment mode ─────────────────────────────
     # Classify the cable (connector + colour) on every CONNECTED port of an
     # already-analyzed rack and write the cable_* fields back into
-    # device_unit_map.json. No detection runs here — this reuses the exact
+    # device_unit_map.json. No detection runs here - this reuses the exact
     # same crop recipe + classifier the per-port /api/select path uses, just
     # applied to every connected port instead of one. Scheduled in the
     # background so the initial analyze stays fast.
@@ -502,7 +502,7 @@ def main():
     rack_box = detect_rack_bounds(img)
     if rack_box is None:
         rack_box = (0, 0, img_w, img_h)
-        print("[rack] Hough lines found no rack — using full image as rack bounds.")
+        print("[rack] Hough lines found no rack - using full image as rack bounds.")
     else:
         print(f"[rack] bounds: {rack_box}")
     rx1, ry1, rx2, ry2 = rack_box
@@ -547,7 +547,7 @@ def main():
     # correction is stored (pHash + embedding) in the org's learning memory.
     # Here, on every later scan, we match each freshly-detected device against
     # that memory and, on a hit, override the model's class with the corrected
-    # one — the device equivalent of the cable-colour carry-over. Applied BEFORE
+    # one - the device equivalent of the cable-colour carry-over. Applied BEFORE
     # unit derivation and port detection so the corrected class also drives the
     # right port strategy (e.g. Patch Panel vs Switch). Best-effort: any failure
     # leaves the model's original prediction untouched.
@@ -560,7 +560,7 @@ def main():
 
             _al.set_org(_org, root=getattr(args, "al_root", None))
             # Skip the (per-device) embedding cost entirely unless this org has
-            # actually stored device corrections — the common case is none.
+            # actually stored device corrections - the common case is none.
             _have_corr = bool(_al.load_corrections("devices"))
             _n_corrected = 0
             for _dev in devices if _have_corr else []:
@@ -647,18 +647,18 @@ def main():
         else:
             units = []
             unit_source = "none"
-            print("[units] no Switch / Patch Panel detected — cannot derive unit_h.")
+            print("[units] no Switch / Patch Panel detected - cannot derive unit_h.")
 
     # --- Assign each device its top-N grid units (N = round(dev_h / unit_h)) ---
     devices = assign_devices_to_units(devices, units)
     # Port-bearing classes (Switch, Patch Panel, Firewall, Gateway) MUST
-    # survive even when their unit assignment came back empty — the picker
+    # survive even when their unit assignment came back empty - the picker
     # needs to list every one the user can inspect. Only non-port-bearing
     # devices that got zero units are dropped.
     _PICKER_PROTECTED = {"Switch", "Patch Panel", "Firewall", "Gateway", "Router"}
     devices = [d for d in devices if d.get("units") or d.get("class_name") in _PICKER_PROTECTED]
     # Every unit must map to exactly one device. Units left unclaimed by
-    # any real detection — even after the low-conf retry — get a synthetic
+    # any real detection - even after the low-conf retry - get a synthetic
     # 'Unidentified' placeholder. We deliberately don't call these 'Empty':
     # a rack row almost always contains *something*, and claiming 'Empty'
     # with no visual evidence would be a false certainty.
@@ -705,9 +705,9 @@ def main():
         print(line)
 
     # --- Full rack with all devices' port boxes ---
-    # `port_model_inst`  = typed model (port_type_finder.pt) — used on every port
+    # `port_model_inst`  = typed model (port_type_finder.pt) - used on every port
     #                       bearing class, patch panels included.
-    # `status_model_inst` = status model (port_connected_or_empty.pt) — IoU-bound to typed
+    # `status_model_inst` = status model (port_connected_or_empty.pt) - IoU-bound to typed
     #                       ports to produce connected/empty, and nothing else.
     #                       It used to double as the standalone detector for
     #                       patch panels, because the old typed model could not
@@ -740,7 +740,7 @@ def main():
     # with no confident class) get detected as full-width boxes that read like
     # rack-UNIT boundaries and clutter the overview hero. The client hides these
     # in its overlay (HIDDEN_DEVICE_TYPES); match it here so 7_rack_all_ports.png
-    # shows only real devices and their ports — no unit-like boundaries.
+    # shows only real devices and their ports - no unit-like boundaries.
     HIDDEN_DEVICE_TYPES = {"Empty", "Closed Unit", "Unidentified"}
     for dev in devices:
         if dev.get("class_name") in HIDDEN_DEVICE_TYPES:
@@ -864,7 +864,7 @@ def main():
                 # device crop, per port (pipeline/cap_check.py).
                 classified = check_caps_on(classified, dev_crop, config)
 
-                # Phase B grounding — if OCR can read the model name from
+                # Phase B grounding - if OCR can read the model name from
                 # the faceplate, annotate the device with the canonical
                 # port count from device_db. Visual under-count by >25%
                 # of expected => trust the OCR count instead. (When OCR
@@ -883,7 +883,7 @@ def main():
                 # 53 there must be 52"). Applied only to the visual count: an OCR
                 # count comes from the faceplate model via device_db and is
                 # catalogue truth, so it is published as-is. The raw number is
-                # kept on port_count_visual for auditing — without it a snapped
+                # kept on port_count_visual for auditing - without it a snapped
                 # count is indistinguishable from a correctly detected one.
                 snapped_main = snap_switch_port_count(visual_main)
                 if snapped_main != visual_main:
@@ -920,7 +920,7 @@ def main():
                 # A port-detection CRASH must not masquerade as a device that
                 # genuinely has no ports. Log it with context, then MARK the
                 # failure so device_unit_map.json keeps a crash apart from a
-                # real zero-port device — both still demote to "Unidentified"
+                # real zero-port device - both still demote to "Unidentified"
                 # below, but only the crash carries port_detection_failed.
                 logger.exception(
                     "port detection failed for device class=%r units=%s box=%s",
@@ -935,7 +935,7 @@ def main():
                 mark_port_detection_failed(dev, exc)
 
             # If the port detector found no ports at all on a port-bearing
-            # device, the YOLO class is almost certainly wrong — demote to
+            # device, the YOLO class is almost certainly wrong - demote to
             # Unidentified. Status ('connected' vs 'empty') is no longer
             # required: the class-aware port_best.pt labels port *category*
             # (main/sfp/console) but doesn't infer occupancy, so legitimate
@@ -951,7 +951,7 @@ def main():
 
         # Redraw what the screen shows. The annotated images and the unit
         # report were written before the port loop, with the detector's
-        # class burned into them — "3:Switch [u06]" on a box the map now
+        # class burned into them - "3:Switch [u06]" on a box the map now
         # calls a Router. The Results page serves 2_devices_only.png as the
         # rack picture, so the picture has to be drawn from the final map.
         cv2.imwrite(devices_only_path, annotate_devices_only(img, devices))
@@ -967,19 +967,19 @@ def main():
     # Reaching here means a SELECT ("show me port N on device D"), not an
     # analyze: the --detect_only branch above returns before this line. Only
     # that branch computes per-device port_count / ports / sfp_ports /
-    # console_ports, so json_payload here carries devices with NO port data —
+    # console_ports, so json_payload here carries devices with NO port data -
     # and saving it stripped those fields off every device in the rack.
     #
     # That is what broke the second port lookup. The first lookup read a good
     # map, worked, and wiped it on the way out. The next one found port_count
     # gone, so the server had no target count to pin the layout to and the UI
-    # was told the device has 0 ports — "We couldn't read how many ports this
+    # was told the device has 0 ports - "We couldn't read how many ports this
     # device has. Set the port count below, then pick a port." Rebuilding the
     # canonical scan_result.json from the stripped map spread it to the ports
     # dropdown and the report too. (server/app.js grew ensurePortCounts() to
     # heal this after the fact; better not to break it in the first place.)
     #
-    # The analysed map is authoritative — keep it, and only write when there
+    # The analysed map is authoritative - keep it, and only write when there
     # is nothing there to protect.
     _analysed_devices = _analysed_map_devices(json_path)
     if _analysed_devices is None:
@@ -988,15 +988,15 @@ def main():
     else:
         print(
             f"[select] preserving analysed device_unit_map.json "
-            f"({len(_analysed_devices)} devices with port data) — not overwriting"
+            f"({len(_analysed_devices)} devices with port data) - not overwriting"
         )
 
     if not devices:
         raise RuntimeError("No devices detected. Cannot continue to port detection.")
 
     # Index into the ANALYSED device list whenever we have one. device_index is
-    # defined BY that list — the client numbered the devices it was shown, which
-    # came from the analyze pass — so the analysed map is authoritative here by
+    # defined BY that list - the client numbered the devices it was shown, which
+    # came from the analyze pass - so the analysed map is authoritative here by
     # construction, and the fresh re-detection above is not.
     #
     # This matters because the two genuinely disagree. On a real scan
@@ -1080,7 +1080,7 @@ def main():
     num_clusters = pat.get("num_clusters", 0)
     main_cluster_size = pat.get("main_cluster_size", 0)
 
-    print(f"\nPort pattern: {num_clusters} cluster(s) — sizes {cluster_sizes}")
+    print(f"\nPort pattern: {num_clusters} cluster(s) - sizes {cluster_sizes}")
     print(f"  Main pattern: {main_cluster_size} ports/cluster")
     if n_console:
         print(f"  Console: {n_console} port(s)")
@@ -1147,7 +1147,7 @@ def main():
 
         # Occupancy comes ONLY from the status sweep. When it couldn't tag the
         # selected port (e.g. patch-panel-trained port_connected_or_empty.pt didn't match
-        # this switch's port box), the honest answer is "unknown" — we do NOT
+        # this switch's port box), the honest answer is "unknown" - we do NOT
         # fall back to the cable classifier's confidence. That model has no
         # 'no-cable' class (all 14 outputs are colours), so its softmax measures
         # WHICH colour, never WHETHER a cable is present; thresholding it here
@@ -1162,7 +1162,7 @@ def main():
         if selected_port_info["status"] == "connected" and cable_model is not None:
             # Quadruple the port box size before handing it to the cable
             # classifier: the connector alone is a too-tight crop for the
-            # model — it needs the connector PLUS a chunk of the cable body
+            # model - it needs the connector PLUS a chunk of the cable body
             # (color, sheath texture) to nail RJ-45 vs LC vs SC and the
             # specific color reliably. pad_x = 1.5 * box_w → crop width =
             # box_w + 2*1.5*box_w = 4*box_w. The displayed bbox in the UI
@@ -1190,7 +1190,7 @@ def main():
 
             # Cross-scan carry-over: match this cable's appearance against prior
             # technician colour corrections in this org's learning memory and,
-            # if found, apply the corrected colour — so a fix made on one scan
+            # if found, apply the corrected colour - so a fix made on one scan
             # sticks even when the same rack is re-scanned (a different photo /
             # rack id). The lookup uses a tight crop matching the one saved at
             # feedback time so the perceptual hashes line up.

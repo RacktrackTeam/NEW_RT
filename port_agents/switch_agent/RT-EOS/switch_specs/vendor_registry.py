@@ -1,5 +1,5 @@
 """
-Vendor registry loader — one source of truth from vendors.json.
+Vendor registry loader - one source of truth from vendors.json.
 
 agent.py, live_search.py and live_extract.py all extend their built-in
 alias/domain tables with what this module returns, so adding a vendor
@@ -60,7 +60,7 @@ def domains() -> set[str]:
 
 
 def login_gated() -> dict[str, str]:
-    """Vendors whose release notes live behind a login portal — map them
+    """Vendors whose release notes live behind a login portal - map them
     to their portal URL. Derived from the registry's category + notes."""
     portals = {
         "Cisco":      "https://software.cisco.com",

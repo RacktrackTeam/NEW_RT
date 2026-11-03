@@ -31,7 +31,7 @@ const jwt = require('jsonwebtoken');
 const scanJobs = require('./lib/scan-jobs');
 const helmet = require('helmet');
 const { uploadLimiter } = require('./lib/rate_limit');
-// Central observability — must be required before anything that wants to
+// Central observability - must be required before anything that wants to
 // log structured events. Provides logger + metrics + middleware + helpers.
 const o11y = require('./lib/observability');
 const { logger, withSpan, recordEvent } = o11y;
@@ -63,7 +63,7 @@ function softAuthPayload(req) {
   // Reads the cookie as well as the header. Its contract is "no payload means
   // treat as anonymous", so the moment browsers stopped sending Authorization
   // every signed-in user would have silently looked anonymous on the ~25
-  // endpoints that scope their reads through this — no error, just other
+  // endpoints that scope their reads through this - no error, just other
   // tenants' data quietly missing.
   //
   // Verification is delegated to auth.verifyAccessToken rather than done here.
@@ -80,7 +80,7 @@ function softAuthPayload(req) {
 // An <img> cannot send an Authorization header, so rack photographs need a
 // capability that rides in the query string. This carries the caller's role
 // and Site rather than a specific rack, so one token covers every image the
-// user is entitled to — and it is re-checked against canAccessRack on each
+// user is entitled to - and it is re-checked against canAccessRack on each
 // request, so it grants no more than the session it came from.
 //
 // Long enough that images do not break mid-session, but still expiring,
@@ -150,7 +150,7 @@ function engineImageUrl(rackId, rel) {
 }
 
 // Windows sometimes keeps a lingering handle on files sharp just wrote,
-// causing transient EPERM on unlink. Retry briefly, then give up — a
+// causing transient EPERM on unlink. Retry briefly, then give up - a
 // leftover tmp file is harmless.
 function safeUnlink(p) {
   if (!p || !fs.existsSync(p)) return;
@@ -158,7 +158,7 @@ function safeUnlink(p) {
     try { fs.unlinkSync(p); return; }
     catch (err) {
       if (err.code !== 'EPERM' && err.code !== 'EBUSY') return;
-      // tight synchronous retry — usually clears within ~50ms
+      // tight synchronous retry - usually clears within ~50ms
       const until = Date.now() + 50;
       while (Date.now() < until) {}
     }
@@ -177,7 +177,7 @@ function rackImagePath(rackDir, fname) {
 function rackImageUrlPath(rackDir, fname) {
   return fs.existsSync(path.join(rackDir, 'images', fname)) ? `images/${fname}` : fname;
 }
-// Per-port artifacts (5/6 PNG copies) — new layout: <rack>/ports/<base>.png
+// Per-port artifacts (5/6 PNG copies) - new layout: <rack>/ports/<base>.png
 function rackPortPath(rackDir, baseName) {
   const dir = path.join(rackDir, 'ports');
   fs.mkdirSync(dir, { recursive: true });
@@ -196,11 +196,11 @@ function rackPortRelative(rackDir, baseName) {
 // Express's `app.param` callback fires whenever a route definition has
 // `:rackId` in its path, just before the handler runs. This means EVERY
 // scan and OCR endpoint that takes a rackId is automatically
-// gated by tenant ownership — no per-route wiring needed.
+// gated by tenant ownership - no per-route wiring needed.
 //
 // Behavior:
 //   * Authenticated request whose tenant doesn't own this rack → 404
-//     (404 not 403 — don't reveal that the rack exists in another tenant)
+//     (404 not 403 - don't reveal that the rack exists in another tenant)
 //   * Unauthenticated request → falls through (preserves legacy
 //     dev/test access; the routes themselves can require auth if they want)
 // Role-aware rack access (single source of truth for owner/admin/member
@@ -227,7 +227,7 @@ function canAccessRack(auth, rackId) {
 }
 
 // Fail CLOSED throughout. This used to `return next()` for a member whose
-// tenantId is NULL — handing any such principal every rack on the platform —
+// tenantId is NULL - handing any such principal every rack on the platform -
 // while canAccessRack refused the identical case. One policy, two guards, two
 // answers. Both now come from lib/rack_access.
 app.param('rackId', rackAccess.rackOwnershipParam({
@@ -264,7 +264,7 @@ const _corsIsDev = (process.env.NODE_ENV || 'development') !== 'production';
 // The Capacitor (iOS/Android) app runs from a FIXED local WebView origin and
 // calls this API cross-origin, so unless these are allowed the packaged app
 // gets no Access-Control-Allow-Origin and EVERY request dies as "Load failed"
-// — the exact symptom testers hit at login, while the web app (same-origin) is
+// - the exact symptom testers hit at login, while the web app (same-origin) is
 // unaffected. Allowing them is safe: auth is a Bearer token the client reads
 // from its OWN origin's localStorage (never a cookie), and fetch never uses
 // credentials:'include', so CORS carries no ambient credential a malicious
@@ -279,8 +279,8 @@ const _nativeOrigins = new Set([
 // Credentials are granted PER ORIGIN, not globally, and only to origins an
 // operator listed explicitly in CORS_ALLOWED_ORIGINS.
 //
-// The safety argument in the comment above — that allowing http(s)://localhost
-// costs nothing — holds only while no ambient credential rides along. Now that
+// The safety argument in the comment above - that allowing http(s)://localhost
+// costs nothing - holds only while no ambient credential rides along. Now that
 // browser sessions are cookies, a blanket `credentials: true` would hand every
 // page running on a user's own machine (any local dev server, any other app
 // serving on localhost) the ability to make cookie-bearing calls to this API
@@ -296,8 +296,8 @@ app.use(cors((req, cb) => {
     origin: allowed ? (origin || true) : false,
     // Native counts as credentialed too.
     //
-    // _nativeOrigins is a fixed, hardcoded set — the WebView origins our own
-    // packaged app runs from — not something an operator or a caller can
+    // _nativeOrigins is a fixed, hardcoded set - the WebView origins our own
+    // packaged app runs from - not something an operator or a caller can
     // widen, so this is not the blanket `credentials: true` the note above
     // warns against.
     //
@@ -305,7 +305,7 @@ app.use(cors((req, cb) => {
     // on every request, and a browser DISCARDS the response to such a request
     // unless the server answers Access-Control-Allow-Credentials: true. The
     // app was allowed through CORS, served correctly, and then had every reply
-    // thrown away by its own WebView — indistinguishable from the API being
+    // thrown away by its own WebView - indistinguishable from the API being
     // down, while the same server answered the web app (same-origin, and
     // configured) perfectly.
     credentials: isConfigured || isNative,
@@ -318,14 +318,14 @@ app.use(cors((req, cb) => {
 // already read.
 app.use('/api/setup/org', express.json({ limit: '320kb' }));
 app.use(express.json());
-// Must precede anything that reads req.cookies — requireAuth, softAuthPayload
+// Must precede anything that reads req.cookies - requireAuth, softAuthPayload
 // and the CSRF check below all do.
 app.use(cookieParser());
 
 // CSRF: a cookie is sent by the browser automatically, so a form on someone
 // else's site could trigger a state-changing call as the signed-in user. The
-// Bearer path has never had this problem — an attacker cannot set a header on
-// a cross-site request — so the check only engages when a request actually
+// Bearer path has never had this problem - an attacker cannot set a header on
+// a cross-site request - so the check only engages when a request actually
 // carries one of our auth cookies. That keeps the native app, curl and
 // server-to-server callers (which authenticate by Bearer or app key, and have
 // no ambient credential to abuse) working unchanged.
@@ -351,7 +351,7 @@ function csrfOriginCheck(req, res, next) {
   if (referer) {
     try {
       if (isTrusted(new URL(referer).origin)) return next();
-    } catch { /* unparseable — fall through to reject */ }
+    } catch { /* unparseable - fall through to reject */ }
     return res.status(403).json({ error: 'Origin not allowed' });
   }
   // A browser always sends one of the two on a mutating request. Neither
@@ -473,7 +473,7 @@ app.get(/^\/api\/scans\/([^/]+)\/files\/(.+)$/, async (req, res) => {
   }
 });
 
-// Health + metrics — placed early so they bypass auth/static/etc and
+// Health + metrics - placed early so they bypass auth/static/etc and
 // stay reachable even if the main app is degraded.
 // The client asks for this once after sign-in and appends it to image URLs.
 // Authenticated, so the token can only ever encode a session the caller
@@ -487,7 +487,7 @@ app.get('/api/assets/token', auth.requireAuth, (req, res) => {
 app.get('/healthz', o11y.healthHandler);
 app.get('/metrics', o11y.metricsHandler);
 
-// Which build is actually running — no auth, so you can hit
+// Which build is actually running - no auth, so you can hit
 //   https://<tunnel>/api/version
 // and instantly see the live commit + when the server last started. Ends the
 // "did my push deploy?" guesswork.
@@ -510,7 +510,7 @@ app.get('/api/version', (req, res) => {
 //
 // Mounted behind requireAuth; who may read or write WHICH Site is decided inside the router (owner, the
 // org's admin, the Site's manager write; the Site's members read; strangers
-// get 404). /api/analyze is deliberately NOT gated on canScan — the client
+// get 404). /api/analyze is deliberately NOT gated on canScan - the client
 // decides what to show; the server keeps accepting scans.
 try {
   app.use('/api/setup', auth.requireAuth, require('./routes/setup'));
@@ -619,7 +619,7 @@ if (fs.existsSync(clientDist)) {
 
 // ── File upload ───────────────────────────────────────────────
 // The extension is taken from a whitelist match on the original name, not
-// copied verbatim — otherwise an upload named `evil.jpg.bat` (filter passes
+// copied verbatim - otherwise an upload named `evil.jpg.bat` (filter passes
 // on first match) or one with embedded path chars could land on disk with an
 // attacker-controlled suffix.
 // Extension for a file we are willing to store, from the NAME first and the
@@ -628,7 +628,7 @@ if (fs.existsSync(clientDist)) {
 // Name-only was the whole test, and a filename is not something the client
 // controls. A camera capture is built here as `capture_<ts>.jpg` and always
 // passed; a gallery pick is forwarded as the raw File, carrying whatever name
-// the OS attached — and an Android content:// pick frequently has no extension
+// the OS attached - and an Android content:// pick frequently has no extension
 // at all. The same photograph was therefore accepted when taken through the
 // camera and rejected as "Invalid file type" when chosen from the gallery,
 // which is exactly the "sometimes works, sometimes doesn't" the testers hit.
@@ -690,7 +690,7 @@ const upload = multer({
 // available so multiple techs behind one NAT aren't starved by each other.
 const scanLimit = uploadLimiter();
 // The live viewfinder polls /api/detect every 400ms (~150/min) while the camera
-// is open, but it shared the 20/min upload budget — so ~87% of frames were
+// is open, but it shared the 20/min upload budget - so ~87% of frames were
 // encoded, uploaded and then rejected with 429, and live detection effectively
 // stopped a few seconds into every session. /api/detect is a lightweight
 // detect-only call (no scan is written), so it gets its own realistic budget.
@@ -700,7 +700,7 @@ const detectLimit = uploadLimiter({
   burst: Number(process.env.RATE_LIMIT_DETECT_BURST)   || 60,
 });
 
-// Stricter limiter for credential endpoints — throttles brute-force login /
+// Stricter limiter for credential endpoints - throttles brute-force login /
 // password-reset attempts. Keyed by the ACCOUNT (username / email in the body),
 // NOT by IP: every tester reaches the server through the same Cloudflare tunnel,
 // so an IP key would lump all of them into one shared bucket and lock everyone
@@ -717,7 +717,7 @@ const authLimit = uploadLimiter({
 // Crash reports from the client's error boundary. Deliberately unauthenticated:
 // the most valuable report is the one from a screen that broke so badly the
 // session could not be read, and a tester who hits a blank page cannot be asked
-// to log in first. Everything is truncated and nothing is executed or echoed —
+// to log in first. Everything is truncated and nothing is executed or echoed -
 // this only ever appends to the log. Rate limited so it cannot be used to flood
 // the log store.
 const clientErrorLimit = uploadLimiter({ rate: 6, burst: 12 });
@@ -810,7 +810,7 @@ async function normalizeImage(inputPath, intake = null) {
 // first’s results. 34 such ids already exist in the live database.
 function rackScope(auth) {
   if (auth && auth.organizationId) return `org:${auth.organizationId}`;
-  // No organisation (the platform owner’s own Site) — fall back to the tenant
+  // No organisation (the platform owner’s own Site) - fall back to the tenant
   // so an id is still never shared across unrelated accounts.
   if (auth && auth.tenantId) return `tenant:${auth.tenantId}`;
   return 'global';
@@ -828,7 +828,7 @@ function computeRackId(filePath, scope = 'global') {
 
 // ── Persistent Python worker pool ─────────────────────────────
 // Workers preload the YOLO models named in config.json at boot and never
-// re-read it — a model swap there (e.g. models.devices_seg) takes effect only
+// re-read it - a model swap there (e.g. models.devices_seg) takes effect only
 // on the next server restart.
 const pythonCmd = resolvePython();
 // RACKTRACK_WORKERS when set. Unset: 2 when the machine has 8 GB or more of
@@ -849,7 +849,7 @@ const WORKER_COUNT = Math.max(1, parseInt(process.env.RACKTRACK_WORKERS, 10) || 
 //   RACKTRACK_SKIP_WORKER_POOL=1  a stub whose request() throws.
 //   otherwise                     the real pool.
 //
-// The skip flag used to be the only option, and it is a boolean — you could
+// The skip flag used to be the only option, and it is a boolean - you could
 // turn the pipeline off but not replace it. That left the product's core
 // workflow (upload an image, get a rack back) with zero automated coverage by
 // construction rather than by oversight: any test of /api/analyze either
@@ -866,10 +866,10 @@ if (process.env.RACKTRACK_POOL_MODULE) {
   }
   if (typeof pool.shutdown !== 'function') pool.shutdown = () => Promise.resolve();
   logger.warn({ event: 'worker_pool.injected', module: modPath },
-    'worker pool replaced by RACKTRACK_POOL_MODULE — not for production use');
+    'worker pool replaced by RACKTRACK_POOL_MODULE - not for production use');
 } else if (process.env.RACKTRACK_SKIP_WORKER_POOL === '1') {
   logger.warn({ event: 'worker_pool.disabled' },
-    'RACKTRACK_SKIP_WORKER_POOL=1 — Python worker pool disabled; AI/ML routes will 500');
+    'RACKTRACK_SKIP_WORKER_POOL=1 - Python worker pool disabled; AI/ML routes will 500');
   pool = {
     request: () => { throw new Error('worker pool disabled (RACKTRACK_SKIP_WORKER_POOL=1)'); },
     shutdown: () => Promise.resolve(),
@@ -886,13 +886,13 @@ if (process.env.RACKTRACK_POOL_MODULE) {
 
 // A scan that died because the GPU fell over is neither the photographer's
 // fault nor a permanent failure: the pool has already killed the poisoned
-// worker, so the next attempt runs on a fresh CUDA context. Say that — instead
+// worker, so the next attempt runs on a fresh CUDA context. Say that - instead
 // of blaming the photo, or pasting a torch traceback into the owner's feed,
 // which is what "CUDA error: unknown error CUDA kernel errors might be
 // asynchronously reported…" did to nine consecutive rows of it.
 const ENGINE_DOWN_MSG =
   'The scan engine lost its GPU and is restarting itself. Please try that photo again in a moment.';
-const ENGINE_DOWN_AUDIT = 'Scan engine GPU fault — worker recycled; scan is retryable';
+const ENGINE_DOWN_AUDIT = 'Scan engine GPU fault - worker recycled; scan is retryable';
 
 async function runQualityCheck(imagePath) {
   return withSpan('pipeline.quality_check', async (log) => {
@@ -960,7 +960,7 @@ async function runPipelineSelect(imagePath, outputDir, deviceIndex, port, portCa
   }, { imagePath, outputDir, deviceIndex, port, portCategory });
 }
 
-// The main-port count this device is PUBLISHED with — the number the port
+// The main-port count this device is PUBLISHED with - the number the port
 // dropdown, the "N detected" caption and the 1-N input bound all read. Select
 // must lay out exactly this many ports so "port N" means the same physical
 // position on both sides of the wire.
@@ -968,7 +968,7 @@ async function runPipelineSelect(imagePath, outputDir, deviceIndex, port, portCa
 // This used to return a count ONLY for devices the user had manually
 // relabeled, which left every other device selecting against a fresh
 // re-detection instead of the published layout. Those two numbers disagree
-// whenever detection isn't perfectly repeatable against the published count —
+// whenever detection isn't perfectly repeatable against the published count -
 // most often on a device whose count came from OCR + device_db, where
 // runner.py --detect_only deliberately publishes the catalogue count
 // (e.g. 48) after the visual pass under-counted (e.g. 30). The UI then offered
@@ -1060,7 +1060,7 @@ async function ensurePortCounts(rackId) {
 // ── Heal-on-open for racks with no port data ──────────────────────────────
 // A rack whose devices carry no port_count cannot be worked on: buildResponse
 // maps the missing field to null, the client reads that as zero ports, and the
-// results page opens with nothing to pick — no devices, no ports, and "We
+// results page opens with nothing to pick - no devices, no ports, and "We
 // couldn't read how many ports this device has" the moment Find Port is
 // pressed. Reopening a scan from Recent Scans is where testers hit this.
 //
@@ -1069,7 +1069,7 @@ async function ensurePortCounts(rackId) {
 // when an existing scan was reopened, so a rack that lost its port data stayed
 // broken for good. The loss came from the select path overwriting
 // device_unit_map.json (fixed in pipeline/runner.py), which is why this only
-// struck *some* scans — the ones a port lookup had already been run on. Racks
+// struck *some* scans - the ones a port lookup had already been run on. Racks
 // damaged before that fix still need healing, and this is what does it.
 //
 // A rack that was properly analysed has a numeric port_count on EVERY device,
@@ -1228,7 +1228,7 @@ const { modelFromText, modelInText, matchesShape } = require('./lib/model_read')
 // Matches a report device (by its first occupied unit + class) against the
 // per-device OCR pass (ocr_devices.json in the engine folder) to recover the
 // make/model read off the physical faceplate. Best-effort: OCR frequently
-// only gets the make, or nothing at all — callers must handle null fields.
+// only gets the make, or nothing at all - callers must handle null fields.
 // The model is settled from raw_text by lib/model_read.js: read, never guessed.
 function matchOcrDevice(rackDir, position, className) {
   try {
@@ -1286,7 +1286,7 @@ const ROUTER_PORT_CEILING = 10;
  *
  * The pipeline writes it into new maps; this is for every file written before
  * the rule existed, and for every route that used to copy class_name straight
- * off disk — the Results payload, the cached scan_result.json, the OCR record.
+ * off disk - the Results payload, the cached scan_result.json, the OCR record.
  * Same rule as pipeline/classify.py: only a Switch, only once its ports have
  * been counted, and never a class a person or the detector chose otherwise.
  */
@@ -1319,7 +1319,7 @@ function buildScanReportData(rackId) {
     // not run yet; this settles it for every rack already on disk, without
     // asking anyone to photograph their rack a second time. Both are narrow
     // in the same way: only a device the detector called Switch, and only
-    // once its ports have actually been counted — a four-port server is a
+    // once its ports have actually been counted - a four-port server is a
     // server and a six-port patch panel is a patch panel.
     const dev = applyRouterRule(dev0);
     const code = CLASS_CODE_SRV[dev.class_name] || (dev.class_name || 'UNK').replace(/\s+/g, '').slice(0, 4).toUpperCase();
@@ -1356,14 +1356,14 @@ function buildScanReportData(rackId) {
   // Best-effort throughout: the result still builds if OCR never ran.
   for (const dv of devices) {
     const o = matchOcrDevice(rackDir, dv.position, dv.class_name);
-    const ov = readDeviceOverride(rackDir, String(dv.position || '').split(/[\s–—-]/)[0]);
+    const ov = readDeviceOverride(rackDir, String(dv.position || '').split(/[\s\u2013\u2014-]/)[0]);
     if (o || ov) {
       dv.make     = ov?.make     || o?.make    || null;
       dv.model    = ov?.model    || o?.model   || null;
     }
   }
 
-  // Latest port identification only — walk newest-first and take the first valid line
+  // Latest port identification only - walk newest-first and take the first valid line
   const idsPath = path.join(rackDir, 'port_identifications.jsonl');
   const portIdentifications = [];
   if (fs.existsSync(idsPath)) {
@@ -1428,7 +1428,7 @@ function buildScanReportData(rackId) {
     const latest = portIdentificationsOut[0];
     const dev = devices[latest.device_index - 1];
     if (dev) {
-      const firstUnit = String(dev.position || '').split(/[\s–—-]/)[0];
+      const firstUnit = String(dev.position || '').split(/[\s\u2013\u2014-]/)[0];
       const ocr = matchOcrDevice(rackDir, dev.position, dev.class_name);
       const override = readDeviceOverride(rackDir, firstUnit);
       selectedDevice = {
@@ -1624,7 +1624,7 @@ function writeCanonicalScanResult(rackId, prebuiltData) {
 
 // Schedule a canonical-result refresh for after the response is sent. Used by
 // mutation endpoints that don't already build the result inline. Also kicks
-// off per-device OCR in the background — fully silent, the user never sees
+// off per-device OCR in the background - fully silent, the user never sees
 // it; the result lands in the engine folder's ocr_devices.json.
 function scheduleCanonicalRefresh(rackId) {
   setImmediate(() => {
@@ -1636,7 +1636,7 @@ function scheduleCanonicalRefresh(rackId) {
 }
 
 // Fire-and-forget: classify the cable (connector + colour) on EVERY connected
-// port after a scan finishes, so the whole rack shows cable info — not just the
+// port after a scan finishes, so the whole rack shows cable info - not just the
 // one port a user taps. Runs in a worker so the initial analyze response stays
 // fast; when it finishes we rewrite scan_result.json so the client picks the
 // cable_* fields up on its next load. Idempotent + guarded: skips racks whose
@@ -1674,7 +1674,7 @@ function scheduleCableEnrichment(rackId) {
   const rackDir  = engineDir(rackId);
   const mapPath  = path.join(rackDir, 'device_unit_map.json');
   if (!fs.existsSync(mapPath)) return;
-  // Already enriched? Nothing to do — keeps repeated canonical refreshes cheap.
+  // Already enriched? Nothing to do - keeps repeated canonical refreshes cheap.
   try {
     const dm = JSON.parse(fs.readFileSync(mapPath, 'utf8'));
     if (dm && dm.cables_enriched) return;
@@ -1706,7 +1706,7 @@ function scheduleCableEnrichment(rackId) {
 // misses a device or boxes it tight enough to clip its faceplate label, the
 // per-device pass returns empty text. Running label OCR on the whole rack
 // photo recovers brand badges (PLANAR, TRIPP-LITE, AUDIOCODES, SONY, …) and
-// rack-applied labels that fall outside any single device's bbox — the GET
+// rack-applied labels that fall outside any single device's bbox - the GET
 // /api/ocr/labels/:rackId endpoint then maps those tokens back to devices by
 // Y-overlap and surfaces a brand-token reclassification for the client.
 const _ocrLabelsRunning = new Map();
@@ -1771,7 +1771,7 @@ async function nameFromLateLabels(rackId) {
 }
 
 // Fire-and-forget per-device OCR after a scan finishes. Runs only when
-// the engine folder's ocr_devices.json doesn't already exist — re-running OCR
+// the engine folder's ocr_devices.json doesn't already exist - re-running OCR
 // on every canonical refresh would be wasteful (1-2 min on CPU). The user
 // can still trigger a re-run via POST /api/scan/:rackId/ocr-devices.
 //
@@ -1800,7 +1800,7 @@ function scheduleOcrDevices(rackId) {
       logger.warn(`[ocr_devices] ${rackId} produced no output: ${stderr.slice(-300)}`);
       return;
     }
-    // OCR ran — rewrite the canonical result so it picks up the real
+    // OCR ran - rewrite the canonical result so it picks up the real
     // make/model. Silent and fire-and-forget; the user never sees this.
     try { writeCanonicalScanResult(rackId); } catch (_) {}
   });
@@ -1812,8 +1812,8 @@ function scheduleOcrDevices(rackId) {
 
 // Which tenant should own a scan this person just ran.
 //
-// Their own, when they have one. Owners and org_admins do NOT — role is what
-// gets them access, not membership of a site — and rack_owners.tenant_id is
+// Their own, when they have one. Owners and org_admins do NOT - role is what
+// gets them access, not membership of a site - and rack_owners.tenant_id is
 // NOT NULL, so `claimRack` returned early for them and their scans were never
 // recorded at all. The owner dashboard counts rows in that table, which is why
 // an owner could run a dozen scans and watch the total sit at one or two: it
@@ -1825,7 +1825,7 @@ function scheduleOcrDevices(rackId) {
 function scanOwnerTenantId(authPayload) {
   const own = authPayload?.tenantId;
   if (own) return own;
-  if (!authPayload?.sub) return null;      // not signed in — nothing to claim
+  if (!authPayload?.sub) return null;      // not signed in - nothing to claim
   try { return auth.getDefaultTenantId() || null; } catch { return null; }
 }
 
@@ -1906,7 +1906,7 @@ app.get('/api/health', (req, res) => {
 // throttled. verify-reset-code and verify were missing: they check a 6-digit
 // code without consuming it and with no attempt counter, so an unthrottled
 // caller could brute-force the ~10^6 space in seconds and then mint a full
-// token via login-with-code — account takeover without the password.
+// token via login-with-code - account takeover without the password.
 app.use(['/api/auth/login', '/api/auth/signup', '/api/auth/forgot-password',
   '/api/auth/reset-password', '/api/auth/login-with-code',
   '/api/auth/verify-reset-code', '/api/auth/verify', '/api/auth/resend-code'], authLimit);
@@ -1917,7 +1917,7 @@ auth.registerRoutes(app);
 // GET /api/audit?action=&targetType=&targetId=&status=&since=&until=&limit=&offset=
 //
 // By default returns ONLY the calling user's events. Pass `?scope=all` to see
-// every event — but only if the caller's username appears in the
+// every event - but only if the caller's username appears in the
 // AUDIT_ADMINS env var (comma-separated). Without admin status, scope=all is
 // silently downgraded to scope=self so we never leak other users' actions.
 app.get('/api/audit', auth.requireAuth, (req, res) => {
@@ -1957,8 +1957,8 @@ app.get('/api/audit', auth.requireAuth, (req, res) => {
 // The pino log stream is mirrored into SQLite by lib/log-store.js. These
 // endpoints back the LogsPage: a filterable, auto-refreshing view of what the
 // server has actually been logging (email/SMTP results, errors, HTTP, etc.).
-// Gated to owners or the AUDIT_ADMINS allow-list — same bar as the ops
-// dashboard — since logs can carry operational detail members shouldn't see.
+// Gated to owners or the AUDIT_ADMINS allow-list - same bar as the ops
+// dashboard - since logs can carry operational detail members shouldn't see.
 // The owner's console: logs and the dashboard (routes/owner_console.js, shared with auth_service.js).
 require('./routes/owner_console')(app, { auth, audit, logger, feedbackTally: () => feedbackTally() });
 
@@ -2050,7 +2050,7 @@ setInterval(() => {
       sampleOrphans: (summary.orphans || []).slice(0, 5).map(o => o.rackId),
     }, `scheduled orphan GC: ${summary.removed}/${summary.scanned} ${_orphanGcApply ? 'pruned' : 'would-prune'}`);
     // When the scheduled job actually deletes customer data, record it in the
-    // tamper-evident audit trail — same as the manual endpoint does. A system
+    // tamper-evident audit trail - same as the manual endpoint does. A system
     // actor (no req) stands in for the cron. Dry-runs delete nothing, so this
     // only fires once apply is deliberately enabled.
     if (_orphanGcApply && summary.removed > 0) {
@@ -2075,7 +2075,7 @@ setInterval(() => {
 
 /**
  * POST /api/detect
- * Stateless live-overlay detection — runs only YOLO bbox classification on
+ * Stateless live-overlay detection - runs only YOLO bbox classification on
  * the uploaded JPEG. NO rack folder, NO OCR, NO port detection, NO audit
  * log, NO image renders. Used by the Camera viewfinder's per-frame loop.
  *
@@ -2122,7 +2122,7 @@ app.post('/api/detect', detectLimit, upload.single('image'), async (req, res) =>
 // Lets a mobile client reclaim a scan it started but lost when iOS suspended
 // the app mid-analysis. The client sends a random `clientJobId`; we record
 // jobId -> rackId here by hooking res.json, so every return path (cache hit,
-// success, error) is captured even if the client socket already closed — the
+// success, error) is captured even if the client socket already closed - the
 // handler still runs to completion server-side. No-op without a clientJobId,
 // so web and older clients are unaffected.
 function trackScanJob(req, res) {
@@ -2143,7 +2143,7 @@ function trackScanJob(req, res) {
 
 // Poll target for the resume flow above. Returns { status, rackId } for a
 // previously-started clientJobId. 'missing' means we never saw it (expired or
-// wrong id) — the client then just falls back to the normal upload screen.
+// wrong id) - the client then just falls back to the normal upload screen.
 app.get('/api/analyze/result/:jobId', (req, res) => {
   const j = scanJobs.get(req.params.jobId);
   if (!j) return res.json({ status: 'missing' });
@@ -2176,7 +2176,7 @@ app.post('/api/analyze', auth.requireAuth, scanLimit, upload.single('image'), as
   // org is still pending owner approval (legacy/no-org users are unaffected).
   // NOT block-scoped: `_a` is also needed further down for rackScope() when the
   // rack id is computed. It used to live in a bare block, which put it out of
-  // scope at the call site and made every scan throw ReferenceError — surfaced
+  // scope at the call site and made every scan throw ReferenceError - surfaced
   // to the user as "Please upload a clearer photo", blaming their image.
   const _caller = softAuthPayload(req);
   if (_caller?.organizationId && !auth.isOrgActive(_caller.organizationId)) {
@@ -2193,7 +2193,7 @@ app.post('/api/analyze', auth.requireAuth, scanLimit, upload.single('image'), as
 
   // Optional binding to a space the admin set up (organisation setup). The
   // phone sends `spaceId` alongside the image. The space must belong to the
-  // same Site the scan is claimed for — the tenant claimRack uses below — or
+  // same Site the scan is claimed for - the tenant claimRack uses below - or
   // the scan is refused before any work is done, 404 like any resource in
   // another Site. Without spaceId nothing in this handler changes.
   let _scanSpace = null;
@@ -2246,7 +2246,7 @@ app.post('/api/analyze', auth.requireAuth, scanLimit, upload.single('image'), as
     const jsonPath  = path.join(engineDir(rackId), 'device_unit_map.json');
 
     // Tenant ownership: anyone scanning an image (cached or fresh) is
-    // making a tenant-scoped claim on this rack. Idempotent — multiple
+    // making a tenant-scoped claim on this rack. Idempotent - multiple
     // tenants can co-own the same RK-id when they scan the same image.
     const _authPayload = _a;
     const _scanTenantId = scanOwnerTenantId(_authPayload);
@@ -2262,7 +2262,7 @@ app.post('/api/analyze', auth.requireAuth, scanLimit, upload.single('image'), as
 
       // AL auto-apply also on cache hit. Even though it's the same image,
       // a previously-saved correction may not yet be reflected in
-      // device_unit_map.json — apply it now so the cached result shows
+      // device_unit_map.json - apply it now so the cached result shows
       // the user's corrected device classes.
       let _alAppliedCacheHit = 0;
       if (hasDeviceCorrections(_authPayload?.organizationId ?? null)) try {
@@ -2284,13 +2284,13 @@ app.post('/api/analyze', auth.requireAuth, scanLimit, upload.single('image'), as
 
       // Synchronously rebuild scan_result.json BEFORE responding, so the
       // client's next /api/scan/:rackId/result call gets the AL-corrected
-      // view — avoids the setImmediate race in scheduleCanonicalRefresh().
+      // view - avoids the setImmediate race in scheduleCanonicalRefresh().
       if (_alAppliedCacheHit > 0) {
         try { writeCanonicalScanResult(rackId); } catch (_) {}
       }
 
       // Re-scanning the same image is a cache hit (same content-hash RK-id),
-      // but the user still just scanned it — so Recent Scans should show "now",
+      // but the user still just scanned it - so Recent Scans should show "now",
       // not the first scan's time. Refresh the scan timestamp (preserving the
       // original as first_scanned_at). /api/scans sorts + displays by timestamp.
       try {
@@ -2306,7 +2306,7 @@ app.post('/api/analyze', auth.requireAuth, scanLimit, upload.single('image'), as
         }
         if (_scanSpace) m.space = _scanSpace;
         writeMeta(rackId, m);
-      } catch (_) { /* non-fatal — history just keeps the old time */ }
+      } catch (_) { /* non-fatal - history just keeps the old time */ }
       stampScanSite(rackId, _site);
       _bindScanSpace(rackId, _scanTenantId, _scanUserId);
 
@@ -2324,7 +2324,7 @@ app.post('/api/analyze', auth.requireAuth, scanLimit, upload.single('image'), as
     // ── Confirmed-rack bypass ──────────────────────────────
     // A re-shot photo of a rack the user already CONFIRMED gets a new content
     // hash, so it misses the cache above. If it perceptually matches a confirmed
-    // rack, serve that confirmed result instead of re-detecting — "show what's
+    // rack, serve that confirmed result instead of re-detecting - "show what's
     // already confirmed." Only runs when this org has confirmed racks (cheap
     // file check first, so the ~pHash+embedding lookup cost is paid only when it
     // can possibly match). Strict thresholds guard against a wrong-rack match.
@@ -2359,7 +2359,7 @@ app.post('/api/analyze', auth.requireAuth, scanLimit, upload.single('image'), as
             }
             if (_scanSpace) m.space = _scanSpace;
             writeMeta(matchId, m);
-          } catch (_) { /* non-fatal — the DB row above still carries the binding */ }
+          } catch (_) { /* non-fatal - the DB row above still carries the binding */ }
           stampScanSite(matchId, _site);
           await settleRack(matchId, { tenantId: _scanTenantId, userId: _scanUserId });
           timings.total_ms = Date.now() - reqStart;
@@ -2399,8 +2399,8 @@ app.post('/api/analyze', auth.requireAuth, scanLimit, upload.single('image'), as
     // to the full pipeline (whose own 0-device check still catches it).
     // Two tiers, because "is this a rack" is not a yes/no the detector can
     // answer confidently. Zero detections is a clear miss. But a photo of a
-    // desktop tower is NOT zero — it yields a couple of boxes the model can
-    // only call Empty or Unidentified — and the old single test (devices === 0)
+    // desktop tower is NOT zero - it yields a couple of boxes the model can
+    // only call Empty or Unidentified - and the old single test (devices === 0)
     // waved it through, which is why 2D and 3D views were being generated for
     // things that are not racks at all.
     //
@@ -2408,14 +2408,14 @@ app.post('/api/analyze', auth.requireAuth, scanLimit, upload.single('image'), as
     // stop and say so. Both stay `retryable`, which the scan page renders as
     // "Retake / Proceed anyway": a real rack shot in bad light can detect
     // nothing, and refusing outright would strand the person holding the phone
-    // in front of it. Blocking without an override is the worse failure —
+    // in front of it. Blocking without an override is the worse failure -
     // guessing wrong about a genuine rack costs more than analysing a desk.
     if (!skipQualityCheck) {
       try {
         const det = await pool.request('detect_only', { image_path: tmpPath, config_path: CONFIG_PATH });
         if (det && det.ok && Array.isArray(det.devices)) {
           // Empty / Closed Unit / Unidentified are rack-slot placeholders, not
-          // equipment — the same set the client hides from its overlay. A photo
+          // equipment - the same set the client hides from its overlay. A photo
           // whose only detections are these has not shown us a rack.
           const PLACEHOLDER = new Set(['Empty', 'Closed Unit', 'Unidentified']);
           const equipment = det.devices.filter(d => d && !PLACEHOLDER.has(d.class_name));
@@ -2428,16 +2428,16 @@ app.post('/api/analyze', auth.requireAuth, scanLimit, upload.single('image'), as
             return res.status(400).json({
               error: det.devices.length === 0
                 ? "This doesn't look like a server rack. Point the camera at the front of a rack so its devices and ports are visible."
-                : "No rack equipment was recognised in this photo — nothing that looks like a switch, patch panel, server or PDU. Point the camera at the front of a rack.",
+                : "No rack equipment was recognised in this photo - nothing that looks like a switch, patch panel, server or PDU. Point the camera at the front of a rack.",
               retryable: true,
               kind: 'not_a_rack',
             });
           }
         }
-      } catch (_) { /* detect failed — let the full pipeline decide */ }
+      } catch (_) { /* detect failed - let the full pipeline decide */ }
     }
 
-    // ── Cache miss — run pipeline ──────────────────────────
+    // ── Cache miss - run pipeline ──────────────────────────
     // The scan's folder, under its organization, Site and rack (lib/store.js).
     // The photo is kept as photo.jpg (normalizeImage() always gives a JPEG) and
     // the upload in the cache is removed the moment it is there.
@@ -2483,32 +2483,32 @@ app.post('/api/analyze', auth.requireAuth, scanLimit, upload.single('image'), as
 
     // When the user clicked "Proceed" on the quality warning, they have
     // explicitly asked us to accept whatever the pipeline produces. Don't
-    // re-gate on deviceCount / unitCount in that case — the pipeline ran,
+    // re-gate on deviceCount / unitCount in that case - the pipeline ran,
     // so whatever it found is what they'll see.
     if (!skipQualityCheck) {
       if (deviceCount === 0) {
-        // Deliberately NOT deleting rackDir. The pipeline has already run — the
-        // expensive part is done — and this is a retryable warning, not a
+        // Deliberately NOT deleting rackDir. The pipeline has already run - the
+        // expensive part is done - and this is a retryable warning, not a
         // failure. Deleting it meant "Proceed anyway" had nothing to reuse and
         // re-ran the whole analysis on an image that had just been processed.
         // Rack ids are content hashes, so keeping the output lets the retry hit
         // the cache and return immediately.
         return res.status(400).json({
-          error: 'Please take the photo from the front of the rack — we need to see the devices and ports face-on.',
+          error: 'Please take the photo from the front of the rack - we need to see the devices and ports face-on.',
           retryable: true,
           kind: 'quality',
         });
       }
 
       if (unitCount < 3) {
-        // Kept for the same reason as above — "Proceed anyway" reuses it.
+        // Kept for the same reason as above - "Proceed anyway" reuses it.
         // Say what was actually seen. "Upload a clearer photo" on a photo that
         // IS clear reads as the app being broken, and gives the user nothing
-        // to act on — a small or partly visible rack needs different advice
+        // to act on - a small or partly visible rack needs different advice
         // from a blurry one.
         return res.status(400).json({
           error: `Only ${unitCount} rack unit${unitCount === 1 ? '' : 's'} could be made out in that photo. `
-               + `Move back so the whole rack fits in the frame, or get closer if the rack is small — `
+               + `Move back so the whole rack fits in the frame, or get closer if the rack is small - `
                + `we need to see at least three units to map it.`,
           retryable: true,
           kind: 'quality',
@@ -2595,8 +2595,8 @@ app.post('/api/analyze', auth.requireAuth, scanLimit, upload.single('image'), as
       return res.status(503).json({ error: ENGINE_DOWN_MSG, retryable: true, kind: 'engine' });
     }
 
-    // This used to answer "Please upload a clearer photo" for EVERY exception —
-    // a crashed worker, a timeout, a bug in our own code — so the app blamed
+    // This used to answer "Please upload a clearer photo" for EVERY exception -
+    // a crashed worker, a timeout, a bug in our own code - so the app blamed
     // the user's photograph for its own failures. Testers duly re-took clear
     // photos over and over and got the same message, and we lost the real
     // error. Only genuine image problems get the photo advice now; anything
@@ -2611,7 +2611,7 @@ app.post('/api/analyze', auth.requireAuth, scanLimit, upload.single('image'), as
       });
     }
     res.status(500).json({
-      error: 'Something went wrong on our side analysing that photo — it is not a problem with your image. It has been logged; please try again.',
+      error: 'Something went wrong on our side analysing that photo - it is not a problem with your image. It has been logged; please try again.',
       retryable: true,
       kind: 'server',
     });
@@ -2620,16 +2620,16 @@ app.post('/api/analyze', auth.requireAuth, scanLimit, upload.single('image'), as
 
 /**
  * POST /api/stitch
- * Multi-image upload for tall racks. Accepts 2–8 photos (top-to-bottom),
+ * Multi-image upload for tall racks. Accepts 2-8 photos (top-to-bottom),
  * normalizes each, runs pipeline/rack_stitch.py to produce a single
  * stitched panorama, then funnels the result through the SAME analyze
- * path as /api/analyze and returns the same shape — plus a `stitch`
+ * path as /api/analyze and returns the same shape - plus a `stitch`
  * sub-object describing the seams (so the client can warn the user
  * when an overlap fell back to "butt-flush").
  *
  * Form fields:
- *   images (file[], required) — 2–8 image files, ORDER MATTERS (top→bottom)
- *   skipQualityCheck (string, optional) — same as /api/analyze
+ *   images (file[], required) - 2-8 image files, ORDER MATTERS (top→bottom)
+ *   skipQualityCheck (string, optional) - same as /api/analyze
  */
 function runStitcher(inputPaths, outputPath) {
   return new Promise((resolve, reject) => {
@@ -2727,7 +2727,7 @@ app.post('/api/stitch', scanLimit, upload.array('images', 8), async (req, res) =
       });
     }
 
-    // Inputs no longer needed — only the stitched output goes downstream.
+    // Inputs no longer needed - only the stitched output goes downstream.
     tmpPaths.forEach(safeUnlink);
 
     // ── Now mirror /api/analyze flow on the stitched image ───────
@@ -2739,7 +2739,7 @@ app.post('/api/stitch', scanLimit, upload.array('images', 8), async (req, res) =
     const _scanUserId = _authPayload?.sub || null;
     if (_scanTenantId) tenant.claimRack(_scanTenantId, rackId, _scanUserId);
 
-    // Cache hit — same stitched image was scanned before.
+    // Cache hit - same stitched image was scanned before.
     if (fs.existsSync(jsonPath)) {
       safeUnlink(stitchedPath);
       logger.info({ event: 'scan.cache_hit', rackId, tenantId: _scanTenantId, stitched: true }, `stitch cache hit ${rackId}`);
@@ -2811,7 +2811,7 @@ app.post('/api/stitch', scanLimit, upload.array('images', 8), async (req, res) =
     await runPipelineAnalyze(imagePath, rackDir, _a?.organizationId || null, rackId);
     timings.pipeline_ms = Date.now() - tPipeStart;
 
-    // Post-pipeline framing check (looser than /api/analyze — the user
+    // Post-pipeline framing check (looser than /api/analyze - the user
     // explicitly stitched a tall rack, so we expect more units, but be
     // forgiving about per-tile detection quality).
     const mapPath = path.join(rackDir, 'device_unit_map.json');
@@ -2820,7 +2820,7 @@ app.post('/api/stitch', scanLimit, upload.array('images', 8), async (req, res) =
     if (!skipQualityCheck && deviceCount === 0) {
       store.deleteScan(rackId);
       return res.status(400).json({
-        error: 'No devices were detected on the stitched rack — make sure each photo shows the front of the rack and the shots overlap.',
+        error: 'No devices were detected on the stitched rack - make sure each photo shows the front of the rack and the shots overlap.',
         retryable: true,
         kind: 'quality',
         stitch: { seams: stitchResult.seams, uncertain: stitchResult.uncertain },
@@ -2874,7 +2874,7 @@ app.post('/api/stitch', scanLimit, upload.array('images', 8), async (req, res) =
       return res.status(503).json({ error: ENGINE_DOWN_MSG, retryable: true, kind: 'engine' });
     }
     res.status(400).json({
-      error: 'Could not stitch and analyze the rack. Make sure each photo shows the rack front and adjacent shots overlap by ~20–40%.',
+      error: 'Could not stitch and analyze the rack. Make sure each photo shows the rack front and adjacent shots overlap by ~20-40%.',
       retryable: true,
       kind: 'stitch',
     });
@@ -2888,8 +2888,8 @@ app.post('/api/stitch', scanLimit, upload.array('images', 8), async (req, res) =
  * flow when physical labels exist on the rack/devices.
  *
  * Body (multipart/form-data):
- *   image  (file, required)         — JPEG/PNG of the rack front
- *   rackId (string, optional)       — if provided, labels are cached under
+ *   image  (file, required)         - JPEG/PNG of the rack front
+ *   rackId (string, optional)       - if provided, labels are cached under
  *                                     the scan's engine/labels-front.json so
  *                                     they can be mapped to detected devices.
  *
@@ -2905,8 +2905,8 @@ app.post('/api/stitch', scanLimit, upload.array('images', 8), async (req, res) =
  *
  * Through the warm worker, which holds the models in memory, and only through
  * the one-shot script when that cannot start. The script pays for importing
- * torch and building an easyocr Reader on every single call — five to twenty
- * seconds before it looks at the picture — which is the whole of the wait
+ * torch and building an easyocr Reader on every single call - five to twenty
+ * seconds before it looks at the picture - which is the whole of the wait
  * after photographing a label.
  */
 /**
@@ -2933,8 +2933,8 @@ function siteDeviceNames(rackId) {
 
 async function runOcrLabels(imagePath, { vocab = null } = {}) {
   // The same pixels give the same labels. Read once, remembered against the
-  // image's own hash, so a photo uploaded again — or scanned as a second rack
-  // — costs nothing the second time.
+  // image's own hash, so a photo uploaded again - or scanned as a second rack
+  // - costs nothing the second time.
   const hash = ocrCache.hashFile(imagePath);
   const hit = ocrCache.get(LABELS_CACHE_KIND, hash);
   if (hit) return hit;
@@ -3081,14 +3081,14 @@ app.post('/api/ocr/labels', scanLimit, upload.single('image'), async (req, res) 
 
 /**
  * POST /api/ocr/device-label
- * Identifies one device from a close-up photo of its label — the recovery
+ * Identifies one device from a close-up photo of its label - the recovery
  * path for a device the rack scan couldn't read.
  *
  * A rack photo gives each device only its slice of the frame, so a model
  * string that was perfectly legible in person arrives here 20px tall and the
  * identifier comes back empty. Rather than dead-ending the user in a text
- * field, the app asks for one more photo — of that device alone, framed on
- * its label — where the pixels actually exist. Same OCR engine and same
+ * field, the app asks for one more photo - of that device alone, framed on
+ * its label - where the pixels actually exist. Same OCR engine and same
  * make/model identifier as the rack pass; only the framing changes.
  *
  * The answer is a SUGGESTION for the user to confirm in the manual-entry
@@ -3096,10 +3096,10 @@ app.post('/api/ocr/labels', scanLimit, upload.single('image'), async (req, res) 
  * better than a rack-crop read, which is not the same as trustworthy.
  *
  * Body (multipart/form-data):
- *   image  (file, required)    — JPEG/PNG/HEIC close-up of one device
- *   preset (string, optional)  — 'closeup' (default) | 'fast' | 'accurate'
+ *   image  (file, required)    - JPEG/PNG/HEIC close-up of one device
+ *   preset (string, optional)  - 'closeup' (default) | 'fast' | 'accurate'
  *
- * Response 200 (a read that found nothing is still a 200 — the client falls
+ * Response 200 (a read that found nothing is still a 200 - the client falls
  * back to manual entry, which is an outcome, not an error):
  *   { ok, make, model, version, raw_text, ocr_conf, match_conf,
  *     alternates: [{make, model, conf}], source, elapsed_ms }
@@ -3120,7 +3120,7 @@ app.post('/api/ocr/device-label', auth.requireAuth, scanLimit, upload.single('im
     tmpPath = intake.path;
     tmpPath = await normalizeImage(tmpPath, intake);
     // Same photo, same answer. Hashed AFTER normalising, because that is the
-    // image the reader actually sees — the same label photographed twice is
+    // image the reader actually sees - the same label photographed twice is
     // two different files and is read twice, which is right; the same file
     // sent twice is not.
     // The preset changes the answer, so it is part of the key.
@@ -3129,7 +3129,7 @@ app.post('/api/ocr/device-label', auth.requireAuth, scanLimit, upload.single('im
     let result = ocrCache.get(kind, hash);
     if (!result) {
       result = await pool.request('closeup_ocr', { image_path: tmpPath, preset });
-      // A read that failed is not an answer about this photo — remembering it
+      // A read that failed is not an answer about this photo - remembering it
       // would make one bad moment permanent.
       if (result && result.ok) ocrCache.put(kind, hash, result);
     }
@@ -3163,7 +3163,7 @@ app.post('/api/ocr/device-label', auth.requireAuth, scanLimit, upload.single('im
  * Returns the cached OCR labels for a rack's front image and maps each label
  * to its best-matching detected device by vertical bbox overlap with the
  * device's U-slot region. Falls back to ocr_devices.json (per-device crop
- * OCR) when no front label file is present — so any physical label captured
+ * OCR) when no front label file is present - so any physical label captured
  * during the analyze flow is surfaced as a candidate name. When at least one
  * label is detected, also infers the pattern (prefix-CODE-NN) so the client
  * can mint matching names for unlabeled devices in the same rack.
@@ -3194,7 +3194,7 @@ function normalizeOcrLabelText(rawText) {
       .toUpperCase();
     // Require at least one separator and a letters-then-digits final segment,
     // e.g. RVEW-CORE-SW01 or RACK01_PDU3. Bare tokens like "SW01" don't
-    // qualify on their own — they're ambiguous without a site/rack prefix.
+    // qualify on their own - they're ambiguous without a site/rack prefix.
     if (/^[A-Z][A-Z0-9]*(?:[-_][A-Z0-9]+)*[-_][A-Z]+\d+$/.test(fixed)) return fixed;
   }
   return null;
@@ -3210,7 +3210,7 @@ function inferLabelPattern(label) {
 
 // Brand → class-name lookup. The YOLO detector can't see vendor badges, so
 // when OCR catches a known brand inside (or adjacent to) a device's bbox we
-// upgrade the class. Order matters — more specific brands first so e.g.
+// upgrade the class. Order matters - more specific brands first so e.g.
 // "Cisco Catalyst" hits CATALYST before CISCO.
 const BRAND_CLASS = [
   ['MEDIAPACK',  'Gateway'],
@@ -3286,12 +3286,12 @@ app.get('/api/ocr/labels/:rackId', (req, res) => {
     // For each device, find the best-matching front label by Y-overlap.
     // device_unit_map.json stores boxes as `box: [x1,y1,x2,y2]` in pixel
     // coords; label bboxes are also pixel-absolute. Compare Y centers directly
-    // rather than going through percentages — dum has no image_size field,
+    // rather than going through percentages - dum has no image_size field,
     // and the percentages from labels-front are tied to their own image_size.
     //
     // matchSide only considers identifier-shaped labels (RVEW-CORE-SW01,
     // RACK01-PDU3, …) for naming. Brand badges (PLANAR, TRIPPLME) and
-    // descriptive chatter (STACK MEMBER 2, 1044248) are ignored here —
+    // descriptive chatter (STACK MEMBER 2, 1044248) are ignored here -
     // they're still consumed by mapFullImageLabels below for reclassification.
     // Without this filter the device chip would show "PLANAR" as its name,
     // and inferLabelPattern would pick a non-pattern token as the template.
@@ -3321,7 +3321,7 @@ app.get('/api/ocr/labels/:rackId', (req, res) => {
     const matched = new Map();
     for (const m of frontMatches) matched.set(m.idx, m);
 
-    // Find a "stack member N" hint near a device's Y-band — captured as a
+    // Find a "stack member N" hint near a device's Y-band - captured as a
     // separate OCR label, e.g. "STACK MEMBER 2". Used to differentiate two
     // physically distinct switches that share the same hostname sticker.
     const findStackMember = (sideData, dy, dh) => {
@@ -3361,7 +3361,7 @@ app.get('/api/ocr/labels/:rackId', (req, res) => {
     // Per-device crop OCR fills any slot still missing a label. We match by
     // U-slot since ocr_devices.json and device_unit_map.json are generated
     // from the same detection pass. Two relaxations from the front/rear path:
-    //   - Threshold 0.4 instead of 0.6 — Cisco stack members often produce
+    //   - Threshold 0.4 instead of 0.6 - Cisco stack members often produce
     //     mid-confidence OCR on the second/third stack switch because cables
     //     partially occlude the label, but the text is still recognizable.
     //   - Duplicate labels are kept (with a /N stack-member suffix when the
@@ -3399,7 +3399,7 @@ app.get('/api/ocr/labels/:rackId', (req, res) => {
 
   // Post-pass: symmetric stack-member suffixing. When two+ devices share the
   // same stack_base (e.g. two switches both labelled RVEW-CORE-SW01 because
-  // they form a Cisco stack), suffix every member with /N — not just the
+  // they form a Cisco stack), suffix every member with /N - not just the
   // duplicates after the first. That way the UI doesn't visually merge the
   // primary into a single chip and leave the others looking like /2, /3.
   if (dum && Array.isArray(dum.devices)) {
@@ -3432,7 +3432,7 @@ app.get('/api/ocr/labels/:rackId', (req, res) => {
     .sort((a, b) => (b.conf || 0) - (a.conf || 0))[0];
   const pattern = bestLabeled ? inferLabelPattern(bestLabeled.stack_base || bestLabeled.label) : null;
 
-  // Brand-token reclassification — read every OCR'd token we have (front
+  // Brand-token reclassification - read every OCR'd token we have (front
   // image labels + per-device crop text) and, when a known brand name lands
   // inside or atop a device's bbox, upgrade that device's class. This
   // recovers Planar/Sony/Audiocodes/Tripp-Lite/CEdge etc. that YOLO
@@ -3452,7 +3452,7 @@ app.get('/api/ocr/labels/:rackId', (req, res) => {
   };
 
   if (dum && Array.isArray(dum.devices)) {
-    // Per-device crop text — direct device-to-text mapping.
+    // Per-device crop text - direct device-to-text mapping.
     if (perDev && Array.isArray(perDev.devices)) {
       for (const od of perDev.devices) {
         const hit = classifyByBrand(od.raw_text);
@@ -3462,7 +3462,7 @@ app.get('/api/ocr/labels/:rackId', (req, res) => {
         noteReclass(idx, hit, od.raw_text, od.ocr_conf);
       }
     }
-    // Full-image OCR labels — match to the device whose bbox vertically
+    // Full-image OCR labels - match to the device whose bbox vertically
     // contains the label's center. Pixel-absolute comparison; dum has no
     // image_size and dev uses `box: [x1,y1,x2,y2]`.
     const mapFullImageLabels = (sideData) => {
@@ -3490,7 +3490,7 @@ app.get('/api/ocr/labels/:rackId', (req, res) => {
 
     // Label-driven reclassification: when YOLO marked a device Unidentified
     // (or Empty) but OCR captured an identifier-shaped label whose class
-    // token names a known class — e.g. "RVEW-CORE-SW01" → SW → Switch — use
+    // token names a known class - e.g. "RVEW-CORE-SW01" → SW → Switch - use
     // the label's own evidence to upgrade the class. Only applies to
     // low-confidence YOLO classes so we don't overrule strong detections.
     const CLASS_FROM_CODE = {
@@ -3540,8 +3540,8 @@ app.post('/api/select', auth.requireAuth, async (req, res) => {
   }
 
   // This route takes the rack id from the BODY (scanId), so the
-  // app.param('rackId') guard — which only fires for routes with :rackId in
-  // the path — never runs here. Enforce both checks manually:
+  // app.param('rackId') guard - which only fires for routes with :rackId in
+  // the path - never runs here. Enforce both checks manually:
   //   1. shape-validate to block path traversal (rackId flows into path.join
   //      and writeMeta below),
   //   2. tenant-ownership (same soft check as the app.param guard).
@@ -3566,7 +3566,7 @@ app.post('/api/select', auth.requireAuth, async (req, res) => {
     return res.status(404).json({ error: `Rack ${rackId} not found. Please re-upload the image.` });
   }
 
-  // meta.json can go missing even when the analysis is fully intact —
+  // meta.json can go missing even when the analysis is fully intact -
   // e.g. the cache-hit analyze path skips writeMeta, or the folder was
   // created by a flow that didn't persist it. /api/select only needs the
   // device map + original image (both present here), so reconstruct and
@@ -3610,7 +3610,7 @@ app.post('/api/select', auth.requireAuth, async (req, res) => {
   let appliedShift = 0;
   if (portCategory === 'main') {
     try {
-      // Latest correction only — the offset is absolute (predicted_port is
+      // Latest correction only - the offset is absolute (predicted_port is
       // stored raw), so it never compounds across corrections.
       const shift = _latestPortShift(_readFeedbackForScan(rackId), device_index);
       if (shift !== 0) {
@@ -3627,13 +3627,13 @@ app.post('/api/select', auth.requireAuth, async (req, res) => {
   }
   if (rawPort < 1) {
     // The accumulated numbering shift pushes this port before the device's
-    // first physical port — the correction history has compounded into an
+    // first physical port - the correction history has compounded into an
     // out-of-range offset. Rather than hard-block the user, fall back to the
     // raw (un-shifted) numbering for this selection so they can still inspect
     // the port. They can re-apply a correction to fix the numbering.
     logger.warn({ event: 'select.port_shift_out_of_range',
                   rackId, device_index, userPort, rawPort, appliedShift },
-      `select: shift ${appliedShift} pushes port ${userPort} out of range — ignoring shift`);
+      `select: shift ${appliedShift} pushes port ${userPort} out of range - ignoring shift`);
     rawPort = userPort;
     appliedShift = 0;
   }
@@ -3654,7 +3654,7 @@ app.post('/api/select', auth.requireAuth, async (req, res) => {
     // this category's port list, so it never located a port at all (runner.py
     // sets it in the `else` of `if 1 <= port_number <= cat_count`). That is a
     // different fact from "found the port, couldn't measure it", and the
-    // coercion below used to flatten the two together — so an unlocatable port
+    // coercion below used to flatten the two together - so an unlocatable port
     // came back as a perfectly ordinary EMPTY port. The user saw a result for a
     // port the pipeline had not found, which is the "wrong port / no port"
     // half of the second-lookup bug. Answer honestly instead, and name the real
@@ -3676,7 +3676,7 @@ app.post('/api/select', auth.requireAuth, async (req, res) => {
       });
       return res.status(422).json({
         error: realCount > 0
-          ? `This device has ${realCount} ${catLabel}port${realCount === 1 ? '' : 's'} — enter a number between 1 and ${realCount}.`
+          ? `This device has ${realCount} ${catLabel}port${realCount === 1 ? '' : 's'} - enter a number between 1 and ${realCount}.`
           : `We couldn't locate ${catLabel}port ${userPort} on this device. Confirm the port count below, then pick a port.`,
         portOutOfRange: true,
         detectedCount: realCount,
@@ -3684,12 +3684,12 @@ app.post('/api/select', auth.requireAuth, async (req, res) => {
       });
     }
 
-    // Occupancy is 'connected', 'empty', or 'unknown' — 'unknown' meaning the
+    // Occupancy is 'connected', 'empty', or 'unknown' - 'unknown' meaning the
     // status model couldn't measure THIS port (a coverage gap). The pipeline is
     // deliberately honest about that and never guesses (see pipeline/runner.py).
     // But testers found a bare "Unknown" on the Port Located screen confusing,
     // so for the FIND-PORT DISPLAY ONLY we present an unmeasured port as
-    // 'empty' — the conservative reading (don't claim a link we didn't see).
+    // 'empty' - the conservative reading (don't claim a link we didn't see).
     // The honest value is preserved on occupancy_source, and the data written
     // to disk is the pipeline's, untouched by this line.
     if (portInfo.status !== 'connected' && portInfo.status !== 'empty') {
@@ -3706,7 +3706,7 @@ app.post('/api/select', auth.requireAuth, async (req, res) => {
     }
 
     // Apply the tech's stored cable-colour correction for THIS port so a
-    // re-located port shows the colour they confirmed — not the model's guess
+    // re-located port shows the colour they confirmed - not the model's guess
     // again. Matched by device + port-location signature (same key the report
     // path uses). Without this, cable-colour feedback never "sticks".
     try {
@@ -3880,7 +3880,7 @@ app.post('/api/analyze-video', auth.requireAuth, scanLimit, upload.single('video
           await ensurePortCounts(rackId);
           stampScanSite(rackId, _site);
         } else {
-          // Fresh analysis — same path /api/analyze takes: the frame is kept
+          // Fresh analysis - same path /api/analyze takes: the frame is kept
           // as the scan's photo.jpg, which the results page, the OCR passes
           // and the canonical refresh all read.
           const scanPaths = ensureScanFolder(rackId, { orgId: authPayload?.organizationId ?? null, siteId: tenantId });
@@ -4001,7 +4001,7 @@ app.get('/api/scans', auth.requireAuth, (req, res) => {
       .map(({ scanId: rackId }) => {
         const meta = readMeta(rackId);
         if (!meta) return null;
-        // Note: no meta.userId gate for members — allowedRacks is already the
+        // Note: no meta.userId gate for members - allowedRacks is already the
         // set of racks THIS member claimed (tenantUserRackIds), which is the
         // correct per-user ownership signal for shared RK-ids.
         const rackDir  = engineDir(rackId);
@@ -4171,7 +4171,7 @@ app.post('/api/scan/:rackId/device-override', (req, res) => {
 });
 
 // GET /api/scan/:rackId
-// Returns the same shape as POST /api/analyze (cached) — devices array with
+// Returns the same shape as POST /api/analyze (cached) - devices array with
 // per-port arrays, units_detected, originalExt, etc. The Results page calls
 // this on mount so port counts stay in sync with the underlying
 // device_unit_map.json after re-detection runs.
@@ -4201,7 +4201,7 @@ app.get('/api/scan/:rackId/result', auth.requireAuth, async (req, res) => {
     return res.status(404).json({ error: `Rack ${rackId} not found` });
   }
   try {
-    // Same as above — and it must run BEFORE the stored result.json is read,
+    // Same as above - and it must run BEFORE the stored result.json is read,
     // because that copy is what carries the portless devices onward. A
     // successful heal rewrites result.json itself, so the read below picks up
     // the repaired payload.
@@ -4210,7 +4210,7 @@ app.get('/api/scan/:rackId/result', auth.requireAuth, async (req, res) => {
     const doc = store.readResult(rackId);
     if (!doc || !doc.api) {
       const result = writeCanonicalScanResult(rackId);
-      // Internal filename kept out of the response — it goes in the log instead.
+      // Internal filename kept out of the response - it goes in the log instead.
       if (!result) return res.status(500).json({ error: 'Could not assemble the scan result.' });
       return res.json(result);
     }
@@ -4302,15 +4302,15 @@ app.get('/api/scan/:rackId/ocr-devices', (req, res) => {
 });
 
 // POST /api/scan/:rackId/side-labels
-// Runs pipeline.side_labels — extracts identifier-shaped text from the
+// Runs pipeline.side_labels - extracts identifier-shaped text from the
 // LEFT and RIGHT margins of the rack photo (the green "SWHOME / SWFIBRA1"
 // chips techs apply to rack rails). This is independent of the CV
 // detector: even when YOLO misses a device with an unusual fascia, the
 // side label is still readable. The client uses the result to surface
-// recall gaps ("5 labels found, 3 switches identified — confirm the
+// recall gaps ("5 labels found, 3 switches identified - confirm the
 // missing 2") instead of silently under-counting.
 //
-// Same spawn pattern as ocr-devices (synchronous, generous timeout —
+// Same spawn pattern as ocr-devices (synchronous, generous timeout -
 // EasyOCR on CPU). Cheaper than the full-image pass because we only OCR
 // ~24% of the pixels (12% on each margin).
 const SIDE_LABELS_TIMEOUT_MS = 3 * 60_000;
@@ -4751,7 +4751,7 @@ function feedbackTally() {
 // `_correction` audit trail so the original prediction is never lost.
 //
 // Applied during writeCanonicalScanResult, so the corrected values land in
-// result.json — every consumer sees the same overlaid view. Re-runs after
+// result.json - every consumer sees the same overlaid view. Re-runs after
 // every feedback POST because scheduleCanonicalRefresh fires after the
 // audit.log success.
 function _readFeedbackForScan(scanId) {
@@ -4781,7 +4781,7 @@ function _latestPortShift(rows, deviceIndex) {
 
 // device_index -> { shift, ts } from the latest correction (for bulk report
 // re-indexing). Iterating in timestamp order and overwriting means the last
-// (most recent) correction wins — no summing.
+// (most recent) correction wins - no summing.
 function _latestPortShifts(rows) {
   const byDev = new Map();
   const pr = (rows || [])
@@ -4827,7 +4827,7 @@ function applyFeedbackOverrides(scanId, payload) {
     if (!prev || (r.timestamp || '') > (prev.timestamp || '')) latest.set(key, r);
   }
 
-  // 1) selectedPort.port_info — the "Port Located" card the UI renders.
+  // 1) selectedPort.port_info - the "Port Located" card the UI renders.
   const sp = payload.selectedPort;
   if (sp && sp.device_index != null && sp.port_info) {
     const pi = sp.port_info;
@@ -4871,7 +4871,7 @@ function applyFeedbackOverrides(scanId, payload) {
     }
   }
 
-  // 2) devices[] — class_name (device feedback) + port_count (port-count feedback)
+  // 2) devices[] - class_name (device feedback) + port_count (port-count feedback)
   for (const dev of payload.devices || []) {
     if (!dev || dev.index == null) continue;
 
@@ -4926,7 +4926,7 @@ function applyFeedbackOverrides(scanId, payload) {
     const ds = deviceShifts.get(Number(ident.device_index));
     if (!ds || !ds.shift) { newIdents.push(ident); continue; }
     const newPort = ident.port + ds.shift;
-    if (newPort <= 0) continue; // before actual start of port row — drop
+    if (newPort <= 0) continue; // before actual start of port row - drop
     const fields = ['port'];
     const original = { port: ident.port };
     const shifted = { ...ident, port: newPort };
@@ -5095,7 +5095,7 @@ app.post('/api/feedback', auth.requireAuth, async (req, res) => {
     device_class: deviceClass,
     is_correct,
     wrong_fields: wrongFields,
-    // Port index (RAW model space — see predictedRaw above)
+    // Port index (RAW model space - see predictedRaw above)
     predicted_port: predictedRaw,
     actual_port: (is_correct || actual_port == null) ? null : Number(actual_port),
     // Cable color
@@ -5173,7 +5173,7 @@ app.post('/api/feedback/port-type', auth.requireAuth, async (req, res) => {
 
   // scanId is joined into an output path and into a written filename, and
   // path.join happily resolves "..". Validate the shape before it reaches the
-  // filesystem — this holds even for callers canAccessRack still lets through.
+  // filesystem - this holds even for callers canAccessRack still lets through.
   if (!/^RK-[A-Za-z0-9]{4,32}$/.test(String(scanId))) {
     return res.status(400).json({ error: 'Invalid scanId' });
   }
@@ -5247,7 +5247,7 @@ app.post('/api/feedback/port-type', auth.requireAuth, async (req, res) => {
 // POST /api/scan/:rackId/confirm-layout
 // Mark a rack as CONFIRMED by the user. Registers the rack image's perceptual
 // fingerprint → rackId so a later re-upload that matches serves this confirmed
-// result instead of re-detecting it. "The user already fixed it — show that."
+// result instead of re-detecting it. "The user already fixed it - show that."
 app.post('/api/scan/:rackId/confirm-layout', auth.requireAuth, async (req, res) => {
   const { rackId } = req.params;
   const rackDir = engineDir(rackId);
@@ -5308,7 +5308,7 @@ async function saveDeviceFeedback(req, { scanId, device_index, is_correct, actua
       predictedClass = dev?.class_name || null;
       deviceBox      = dev?.box || null;
       // Persist the corrected class into device_unit_map.json so the picker
-      // dropdown, Recent Scans and any re-open reflect it — not only the
+      // dropdown, Recent Scans and any re-open reflect it - not only the
       // result-overlay. Without this the change was purely cosmetic/session.
       if (dev && !is_correct && actual_device_class && actual_device_class !== dev.class_name) {
         if (!dev.class_name_original) dev.class_name_original = dev.class_name;
@@ -5603,7 +5603,7 @@ app.get('/api/feedback/stats', auth.requireAuth, (req, res) => {
 app.get(/^\/(?!api).*/, (req, res, next) => {
   // SPA fallback for client-side routes ONLY. A request that looks like a file
   // (has an extension, e.g. /assets/ResultsPage-abc.js) must NOT fall back
-  // to index.html — express.static already served it if it exists, so reaching
+  // to index.html - express.static already served it if it exists, so reaching
   // here means it's MISSING (e.g. a stale hashed chunk after a rebuild). Return
   // 404 so the browser fails cleanly and can reload, instead of getting HTML
   // where it expects a JS module ("Load failed" on a dynamic import).
@@ -5613,7 +5613,7 @@ app.get(/^\/(?!api).*/, (req, res, next) => {
   next();
 });
 
-// Global error handler — must be installed AFTER all routes/middleware so
+// Global error handler - must be installed AFTER all routes/middleware so
 // it catches anything that throws or calls next(err). Logs with full
 // context (requestId, route, stack) and returns a sanitized JSON body.
 app.use(o11y.errorHandler);
@@ -5622,7 +5622,7 @@ app.use(o11y.errorHandler);
 // app.js as a module (tests, scripts) must not start a second listener.
 if (require.main === module) {
   // Bind with retry-on-EADDRINUSE. The previous implementation created a fresh
-  // server inside setTimeout without re-attaching the 'error' handler — a second
+  // server inside setTimeout without re-attaching the 'error' handler - a second
   // EADDRINUSE then crashed the process via an unhandled 'error' event. Wrap
   // listen() so every attempt has the same handler, and retry indefinitely
   // (a stale dev process usually clears within seconds).
@@ -5658,7 +5658,7 @@ if (require.main === module) {
 
   const gracefulShutdown = async (signal) => {
     logger.info({ event: 'server.shutdown', signal },
-      `${signal} received — stopping workers and HTTP server`);
+      `${signal} received - stopping workers and HTTP server`);
     if (server) {
       try { server.close(); } catch (_) {}
     }
@@ -5672,7 +5672,7 @@ if (require.main === module) {
     const _shutdownTimeoutMs = parseInt(process.env.SHUTDOWN_TIMEOUT_MS, 10) || 30000;
     setTimeout(() => {
       logger.warn({ event: 'server.shutdown_forced', timeoutMs: _shutdownTimeoutMs },
-        'graceful shutdown timeout — forcing exit');
+        'graceful shutdown timeout - forcing exit');
       process.exit(1);
     }, _shutdownTimeoutMs).unref();
   };

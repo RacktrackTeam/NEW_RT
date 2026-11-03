@@ -59,14 +59,14 @@ def create_engine(cfg: OCRConfig) -> BaseEngine:
         if not avail:
             raise RuntimeError(
                 "No OCR backend installed. Install one of:\n"
-                "  pip install paddleocr paddlepaddle   (recommended — best accuracy)\n"
+                "  pip install paddleocr paddlepaddle   (recommended - best accuracy)\n"
                 "  pip install rapidocr onnxruntime     (lightweight alternative)\n"
                 "  pip install pytesseract  + the tesseract binary (fallback)"
             )
         choice = avail[0]
         if choice != "paddle":
             log.warning(
-                "PaddleOCR not installed — falling back to '%s'. For the best "
+                "PaddleOCR not installed - falling back to '%s'. For the best "
                 "results on tiny/blurry text run: pip install paddleocr paddlepaddle",
                 choice,
             )
@@ -77,7 +77,7 @@ def create_all_engines(cfg: OCRConfig) -> List[BaseEngine]:
     """Instantiate every installed backend for ensemble OCR.
 
     More engines means more independent chances to read the make/model
-    correctly — each backend has different failure modes on the same
+    correctly - each backend has different failure modes on the same
     photo. Results are pooled by the caller (raw detections merge like
     any other preprocessing pass), so this is a pure recall win at the
     cost of runtime. Falls back to a single engine when only one backend
@@ -87,7 +87,7 @@ def create_all_engines(cfg: OCRConfig) -> List[BaseEngine]:
     if not avail:
         raise RuntimeError(
             "No OCR backend installed. Install one of:\n"
-            "  pip install paddleocr paddlepaddle   (recommended — best accuracy)\n"
+            "  pip install paddleocr paddlepaddle   (recommended - best accuracy)\n"
             "  pip install rapidocr onnxruntime     (lightweight alternative)\n"
             "  pip install pytesseract  + the tesseract binary (fallback)"
         )

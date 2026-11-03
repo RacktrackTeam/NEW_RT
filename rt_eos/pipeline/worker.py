@@ -74,12 +74,12 @@ def _safe_imread(filename, flags=cv2.IMREAD_COLOR):
     file_bytes = np.frombuffer(data, np.uint8)
     # Hand back exactly what cv2.imread would. The shape matters: a caller that
     # asks for IMREAD_GRAYSCALE is promised a 2-D (h, w) array, and easyocr
-    # takes that promise literally — `maximum_y, maximum_x = img.shape` in its
+    # takes that promise literally - `maximum_y, maximum_x = img.shape` in its
     # get_image_list. This used to expand a grayscale read to (h, w, 1), so
     # every label read inside the warm worker died on "too many values to
     # unpack (expected 2)" and the server quietly fell back to a fresh process
-    # per photo: a 15-30 second wait instead of one or two. IMREAD_COLOR — the
-    # default, and what the ultralytics callers this patch exists for use —
+    # per photo: a 15-30 second wait instead of one or two. IMREAD_COLOR - the
+    # default, and what the ultralytics callers this patch exists for use -
     # already decodes to three channels, so nothing needed the extra axis.
     return cv2.imdecode(file_bytes, flags)
 
@@ -89,7 +89,7 @@ log("cv2.imread patched to open()+imdecode (bypasses ultralytics np.fromfile)")
 
 
 QUALITY_ERROR = (
-    "Please upload a clearer photo of the rack — keep the camera "
+    "Please upload a clearer photo of the rack - keep the camera "
     "steady and make sure the full rack fits in the frame."
 )
 
@@ -146,7 +146,7 @@ def handle_quality_check(req):
         return tilt
     side = check_side_view(img)
 
-    # Occlusion check — trained MobileNetV2 classifier (Models/photo_quality_check.pth)
+    # Occlusion check - trained MobileNetV2 classifier (Models/photo_quality_check.pth)
     # judging clear vs occluded directly, instead of inferring cable clutter from
     # edge-orientation and saturation proxies. May return a hard fail
     # (ok=False, kind='occlusion') for severely cabled racks, which the client
@@ -180,7 +180,7 @@ def handle_quality_check(req):
 
 
 def handle_detect_only(req):
-    """Stateless, lightweight YOLO bbox detection — used by the live
+    """Stateless, lightweight YOLO bbox detection - used by the live
     in-viewfinder overlay (POSTed at ~1 Hz). Skips the full analyze
     pipeline (no rack folder, no port detection, no OCR, no image
     renders). Returns just devices with class_name + confidence + bbox.
@@ -208,7 +208,7 @@ def handle_detect_only(req):
     mode = config.get("detection", {}).get("device_detect_mode", "dual")
     # Live in-viewfinder overlay runs a SINGLE forward pass at imgsz=320 for
     # throughput. In dual-detect mode we still only run the general head
-    # here — the server head is reserved for the full analyze path. Skipping
+    # here - the server head is reserved for the full analyze path. Skipping
     # the second pass keeps the live overlay snappy without changing the
     # production result.
     if mode == "dual":
@@ -222,7 +222,7 @@ def handle_detect_only(req):
 
     model = load_model(det_path)
 
-    # Inline the YOLO call so we can pass imgsz=320 — full /api/analyze
+    # Inline the YOLO call so we can pass imgsz=320 - full /api/analyze
     # uses YOLO's default 640, but on CPU that's ~1s per frame; halving
     # the inference resolution roughly triples throughput while still
     # finding rack devices (40+ px tall in the source frame). Confidence
@@ -281,7 +281,7 @@ def handle_split_video_racks(req):
     if not output_dir:
         return {"ok": False, "error": "output_dir missing"}
     # Forward config_path like every other handler. The server sends it and the
-    # splitter accepts it, but this handler dropped it on the floor — so the
+    # splitter accepts it, but this handler dropped it on the floor - so the
     # splitter always fell back to its own config.json lookup and a deployment
     # pointing RACKTRACK_CONFIG elsewhere silently got a different model and
     # threshold here than on the single-rack path. The fix on the Node side was
@@ -307,7 +307,7 @@ def handle_closeup_ocr(req):
     rack waiting for this answer will just type the model in instead if we
     make them wait for a cold start on every photo. The reader is cached
     inside pipeline.ocr_closeup, so only the first close-up per worker pays
-    it. The import is deferred for the same reason in reverse — a worker
+    it. The import is deferred for the same reason in reverse - a worker
     that never sees a close-up should not carry the OCR models in memory.
     """
     from pipeline.ocr_closeup import run as closeup_run
@@ -333,7 +333,7 @@ def handle_ocr_labels(req):
     reader costs several seconds, and the old path spawned a fresh Python for
     each call and paid it every time. pipeline.ocr_labels caches the reader,
     so only the first rack photo a worker sees pays for it. The import stays
-    deferred — a worker that never reads a label should not be holding the
+    deferred - a worker that never reads a label should not be holding the
     models in memory.
     """
     from pipeline.ocr_labels import extract_labels
@@ -440,7 +440,7 @@ def handle_ocr_devices(req):
 
     In the warm worker for the same reason as the other two OCR passes: the
     switch-ocr reader loads its models on construction, and this used to be a
-    fresh Python process per rack — the whole load paid before the first label
+    fresh Python process per rack - the whole load paid before the first label
     was read. pipeline.ocr_devices caches the reader now, so only the first
     rack a worker sees pays for it.
     """
@@ -520,7 +520,7 @@ def handle_relabel_port_count(req):
         classified = detect_patch_panel_ports(
             crop, port_model, conf=ports_conf, status_model=status_model
         )
-        # Honor the user-supplied target count — patch panels are uniform
+        # Honor the user-supplied target count - patch panels are uniform
         # grids of 24 or 48, so trimming/padding by index is meaningful.
         mp = classified.get("main_ports", [])
         if len(mp) > target_count:
@@ -569,7 +569,7 @@ def handle_relabel_port_count(req):
             return best.get("status", "unknown") if best else "unknown"
 
         # Column-major numbering for 2 rows (top of a column, then bottom),
-        # left→right for a single row — matches the app's switch convention.
+        # left→right for a single row - matches the app's switch convention.
         grid, idx = [], 1
         for c in range(per_row):
             cx = int(cell_w * (c + 0.5))
@@ -638,7 +638,7 @@ def handle_relabel_port_count(req):
 
     router_rule(device)
 
-    # Hardware rule: a Patch Panel is just RJ-45 jacks — no SFP cages, no
+    # Hardware rule: a Patch Panel is just RJ-45 jacks - no SFP cages, no
     # console port. Force-clear those so the picker doesn't show e.g. "24p 3s".
     if device.get("class_name") == "Patch Panel":
         device["console_ports"] = []
@@ -717,7 +717,7 @@ def handle_pipeline(req):
             argv += ["--index_offset", str(req["index_offset"])]
     # Org scope is needed on BOTH analyze and select so device-class active
     # learning (find_match on "devices") can apply the org's prior corrections
-    # while devices are being detected — mirrors the cable learning path.
+    # while devices are being detected - mirrors the cable learning path.
     if req.get("org_id") is not None:
         argv += ["--org_id", str(req["org_id"])]
     # The organization's training folder (server/lib/store.js trainingDir),
@@ -737,7 +737,7 @@ def handle_pipeline(req):
         return {"ok": True}
     except SystemExit as e:
         # argparse calls sys.exit() when an argument will not parse, and
-        # SystemExit derives from BaseException — so `except Exception` below
+        # SystemExit derives from BaseException - so `except Exception` below
         # does NOT catch it. Unhandled, it tears down this long-lived worker
         # process, and one malformed device_index or port from a request takes
         # a worker out of the pool for every user, not just the caller.
@@ -747,7 +747,7 @@ def handle_pipeline(req):
         return {"ok": False, "error": f"invalid pipeline arguments (exit {e.code})", "trace": tb}
     except Exception as e:
         # Log the full traceback to stderr so it shows up in the Node server's
-        # worker output — otherwise only str(e) propagates to the client.
+        # worker output - otherwise only str(e) propagates to the client.
         tb = traceback.format_exc()
         captured_tail = buf.getvalue()[-2000:]
         log(

@@ -81,7 +81,7 @@ class TeammateApproach:
     def _classifier(self):
         if self._clf is None:
             import joblib
-            # joblib pickle of our own retrain of their recipe — trusted, local artefact.
+            # joblib pickle of our own retrain of their recipe - trusted, local artefact.
             self._clf = joblib.load(self.weights)["clf"]
         return self._clf
 

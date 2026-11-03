@@ -32,7 +32,7 @@ export default defineConfig({
     port: 5173,
     host: '0.0.0.0',
     // Allow any Host header so a public tunnel (e.g. *.trycloudflare.com) can
-    // reach the dev server — otherwise Vite blocks unknown hosts.
+    // reach the dev server - otherwise Vite blocks unknown hosts.
     allowedHosts: true,
     watch: {
       usePolling: true,

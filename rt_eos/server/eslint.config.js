@@ -9,8 +9,8 @@ module.exports = [
   js.configs.recommended,
   {
     // .mjs files are ES modules, not CommonJS. Without this block they fall
-    // through to js.configs.recommended alone — no Node globals, no module
-    // sourceType — so every `process`/`fetch`/`console` reads as no-undef.
+    // through to js.configs.recommended alone - no Node globals, no module
+    // sourceType - so every `process`/`fetch`/`console` reads as no-undef.
     files: ['**/*.js', '**/*.mjs'],
     languageOptions: {
       ecmaVersion: 2022,

@@ -1,5 +1,5 @@
 """
-Device-model lookup — ground-truth port count from the brand label.
+Device-model lookup - ground-truth port count from the brand label.
 
 Many switches and patch panels have their model name printed on the
 faceplate (e.g. "TL-SG2428P", "DGS-1016D"). When the visual port-count
@@ -37,7 +37,7 @@ class ModelSpec:
 
 # Compact whitelist. Each entry maps a regex (case-insensitive, allowing
 # common typo/spacing variants) to total RJ45 ports + SFP ports.
-# Sources: vendor datasheets. Add liberally — the matcher is regex so
+# Sources: vendor datasheets. Add liberally - the matcher is regex so
 # new device names just need one line.
 DEVICE_MODELS: list[ModelSpec] = [
     # ── TP-Link (Smart / Managed Gigabit) ─────────────────────────────────
@@ -79,7 +79,7 @@ def match_model(text: str) -> ModelSpec | None:
 
 
 # ─────────────────────────────────────────────────────────────────────────
-# OCR backend dispatch — lazy-loaded so importing this module is cheap.
+# OCR backend dispatch - lazy-loaded so importing this module is cheap.
 # ─────────────────────────────────────────────────────────────────────────
 
 _OCR_READER = None  # cached EasyOCR Reader, when available
@@ -97,7 +97,7 @@ def _init_ocr() -> str | None:
     try:
         import easyocr  # type: ignore
 
-        # GPU off by default — keeps memory low and avoids CUDA surprises.
+        # GPU off by default - keeps memory low and avoids CUDA surprises.
         _OCR_READER = easyocr.Reader(["en"], gpu=False, verbose=False)
         _OCR_BACKEND = "easyocr"
         return "easyocr"
@@ -107,7 +107,7 @@ def _init_ocr() -> str | None:
     try:
         import pytesseract  # type: ignore
 
-        _ = pytesseract.get_tesseract_version()  # noqa: F841 — probe
+        _ = pytesseract.get_tesseract_version()  # noqa: F841 - probe
         _OCR_BACKEND = "tesseract"
         return "tesseract"
     except Exception:

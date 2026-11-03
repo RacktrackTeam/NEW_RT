@@ -1,4 +1,4 @@
-"""PaddleOCR (PP-OCRv5) backend — the recommended engine.
+"""PaddleOCR (PP-OCRv5) backend - the recommended engine.
 
 PP-OCRv5's DB++ detector and SVTR-based recognizer are state-of-the-art
 among free models for exactly the hard cases this project targets: tiny,
@@ -50,7 +50,7 @@ class PaddleEngine(BaseEngine):
             use_doc_orientation_classify=False,
             use_doc_unwarping=False,
             use_textline_orientation=cfg.use_textline_orientation,
-            # Detection sensitivity — tuned for faint/small text.
+            # Detection sensitivity - tuned for faint/small text.
             text_det_limit_side_len=cfg.det_limit_side_len,
             text_det_limit_type=cfg.det_limit_type,
             text_det_thresh=cfg.det_thresh,

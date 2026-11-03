@@ -1,6 +1,6 @@
 /**
  * Organisation setup, slice two: the organisation profile, the optional
- * tenant profile sections, the pattern checker and the vendor catalogue —
+ * tenant profile sections, the pattern checker and the vendor catalogue -
  * against the real modules, the real router, and a seeded database.
  *
  * Same shape as setup.test.js: a throwaway auth.db seeded before the modules

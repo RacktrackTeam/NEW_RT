@@ -1,7 +1,7 @@
 // A stand-in for the Python worker pool, loaded via RACKTRACK_POOL_MODULE.
 //
-// The point is that /api/analyze can be driven end to end — multipart upload,
-// image normalisation, rack id, tenant claim, response shape — with no Python,
+// The point is that /api/analyze can be driven end to end - multipart upload,
+// image normalisation, rack id, tenant claim, response shape - with no Python,
 // no GPU and no model weights. Before the injection seam existed the pool was
 // a boolean: you could switch the pipeline off, which made every AI route 500,
 // but you could not replace it, so the product's primary workflow had no
@@ -26,7 +26,7 @@ const DEVICES = [
 const UNITS = [1, 2, 3, 4];
 
 // The real pipeline writes device_unit_map.json into output_dir, and the
-// server reads the file back rather than trusting the response — the
+// server reads the file back rather than trusting the response - the
 // "no devices detected" quality gate is driven entirely by what is on disk.
 // A fake that only returned a payload would be quietly rejected there, so it
 // writes the file too.

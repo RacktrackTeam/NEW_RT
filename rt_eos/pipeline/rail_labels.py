@@ -172,7 +172,7 @@ def _tidy(text: str) -> str:
     kind of tape, and so is a space: the labels do not carry either.
     """
     text = text.strip().upper().replace(".", "-")
-    text = re.sub(r"\s*[-–—]\s*", "-", text)
+    text = re.sub(r"\s*[-\u2013\u2014]\s*", "-", text)
     text = re.sub(r"\s+", "-", text)
     return resolve_number_tails(re.sub(r"-{2,}", "-", text).strip("-"))
 

@@ -6,7 +6,7 @@ device (any class except "empty"). Fuse that signal with our classifiers and sco
 
 Honesty note: the device detector was trained on the "train" split of the source dataset, so its
 signal is evaluated separately on crops whose source photo is in the "test"/"valid" split (unseen
-by the detector) — that is the number to trust.
+by the detector) - that is the number to trust.
 """
 
 import pathlib

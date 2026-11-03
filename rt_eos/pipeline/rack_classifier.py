@@ -1,5 +1,5 @@
 """
-Rack Occlusion Classifier — single-file version.
+Rack Occlusion Classifier - single-file version.
 
 Classifies a rack photo as "clear" or "occluded" (view blocked by cables/clutter).
 
@@ -27,7 +27,7 @@ from torch import nn
 from torchvision import models, transforms
 
 # --------------------------------------------------------------------------
-# CONFIG — adjust these if paths/classes change
+# CONFIG - adjust these if paths/classes change
 # --------------------------------------------------------------------------
 MODEL_PATH = pathlib.Path(__file__).parent / "photo_quality_check.pth"
 CLASSES = ["clear", "occluded"]

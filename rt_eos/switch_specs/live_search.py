@@ -120,7 +120,7 @@ def _engine_mojeek(query: str, timeout: int) -> list[dict]:
 
 
 def _engine_ddg(query: str, timeout: int) -> list[dict]:
-    """Legacy DuckDuckGo HTML — often 202-throttled, tried last."""
+    """Legacy DuckDuckGo HTML - often 202-throttled, tried last."""
     try:
         r = requests.post("https://html.duckduckgo.com/html/",
                           data={"q": query, "kl": "us-en"},
@@ -221,7 +221,7 @@ def search_for_switch(
                 continue
             seen_urls.add(r["url"])
             all_results.append(r)
-        # Stop as soon as one query gives us enough — extra queries
+        # Stop as soon as one query gives us enough - extra queries
         # mostly cost time (live lookup is on a hard deadline).
         if len(all_results) >= max_results:
             break
@@ -305,7 +305,7 @@ def guess_vendor(query: str) -> Optional[str]:
     }
     # Merge in every alias from vendors.json (134 vendors) so guess_vendor
     # recognises the long tail (Westermo, Hirschmann, Pluribus, Fujitsu, NEC,
-    # Tejas, Sophos, Tenda, WatchGuard, ...) — not just the hardcoded ~20.
+    # Tejas, Sophos, Tenda, WatchGuard, ...) - not just the hardcoded ~20.
     try:
         from vendor_registry import aliases as _vr_aliases
         for _alias, _name in _vr_aliases().items():

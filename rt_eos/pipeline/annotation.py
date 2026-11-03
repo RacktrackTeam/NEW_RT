@@ -17,9 +17,9 @@ DEVICE_CLASS_COLOR = {
 DEVICE_NAME_COLOR = {
     "Patch Panel": (0, 255, 0),
     "Switch": (0, 128, 255),
-    "Empty": (0, 165, 255),  # orange — YOLO-classified empty slots
+    "Empty": (0, 165, 255),  # orange - YOLO-classified empty slots
     "Closed Unit": (0, 0, 255),  # red
-    "Unidentified": (128, 128, 128),  # grey — row with no confident class
+    "Unidentified": (128, 128, 128),  # grey - row with no confident class
 }
 
 

@@ -1,5 +1,5 @@
 """
-Rack Image Stitcher — vertical multi-shot stitcher for tall racks.
+Rack Image Stitcher - vertical multi-shot stitcher for tall racks.
 
 Two entry points:
   1. Headless API:  stitch_images(paths, out_path) -> dict
@@ -15,14 +15,14 @@ Algorithm (find_overlap):
     highlight cable rows / panel borders / LED strips that are unique per
     rack section and give a sharp peak at the true seam.
   - Take a fixed probe strip from the BOTTOM of img_prev (height proportional
-    to img height — 1.5%, min 16px).
+    to img height - 1.5%, min 16px).
   - Slide that strip through the TOP of img_next, searching both Y *and* X
     (+/- x_search px) to absorb hand-held lateral drift between shots.
   - Score = 0.4 * (1 - mean |RGB diff|/255) + 0.6 * (1 - mean |edge diff|/norm).
   - Accept the best (x, y) only if its score exceeds the median score by
     peak_margin. This rejects flat scoring curves where no real overlap exists.
   - When accepted, return (cut_rows_in_next, x_shift, score, accepted=True).
-    Otherwise return (0, 0, best_score, False) — the caller decides whether
+    Otherwise return (0, 0, best_score, False) - the caller decides whether
     to butt the images flush, ask the user to retake, or fail the whole job.
 """
 
@@ -59,7 +59,7 @@ def find_overlap(
     Returns (cut_rows, x_shift, score, accepted).
       cut_rows : how many rows to trim from the TOP of img_next before pasting.
                  0 when no confident overlap was found (caller decides what to
-                 do — butt flush, error, or ask the user to retake).
+                 do - butt flush, error, or ask the user to retake).
       x_shift  : pixel shift in img_next's X relative to img_prev. The caller
                  should paste img_next at offset x=x_shift to align it.
       score    : best combined match score (RGB+edge), in [0, 1].
@@ -161,7 +161,7 @@ def _pairwise_score(img_a: Image.Image, img_b: Image.Image) -> float:
     relaxed overlap-ratio (up to 80%, since users often shoot with generous
     overlap when they don't know about the seam algorithm) and tightened
     peak_margin (suppresses false-positive matches that would corrupt the
-    chain-finder). x_search is small here — we only care about chain
+    chain-finder). x_search is small here - we only care about chain
     ORDERING; the real stitch pass will refine Y/X alignment.
 
     Returns 0.0 when the match isn't confidently accepted, so non-adjacent
@@ -180,7 +180,7 @@ def _pairwise_score(img_a: Image.Image, img_b: Image.Image) -> float:
 def auto_arrange_images(images: list[Image.Image]) -> tuple[list[int], dict]:
     """
     Infer the top-to-bottom order of a set of rack photos by pairwise overlap
-    scoring. The user can upload in any order — this returns the indices in
+    scoring. The user can upload in any order - this returns the indices in
     the inferred chain.
 
     For N <= 7 we brute-force every permutation (5040 perms for N=7, each
@@ -490,7 +490,7 @@ def _run_gui() -> None:
     class RackStitcherApp:
         def __init__(self, root):
             self.root = root
-            self.root.title("Rack Image Stitcher — Smart Overlap")
+            self.root.title("Rack Image Stitcher - Smart Overlap")
             self.root.geometry("1020x700")
             self.root.configure(bg="#f5f5f3")
             self.root.resizable(True, True)
@@ -759,7 +759,7 @@ def _run_gui() -> None:
                 self._build_row(i, item)
             n = len(self.images)
             self.count_lbl.config(text=f"{n} image{'s' if n > 1 else ''}")
-            self.status_var.set(f"{n} image(s) loaded — ready to stitch.")
+            self.status_var.set(f"{n} image(s) loaded - ready to stitch.")
             target = select if select is not None else self._selection
             if target is not None and 0 <= target < n:
                 self._select_row(target)

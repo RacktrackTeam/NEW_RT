@@ -48,7 +48,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="switch-ocr",
         description="Detect and read ALL text on photos of network switches "
-                    "(labels, port numbers, serials) — tuned for tiny, blurry, "
+                    "(labels, port numbers, serials) - tuned for tiny, blurry, "
                     "low-quality text. 100%% free and offline after first model download.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
@@ -77,7 +77,7 @@ def build_parser() -> argparse.ArgumentParser:
                    help="Per-image time budget for escalation stages (0 = unlimited)")
     p.add_argument("--workers", type=int, default=10, metavar="N",
                    help="Process N images in parallel (separate processes, each "
-                        "with its own OCR engine) — big speedup for folders")
+                        "with its own OCR engine) - big speedup for folders")
     p.add_argument("--min-device-conf", type=float, default=0.0,
                    help="Only report make/model when identification confidence is at "
                         "least this (e.g. 0.6). Weaker guesses move to 'alternates' "
@@ -93,7 +93,7 @@ def build_parser() -> argparse.ArgumentParser:
                    help="OCR backend (auto = best installed)")
     p.add_argument("--vendors", default=None, metavar="JSON",
                    help="Extra vendor knowledge file (same schema as the "
-                        "built-in vendors.json) — extend coverage without code changes")
+                        "built-in vendors.json) - extend coverage without code changes")
     p.add_argument("--recursive", action="store_true", help="Recurse into sub-folders")
     p.add_argument("--csv", action="store_true", help="Also write a combined results.csv")
     p.add_argument("--json-only", action="store_true", help="Skip annotated images")
@@ -133,7 +133,7 @@ def _process_file(reader, path: Path, out_dir: Path, json_only: bool) -> dict:
         line = f"{path.name}: {device.display_name}  (confidence {device.confidence:.2f})"
     else:
         line = (f"{path.name}: device not identified "
-                f"({len(result.detections)} text regions found — see JSON)")
+                f"({len(result.detections)} text regions found - see JSON)")
     return {"name": path.name, "ok": True, "line": line, "rows": rows,
             "elapsed": result.elapsed_ms, "count": len(result.detections),
             "texts": [f"  {d.confidence:.2f}\t{d.text}" for d in result.detections]}
@@ -229,7 +229,7 @@ def main(argv: List[str] | None = None) -> int:
         from concurrent.futures import ProcessPoolExecutor
         # Each worker is a separate process running its own OCR engine.
         # cfg.cpu_threads defaults to ALL CPU cores (meant for a single
-        # engine running alone) — left as-is, N worker processes would
+        # engine running alone) - left as-is, N worker processes would
         # each independently try to claim every core at once, thrashing
         # instead of speeding anything up. Dividing it across workers
         # means the SAME total CPU capacity is shared properly, so

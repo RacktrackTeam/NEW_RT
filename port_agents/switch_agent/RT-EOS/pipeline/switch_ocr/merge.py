@@ -38,7 +38,7 @@ def merge_detections(
     """Deduplicate readings of the same physical text across passes.
 
     Strategy: sort by a quality score (confidence, then text length as a
-    tie-breaker — a fuller reading of the same label beats a truncated one),
+    tie-breaker - a fuller reading of the same label beats a truncated one),
     then greedily keep a detection unless it overlaps an already-kept one
     (IoU over *iou_thresh*, or near-total containment either way).
     """

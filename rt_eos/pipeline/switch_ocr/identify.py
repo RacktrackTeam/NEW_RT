@@ -13,9 +13,9 @@ THIS MODULE NEVER NEEDS EDITING FOR NEW DEVICES. It works in layers:
 
 To improve precision for a vendor, edit ``vendors.json`` or supply an extra
 JSON file at runtime (``--vendors my_vendors.json`` / OCRConfig.extra_vendors)
-— the code stays untouched.
+- the code stays untouched.
 
-Pure stdlib — no extra dependencies.
+Pure stdlib - no extra dependencies.
 """
 from __future__ import annotations
 
@@ -32,7 +32,7 @@ from .types import TextDetection
 log = logging.getLogger("switch_ocr")
 
 # --------------------------------------------------------------------------- #
-# Vendor knowledge base — loaded from vendors.json (data, not code)
+# Vendor knowledge base - loaded from vendors.json (data, not code)
 # --------------------------------------------------------------------------- #
 _KB_PATH = Path(__file__).parent / "vendors.json"
 
@@ -114,7 +114,7 @@ def _load_kb(path: Path) -> None:
 def load_extra_vendors(path) -> None:
     """Add/extend vendors at runtime from a user JSON file (same schema as
     vendors.json). This is the supported way to teach the identifier new
-    vendors — no code changes."""
+    vendors - no code changes."""
     _load_kb(Path(path))
     log.info("Vendor knowledge extended from %s (now %d vendors)", path, len(VENDORS))
 
@@ -130,7 +130,7 @@ _PANEL_STOPWORDS = {
     "1000BASE-T", "100-240V", "50-60HZ", "PORT", "PORTS", "SMART",
     "MANAGED", "UNMANAGED", "SERIES", "PRO", "PLUS", "LITE",
     "IEEE802", "RJ45", "CAT5E", "CAT6", "SFP28", "QSFP28", "BASE-T",
-    # LED/status labels — real-world example: a row-joined "ECS2552FP" +
+    # LED/status labels - real-world example: a row-joined "ECS2552FP" +
     # "Fault" (nearby LED label) must never be read as one longer model.
     "FAULT", "ALARM", "DIAG", "TEMP", "FAN", "ERROR", "ALERT", "READY",
 }
@@ -151,7 +151,7 @@ def _plausible_model(token: str) -> bool:
     concatenated port numbers ("I124134") do not.
 
     A single-letter prefix (Dell "N1524", Huawei/H3C "S5731", etc.) is a
-    completely standard real convention, not noise — requiring 2+ letters
+    completely standard real convention, not noise - requiring 2+ letters
     here used to reject those outright. The digit-ratio check just below
     already independently rejects genuine concatenated-number noise like
     "I124134" (1 letter, 6 digits, ratio 0.86), so dropping to "at least 1
@@ -171,7 +171,7 @@ def _plausible_model(token: str) -> bool:
         return False
     return True
 #: Digit-lookalike letters: safe to convert whenever a digit run is adjacent
-#: (chains like "11OO" count — O/I/l are skipped when looking for the digit).
+#: (chains like "11OO" count - O/I/l are skipped when looking for the digit).
 _DIGITLIKE = {"O": "0", "o": "0", "I": "1", "l": "1", "|": "1"}
 #: Aggressive confusions: only converted when sandwiched BETWEEN digits.
 #: (Adjacent-to-one-digit is exactly how legit prefixes look: the S in
@@ -270,7 +270,7 @@ def _brand_score(detection_text: str, aliases: List[str], floor: float = 0.80,
 
     Compared in TWO forms: alphanumeric-only AND punctuation-preserving.
     The dash in a damaged "to-link" is precisely what distinguishes
-    tp-link from TOTOLINK — stripping it loses real evidence.
+    tp-link from TOTOLINK - stripping it loses real evidence.
 
     ``floor`` is the acceptance threshold; a relaxed second pass (0.70)
     rescues heavier OCR damage like "QHAP" -> QNAP, "NETOIAR" -> Netgear,
@@ -288,7 +288,7 @@ def _brand_score(detection_text: str, aliases: List[str], floor: float = 0.80,
             # substring/fuzzy against the full string), else too many
             # false positives. Exact token match scores full; a token
             # that's the alias plus exactly one stray character ("OFS"
-            # for "FS" — a single leading/trailing OCR-noise character on
+            # for "FS" - a single leading/trailing OCR-noise character on
             # an otherwise-clean short logo read) still scores highly
             # rather than zero, since that one-character margin is tight
             # enough to stay safe from unrelated short words.
@@ -517,7 +517,7 @@ def _infer_brand(detections: List[TextDetection], exclude: Optional[str] = None)
         if name.upper() in _NON_BRAND or any(w.upper() in _NON_BRAND for w in core):
             continue
         # LED rows and port-dot artwork OCR as repeated letters ("YYYYYY",
-        # "CCCCCR") — no real brand is >50% one character.
+        # "CCCCCR") - no real brand is >50% one character.
         letter_counts = [name.upper().count(c) for c in set(name.upper()) if c.isalpha()]
         if letter_counts and max(letter_counts) / sum(letter_counts) > 0.5:
             continue
@@ -537,7 +537,7 @@ def _infer_brand(detections: List[TextDetection], exclude: Optional[str] = None)
     if not candidates:
         return None
     best = max(candidates, key=lambda c: c["score"])
-    # Clearly prominent logo, or the only alphabetic string on the plate —
+    # Clearly prominent logo, or the only alphabetic string on the plate -
     # the solo case demands higher confidence and a longer name.
     if best["rel_h"] >= 1.3:
         return best
@@ -552,7 +552,7 @@ def _exact_model_hits(model_texts) -> Dict[str, List[Tuple[str, float, float]]]:
     Tokens are extracted with the generic model shapes (plus the whole
     string), normalised (case/punctuation-insensitive, OCR-corrected) and
     matched against _MODEL_INDEX. An exact hit is the strongest model
-    evidence there is, so it carries specificity 1.2 — above any regex.
+    evidence there is, so it carries specificity 1.2 - above any regex.
     """
     if not _MODEL_INDEX:
         return {}
@@ -580,12 +580,12 @@ def _catalog_adjust(brand: str, candidates, allow_hard_reject: bool = False):
     ``allow_hard_reject`` gates dropping a candidate outright when it
     barely resembles anything in the catalog. That's safe for candidates
     from the BRAND-AGNOSTIC generic-shape fallback (no vendor-specific
-    signal connects them to this brand at all — a real Juniper-adjacent
+    signal connects them to this brand at all - a real Juniper-adjacent
     case verified this at ratio 0.375). It is NOT safe for candidates that
     matched the vendor's OWN curated pattern/weak_pattern: those represent
     a real, known naming convention for that brand even when the
     (necessarily incomplete, field-collected) catalog has no example of
-    it yet — verified with a real Aruba CX-series marketing name
+    it yet - verified with a real Aruba CX-series marketing name
     ("6300M-24G4M") that legitimately matches Aruba's own weak_pattern but
     scores low against a catalog that only has older J####A part numbers.
     """
@@ -602,7 +602,7 @@ def _catalog_adjust(brand: str, candidates, allow_hard_reject: bool = False):
         # "Fault" -> "ECS2552FPFAULT"). The suffix can push the combined
         # string's length far enough past the real model's that the fuzzy
         # search's length-difference gate would never even consider the
-        # correct catalog entry as a comparison candidate — this direct
+        # correct catalog entry as a comparison candidate - this direct
         # exact-lookup-after-stripping catches it regardless of length.
         stripped_hit = None
         for stop in _PANEL_STOPWORDS:
@@ -631,7 +631,7 @@ def _catalog_adjust(brand: str, candidates, allow_hard_reject: bool = False):
         # two DIFFERENT real models are equally plausible from this text
         # alone (verified real case: "ES-504PH" damaged-reads scored
         # EXACTLY 0.933 against both real Edimax "ES-5804PH" and
-        # "ES-5104PH" — dropping either the 8 or the 1 produces the same
+        # "ES-5104PH" - dropping either the 8 or the 1 produces the same
         # string). Snapping to whichever the search happened to see first
         # is a coin flip; keep the original reading instead of confidently
         # picking the wrong one of two real products.
@@ -640,13 +640,13 @@ def _catalog_adjust(brand: str, candidates, allow_hard_reject: bool = False):
             out.append((token, conf, spec))
         elif best_ratio >= 0.78 and contaminated_suffix:
             # tk is a COMPLETE catalog model plus a trailing panel/LED
-            # label — this is row-joining noise, not a longer SKU variant.
+            # label - this is row-joining noise, not a longer SKU variant.
             # Snap to the clean spelling instead of the branch below, which
             # would otherwise preserve the contamination.
             out.append((best_model, conf, 1.0))
         elif best_ratio >= 0.78 and (bk.startswith(tk) or tk.startswith(bk)):
             # Pure prefix/suffix relationship: the label may legitimately be
-            # the base SKU ("S3900-24T4S" vs catalog "S3900-24T4S-R") — keep
+            # the base SKU ("S3900-24T4S" vs catalog "S3900-24T4S-R") - keep
             # what the photo says, corroborated by the catalog.
             out.append((token, conf, 0.9))
         elif best_ratio >= 0.78:
@@ -659,7 +659,7 @@ def _catalog_adjust(brand: str, candidates, allow_hard_reject: bool = False):
             # else: essentially unrelated to this brand's real lineup (real
             # verified damaged matches score >= 0.57; a confirmed unrelated
             # token like a random Juniper-adjacent generic-shape read scored
-            # 0.375) — drop rather than report a wrong model just because
+            # 0.375) - drop rather than report a wrong model just because
             # nothing else was competing for the slot. Only reachable when
             # allow_hard_reject=True (brand-agnostic fallback candidates).
         else:
@@ -677,7 +677,7 @@ def _catalog_from_texts(brand: str, texts) -> list:
     ("CRS317-1G-16S+RM" read as "CAS 317-16-165") is typically SCATTERED
     across several segments rather than one clean break, so the longest
     single matching run can be short even when the overall string is
-    clearly the same model — the whole-string ratio still reads it
+    clearly the same model - the whole-string ratio still reads it
     correctly (0.667 in that example) where a single-block fraction
     collapses to near zero.
     """
@@ -697,7 +697,7 @@ def _catalog_from_texts(brand: str, texts) -> list:
             if mk.startswith(tk) or tk.startswith(mk):
                 # A pure prefix/truncation relationship ("N1524" is just
                 # the start of catalog "N1524-ON") is NOT what this
-                # function is for — that's scattered internal damage
+                # function is for - that's scattered internal damage
                 # recovery ("CAS317..." -> "CRS317..."), not "OCR read a
                 # shorter, real, valid base SKU and the catalog happens to
                 # also carry a longer SKU that starts with it." The latter
@@ -717,10 +717,10 @@ def _catalog_from_texts(brand: str, texts) -> list:
         # worse than admitting the family, not the exact SKU, is all the
         # photo supports. Requiring a real margin over the runner-up catches
         # a genuine TIE (verified real case: two Edgecore SKUs both scored
-        # exactly 0.600, margin 0.000 — correctly declined). It must NOT
+        # exactly 0.600, margin 0.000 - correctly declined). It must NOT
         # require as much margin as that when the top match is comfortably
         # ahead: a real D-Link case scored "DGS-1210-28P" at 0.700 against
-        # a same-family sibling "DGS-1210-28MP" at 0.667 (margin 0.033) —
+        # a same-family sibling "DGS-1210-28MP" at 0.667 (margin 0.033) -
         # a real, single, correct answer, just with a smaller gap because
         # the two SKUs happen to be similarly named, not because either
         # reading is ambiguous.
@@ -740,7 +740,7 @@ def _closest_known_vendor_name(text: str):
     as an unverified, invented brand name. Verified against real data:
     genuine near-misses of a known name score ratio 0.60-0.86 with a
     0.17-0.44 margin over the next-closest vendor name; unrelated or
-    genuinely-unlisted words score ratio ~0.47 with ~0.01 margin — a clean
+    genuinely-unlisted words score ratio ~0.47 with ~0.01 margin - a clean
     gap at ratio >= 0.60 with margin >= 0.10.
     """
     tk = _norm(text)
@@ -767,7 +767,7 @@ def _best_cross_vendor_catalog_match(texts):
     """Scan EVERY vendor's catalog for a confident whole-string match.
 
     Used only in the universal fallback, when NO vendor scored any
-    evidence at all — not even a fuzzy brand-name hit. Without this, a
+    evidence at all - not even a fuzzy brand-name hit. Without this, a
     photo with an illegible/absent logo but a garbled-but-recognizable
     model number (e.g. a near-exact OCR read of a real catalog model)
     was reported brandless even though its model closely and uniquely
@@ -776,14 +776,14 @@ def _best_cross_vendor_catalog_match(texts):
     Much stricter than the single-(already-known)-vendor case in
     :func:`_catalog_from_texts`, and margin is computed GLOBALLY across
     every vendor's models combined, not per-vendor: verified against real
-    data — genuinely clean readings of a real model (even lightly OCR-
+    data - genuinely clean readings of a real model (even lightly OCR-
     damaged) score >= 0.769 with a >= 0.05 margin over the next-closest
     model from ANY vendor, while a truly ambiguous/noisy reading with no
     real single answer tops out around 0.63 with ~0.00 margin (several
     unrelated vendors' models tie). A per-vendor-local margin check is not
     enough here: with ~100+ catalogs in play, an unrelated vendor's
     smaller catalog can produce a "clean" local winner by pure chance that
-    is no better than another vendor's true match — only a global
+    is no better than another vendor's true match - only a global
     top-1-vs-top-2 comparison (across ALL vendors together) catches that.
     """
     best_overall = None  # (ratio, brand, model, conf)
@@ -837,7 +837,7 @@ def identify_device(detections: List[TextDetection]) -> DeviceID:
     #: vendor-NAME check only (down to 3 chars, matching that function's
     #: own floor): a heavily truncated fragment like "KUS" (from
     #: "Ruckus") is too short for the length-4 rule above, but that rule
-    #: exists to protect the ALIAS-relaxed pass specifically — this
+    #: exists to protect the ALIAS-relaxed pass specifically - this
     #: mechanism has its own independent, globally-verified-unique safety
     #: margin (ratio >= 0.60 AND >= 0.10 clear of every other vendor
     #: name), so it doesn't need to inherit a threshold tuned for a
@@ -852,7 +852,7 @@ def identify_device(detections: List[TextDetection]) -> DeviceID:
     joined = _row_joined_texts(detections)
     model_texts = texts + joined
     #: Generic (shape-only) matching gets stricter input: joined fragments
-    #: qualify only when every member read confidently — low-confidence
+    #: qualify only when every member read confidently - low-confidence
     #: fragment soup is where fake models ("OOR310") come from.
     generic_texts = texts + [j for j in joined if j[1] >= 0.6]
     exact_by_brand = _exact_model_hits(model_texts)
@@ -865,14 +865,14 @@ def identify_device(detections: List[TextDetection]) -> DeviceID:
         per-vendor scoring AND the closest-known-vendor-name fallback
         below, so a vendor recovered only by a name-typo match still gets
         the SAME model-matching pipeline as a vendor found normally."""
-        # Exact catalog hits are already ground truth — never re-run them
+        # Exact catalog hits are already ground truth - never re-run them
         # through catalog reconciliation (it would incorrectly cap their
         # specificity below the 1.2 exact-match bonus).
         exact_models = list(exact_by_brand.get(brand, []))
         pattern_models = _model_candidates(model_texts, patterns)
         if brand in WEAK_PATTERNS:
             # Weak patterns are, by definition, less specific (e.g. a bare
-            # digit run) — they need the SAME plausibility gate the
+            # digit run) - they need the SAME plausibility gate the
             # cross-vendor fallback path already applies below, or a
             # contextless number with no letters and no dash ("9368")
             # sails through as "model evidence" for whichever brand's weak
@@ -888,7 +888,7 @@ def identify_device(detections: List[TextDetection]) -> DeviceID:
         # loosely by two vendors (e.g. a bare "S####" shape) lets the WRONG
         # vendor claim another brand's model number outright; (2) OCR/
         # row-joining noise tacks a stray trailing character onto an
-        # otherwise-real model — the catalog snap corrects or dampens it
+        # otherwise-real model - the catalog snap corrects or dampens it
         # instead of it sailing through untouched.
         pattern_models = _catalog_adjust(brand, pattern_models)
         models = exact_models + pattern_models
@@ -904,7 +904,7 @@ def identify_device(detections: List[TextDetection]) -> DeviceID:
             # when the shape-only pass found nothing: a weak, dampened
             # shape-only candidate (specificity 0.35) must never block a
             # much stronger catalog-backed reading from ever competing for
-            # best_model — they're merged and the final max() picks
+            # best_model - they're merged and the final max() picks
             # whichever is actually better.
             models += _catalog_from_texts(brand, generic_texts)
         best_model = max(models, key=lambda m: (m[2], m[1], len(m[0])), default=None)
@@ -975,20 +975,20 @@ def identify_device(detections: List[TextDetection]) -> DeviceID:
     strict_hit = bool(scored)
     if not scored:
         # Relaxed second chance: heavier OCR damage ("QHAP" -> QNAP,
-        # "NETOIAR" -> Netgear) — correcting to a known vendor beats
+        # "NETOIAR" -> Netgear) - correcting to a known vendor beats
         # inventing a brand that doesn't exist.
         scored = _score_pass(0.70)
 
     # ---- 1b. closest-KNOWN-vendor NAME cross-check ---------------------- #
     # Skipped once a STRICT (floor 0.80, exact-alias-containment) hit
-    # exists — that's already unambiguous. Otherwise ALWAYS computed, not
+    # exists - that's already unambiguous. Otherwise ALWAYS computed, not
     # only when the relaxed alias pass found nothing: that pass checks
     # each vendor's aliases independently and can accept a coincidental
-    # cross-vendor overlap uncontested — a real, verified case: "Dlinsis"
+    # cross-vendor overlap uncontested - a real, verified case: "Dlinsis"
     # scored 0.714 against Cisco's "linksys" alias (same length, so a
     # length-similarity gate let it through) while its comparison against
     # D-Link's OWN "dlink" alias was rejected outright by that same gate
-    # (length differs by 2) — so the correct vendor never got to compete
+    # (length differs by 2) - so the correct vendor never got to compete
     # at all. Checking the text against every vendor's actual NAME (no
     # such gate, but a strict global-uniqueness margin instead) catches
     # what the alias pass structurally cannot.
@@ -1001,8 +1001,8 @@ def identify_device(detections: List[TextDetection]) -> DeviceID:
             brand, ratio = match
             aliases, patterns = VENDORS[brand]
             # A small bonus reflects that this match has ALREADY been
-            # verified unique against all 117 vendor names — evidence the
-            # plain relaxed alias pass never checks — so it can fairly
+            # verified unique against all 117 vendor names - evidence the
+            # plain relaxed alias pass never checks - so it can fairly
             # outrank an uncontested but coincidental alias overlap.
             brand_hits = [{"text": text, "ocr_confidence": round(conf, 3),
                           "match": round(min(1.0, ratio + 0.15), 3),
@@ -1026,7 +1026,7 @@ def identify_device(detections: List[TextDetection]) -> DeviceID:
     if not scored:
         all_aliases = [a for aliases, _ in VENDORS.values() for a in aliases]
         # Without ANY brand anchor, only contiguous OCR strings are trusted
-        # for models — row-joined fragments invent them ("P0-MMN910").
+        # for models - row-joined fragments invent them ("P0-MMN910").
         generic = [m for m in _model_candidates(texts, _GENERIC_PATTERNS)
                    if _plausible_model(m[0]) and _brand_score(m[0], all_aliases) < 0.8]
         best = max(generic, key=lambda m: (m[1], len(m[0])), default=None)
@@ -1036,7 +1036,7 @@ def identify_device(detections: List[TextDetection]) -> DeviceID:
         # Before settling for a brandless guess, check whether the garbled
         # text actually matches some vendor's real catalog closely and
         # uniquely. This is ALWAYS preferred over the brandless guess below
-        # when found — it already passed its own strict, data-calibrated
+        # when found - it already passed its own strict, data-calibrated
         # bar (global ratio >= 0.75 with a >= 0.05 margin over every other
         # vendor's models combined), which is fundamentally stronger
         # evidence than "some prominent word looks like a brand name" plus
@@ -1061,7 +1061,7 @@ def identify_device(detections: List[TextDetection]) -> DeviceID:
         if best or brand_guess:
             # brand_guess is a prominence-based guess ("biggest alphabetic
             # string on the panel"), NOT a name verified against any real
-            # vendor — it already failed both the alias-fuzzy passes above
+            # vendor - it already failed both the alias-fuzzy passes above
             # AND the closest-known-vendor-name check. It is kept as
             # supporting evidence (useful for debugging/manual review) but
             # is NEVER displayed as the reported brand: only a name that
@@ -1072,7 +1072,7 @@ def identify_device(detections: List[TextDetection]) -> DeviceID:
                 evidence.append({"text": brand_guess["text"],
                                  "ocr_confidence": round(brand_guess["conf"], 3),
                                  "match": round(brand_guess["score"], 3),
-                                 "role": "brand candidate (NOT in vendors.json — not displayed)"})
+                                 "role": "brand candidate (NOT in vendors.json - not displayed)"})
             if best:
                 evidence.append({"text": best[0], "ocr_confidence": round(best[1], 3),
                                  "match": 0.6, "role": "model (generic shape)"})

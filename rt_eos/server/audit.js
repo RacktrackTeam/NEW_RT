@@ -1,5 +1,5 @@
 /**
- * Audit log — append-only event trail for every authenticated/sensitive action.
+ * Audit log - append-only event trail for every authenticated/sensitive action.
  *
  * Storage: shares data/db/auth.db (a single SQLite file keeps backup +
  * restore trivial). Table is created on first require.
@@ -19,7 +19,7 @@
  *   - We snapshot username at write time so deleting a user later does not
  *     erase their trail.
  *   - payload is JSON-stringified; we cap it at 8 KiB to bound row size.
- *   - `req` is optional — pass it when available so we can capture IP + UA.
+ *   - `req` is optional - pass it when available so we can capture IP + UA.
  */
 
 const fs       = require('fs');
@@ -57,7 +57,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_audit_ts        ON audit_log(ts);
 `);
 
-// tenant_id is added to audit_log by auth.js's tenant migration — which runs
+// tenant_id is added to audit_log by auth.js's tenant migration - which runs
 // AFTER this module is required (auth.js does `require('./audit')` at the top,
 // THEN runs migrateTenants()). So at load time the column is typically absent.
 //
@@ -197,7 +197,7 @@ function log(opts = {}) {
   }
 
   // Mirror to structured log stream + bump audit-event counter so the same
-  // trail is queryable in logs/aggregators, not just SQLite. Best-effort —
+  // trail is queryable in logs/aggregators, not just SQLite. Best-effort -
   // a failure here must not affect the caller.
   if (o) {
     try {

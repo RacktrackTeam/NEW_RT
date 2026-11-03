@@ -1,5 +1,5 @@
 """
-Rack-unit (U) identification from a front photo of a 19" rack — classical CV, no ML model.
+Rack-unit (U) identification from a front photo of a 19" rack - classical CV, no ML model.
 
 Core idea
 ---------

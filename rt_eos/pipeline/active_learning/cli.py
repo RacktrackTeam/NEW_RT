@@ -86,7 +86,7 @@ def _handle(req: dict) -> dict:
             source_name=req.get("source_name"),
             extra=req.get("extra"),
         )
-        # Don't echo the 512-d embedding back over stdout — large + uninteresting.
+        # Don't echo the 512-d embedding back over stdout - large + uninteresting.
         rec_lite = {k: v for k, v in rec.items() if k != "embedding"}
         return {"ok": True, "record": rec_lite}
 
@@ -103,7 +103,7 @@ def _handle(req: dict) -> dict:
     if cmd == "find_verified_ports":
         rec = store.find_verified_port_layout(req["image_path"])
         if rec is not None:
-            # Drop embedding from response — large and unused on the JS side.
+            # Drop embedding from response - large and unused on the JS side.
             rec = {k: v for k, v in rec.items() if k != "embedding"}
         return {"ok": True, "verified": rec}
 

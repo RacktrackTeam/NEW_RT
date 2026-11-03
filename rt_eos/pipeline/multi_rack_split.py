@@ -2,19 +2,19 @@
 Multi-rack video splitter.
 
 Given a video where the user pans across N racks side-by-side, split it into
-N best-frame images — one per rack — so the rest of the existing single-rack
+N best-frame images - one per rack - so the rest of the existing single-rack
 analysis pipeline can run on each independently.
 
 Algorithm (fully automated, no user input):
 
   1. Sample frames at evenly-spaced timestamps (~30 frames over the whole
-     clip — fast enough for a 30s phone video, dense enough to catch
+     clip - fast enough for a 30s phone video, dense enough to catch
      short pauses on each rack).
 
   2. Run the existing device detector on each sampled frame to get the
      device bounding boxes.
 
-  3. Compute each frame's "rack signature" — a horizontal cluster of
+  3. Compute each frame's "rack signature" - a horizontal cluster of
      detected device boxes (mean X position weighted by box area). The
      same rack across consecutive frames has a stable signature; a pan
      to the next rack shows up as a sudden X-shift.
@@ -69,19 +69,19 @@ MIN_FRAMES_PER_RACK = 3  # a "rack" must hold the camera for >= N samples.
 # so nothing was ever dropped. A single shaky
 # frame mid-pan became its own "rack", and one
 # rack filmed in one pass could split into two
-# near-identical entries — which is why a
+# near-identical entries - which is why a
 # two-rack video showed the same rack
 # twice. Three samples is roughly a second of
 # the camera actually being held on a rack.
 DEFAULT_DEVICES_CONF = 0.20  # only used when config.json omits
-# detection.devices_conf — the live value
+# detection.devices_conf - the live value
 # is read from the config so this path and
 # the single-rack path can never drift.
 MAX_ANALYSIS_WIDTH = 1920  # sampled frames wider than this are
 # downscaled before detection. The detector
 # letterboxes to imgsz=640 internally, so
 # 4K pixels buy nothing but RAM and resize
-# time — and 30 retained 4K BGR frames was
+# time - and 30 retained 4K BGR frames was
 # ~750 MB inside a worker that already
 # holds several YOLO checkpoints.
 
@@ -93,7 +93,7 @@ def _video_hash(video_path: str) -> str:
     """Stable per-video id (used for the multi-rack output directory)."""
     h = hashlib.sha256()
     with open(video_path, "rb") as f:
-        # Hash up to first 8 MiB — enough to be unique without reading 100MB
+        # Hash up to first 8 MiB - enough to be unique without reading 100MB
         h.update(f.read(8 * 1024 * 1024))
     return h.hexdigest()[:16]
 
@@ -130,12 +130,12 @@ def _load_detector(cfg: dict):
     """
     from pipeline.detection import load_model
 
-    # config.json ships "devices_seg" — there has never been a plain "devices"
+    # config.json ships "devices_seg" - there has never been a plain "devices"
     # key, so this raised KeyError on every call and the video split silently
     # reported "multi-rack split failed: 'devices'". Accept either spelling.
     model_path = cfg["models"].get("devices") or cfg["models"]["devices_seg"]
     # Keep the config's own spelling of the path when it resolves from the
-    # cwd — the cache is keyed on the string, and the worker preloads it in
+    # cwd - the cache is keyed on the string, and the worker preloads it in
     # exactly that form, so absolutising it here would miss the warm entry.
     if not os.path.isabs(model_path) and not os.path.exists(model_path):
         model_path = str(_REPO_ROOT / model_path)
@@ -211,7 +211,7 @@ def _sharpness(bgr_frame):
 
 def _visual_fingerprint(bgr_frame, target_w: int = 96):
     """Small HSV color histogram. Robust to minor camera shake within a
-    rack but changes a lot when the scene changes (different rack —
+    rack but changes a lot when the scene changes (different rack -
     different devices, cabling, room background). Used as a second
     rack-boundary signal alongside the device-X-shift signature, because
     head-on shots of two different racks can produce the same mean-X
@@ -274,7 +274,7 @@ def split_video_into_racks(
 
     # Sample + detect.
     #
-    # We deliberately keep NO frame pixels here — only the scores and the
+    # We deliberately keep NO frame pixels here - only the scores and the
     # source frame index. Retaining all 30 sampled frames at full resolution
     # was ~750 MB of resident numpy for 4K phone footage (the upload limit
     # admits it), which OOM-killed the singleton worker mid-split and stalled
@@ -316,7 +316,7 @@ def split_video_into_racks(
     #   * scene fingerprint changes by > VISUAL_CHANGE_THRESHOLD   (different rack)
     #   * we cross a stretch of frames with no detections          (pan blur)
     # The visual-fingerprint signal catches the case where the user films
-    # two different racks each centered head-on — both have mean-X ≈ 0.5
+    # two different racks each centered head-on - both have mean-X ≈ 0.5
     # so the X-shift never trips, but the room/device colors are obviously
     # different scenes.
     segments: list[list[dict]] = []
@@ -350,8 +350,8 @@ def split_video_into_racks(
     # Drop too-short segments (single-frame flickers from camera shake).
     #
     # This silently discarded real racks. Sampling spreads MAX_SAMPLED_FRAMES
-    # across the WHOLE video, so a rack the operator panned past quickly — under
-    # roughly MIN_FRAMES_PER_RACK/MAX_SAMPLED_FRAMES of the runtime — can never
+    # across the WHOLE video, so a rack the operator panned past quickly - under
+    # roughly MIN_FRAMES_PER_RACK/MAX_SAMPLED_FRAMES of the runtime - can never
     # accumulate enough samples. A three-rack pan that lingers on two came back
     # as `ok: true, count: 2`, with position renumbering removing even the gap
     # that would have hinted something was lost. Still dropped, because a
@@ -361,14 +361,14 @@ def split_video_into_racks(
     if dropped:
         print(
             f"[multi-rack] dropped {dropped} segment(s) shorter than "
-            f"{MIN_FRAMES_PER_RACK} samples — if a rack is missing from the "
+            f"{MIN_FRAMES_PER_RACK} samples - if a rack is missing from the "
             f"result, it was panned past too quickly to sample",
             file=sys.stderr,
         )
     segments = kept
     if not segments:
         # If aggressive splitting killed everything, treat the whole
-        # video as one rack — pick the globally best detected frame.
+        # video as one rack - pick the globally best detected frame.
         viable = [s for s in samples if s["n_devices"] >= MIN_DEVICES_FOR_RACK]
         if not viable:
             cap.release()

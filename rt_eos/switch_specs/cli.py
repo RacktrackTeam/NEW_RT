@@ -1,7 +1,7 @@
 """
 CLI for the switch spec agent.
 
-Natural language (default — uses the answer() router):
+Natural language (default - uses the answer() router):
     python cli.py "Cisco Catalyst 9300-48P"
     python cli.py "compare C9300-48P vs EX4400-48P"
     python cli.py "which switches support 400G"
@@ -62,9 +62,9 @@ def render(agent: SpecAgent, resp: dict) -> None:
     print()
     for r in res:
         sc = r.get("switching_capacity_gbps")
-        sc = f"{sc:g} Gbps" if sc else "—"
+        sc = f"{sc:g} Gbps" if sc else "-"
         print(f"  {r['vendor']:12s} {r['model']:34s} "
-              f"{r.get('port_config', '') or '—':<26} {sc}")
+              f"{r.get('port_config', '') or '-':<26} {sc}")
 
 
 def _emit_json(agent: SpecAgent, args) -> None:
@@ -89,7 +89,7 @@ def _emit_json(agent: SpecAgent, args) -> None:
                 "response": resp,
                 "elapsed_ms": int((time.time() - t0) * 1000),
             }
-    except Exception as exc:  # noqa: BLE001 — surface any failure to caller
+    except Exception as exc:  # noqa: BLE001 - surface any failure to caller
         payload = {"ok": False, "error": str(exc),
                    "elapsed_ms": int((time.time() - t0) * 1000)}
     sys.stdout.write(json.dumps(payload, default=str) + "\n")
@@ -178,7 +178,7 @@ def main() -> None:
         print(f"\n[answered in {(time.time() - t0) * 1000:.0f} ms]")
         return
 
-    print("Switch Spec Agent — type a query, or 'quit' to exit.")
+    print("Switch Spec Agent - type a query, or 'quit' to exit.")
     print("Examples: 'Arista 7050SX3-48YC8', 'compare C9300-48P vs EX4400-48P',")
     print("          'which switches support 400G', 'vendors'\n")
     while True:

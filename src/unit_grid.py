@@ -1,4 +1,4 @@
-"""Rack-unit ladder — the SAME logic RT-EOS uses to identify units.
+"""Rack-unit ladder - the SAME logic RT-EOS uses to identify units.
 
 Copied verbatim from RT-EOS `pipeline/detection.py` (`shrink_for_inference`,
 `_unit_rows_from_result`, `_drop_duplicate_units`, `_cap_at_rails`,

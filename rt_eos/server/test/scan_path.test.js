@@ -1,5 +1,5 @@
 /**
- * End-to-end coverage of the scan workflow — upload an image, get a rack back.
+ * End-to-end coverage of the scan workflow - upload an image, get a rack back.
  *
  * This is the product's primary flow and it had no automated test at all,
  * because the worker pool was a boolean toggle: you could switch the Python
@@ -39,7 +39,7 @@ function listen() {
 // ── Authentication ───────────────────────────────────────────
 // /api/analyze is behind requireAuth, so every request here needs a session.
 // These tests used to send none at all and assert 200, which cannot have
-// passed since the route was protected — they were failing long before the
+// passed since the route was protected - they were failing long before the
 // cookie migration and simply went unnoticed.
 //
 // The session is the same shape a browser gets: an httpOnly rt_access cookie
@@ -50,7 +50,7 @@ const bcrypt = require('bcryptjs');
 const Database = require('better-sqlite3');
 
 let authHeaders = {};      // Cookie + Origin, filled in by the setup test
-let testUser = null;       // { db, userId } — torn down in after()
+let testUser = null;       // { db, userId } - torn down in after()
 
 function postJson(port, urlPath, jsonBody, extraHeaders = {}) {
   return new Promise((resolve, reject) => {
@@ -73,7 +73,7 @@ function postJson(port, urlPath, jsonBody, extraHeaders = {}) {
   });
 }
 
-/** Minimal multipart POST — avoids adding a test-only HTTP dependency. */
+/** Minimal multipart POST - avoids adding a test-only HTTP dependency. */
 function postImage(port, filePath, field = 'image') {
   const boundary = '----racktracktest' + Date.now();
   const file = fs.readFileSync(filePath);
@@ -90,7 +90,7 @@ function postImage(port, filePath, field = 'image') {
         'Content-Type': `multipart/form-data; boundary=${boundary}`,
         'Content-Length': body.length,
         ...authHeaders,
-        // Origin has to name the port too — csrfOriginCheck compares the
+        // Origin has to name the port too - csrfOriginCheck compares the
         // origin's host against req.headers.host, which includes it.
         Origin: `http://127.0.0.1:${port}`,
       },
@@ -112,7 +112,7 @@ function postImage(port, filePath, field = 'image') {
 // bypassed by a fixture the decoder rejects immediately. Its pixels are seeded
 // from the pid so concurrent runs do not collide on one content-addressed rack
 // id, and so a re-run starts from a genuinely cold rack rather than inheriting
-// the last run's directory — the difference matters, because a cached rack
+// the last run's directory - the difference matters, because a cached rack
 // takes a different path through the quality gates.
 let imagePath;
 const createdRacks = new Set();
@@ -131,7 +131,7 @@ test('setup: make a real test image', async () => {
 
 // Created directly in the DB so the suite still passes on a fresh checkout
 // with no seeded data. No organization_id, so orgBlocked() lets it straight
-// through — this is a pipeline test, not an org-permissions test.
+// through - this is a pipeline test, not an org-permissions test.
 test('setup: sign in so /api/analyze accepts these requests', async (t) => {
   const { server, port } = await listen();
   t.after(() => new Promise((r) => server.close(r)));
@@ -173,7 +173,7 @@ after(() => {
       testUser.db.prepare('DELETE FROM users WHERE id = ?').run(testUser.userId);
       testUser.db.close();
     } catch (err) {
-      // Still best-effort — a leaked test row must not fail the suite — but
+      // Still best-effort - a leaked test row must not fail the suite - but
       // say so, rather than leaving the leak invisible.
       console.error(`[scan_path] test user ${testUser.userId} not cleaned up: ${err.message}`);
     }
@@ -231,7 +231,7 @@ test('a pipeline crash is reported as OUR failure, not a bad photo', async (t) =
   t.after(() => new Promise((r) => server.close(r)));
 
   // The regression this pins is the one that turned a total scan outage into a
-  // support mystery: every exception — a crashed worker, a bug in our code —
+  // support mystery: every exception - a crashed worker, a bug in our code -
   // came back as 400 "Please upload a clearer photo". The failures never
   // registered as server errors, so no error-rate alarm could fire while 100%
   // of scans were failing, and testers re-took clear photos over and over.

@@ -3,8 +3,8 @@
  *
  * Production logged nine consecutive scans failing with the identical
  * "CUDA error: unknown error" and would have logged nine hundred: the worker
- * answered {ok:false} rather than crashing, so the pool — which recycled only
- * on exit and timeout — handed the same dead context to every request that
+ * answered {ok:false} rather than crashing, so the pool - which recycled only
+ * on exit and timeout - handed the same dead context to every request that
  * followed. These tests pin the three behaviours that fix it: a poisoned worker
  * is replaced and the request retried, a genuinely dead GPU stops the churn
  * instead of respawning forever, and an ordinary request failure still costs

@@ -1,4 +1,4 @@
-"""Tesseract backend — zero-ML-framework fallback.
+"""Tesseract backend - zero-ML-framework fallback.
 
 Noticeably weaker than PP-OCRv5 on tiny/blurry scene text, but it installs
 anywhere (apt/brew/choco + pytesseract) and keeps the pipeline usable when
@@ -52,7 +52,7 @@ class TesseractEngine(BaseEngine):
     def run(self, image_bgr: np.ndarray, variant: str = "") -> List[RawDetection]:
         """Union of two segmentation modes: sparse (11) catches scattered
         labels, block (6) reads dense plates the sparse mode fragments.
-        The block pass runs only on the contrast-enhanced variant — it is
+        The block pass runs only on the contrast-enhanced variant - it is
         where it helps, and on big noisy upscales it just burns minutes.
         The pipeline's merge step deduplicates the overlap."""
         self._ensure()
@@ -77,8 +77,8 @@ class TesseractEngine(BaseEngine):
                 output_type=pytesseract.Output.DICT,
                 timeout=self.cfg.tesseract_timeout,
             )
-        except RuntimeError:  # pass exceeded its time budget — skip it
-            log.warning("tesseract psm %d pass timed out (>%.0fs) — skipped",
+        except RuntimeError:  # pass exceeded its time budget - skip it
+            log.warning("tesseract psm %d pass timed out (>%.0fs) - skipped",
                         psm, self.cfg.tesseract_timeout)
             return []
 

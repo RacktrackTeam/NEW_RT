@@ -2,7 +2,7 @@
 //
 // This is the check that decides whether one customer can read another's rack.
 // It previously existed as four copies across app.js and two proxy modules that
-// had drifted apart — one had no check at all, and two disagreed about a user
+// had drifted apart - one had no check at all, and two disagreed about a user
 // with no Site. These tests pin the policy so the next
 // copy cannot silently differ, and they run against the real module with a
 // stub tenant store so no database is needed.
@@ -131,7 +131,7 @@ test('a capability token admits the caller for that rack only', () => {
 test('a capability token is read-only', () => {
   // A capability is a READ capability. It used to admit any method, so a
   // forwarded link could POST to the rack routes that carry no requireAuth of
-  // their own — mutating OCR device lists and side labels with no
+  // their own - mutating OCR device lists and side labels with no
   // attributable identity.
   const guard = rackOwnershipParam({
     tenant,

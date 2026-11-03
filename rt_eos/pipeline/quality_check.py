@@ -1,10 +1,10 @@
-"""Server-side quality pre-check — RELAXED version with side-view detection.
+"""Server-side quality pre-check - RELAXED version with side-view detection.
 
 Checks:
-  1. Letterbox  — rejects images with large black bands (screenshot/rotated)
-  2. Tilt       — rejects images rotated more than TILT_TOLERANCE_DEG
-  3. Skew       — rejects if left vs right rail angles diverge too much
-  4. Side-view  — NEW: rejects if horizontal lines converge (perspective angle)
+  1. Letterbox  - rejects images with large black bands (screenshot/rotated)
+  2. Tilt       - rejects images rotated more than TILT_TOLERANCE_DEG
+  3. Skew       - rejects if left vs right rail angles diverge too much
+  4. Side-view  - NEW: rejects if horizontal lines converge (perspective angle)
 
 Tolerances loosened vs the original to reduce false rejections on
 slightly imperfect but usable front-facing shots.
@@ -32,13 +32,13 @@ SIDE_VIEW_MIN_LINES = 8  # need at least this many horizontal lines to judge
 # Image-only heuristic that runs PRE-analyze. Detects heavily-cabled racks
 # where the front of the equipment is blocked by patch cables / cable spaghetti.
 #
-# Two independent signals — if EITHER fires, the rack is flagged:
+# Two independent signals - if EITHER fires, the rack is flagged:
 #
 #  (a) Edge-orientation ratio: clean racks have dominant HORIZONTAL edges
 #      (top/bottom of each 1U device); cabled racks have dominant VERTICAL/
 #      DIAGONAL edges (cables crossing across devices). Misses racks with
 #      visible U-position labels (the labels create strong horizontal edges
-#      even when cables block the equipment behind them) — hence signal (b).
+#      even when cables block the equipment behind them) - hence signal (b).
 #
 #  (b) Color-saturation fraction: cables are vividly colored (blue, orange,
 #      yellow, red); device faces are desaturated (gray/black/white). When
@@ -64,7 +64,7 @@ def check_letterbox(img):
             "ok": False,
             "kind": "framing",
             "retryable": True,
-            "error": "Please upload a clearer photo of the rack — keep the camera steady and make sure the full rack fits in the frame.",
+            "error": "Please upload a clearer photo of the rack - keep the camera steady and make sure the full rack fits in the frame.",
             "metrics": {"letterbox_pct": round(worst * 100, 1)},
         }
     return {"ok": True}
@@ -154,7 +154,7 @@ def check_side_view(img):
     """Detect side-angle shots by analyzing horizontal line convergence.
 
     In a front-facing view, horizontal edges (shelves, unit faces) are
-    roughly parallel — near 0°.  In a side-angle view, they converge
+    roughly parallel - near 0°.  In a side-angle view, they converge
     toward a vanishing point, producing a measurable average slope and
     wider angle spread.
     """
@@ -234,12 +234,12 @@ def check_occlusion(img):
 
     Two independent image-only signals (either firing → occluded):
 
-      (a) Edge orientation — strong edges with HORIZONTAL gradient (vertical
+      (a) Edge orientation - strong edges with HORIZONTAL gradient (vertical
           image lines) come from cables; strong edges with VERTICAL gradient
           (horizontal image lines) come from 1U/2U device faces. v_to_h_ratio
           captures cable dominance from edges alone.
 
-      (b) Color saturation fraction — cables are vivid (blue/orange/yellow);
+      (b) Color saturation fraction - cables are vivid (blue/orange/yellow);
           device faces and rack frames are desaturated grays. When >20% of
           the central rack region's pixels are high-saturation, cables
           dominate the view. This catches racks whose labels would otherwise
@@ -248,7 +248,7 @@ def check_occlusion(img):
     Returns:
       - {"ok": True}                                 # clean enough
       - {"ok": True, "warning": "occlusion", ...}    # cabled but proceed-able
-      - {"ok": False, "kind": "occlusion", ...}      # severely occluded — pop modal
+      - {"ok": False, "kind": "occlusion", ...}      # severely occluded - pop modal
     """
     h, w = img.shape[:2]
     if h < 64 or w < 64:
@@ -261,7 +261,7 @@ def check_occlusion(img):
     if central_color.size == 0:
         return {"ok": True, "metrics": {"note": "no-central-region"}}
 
-    # ── Signal (a) — edge orientation ratio ──
+    # ── Signal (a) - edge orientation ratio ──
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (3, 3), 0)
     central_gray = gray[y0:y1, x0:x1]
@@ -287,7 +287,7 @@ def check_occlusion(img):
             else:
                 ratio = vertical_line_mag / horizontal_line_mag
 
-    # ── Signal (b) — color-saturation fraction ──
+    # ── Signal (b) - color-saturation fraction ──
     hsv = cv2.cvtColor(central_color, cv2.COLOR_BGR2HSV)
     sat = hsv[..., 1]
     # Also require some minimum brightness (avoid counting dark noisy regions
@@ -318,7 +318,7 @@ def check_occlusion(img):
             "kind": "occlusion",
             "retryable": True,
             "error": (
-                "This rack is heavily covered by cables — "
+                "This rack is heavily covered by cables - "
                 + " and ".join(reasons)
                 + ". For better accuracy, take additional photos from the left and right "
                 "sides of the rack so we can see behind the cable bundles, or proceed "
@@ -334,7 +334,7 @@ def check_occlusion(img):
             "ok": True,
             "warning": "occlusion",
             "warning_msg": (
-                "Cables cover much of the rack — some devices behind cable bundles "
+                "Cables cover much of the rack - some devices behind cable bundles "
                 "may not be detected. Side-angle photos would improve accuracy."
             ),
             "metrics": metrics,
@@ -370,7 +370,7 @@ def main():
     # 3. Side-view check (returns warning, not hard fail)
     side = check_side_view(img)
 
-    # All passed — merge metrics and include any warning
+    # All passed - merge metrics and include any warning
     merged_metrics = {}
     merged_metrics.update(tilt.get("metrics", {}))
     merged_metrics.update(side.get("metrics", {}))

@@ -21,7 +21,7 @@ class TPLinkScraper(BaseScraper):
     VENDOR = "TP-Link"
     BASE = "https://www.tp-link.com"
     # The product catalog is JS-rendered (no links in static HTML), so we
-    # enumerate every switch from the sitemap instead — reliable, $0, no JS.
+    # enumerate every switch from the sitemap instead - reliable, $0, no JS.
     SITEMAP = "https://www.tp-link.com/us/sitemap.xml"
 
     def discover_models(self) -> Iterator[tuple[str, str]]:

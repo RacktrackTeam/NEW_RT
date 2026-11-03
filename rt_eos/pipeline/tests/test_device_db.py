@@ -1,8 +1,8 @@
-"""Device-model lookup — pure regex matching over OCR text.
+"""Device-model lookup - pure regex matching over OCR text.
 
 match_model() is the safety net for the visual port counter: when it fires, its
 port count OVERRIDES what the detector saw, so a wrong match is worse than no
-match. These tests pin both directions — the models we claim to know, and the
+match. These tests pin both directions - the models we claim to know, and the
 noise we must not match.
 """
 
@@ -74,8 +74,8 @@ def test_patch_panel_count_must_follow_the_keyword():
 
     Every panel pattern is `<keyword>.{0,N}<count>`, so a faceplate that OCRs
     as "24 PORT PATCH PANEL" (count first) does NOT match and the visual count
-    is used instead. That's the safe direction — it degrades to the detector
-    rather than asserting a wrong count — but if someone later adds a
+    is used instead. That's the safe direction - it degrades to the detector
+    rather than asserting a wrong count - but if someone later adds a
     count-first pattern this test should be updated, not deleted silently.
     """
     assert match_model("24 PORT PATCH PANEL") is None
@@ -84,7 +84,7 @@ def test_patch_panel_count_must_follow_the_keyword():
 def test_first_match_wins_when_text_contains_two_models():
     # DEVICE_MODELS is scanned in order, so a crop that OCRs two labels (a
     # switch above a panel, say) resolves to whichever appears first in the
-    # table — pinned so a reordering of the list is a deliberate decision.
+    # table - pinned so a reordering of the list is a deliberate decision.
     spec = match_model("TL-SG1016 and DGS-1024")
     assert spec.canonical == "TL-SG1016"
 

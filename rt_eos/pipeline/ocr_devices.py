@@ -1,5 +1,5 @@
 """
-ocr_devices.py — per-device OCR for chassis labels.
+ocr_devices.py - per-device OCR for chassis labels.
 
 For each device detected by the rack-scan CV pipeline, crops its bounding box
 from the rack image. The photo is read ONCE by switch-ocr and each device
@@ -77,7 +77,7 @@ VENDOR_EXCEL = ROOT / "reference" / "Switch_Vendors_Websites.xlsx"
 # the devices we already struggle with.
 #
 # Patch panels, PDUs, UPS, blank panels, and pure storage chassis are
-# still skipped — those rarely have model text on the front, and OCRing
+# still skipped - those rarely have model text on the front, and OCRing
 # them just adds noise (port-number text "1 2 3 ... 24" everywhere).
 OCR_CLASSES = {
     "Switch",
@@ -120,7 +120,7 @@ def load_vendor_names() -> list[str]:
 
 
 # Per-vendor model-number patterns. We try each in order; the first to hit
-# wins. These are intentionally conservative — false positives would push
+# wins. These are intentionally conservative - false positives would push
 # wrong data into the record. Better to fall back to "ocr_make_only" than to
 # guess a model.
 MODEL_PATTERNS: list[tuple[str, re.Pattern]] = [
@@ -139,7 +139,7 @@ MODEL_PATTERNS: list[tuple[str, re.Pattern]] = [
     ("D-Link", re.compile(r"\bDSR-\d{3,4}[A-Z]?\b")),
     # Juniper EX/QFX/MX/SRX
     ("Juniper", re.compile(r"\b(?:EX|QFX|MX|SRX)\d{3,5}[A-Z0-9-]*\b")),
-    # Aruba (HPE) — CX 6100, 8320, 8400 series; older 2530/2540
+    # Aruba (HPE) - CX 6100, 8320, 8400 series; older 2530/2540
     ("Aruba", re.compile(r"\bCX\s?\d{4}[A-Z]?\b")),
     ("Aruba", re.compile(r"\b\d{4}[A-Z]{1,3}-\d{1,3}[A-Z]{0,4}\b")),
     # HP / HPE OfficeConnect & ProCurve switches: 1820-24G, 1920-48G,
@@ -206,7 +206,7 @@ def _normalize_ocr_text(text: str) -> str:
 # in the wild ("Csco" for Cisco, "Mikrorik" for MikroTik, "Unfi" for
 # UniFi, etc.). The fuzzy matcher below catches single-character drifts
 # beyond what's enumerated here, so we don't have to spell out every
-# possible mangling — only the ones short enough that fuzzy can't safely
+# possible mangling - only the ones short enough that fuzzy can't safely
 # bridge them on its own.
 BRAND_KEYWORDS: list[tuple[str, tuple[str, ...]]] = [
     ("Cisco", ("cisco", "catalyst", "nexus", "meraki", "csco")),
@@ -218,7 +218,7 @@ BRAND_KEYWORDS: list[tuple[str, tuple[str, ...]]] = [
     ("Huawei", ("huawei",)),
     ("Dell", ("dell", "poweredge", "powerswitch", "idrac")),
     ("NETGEAR", ("netgear", "prosafe", "readynas")),
-    # Ubiquiti / UniFi — OCR commonly drops a letter ("Unfi", "Ubiqui");
+    # Ubiquiti / UniFi - OCR commonly drops a letter ("Unfi", "Ubiqui");
     # fuzzy match handles those.
     ("Ubiquiti", ("ubiquiti", "unifi", "edgeswitch", "edgemax", "edgerouter", "amplifi", "ufiber")),
     # MikroTik OCR misreads we've seen on real photos: Mikrorik, Mikroz,
@@ -286,26 +286,26 @@ def _levenshtein_bounded(a: str, b: str, max_dist: int) -> int:
     return prev[-1]
 
 
-# Pre-compile token splitter — one regex used per OCR pass.
+# Pre-compile token splitter - one regex used per OCR pass.
 _TOKEN_RE = re.compile(r"[a-z0-9]+")
 
 
 def _fuzzy_keyword_match(text_lower: str, keyword: str) -> bool:
     """Token-level fuzzy match for brand keywords.
 
-    First a cheap substring check (the original behavior — catches exact
+    First a cheap substring check (the original behavior - catches exact
     hits and embedded matches like "mikrotik" inside "mikrotikrouterboard").
 
     Then a token-level Levenshtein pass: split the text into alphanumeric
     tokens and accept any token within the distance budget. The budget
     grows with keyword length:
-       length ≤ 4: NO fuzzy (ambiguity risk too high — "ASP" vs "APC")
-       5–8 chars : 1 edit allowed     (Csco→Cisco, Unfi→UniFi)
-       9–12 chars: 2 edits allowed   (Mikrorik→Mikrotik, Hewlett→Hewlettt)
+       length ≤ 4: NO fuzzy (ambiguity risk too high - "ASP" vs "APC")
+       5-8 chars : 1 edit allowed     (Csco→Cisco, Unfi→UniFi)
+       9-12 chars: 2 edits allowed   (Mikrorik→Mikrotik, Hewlett→Hewlettt)
        13+       : 3 edits allowed   (PowerEdge→PoverEdges, EdgeSwitch typos)
 
     Distance scales with length because a single OCR misread
-    represents a smaller fraction of total characters in longer words —
+    represents a smaller fraction of total characters in longer words -
     "Mikrorik" vs "Mikrotik" is still 87% similar at 1 edit / 8 chars.
     """
     if keyword in text_lower:
@@ -332,7 +332,7 @@ def parse_make_model(text: str, vendor_names: list[str]) -> tuple[str | None, st
     # Normalize OCR artifacts before attempting regex match
     normalized = _normalize_ocr_text(text)
 
-    # Try MODEL_PATTERNS first — a model match also nails down the make.
+    # Try MODEL_PATTERNS first - a model match also nails down the make.
     # Try on both normalized and original text.
     for vendor, rx in MODEL_PATTERNS:
         m = rx.search(normalized) or rx.search(text)
@@ -359,7 +359,7 @@ def parse_make(text: str, vendor_names: list[str]) -> str | None:
     # OCR misreads ("Csco", "Unfi", "Mikrorik") that would otherwise drop
     # us to "no vendor identified" even when the brand was clearly visible
     # in the photo. Two passes: lowercased original (preserves token
-    # boundaries — needed for fuzzy) and slugified (catches keywords that
+    # boundaries - needed for fuzzy) and slugified (catches keywords that
     # only appear without separators, e.g. "tplink").
     text_lower = text.lower()
     for vendor, kws in BRAND_KEYWORDS:
@@ -382,7 +382,7 @@ def _read_whole_image(reader, img) -> list[dict]:
 
     One pass over the full image instead. Detections come back in original
     image coordinates, so they can be handed to whichever device box contains
-    them — which also gives each label a real position, something the old
+    them - which also gives each label a real position, something the old
     per-crop path never had (the sort by y,x was a no-op because crop-relative
     coordinates were discarded).
     """
@@ -460,7 +460,7 @@ def _labels_for_box(detections: list[dict], box: list[int], pad: int = 2) -> lis
 
 
 # One reader per process. OCRConfig.accurate() loads its models on
-# construction, and this module used to be spawned fresh for every rack — so
+# construction, and this module used to be spawned fresh for every rack - so
 # every scan paid for the load before it read a single label. In the warm
 # worker the first rack pays and the rest do not.
 _READER = None
@@ -473,7 +473,7 @@ def _build_reader():
     gone: on the same rack photo EasyOCR returned 'Calb' and 'Drrotm' where
     switch-ocr returns 'D-Link' and the model number 'DCS-1100-18', and a
     vendor/model matcher fed the former cannot recover. There is no fallback on
-    purpose — silently degrading to an engine that misreads model numbers
+    purpose - silently degrading to an engine that misreads model numbers
     produces a confident, wrong inventory, which is worse than a scan that
     fails loudly and can be retried.
     """
@@ -523,7 +523,7 @@ def run(rack_id: str, rack_dir) -> dict:
     dum = json.loads(dum_path.read_text(encoding="utf-8"))
     raw_devices = dum.get("devices") or []
 
-    # Lazy imports — these are heavy and we only need them on a real run.
+    # Lazy imports - these are heavy and we only need them on a real run.
     import cv2
 
     img = cv2.imread(str(img_path))
@@ -616,7 +616,7 @@ def run(rack_id: str, rack_dir) -> dict:
         text = " ".join(l["text"] for l in labels)
         ocr_conf = round(sum(l["conf"] for l in labels) / len(labels), 3) if labels else 0.0
 
-        # switch-ocr's own identifier first — it covers the vendors and model
+        # switch-ocr's own identifier first - it covers the vendors and model
         # formats the local MODEL_PATTERNS regex misses (which is why testers
         # were seeing make with no model). Fall back to the local parser for
         # anything it leaves blank.
@@ -664,7 +664,7 @@ def run(rack_id: str, rack_dir) -> dict:
         "rack_id": rack_id,
         "image": img_path.name,
         # datetime.UTC landed in 3.11; this venv is 3.10, where it does not
-        # exist — so every run of this module raised AttributeError at the
+        # exist - so every run of this module raised AttributeError at the
         # very end, after doing all the reading, and wrote no file. That is
         # why make and model never arrived. timezone.utc is the same instant
         # and has been there since 3.2.
@@ -705,7 +705,7 @@ def main():
         sys.stdout.flush()
         sys.exit(0 if result.get("ok") else 2)
 
-    # Pretty mode — human-readable summary for CLI runs.
+    # Pretty mode - human-readable summary for CLI runs.
     if not result.get("ok"):
         print(f"FAILED: {result.get('error')}")
         sys.exit(2)

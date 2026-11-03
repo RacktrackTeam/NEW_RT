@@ -2,7 +2,7 @@
 
     python3 train_v2.py classical | clip | dinov2 | teammate | yolo11s | yolov8m | ensemble
 
-Data: data/datasets/occupancy_224/{train,val,test}/{occupied,unoccupied} — v2 crops squashed to 224x224.
+Data: data/datasets/occupancy_224/{train,val,test}/{occupied,unoccupied} - v2 crops squashed to 224x224.
   train (12,800) fits the model, val (1,600) picks hyper-parameters / the best YOLO epoch,
   test (1,600) is scored once at the end. No rack photo is shared between the three splits.
 Output: models/v2/<key>.{pt,joblib} and models/v2/<key>_eval.json (same format as v1).
@@ -82,7 +82,7 @@ def run_embed(kind):
     cands = {f"LogReg C={C}": (lambda C=C: LogisticRegression(C=C, max_iter=5000)) for C in [1, 3, 10, 30]}
     cands["MLP 512"] = lambda: MLPClassifier((512,), alpha=1e-3, early_stopping=True, max_iter=300, random_state=0)
     head, vacc, clf = fit_head(Xtr, ytr, Xva, yva, cands)
-    # joblib pickle of our own freshly trained sklearn head — trusted, local artefact.
+    # joblib pickle of our own freshly trained sklearn head - trusted, local artefact.
     joblib.dump({"backbone": kind, "head": head, "clf": clf}, OUT / f"{key}_clf.joblib")
     write_eval(key, f"{kind.upper() if kind == 'clip' else 'DINOv2'} embeddings + {head}", fte, yte,
                clf.predict_proba(Xte)[:, 1], {"head": head, "valid_accuracy": float(vacc)})
@@ -102,7 +102,7 @@ def run_teammate():
     clf = LogisticRegression(C=1.0, class_weight="balanced", max_iter=5000).fit(Xtr, ytr)
     vacc = float((clf.predict(Xva) == yva).mean())
     print(f"  valid {vacc:.4f}", flush=True)
-    # joblib pickle of our own freshly trained sklearn model — trusted, local artefact.
+    # joblib pickle of our own freshly trained sklearn model - trusted, local artefact.
     joblib.dump({"recipe": "teammate ResNet50 + LogReg", "clf": clf}, OUT / "teammate_clf.joblib")
     write_eval("teammate", "ResNet50 + LogReg (teammate recipe, retrained on v2)", fte, yte,
                clf.predict_proba(Xte)[:, 1], {"valid_accuracy": vacc})
@@ -120,7 +120,7 @@ def run_classical():
              "HistGradientBoosting": lambda: HistGradientBoostingClassifier(max_iter=400, learning_rate=0.08,
                                                                             random_state=0)}
     head, vacc, clf = fit_head(Xtr, ytr, Xva, yva, cands)
-    # joblib pickle of our own freshly trained sklearn model — trusted, local artefact.
+    # joblib pickle of our own freshly trained sklearn model - trusted, local artefact.
     joblib.dump({"model": head, "clf": clf}, OUT / "classical_clf.joblib")
     write_eval("classical", f"Classical features + {head}", fte, yte, clf.predict_proba(Xte)[:, 1],
                {"valid_accuracy": float(vacc)})

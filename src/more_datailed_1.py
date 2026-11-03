@@ -509,7 +509,7 @@ def draw(img, out):
                 if dv["off_grid"]:
                     tb = d.textbbox((0, 0), desc, font=f_row)
                     put(x_txt + (tb[2] - tb[0]) + int(10 * k), "off-grid", f_tag, INK_DIM)
-                rng = f"U{dv['u_top']}" if dv["units"] == 1 else f"U{dv['u_top']}–U{dv['u_bottom']}"
+                rng = f"U{dv['u_top']}" if dv["units"] == 1 else f"U{dv['u_top']}-U{dv['u_bottom']}"
                 put(x_rng, rng, f_row, INK_DIM, right=True)
             else:
                 put(x_id, dv["id"], f_row, INK_DIM)

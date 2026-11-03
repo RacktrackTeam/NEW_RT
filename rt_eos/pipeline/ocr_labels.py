@@ -2,7 +2,7 @@
 OCR-only label extraction for rack images.
 
 Runs EasyOCR on a single image and prints a JSON document to stdout.
-No segmentation, no grouping, no HTML — just text + bbox + confidence.
+No segmentation, no grouping, no HTML - just text + bbox + confidence.
 
 Usage:
     python pipeline/ocr_labels.py <image_path>
@@ -27,7 +27,7 @@ import json
 import re
 import sys
 
-# The unit segment of a rack label — "SW-U10", "SP-RI-U15-SW04" — is two
+# The unit segment of a rack label - "SW-U10", "SP-RI-U15-SW04" - is two
 # digits after a U, and EasyOCR reads those digits as the letters that look
 # like them: 1 as I or l, 5 as S, 0 as O, 8 as B, 2 as Z, 6 as G. One label in
 # the office rack came back "SP-RI-UIS-SW04" for U15. The fix is applied only
@@ -54,7 +54,7 @@ def fix_unit_confusables(text: str) -> str:
 
 
 # Built on first use and kept. Constructing an easyocr.Reader loads two neural
-# networks off disk — several seconds — and the old code did it on every call,
+# networks off disk - several seconds - and the old code did it on every call,
 # which in a spawned-per-request script meant every photograph paid for it. In
 # the warm worker the first label pays and the rest do not.
 _READER = None
