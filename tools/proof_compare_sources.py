@@ -55,9 +55,14 @@ def main():
                     if "organization admin" not in t: bad.append(f"{tag}: expected the refusal sentence, got {t!r}")
                     pg.screenshot(path=str(OUT / f"compare_{tag}_2_refused.png"))
                 else:
-                    pg.wait_for_selector("#cmp-continue", timeout=30000)
-                    pg.screenshot(path=str(OUT / f"compare_{tag}_2_confirm.png"))
-                    pg.click("#cmp-continue"); pg.wait_for_selector("#diff-top .card", timeout=30000); pg.wait_for_timeout(500)
+                    pg.wait_for_selector("#cmp-continue, .idauto", timeout=30000)
+                    if pg.is_visible(".idauto"):              # identified for certain: straight to the differences (owner, 3 Nov 2026)
+                        pg.wait_for_selector("#diff-top .card", timeout=30000); pg.wait_for_timeout(500)
+                        if pg.is_visible("#cmp-continue"): bad.append(f"{tag}: a certain rack still asked to confirm")
+                        pg.screenshot(path=str(OUT / f"compare_{tag}_2_auto.png"))
+                    else:
+                        pg.screenshot(path=str(OUT / f"compare_{tag}_2_confirm.png"))
+                        pg.click("#cmp-continue"); pg.wait_for_selector("#diff-top .card", timeout=30000); pg.wait_for_timeout(500)
                     print(tag, "drift:", pg.inner_text("#diff-top .card p")[:80].replace("\n", " "))
                     pg.screenshot(path=str(OUT / f"compare_{tag}_3_drift.png"))
                 blank = pg.evaluate("!document.getElementById('cmp-status').textContent.trim() && !document.getElementById('df-top').innerHTML.trim() && !document.getElementById('diff-top').innerHTML.trim()")

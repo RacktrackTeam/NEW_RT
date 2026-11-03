@@ -952,15 +952,30 @@
   function firstSentence(t) { t = String(t || '').replace(/\s+/g, ' ').trim(); var m = t.match(/^.*?[.!?](\s|$)/); t = m ? m[0].trim() : t; return t.charAt(0).toUpperCase() + t.slice(1); }
   // the compare, in the owner's order: a button, a dropdown of the three databases, one panel to confirm the rack id, then the differences.
   // RES.cmpUi: idle (nothing shown) > confirm (the panel) > drift (the differences)
+  function stepsHtml(I) { return '<ul class="idlines">' + (I.steps || []).filter(function (st) { return st.outcome !== 'skipped' || st.n === 0; }).map(function (st) { return '<li><b>' + esc(st.title) + '</b><span class="idc">' + (st.conf != null ? pc(st.conf) : (OUTCOME[st.outcome] || '')) + '</span><span class="muted small idw">' + esc(firstSentence(st.why || st.proof)) + '</span></li>'; }).join('') + '</ul>'; }
+  // after the source is chosen: a rack identified for certain goes straight to the differences (accepted by itself, remembered);
+  // anything less opens the confirm panel as before
+  function afterFind(src) { return function (d) { var I = (d && d.identify) || {};
+    if (d && I.certain && d.match && d.match.how !== 'picked') { RES.cmpUi = 'drift'; cmpStatus('Rack identified for certain. Comparing...'); return setDb({ source: src, auto: true }).then(function (r) { if (r) return secTo('diff'); RES.cmpUi = 'confirm'; renderCompare(d); }); }
+    if (d) { RES.cmpUi = 'confirm'; renderCompare(d); }
+    return d; }; }
   function renderCompare(d) { try { renderCompareInner(d); } catch (e) { console.error('compare', e); cmpStatus('The compare could not be shown: ' + String(e.message || e).replace(/[.!?]*$/, '') + '.', 'err'); } }
   function renderCompareInner(d) {
     RES.cmp = d; var ui = RES.cmpUi || 'idle', src = RES.cmpSrc || d.source || 'excel', I = d.identify || { steps: [] };
+    // the owner's rule (3 Nov 2026): a rack identified for certain was accepted by itself; one line says so, the steps fold under it,
+    // and Not this rack opens the picker, so the person can still change it without being stopped
+    if (ui === 'drift' && d.auto && d.match && d.source === src) {
+      $('df-top').innerHTML = '<div class="card idcard idauto"><div class="dfrow"><span>Rack <b>' + esc(d.match.rack_key) + '</b>, identified with high confidence'
+        + (I.certain_why ? ' (' + esc(I.certain_why) + ')' : '') + '</span><button class="link" type="button" id="cmp-notthis">Not this rack</button></div>'
+        + '<details class="idhow"><summary>Show how</summary>' + stepsHtml(I) + '</details></div>';
+      return renderDiff(d, true);
+    }
     if (ui !== 'confirm' || !(d.chosen && d.source === src)) { $('df-top').innerHTML = ''; return renderDiff(d, ui === 'drift'); }
     var m = d.match;
     var h = '<div class="card idcard"><div class="dfrow"><b>Confirm the verified rack id</b><span class="muted small">' + esc(SRCLABEL[src] || d.sources[src]) + '</span></div>'
       + '<div class="dfrow idhead"><span class="idrack">' + (m ? esc(m.rack_key) : 'No single rack found') + '</span>' + (I.confidence != null ? '<span class="idconf ' + esc(I.state) + '">' + pc(I.confidence) + ' overall</span>' : '') + '</div>'
       + '<figure class="lblstrip"><img src="/api/video/' + encodeURIComponent(RES.id) + '/rack-label.jpg" alt="The rack label crop" onerror="this.parentNode.hidden=true"></figure>'
-      + '<ul class="idlines">' + I.steps.filter(function (st) { return st.outcome !== 'skipped' || st.n === 0; }).map(function (st) { return '<li><b>' + esc(st.title) + '</b><span class="idc">' + (st.conf != null ? pc(st.conf) : (OUTCOME[st.outcome] || '')) + '</span><span class="muted small idw">' + esc(firstSentence(st.why || st.proof)) + '</span></li>'; }).join('') + '</ul>'
+      + stepsHtml(I)
       + '<div class="dfrow idbtns"><button class="btn primary" type="button" id="cmp-continue"' + (m ? '' : ' disabled') + '>Confirm</button><button class="btn" type="button" id="cmp-change">Change</button></div>';
     if (RES.cmpPick || !m) {
       h += '<div class="idpick">' + (!m && I.top && I.top.length ? '<p class="glabel">The closest racks</p><div class="idtop">' + I.top.map(function (t) { return '<button class="btn" type="button" data-cmppick="' + esc(t.rack_key) + '">' + esc(t.rack_key) + '<small class="muted"> ' + esc(t.why) + '</small></button>'; }).join('') + '</div>' : '')
@@ -993,18 +1008,19 @@
     if (d.drift.notes.length) h += '<details class="card"><summary>Not checked (' + d.drift.notes.length + ')</summary><ul class="muted small">' + d.drift.notes.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('') + '</ul></details>';
     el.innerHTML = h;
   }
-    document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('#cmp-btn, #cmp-back, #cmp-change, [data-cmpsrc], #cmp-use, #cmp-continue, [data-cmppick], [data-dfmode]'); if (!t) return;
+    document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('#cmp-btn, #cmp-back, #cmp-change, #cmp-notthis, [data-cmpsrc], #cmp-use, #cmp-continue, [data-cmppick], [data-dfmode]'); if (!t) return;
+    if (t.id === 'cmp-notthis') { RES.cmpUi = 'confirm'; RES.cmpPick = true; renderCompare(RES.cmp); var ty1 = $('cmp-type'); if (ty1) ty1.focus(); return; }
     if (t.id === 'cmp-back') { e.preventDefault(); RES.cmpUi = 'idle'; cmpMode(false); window.scrollTo(0, 0); return; }
     if (t.id === 'cmp-btn') { var mn = $('cmp-menu'); mn.hidden = !mn.hidden; t.setAttribute('aria-expanded', String(!mn.hidden)); return; }
     if (t.id === 'cmp-change') { RES.cmpPick = !RES.cmpPick; renderCompare(RES.cmp); var ty0 = $('cmp-type'); if (ty0) ty0.focus(); return; }
     var src = RES.cmpSrc || (RES.cmp && RES.cmp.source) || 'excel';
     if (t.dataset.dfmode) { RES.diffMode = t.dataset.dfmode; return renderDiff(RES.cmp, true); }
-    if (t.dataset.cmpsrc) { try { src = t.dataset.cmpsrc; RES.cmpSrc = src; $('cmp-menu').hidden = true; $('cmp-btn').setAttribute('aria-expanded', 'false'); RES.cmpPick = false; RES.cmpUi = 'confirm'; cmpMode(true);
+    if (t.dataset.cmpsrc) { try { src = t.dataset.cmpsrc; RES.cmpSrc = src; $('cmp-menu').hidden = true; $('cmp-btn').setAttribute('aria-expanded', 'false'); RES.cmpPick = false; RES.cmpUi = 'finding'; cmpMode(true);    // the confirm panel waits until the ladder says whether the rack is certain
       var toCompare = function () { var el = $('sec-compare'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); };   // on a phone the panel opens below the report: go to it
-      if (RES.cmp && RES.cmp.imported[src]) { cmpStatus('Finding the rack...'); return Promise.resolve(setDb({ source: src })).then(toCompare); }
+      if (RES.cmp && RES.cmp.imported[src]) { cmpStatus('Finding the rack...'); return Promise.resolve(setDb({ source: src })).then(afterFind(src)).then(toCompare); }
       if (src === 'excel') { RES.cmpUi = 'idle'; cmpMode(false); toast('No workbook is copied in yet. Copy one in under Database copies.'); return go('copies'); }
       cmpStatus('Copying in from ' + SRCLABEL[src] + '...');
-      return api('/api/sources/' + src + '/import', { method: 'POST' }).then(function (r) { cmpStatus('Finding the rack...'); return Promise.resolve(setDb({ source: src })).then(toCompare); })
+      return api('/api/sources/' + src + '/import', { method: 'POST' }).then(function (r) { cmpStatus('Finding the rack...'); return Promise.resolve(setDb({ source: src })).then(afterFind(src)).then(toCompare); })
         .catch(function (er) { RES.cmpUi = 'idle'; cmpStatus(String(er.message || 'The copy did not work.').replace(/([^.!?])$/, '$1.'), 'err'); });  } catch (er) { console.error('compare', er); RES.cmpUi = 'idle'; cmpStatus(String(er && er.message || 'The compare did not start').replace(/[.!?]*$/, '') + '.', 'err'); } return; }
     if (t.dataset.cmppick) return setDb({ source: src, rack_key: t.dataset.cmppick });
     if (t.id === 'cmp-use') { var v = ($('cmp-type').value || '').trim(); if (!v) return toast('Type or pick a rack id first.');

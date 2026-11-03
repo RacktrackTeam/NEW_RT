@@ -65,6 +65,7 @@ table td, .dftable td { font-size:14px; padding:12px var(--s2) !important; borde
 /* Database copies on a phone: the source name never broken mid-word, the version and the date each on one line (finding 23) */
 .cptable td b { word-break:normal !important; overflow-wrap:normal !important; hyphens:none; }
 .cptable .cpwhen > span { display:block; white-space:nowrap; }
+.cptable .cpwhen > span + span { white-space:normal; }            /* the date may take two lines; the table never runs past the screen */
 
 /* The primary action at the right of its block, the secondary ones before it (finding 24) */
 .scanfoot { display:flex; justify-content:flex-end; }
@@ -106,6 +107,7 @@ table td, .dftable td { font-size:14px; padding:12px var(--s2) !important; borde
 
 /* On a phone the screen's primary action drops under the title, still at the right (STANDARD.md, Page header) */
 @media (max-width:999px) {
-  .phead { display:flex !important; flex-direction:column !important; align-items:stretch !important; }
+  .phead { display:flex !important; flex-direction:column !important; align-items:stretch !important; justify-content:flex-start !important; height:auto !important; }
+  .phead > div { flex:0 0 auto !important; }
   .phead > .btn, .phead > a.btn { align-self:flex-end !important; margin-left:auto !important; }
 }

@@ -1646,6 +1646,7 @@ def _drift_view(j):
                         {"rack_key": k, "how": "ladder", "why": out["identify"]["words"]})
     out["chosen"] = bool(db.get("source"))
     out["confirmed"] = bool(db.get("confirmed")) and db.get("source") == source
+    out["auto"] = bool(db.get("auto")) and out["confirmed"]          # accepted by itself (identified for certain), not by a person
     if out["match"]:
         out["record"] = SDB.devices(source, out["match"]["rack_key"])
         out["drift"] = SDB.drift(result, out["record"], SDB.ports(source, out["match"]["rack_key"]))      # every source's copy holds its ports now
@@ -1686,11 +1687,20 @@ def api_video_database(job: str, request: Request, body: dict = Body(...)):
         raise HTTPException(400, "Choose Excel, NetBox or CMDB.")
     if body.get("rack_key") and not any(r["rack_key"] == body["rack_key"] for r in SDB.racks(source)):
         raise HTTPException(400, f"No record called {body['rack_key']} in {SDB.SOURCES[source]}.")
-    j["db"] = {"source": source, "rack_key": body.get("rack_key") or None, "confirmed": bool(body.get("confirmed")), "by": rt_session.name(request),
-               "on": datetime.datetime.now().isoformat(timespec="minutes")}
+    auto = bool(body.get("auto")) and not body.get("rack_key")
+    if auto:          # the owner's rule (3 Nov 2026): a rack identified for certain is accepted without the confirm step
+        prev = j.get("db")
+        j["db"] = {"source": source, "rack_key": None, "confirmed": False}
+        ident = (drift_view(j).get("identify") or {})
+        if not ident.get("certain"):
+            j["db"] = prev
+            raise HTTPException(409, "The rack is not certain enough to accept by itself. Confirm it or pick another.")
+    j["db"] = {"source": source, "rack_key": body.get("rack_key") or None, "confirmed": bool(body.get("confirmed")) or auto,
+               "by": rt_session.name(request) + (" (accepted by itself: identified for certain)" if auto else ""),
+               "auto": auto, "on": datetime.datetime.now().isoformat(timespec="minutes")}
     _save(j)
     dv = drift_view(j)
-    if body.get("confirmed") and dv.get("match"):        # kept for the next scan of this rack (step 0 of the identification)
+    if (body.get("confirmed") or auto) and dv.get("match"):        # kept for the next scan of this rack (step 0 of the identification)
         SDB.confirm_rack(_run_org(j), dv["rack_id"], source, dv["match"]["rack_key"], j["db"]["by"])
     return dv
 

@@ -33,6 +33,7 @@ racktrack-app is the core: its video engine reads a rack from a sweep video. We 
 - Each tab is its own screen, no long scrolling, nothing repeated across tabs. The Report holds only the report, with "Compare against the database" top right: dropdown of three, confirm the verified rack id, then the drift.
 - Sign-in: simple, centred in the middle of the window. "Reading the rack" is like RT-EOS's analysing page plus racktrack-app's run page.
 - The mockup in docs/design/ is the reference for Home, Scan, the run, Sign in and the Report; it must be updated to the subtle black accent before the rebuild.
+- 3 Nov: when the rack id is certain, no confirmation step; the person can still change it.
 - Later the same evening: the owner also likes the Report tab as it is now, and the Compare against the database flow on it. The remaining pages are good. So the result screens (Rack, Devices, Layout, Report with its compare flow) are APPROVED and must not be redesigned; the mockup applies only to Sign in, Home, Scan and the run screen, with the subtle black accent.
 
 ## State at 3 Nov (pass 2 fixed, the folder restructured)

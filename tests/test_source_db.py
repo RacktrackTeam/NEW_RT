@@ -94,6 +94,22 @@ def test_identify_ladder_on_the_office_run(sdb):
     assert sdb._rack_number_of("SP-HYD-RM01-R01-R1") == 1
 
 
+def test_a_certain_rack_needs_no_confirmation_and_an_unsure_one_still_asks(sdb):
+    """The owner's rule (3 Nov 2026): the Report's compare skips the confirm step only when the ladder is certain."""
+    _three_racks(sdb)
+    run = ROOT / "samples" / "video" / "run_of_vdo1"
+    result, label = json.loads((run / "result.json").read_text()), json.loads((run / "rack_label.json").read_text())
+    sure = sdb.identify("netbox", "SP-HYD-RM01-R01-R1", result, None, label)            # vdo1: the label read matches one record exactly
+    assert sure["certain"] and sure["certain_why"] == "the rack label matches this record exactly" and sure["confidence"] >= sdb.CERTAIN_AT
+    remembered = sdb.identify("netbox", "SP-HYD-RM01-R01-R1", result, None, label, confirmed={"rack_key": "SP-HYD-RM01-R01-R1", "by": "admin", "on_": "2026-11-03T10:00"})
+    assert remembered["certain"] and remembered["certain_why"] == "confirmed for this rack before"
+    wrong = sdb.identify("netbox", "NETWORK RACK 2", result, None, None)               # a label that names another rack: the person is asked
+    assert not wrong["certain"] and wrong["state"] == "confirm"
+    r2 = json.loads((ROOT / "samples" / "video" / "run_of_whatsapp_2143" / "result.json").read_text())
+    none = sdb.identify("netbox", None, r2, None, None)                               # nothing named: top matches or a question
+    assert not none["certain"] and none["state"] in ("pick", "ask")
+
+
 def test_confirmations_and_corrections_are_kept(sdb):
     _three_racks(sdb)
     run = ROOT / "samples" / "video" / "run_of_vdo1"

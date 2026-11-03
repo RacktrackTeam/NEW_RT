@@ -36,6 +36,14 @@ The site's active copy per source is the newest row of source_copies for that si
    "candidates": [ { "rackKey": "...", "name": "...", "score": 0.95, "evidence": [ { "rank": 2, "kind": "rack_label", "read": "...", "record": "...", "tier": "exact" } ] } ],
    "shortlist": [ "rack keys of the 5 closest" ], "confirmedBy": null | { "userId": 5, "at": "..." } }`
 
+When the rack is certain the Report's compare does not stop to ask (owner, 3 Nov 2026). The ladder (engine/source_db.py identify) marks it
+`certain` when it verified the rack (VERIFY_AT, 0.7) with no step pointing elsewhere and the strongest evidence agrees: a confirmation
+remembered for this rack (step 0), the rack label read matching exactly one record (step 2, exact), or an overall score of at least
+CERTAIN_AT = 0.95 (the named constant beside VERIFY_AT). The screen then goes from the source dropdown straight to the differences
+(POST /api/video/<run>/database with auto, refused with 409 when the rack is not certain), shows one line "Rack ..., identified with high
+confidence" with the steps folded under Show how and a Not this rack link to the picker, and remembers the rack as a confirmation
+does. Below that, the person confirms, picks from the top 3 or is asked, as before.
+
 ## The drift: drift.json (one per scan and source)
 `{ "scanId": "...", "copyId": 12, "source": "excel", "comparedAt": "...", "items": [ { "kind": "missing_device|extra_device|moved_device|wrong_kind|wrong_make_model|wrong_serial|wrong_asset_tag|wrong_height|port_type|port_occupied|dust_cap|missing_cable|extra_cable|wrong_port|wrong_label", "unit": "u17", "deviceKey": "...", "field": "model", "record": "C9200L-48P", "read": "C9300-48P", "confidence": 0.8 } ] }`
 

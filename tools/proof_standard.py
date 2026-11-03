@@ -36,7 +36,9 @@ def main():
                 if hsh in ("CMP", "DRIFT"):
                     if hsh == "CMP":
                         pg.goto(ENGINE + "/app/#result/" + RUN + "/report"); pg.reload(); pg.wait_for_timeout(2500)
-                        pg.click("#cmp-btn"); pg.click('[data-cmpsrc="netbox"]'); pg.wait_for_selector("#cmp-continue", timeout=30000); pg.wait_for_timeout(500)
+                        pg.click("#cmp-btn"); pg.click('[data-cmpsrc="netbox"]'); pg.wait_for_selector("#cmp-continue, .idauto", timeout=30000); pg.wait_for_timeout(500)
+                        if pg.is_visible(".idauto"):          # identified for certain: Not this rack opens the confirm panel and its picker
+                            pg.click("#cmp-notthis"); pg.wait_for_selector("#cmp-continue", timeout=30000); pg.wait_for_timeout(500)
                     else:
                         pg.click("#cmp-continue"); pg.wait_for_selector("#diff-top .card", timeout=30000); pg.wait_for_timeout(500)
                 else:

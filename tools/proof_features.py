@@ -122,6 +122,8 @@ def screens(engine, user, pw):
             pg.locator("#res-dev").screenshot(path=str(OUT / f"device_ids_{width}.png"))          # the device card only (the page is long)
             pg.goto(f"{engine}/app/#result/{RUN}/report"); pg.wait_for_timeout(5000)
             pg.click("#cmp-btn"); pg.click('[data-cmpsrc="excel"]'); pg.wait_for_selector(".idcard", timeout=30000); pg.wait_for_timeout(800)
+            if pg.is_visible(".idhow summary"):
+                pg.click(".idhow summary"); pg.wait_for_timeout(300)        # the steps, folded under the high-confidence line
             pg.locator("#sec-compare").screenshot(path=str(OUT / f"record_location_{width}.png"))  # the compare in the Report, with the identification steps
             pg.close()
         b.close()

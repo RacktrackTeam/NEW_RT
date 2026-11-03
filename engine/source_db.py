@@ -822,6 +822,11 @@ def drift(result, record, ports=None):
 # (identifyFromEvidence: a location narrows, a label names, the devices rung needs MIN_DEVICES, a MIN_SHARE and no rack within TIE_MARGIN).
 # Each step leaves a set of racks; the first step that leaves exactly one names the rack; the later steps only agree or disagree.
 MIN_DEVICES, MIN_SHARE, TIE_MARGIN, NEAR_M, VERIFY_AT = 3, 0.6, 0.1, 300, 0.7
+# The owner's rule (3 Nov 2026): when the rack is identified for certain, the Report's compare does not stop to ask the person
+# to confirm it. Certain = the ladder verified it (VERIFY_AT) with no step pointing elsewhere, and the strongest evidence agrees:
+# a confirmation remembered for this rack (step 0), the rack label read matching exactly one record (step 2, exact), or an
+# overall score in the top band (CERTAIN_AT or above). Below that the person confirms, as before. docs/MODULES.md, match.json.
+CERTAIN_AT = 0.95
 
 
 def _metres(a, b):
@@ -1011,7 +1016,17 @@ def identify(source, rack_id, result, position=None, label=None, rack_id_how=Non
             overall = round(1.0 if first["n"] == 0 and not against else min(overall, 0.99), 2)
         state = "verified" if overall is not None and overall >= VERIFY_AT and not against else "confirm"
         words += f" Verified, {round(100 * overall)} %." if state == "verified" else f" {round(100 * (overall or 0))} %: please confirm the record or pick another."
-    return {"steps": steps, "rack_key": key, "state": state, "words": words, "named_by": first["n"] if first else None, "top": top, "confidence": overall}
+    certain, certain_why = False, None
+    if state == "verified" and key and not any(st.get("agrees") is False for st in steps):
+        lab_step = next((st for st in steps if st["n"] == 2), None)
+        if first and first["n"] == 0:
+            certain, certain_why = True, "confirmed for this rack before"
+        elif lab_step and lab_step.get("outcome") == "one" and lab_step.get("how") == "exact" and lab_step.get("agrees"):
+            certain, certain_why = True, "the rack label matches this record exactly"
+        elif overall is not None and overall >= CERTAIN_AT:
+            certain, certain_why = True, f"{round(100 * overall)} % from the steps together"
+    return {"steps": steps, "rack_key": key, "state": state, "words": words, "named_by": first["n"] if first else None, "top": top, "confidence": overall,
+            "certain": certain, "certain_why": certain_why}
 
 
 def _rack_number_of(name):
