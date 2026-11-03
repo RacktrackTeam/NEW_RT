@@ -1,3 +1,4 @@
+import { ORG_ONLY } from '../utils/orgOnly';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../AuthContext.jsx';
@@ -42,9 +43,10 @@ function personMeta(p) {
   const role = roleWord(p.role);
   let what;
   if (isPending(p)) what = 'Invite sent, not joined yet';
+  else if (ORG_ONLY) what = null;                  // the /org/ build: the scans are the app's, this store has none
   else if (p.last_scan || p.lastScan) what = `Last scan ${whenShort(p.last_scan || p.lastScan)}`;
   else what = 'No scans yet';
-  return `${role}, ${what}${isActive(p) ? '' : ', Deactivated'}`;
+  return [role, what].filter(Boolean).join(', ') + (isActive(p) ? '' : ', Deactivated');
 }
 
 /* What the person looking may do to someone on the list. */
@@ -430,7 +432,7 @@ export default function SitePage() {
   let body;
   if (!siteId) {
     body = needPicker
-      ? <EmptyState text={sites.length ? 'Pick a site to see its racks and people.' : 'There is no site yet. Add one in Organization settings.'} action={sites.length ? null : <TextButton to="/settings">Organization settings</TextButton>} />
+      ? <EmptyState text={sites.length ? (ORG_ONLY ? 'Pick a site to see its people.' : 'Pick a site to see its racks and people.') : 'There is no site yet. Add one in Organization settings.'} action={sites.length ? null : <TextButton to="/settings">Organization settings</TextButton>} />
       : <EmptyState text="Your account is not linked to a site. Ask your organization admin to add you to one." />;
   } else if (loading && !data) {
     body = <Loading />;
@@ -444,7 +446,9 @@ export default function SitePage() {
         </>
       );
   } else if (data) {
-    const sub = `${data.orgName ? `${data.orgName}. ` : ''}${plural(people.length, 'person', 'people')}, ${plural(racks.length, 'rack')}.`;
+    const sub = ORG_ONLY
+      ? `${data.orgName ? `${data.orgName}. ` : ''}${plural(people.length, 'person', 'people')}.`
+      : `${data.orgName ? `${data.orgName}. ` : ''}${plural(people.length, 'person', 'people')}, ${plural(racks.length, 'rack')}.`;
     const racksBlock = (
       <section aria-label="Racks">
         <SectionLabel>Racks</SectionLabel>
@@ -500,7 +504,7 @@ export default function SitePage() {
         </Bar>
         <div className={styles.stack}>
           {peopleBlock}
-          {racksBlock}
+          {ORG_ONLY ? null : racksBlock}
         </div>
         <Stick className={styles.phoneOnly}>
           <Button onClick={() => setInviting(true)}>Invite a technician</Button>

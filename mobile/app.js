@@ -113,6 +113,8 @@
   var AUTH = (function () {
     var base = location.protocol + '//' + location.hostname + ':3302';
     function url(p) { return base + p; }
+    // an organization page at /org/ carries the way back into this app (the /org/ build shows it top left, same host only)
+    function orgUrl(p, back) { return url(p) + '?back=' + encodeURIComponent(location.origin + location.pathname + '#' + (back || 'more')); }
     function call(p, body, method) {
       return fetch(url(p), { method: method || (body ? 'POST' : 'GET'), credentials: 'include', cache: 'no-store',
         headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined })
@@ -128,7 +130,7 @@
       return call('/api/auth/me').then(function (j) {
         var u = j.user || {};
         if (u.organization && u.organization.status && u.organization.status !== 'active' && u.role !== 'owner') { me = null; return go('pending'); }
-        if ((u.role === 'org_admin' || u.role === 'org_owner') && u.setup && u.setup.needsSetup) { location.href = url('/org/setup'); return; }
+        if ((u.role === 'org_admin' || u.role === 'org_owner') && u.setup && u.setup.needsSetup) { location.href = orgUrl('/org/setup', 'home'); return; }
         return api('/api/me').then(function (m) { me = m; setWho(m); go('home'); });
       });
     }
@@ -175,7 +177,7 @@
       if (role === 'owner') L.push(['/org/console', 'Platform console', 'Organizations waiting, activity']);
       if (role === 'owner' || role === 'org_owner' || role === 'org_admin') L.push(['/org/settings', 'Organization settings', 'Profile, sites, data settings']);
       if (role === 'owner' || role === 'org_owner' || role === 'org_admin' || role === 'site_manager') L.push(['/org/site', 'Sites and people', 'People, roles, invites']);
-      var row = function (x) { return '<a class="grow" href="' + esc(url(x[0])) + '"><svg class="ic"><use href="#i-server"/></svg><span>' + esc(x[1]) + '</span><em>' + esc(x[2]) + '</em><span class="arr">→</span></a>'; };
+      var row = function (x) { return '<a class="grow" href="' + esc(orgUrl(x[0])) + '"><svg class="ic"><use href="#i-server"/></svg><span>' + esc(x[1]) + '</span><em>' + esc(x[2]) + '</em><span class="arr">→</span></a>'; };
       $('org-links').innerHTML = L.map(row).join('');
       $('org-links').hidden = !L.length; $('org-label').hidden = !L.length;                // a technician has no organization entries: no empty heading
       $('acct-settings').innerHTML = row(['/org/you', 'Settings', 'Your account']);      // the person's own settings sit under Account, beside Sign out
@@ -184,12 +186,12 @@
   })();
   var ADMIN = false;
   function setWho(j) {
-    var ROLE = { owner: 'Platform owner', org_admin: 'Organization admin', site_manager: 'Site manager', member: 'Technician' }, site = [ROLE[j.role] || '', j.site_name || ''].filter(Boolean).join(' · '), ini = (j.name || '?').trim().charAt(0).toUpperCase();
+    var ROLE = { owner: 'Platform owner', org_owner: 'Organization owner', org_admin: 'Organization admin', site_manager: 'Site manager', member: 'Technician' }, site = [ROLE[j.role] || '', j.site_name || ''].filter(Boolean).join(' · '), ini = (j.name || '?').trim().charAt(0).toUpperCase();
     ADMIN = j.role === 'owner' || j.role === 'org_owner' || j.role === 'org_admin';           // logins and copies are the admins' (docs/AUTH.md); the server checks it too
     document.body.dataset.role = j.role || ''; document.body.classList.toggle('is-admin', ADMIN);
     $('site-pos').hidden = !(j.role === 'org_owner' || j.role === 'org_admin' || j.role === 'site_manager');   // only those who may save a site's position see it
     $('cp-in').hidden = !ADMIN;
-    $('who').textContent = ini; $('av2').textContent = ini; $('av3').textContent = ini; $('who2').textContent = j.name; $('who3').textContent = j.name; $('site2').textContent = site; $('site3').textContent = site; $('site2').hidden = !site; $('site3').hidden = !site;
+    $('who').textContent = ini; $('av2').textContent = ini; $('av3').textContent = ini; $('who2').textContent = j.name; $('who3').textContent = j.name; $('site2').innerHTML = [ROLE[j.role] || '', j.site_name || ''].filter(Boolean).map(function (x) { return '<span>' + esc(x) + '</span>'; }).join(''); $('site3').textContent = site;   // the side bar: role and site each on its own line, never broken $('site2').hidden = !site; $('site3').hidden = !site;
     AUTH.links(j.role);
   }
   function signout() { AUTH.call('/api/auth/logout', {}).catch(quiet('signing out')).then(function () { me = null; go('signin'); }); }
@@ -203,7 +205,7 @@
   function when(iso) { if (!iso) return ''; var d = new Date(String(iso).length === 16 ? iso + ':00' : iso); if (isNaN(d)) return String(iso); var two = function (n) { return (n < 10 ? '0' : '') + n; };   // one date style on every screen: 27 Oct 2026, 12:53
     return d.getDate() + ' ' + MON[d.getMonth()] + ' ' + d.getFullYear() + (/T\d/.test(String(iso)) ? ', ' + two(d.getHours()) + ':' + two(d.getMinutes()) : ''); }
   window.RTWHEN = when;
-  function summary(s) { if (!s || s.units == null) return ''; return s.units + ' units · ' + s.devices + ' devices' + (s.named != null ? ', ' + s.named + ' named' : '') + ' · ' + s.layouts + ' port layouts'; }
+  function summary(s) { if (!s || s.units == null) return ''; return s.units + ' units · ' + s.devices + ' devices' + (s.named != null ? ', ' + s.named + ' named' : '') + ' · ports read on ' + s.layouts + (s.layouts === 1 ? ' device' : ' devices'); }
   function thumb(x) { return (x.status === 'done' || x.partial) ? '<img class="thumbimg" src="/api/video/' + encodeURIComponent(x.id) + '/file/rack.png" alt="" loading="lazy">' : ''; }
   function loadHistory() {
     api('/api/video/history').then(function (rows) {
@@ -233,7 +235,7 @@
       var list = order.map(function (k) { var g = byRack[k].slice().sort(function (a, b) { return (b.started || '').localeCompare(a.started || '') || (b.record ? 1 : 0) - (a.record ? 1 : 0); }); g[0]._scans = g.length; return g[0]; });
       $('home-racks').innerHTML = list.length ? '<div class="rktable"><div class="rkhead"><span>Rack</span><span>Last scan</span><span>Compared with</span><span>State</span><span></span></div>' + list.map(function (x) {
         var href = (x.status === 'done' || x.partial) ? '#result/' + x.id : '#job/' + x.id, site = [me && me.role === 'owner' ? x.org_name : null, x.site_name].filter(Boolean).join(' · ') || (x.org == null && me && me.role === 'owner' ? 'From before sign-in' : '');
-        var rec = x.record ? esc(x.record.source) : x.status === 'done' ? 'Not compared yet' : '-';
+        var rec = x.record ? esc(x.record.source) : '-';                  // the state pill on the same row already says Not compared
         var st = x.status === 'failed' ? ['bad', 'Failed'] : x.differences == null ? (x.status === 'done' ? ['grey', 'Not compared'] : ['grey', 'Not finished']) : x.differences ? ['bad', pl(x.differences, 'difference')] : ['ok', 'No differences'];
         return '<a class="rkrow2" href="' + href + '"><span class="c-rack"><b>' + esc(x.rack_id || x.title || x.name) + '</b>' + (site ? '<small>' + esc(site) + '</small>' : '') + '</span>'
           + '<span class="c-when">' + esc(when(x.started)) + (x._scans > 1 ? '<small>' + x._scans + ' scans</small>' : '') + '</span><span class="c-with">' + rec + '</span><span class="c-state"><span class="spill ' + st[0] + '">' + esc(st[1]) + '</span></span><svg class="ic chev"><use href="#i-next"/></svg></a>'; }).join('') + '</div>'
@@ -341,11 +343,11 @@
   }
   function portsLine(ports) { var k = Object.keys(ports || {}); if (!k.length) return ''; var d = k.filter(function (x) { return ports[x] === 'done'; }).length; return d + ' of ' + k.length + ' devices'; }
   function renderRun(j, id) {
-    var running = j.status === 'running', failed = j.status === 'failed', done = j.status === 'done', n = stepOf(j.progress, j.status);
+    var running = j.status === 'running', failed = j.status === 'failed', done = j.status === 'done', n = stepOf(failed ? j.failed_at : j.progress, j.status);
     var html = RUN_STAGES.map(function (s) {
       var fin = done || n > s[2], on = running && !fin && n >= s[1], note = '';
       if (s[0] === 'Port layouts') { var pl = portsLine(j.ports); if (pl && (on || fin)) note = pl; }
-      var cls = fin ? 'done' : on ? 'on' : failed && n >= s[1] ? 'bad' : '';
+      var cls = fin ? 'done' : on ? 'on' : failed && n >= s[1] && n <= s[2] ? 'bad' : '';
       return '<li class="' + cls + '"><span class="mk">' + (fin ? '&#10003;' : '') + '</span><span>' + esc(s[0]) + '</span><span class="t">' + esc(note) + '</span></li>';
     }).join('');
     $('run-stages').innerHTML = html;
@@ -365,7 +367,7 @@
         renderRun(j, id);
         $('job-err').hidden = !failed; $('job-err').textContent = j.error || 'The analysis failed.';
         $('job-open').hidden = !ready; $('job-open').href = '#result/' + id; $('job-retry').hidden = !failed;
-        $('job-del').hidden = j.status === 'running' || id.indexOf('example-') === 0;
+        $('job-del').hidden = j.status === 'running' || id.indexOf('example-') === 0 || !canRemoveRun();
         var files = j.files || [], pic = files.indexOf('rack.png') >= 0 ? '/api/video/' + id + '/file/rack.png' : (FIRST[id] || null);
         if (pic && pic !== shown) { shown = pic; $('run-img').src = pic; $('run-img').hidden = false; $('run-ph').hidden = true; }
         if (j.status !== 'running') clearInterval(pollTimer);
@@ -375,6 +377,8 @@
     tick(); pollTimer = setInterval(tick, 2000);
   }
   openJob.seen = {};
+  // The server lets only a site manager, an organization admin or owner and the platform owner remove a scan (ROLE_RULES)
+  function canRemoveRun() { return !!(me && ['owner', 'org_owner', 'org_admin', 'site_manager'].indexOf(me.role) >= 0); }
   $('job-del').addEventListener('click', function () {
     var id = (location.hash.split('/')[1] || ''); if (!id) return;
     var b = $('job-del'), label = b.querySelector('span'); if (b.dataset.sure !== '1') { b.dataset.sure = '1'; label.textContent = 'Tap again to remove it for good'; setTimeout(function () { b.dataset.sure = ''; label.textContent = 'Remove this run'; }, 4000); return; }
@@ -499,7 +503,8 @@
       runs.forEach(function (r) { if (r.st === 'used') return; var hS = Y(r.y1) - Y(r.y0), f = Math.min(fs, hS * 0.62); if (f * px < 7) return;
         var label = r.st === 'free' ? r.n + 'U free' : (r.n > 1 ? r.n + 'U ' : '') + 'not sure', tw = label.length * f * 0.6 + f * 1.4, cy = (Y(r.y0) + Y(r.y1)) / 2, lx = rails.l(cy) + W * 0.016 + 14;
         out.push('<g class="splab ' + r.st + '" data-cls="' + r.st + '" style="--i:' + r.i + '"><rect x="' + lx + '" y="' + (cy - f * 0.85) + '" width="' + tw + '" height="' + f * 1.7 + '" rx="' + f * 0.85 + '"/><text x="' + (lx + tw / 2) + '" y="' + cy + '" font-size="' + f + '">' + label + '</text></g>'); });
-      cap = '<b>' + free + 'U free</b> · ' + used + 'U in use' + (unsure ? ' · ' + unsure + 'U not sure' : '');
+      var heldU = (v.record_passive || []).filter(function (x) { return units.some(function (u) { return u.unit === x.unit && u.status !== 'occupied' && u.status !== 'uncertain'; }); }).length;
+      cap = '<b>' + free + 'U free</b> · ' + used + 'U in use' + (unsure ? ' · ' + unsure + 'U not sure' : '') + (heldU ? ' · ' + heldU + 'U of the free hold cable managers or blank panels in the record' : '');
     } else {
       var kinds = {}, kcol = {}, placed = [];
       var unsureU = {}, onDev = {}; units.forEach(function (u) { if (u.status === 'uncertain') unsureU[u.unit] = 1; }); devs.forEach(function (d) { (d.units || []).forEach(function (u) { onDev[u] = 1; }); });
@@ -563,7 +568,7 @@
   function loadOtherScans(id) {                                         // the other scans of the same rack, newest first (Home lists a rack once)
     var el = $('res-others'); el.innerHTML = '';
     api('/api/video/history').then(function (rows) { var me_ = rows.filter(function (x) { return x.id === id; })[0]; if (!me_ || !me_.rack_id || RES.id !== id) return;
-      var others = rows.filter(function (x) { return x.id !== id && x.rack_id && rackKey(x) === rackKey(me_) && (x.started || '') <= (me_.started || ''); });   // the same rack of the same site, scanned before this one
+      var others = rows.filter(function (x) { return x.id !== id && x.rack_id && rackKey(x) === rackKey(me_) && (x.started || '') < (me_.started || ''); });   // the same rack of the same site, scanned before this one (a copy of the same scan, started at the same moment, is not earlier)
       if (others.length) el.innerHTML = '<details class="card othscans"><summary>Earlier scans of this rack (' + others.length + ')</summary><ul class="dflines">' + others.map(function (x) { var s = x.summary || {};
         return '<li><b>' + esc(when(x.started)) + '</b> <span class="muted small">' + (s.devices != null ? pl(s.devices, 'device') + ' · ' + s.units + ' units · ' : '') + (x.record ? 'compared with ' + esc(x.record.source) + ', ' + (x.differences ? pl(x.differences, 'difference') : 'no differences') : 'not compared') + '</span> <a href="#result/' + encodeURIComponent(x.id) + '">Open</a></li>'; }).join('') + '</ul></details>';
     }).catch(quiet('the earlier scans'));
@@ -642,15 +647,21 @@
     var on = ports.filter(function (p) { return p.status === 'connected'; }), off = ports.filter(function (p) { return p.status === 'empty'; }), unk = ports.filter(function (p) { return p.status !== 'connected' && p.status !== 'empty'; });
     var ids = function (l) { return l.map(function (p) { return p.id; }); }, which = function (l) { return l.length === ports.length ? 'all' : l.length ? '<small class="ids"> · ' + esc(ranges(ids(l))) + '</small>' : ''; };
     var row = function (k, val) { return '<span>' + k + '</span><b>' + val + '</b>'; }, kinds = Object.keys(byType).map(function (t) { return byType[t] + ' ' + esc(t); });
-    return row('Ports', (L.mode === 'patchpanel' && L.size_known === false ? ports.length + ' seen · size not sure' : L.mode === 'patchpanel' && L.n_ports > ports.length ? L.n_ports + ' · ' + ports.length + ' seen, ' + (L.n_ports - ports.length) + ' hidden' : ports.length + (kinds.length ? ' (' + kinds.join(' and ') + ')' : ''))) + ((L.combo || []).length ? row('Combo', L.combo.length + '<small class="ids"> · ports ' + esc(ranges(L.combo.map(function (c) { return c.of; }))) + ' also take an SFP module</small>') : '') + row('Connected', on.length === ports.length ? 'all ' + on.length : on.length + which(on)) + row('Empty', off.length === ports.length ? 'all ' + off.length : off.length ? off.length + which(off) : '0') + (unk.length ? row('Not sure', unk.length + which(unk)) : '');
+    return row('Ports', (L.mode === 'patchpanel' && L.size_known === false ? ports.length + ' seen · size not sure' : L.mode === 'patchpanel' && L.n_ports > ports.length ? L.n_ports + ' · ' + ports.length + ' seen, ' + (L.n_ports - ports.length) + ' hidden' : ports.length + (kinds.length ? ' (' + kinds.join(' and ') + ')' : ''))) + ((L.combo || []).length ? row('Combo', L.combo.length + '<small class="ids"> · ports ' + esc(ranges(L.combo.map(function (c) { return c.of; }))) + ' also take an SFP module</small>') : '') + row('Connected', on.length === ports.length && on.length > 1 ? 'all ' + on.length : on.length + which(on)) + row('Empty', off.length === ports.length && off.length > 1 ? 'all ' + off.length : off.length ? off.length + which(off) : '0') + (unk.length ? row('Not sure', unk.length + which(unk)) : '');
   }
   // the specifications of the model, looked up when the dropdown opens (toggle does not bubble: listened to in capture)
   document.addEventListener('click', function (e) { var c = e.target.closest && e.target.closest('#cine'); if (!c) return; c.classList.remove('play'); void c.offsetWidth; c.classList.add('play'); });
-  function specFromAgent(sp) {                                          // the port agent's spec (28 Oct package): found, ports by type, rack units, datasheet, photo check
+  function specFromAgent(sp, combo) {                                   // the port agent's spec (28 Oct package): found, ports by type, rack units, datasheet, photo check
     if (!sp || !sp.found) return null;
     var rows = [], P = sp.ports || {}, names = { rj45: 'RJ45', sfp: 'SFP', qsfp: 'QSFP', combo: 'Combo', console: 'Console', usb: 'USB', management_port: 'Management', other: 'Other' };
-    if (sp.port_config) rows.push(['Ports', sp.port_config]); else { var parts = Object.keys(P).filter(function (k) { return P[k]; }).map(function (k) { return P[k] + ' ' + (names[k] || k); }); if (parts.length) rows.push(['Ports', parts.join(' + ')]); }
-    if (sp.total_ports) rows.push(['All ports', String(sp.total_ports)]);
+    // a combo port is one port with two faces: the agent's spec can list it as RJ45 and again as SFP (DGS-1210-52: "52 RJ45 + 4 SFP",
+    // 56 in all). When the device's own reading found that many combo ports, the spec counts them once, as the facts above do.
+    if (combo && P.sfp === combo && P.rj45 && (!sp.total_ports || sp.total_ports === P.rj45 + P.sfp)) {
+      rows.push(['Ports', P.rj45 + ' RJ45, ' + combo + ' of them combo ports that also take an SFP module']); rows.push(['All ports', String(P.rj45)]);
+    } else {
+      if (sp.port_config) rows.push(['Ports', sp.port_config]); else { var parts = Object.keys(P).filter(function (k) { return P[k]; }).map(function (k) { return P[k] + ' ' + (names[k] || k); }); if (parts.length) rows.push(['Ports', parts.join(' + ')]); }
+      if (sp.total_ports) rows.push(['All ports', String(sp.total_ports)]);
+    }
     if (sp.rack_units != null) rows.push(['Height', sp.rack_units === 'desktop' ? 'Desktop' : sp.rack_units + 'U']);
     if (sp.source) rows.push(['Source', String(sp.source).replace(/_/g, ' ')]);
     var m = sp.matches_photo, note = m && m.agrees === false && m.note ? m.note : '';
@@ -658,7 +669,7 @@
   }
   function loadSpecs(d) { if (!d || !d.dataset.model || d.dataset.loaded) return; d.dataset.loaded = '1';
     var box = d.querySelector('.specbody');
-    var sp = d.dataset.spec ? specFromAgent(JSON.parse(d.dataset.spec)) : null;
+    var sp = d.dataset.spec ? specFromAgent(JSON.parse(d.dataset.spec), parseInt(d.dataset.combo || '0', 10)) : null;
     if (sp) { box.innerHTML = '<div class="dfacts">' + sp.rows.map(function (r) { return '<span>' + esc(r[0]) + '</span><b>' + esc(r[1]) + '</b>'; }).join('') + '</div>'
         + (sp.note ? '<p class="muted small">' + esc(sp.note) + '</p>' : '') + (sp.datasheet ? '<a class="link small" href="' + esc(sp.datasheet) + '" target="_blank" rel="noopener">Datasheet</a>' : ''); return; }
     api('/api/specs?vendor=' + encodeURIComponent(d.dataset.vendor) + '&model=' + encodeURIComponent(d.dataset.model)).then(function (r) {
@@ -691,7 +702,7 @@
     if (L.fitted) return { key: 'on', word: 'Identified', title: mm, pic: P.overlay || P.vendor_ports || P.trace || P.cut || d.crop, facts: true, vendor: L.vendor, model: L.model };
     if (busy) return { key: 'busy', word: 'Reading', title: 'Reading…', pic: d.crop };
     if (mm && L.mapped) return { key: 'on', word: 'Identified', title: mm, pic: L.auto && P.overlay ? P.overlay : d.crop, facts: !!L.auto, vendor: L.vendor || L.typed.vendor, model: L.model || L.typed.model, nolayout: !L.auto };
-    if (L.auto) return { key: 'auto', word: 'Ports found', title: L.vendor_read ? L.vendor_read + ' · model not read' : 'Make and model not read', pic: P.overlay || d.crop, facts: true, ask: true };
+    if (L.auto) return { key: 'auto', word: (L.ports || []).length ? (L.ports.length === 1 ? '1 port found' : L.ports.length + ' ports found') : 'Ports found', title: L.vendor_read ? L.vendor_read + ' · model not read' : 'Make and model not read', pic: P.overlay || d.crop, facts: true, ask: true };
     if (L.mapped) return { key: 'unc', word: 'Needs a close photo', title: L.vendor_read ? L.vendor_read + (L.model_read ? ' ' + L.model_read : ' · model not read') : 'Make and model not read', pic: d.crop, ask: true };
     return { key: 'off', word: L.ports_state === 'failed' ? 'Could not find it' : 'Not checked yet', title: 'Not checked yet', pic: d.crop, read: true };
   }
@@ -717,7 +728,7 @@
       ? '<figure class="pshot cine" id="cine" title="Tap to play again"><img class="c-base" src="' + (P.cut || d.crop) + '" alt=""><img class="c-over" src="' + P.overlay + '" alt="D' + d.index + '"><span class="c-scan"></span>' + '</figure>'
       : '<figure class="pshot rv2"><img src="' + st.pic + '" alt="D' + d.index + '" loading="lazy"></figure>';
     if (st.key === 'on') body += (L.fitted ? '' : L.auto ? '<p class="pline">Ports found.</p>' : '<p class="pline">No port drawing for this model yet.</p>') + (st.facts ? portFacts(L) : '')
-      + '<details class="more specs" data-vendor="' + esc(st.vendor || '') + '" data-model="' + esc(st.model || '') + '" data-spec="' + esc(L.spec ? JSON.stringify(L.spec) : '') + '"><summary class="link">Specifications</summary><div class="morebody specbody"><p class="muted small">Looking up…</p></div></details>' + (L.confirm ? closeupBtn(d) : '');
+      + '<details class="more specs" data-vendor="' + esc(st.vendor || '') + '" data-model="' + esc(st.model || '') + '" data-combo="' + ((L.combo || []).length) + '" data-spec="' + esc(L.spec ? JSON.stringify(L.spec) : '') + '"><summary class="link">Specifications</summary><div class="morebody specbody"><p class="muted small">Looking up…</p></div></details>' + (L.confirm ? closeupBtn(d) : '');
     else if (st.key === 'busy') body += '<p class="pline">Finding the make and model in the video, about a minute…</p>';
     else if (st.key === 'auto') body += '<p class="pline">Ports found. ' + (L.vendor_read ? 'Make read: <b>' + esc(L.vendor_read) + '</b>, model not read. ' : 'The make and model were not read. ') + 'A close, sharp photo of the front gives the model and its ports.</p>' + portFacts(L) + closeupBtn(d) + modelForm(d);
     else if (st.key === 'unc') body += '<p class="pline">' + (L.model_read ? 'Read once, not confirmed. ' : L.vendor_read ? 'The model was not read. ' : 'The make and model were not read. ') + 'A close, sharp photo of the front gives the model and its ports.</p>' + closeupBtn(d) + modelForm(d);
@@ -777,11 +788,11 @@
     var d = (v.devices || []).filter(function (x) { return x.index === pick.id; })[0]; if (!d) { el.innerHTML = ''; return; }
     var L = d.layout || {}, P = L.pictures || {}, ports = L.ports || [], html = '';
     var frames = (d.views || d.frames || []).slice(0, 3);
-    if (frames.length) html += '<div class="card sidecard"><span class="glabel">Seen in the video</span><div class="sideframes">' + frames.map(function (f, i) { return '<img src="' + f + '" alt="D' + d.index + ' view ' + (i + 1) + '" loading="lazy" onerror="imgRetry(this)">'; }).join('') + '</div><p class="sideline">The sharpest views of this device, used for the reading. Click a picture to see it large.</p></div>';
+    if (frames.length) html += '<div class="card sidecard"><span class="glabel">Seen in the video</span><div class="sideframes">' + frames.map(function (f, i) { return '<img src="' + f + '" alt="D' + d.index + ' view ' + (i + 1) + '" loading="lazy" onerror="imgRetry(this)">'; }).join('') + '</div><p class="sideline">' + (frames.length === 1 ? 'The sharpest view of this device, used for the reading.' : 'The sharpest views of this device, used for the reading.') + ' ' + (matchMedia('(hover: none)').matches ? 'Tap' : 'Click') + ' a picture to see it large.</p></div>';
     var how = [];
     how.push(['Found on', d.units && d.units.length ? d.units.map(UP).join(', ') : UP(d.top)]);
     how.push(['Type', esc(d.kind_words || d.kind || 'Not sure')]);   // the words carry the picture's per cent (source_db.device_kind)   // the one kind and where it came from (server: source_db.device_kind)
-    if (L.ports_state || L.mapped) how.push(['Ports read', L.from === 'close-up' ? 'from a close photo' : L.fitted ? 'vendor layout fitted' : L.auto ? 'found and typed from the photo' : L.mode === 'patchpanel' ? 'patch panel reader' : L.ports_state === 'running' ? 'reading now' : ports.length ? 'from the video, no vendor layout' : 'not yet']);
+    if (L.ports_state || L.mapped) how.push(['Ports read', L.from === 'close-up' ? 'from a close photo' : L.fitted ? 'vendor layout fitted' : L.auto ? 'found and typed from the video' : L.mode === 'patchpanel' ? 'patch panel reader' : L.ports_state === 'running' ? 'reading now' : ports.length ? 'from the video, no vendor layout' : 'not yet']);
     if (L.vendor_read || L.model_read) how.push(['Read on the panel', esc((L.vendor_read || '') + (L.model_read ? ' ' + L.model_read : '')) + (L.fitted ? '' : ' · not confirmed')]);
     var PD0 = L.port_detector || {};
     if (PD0.make_dropped) how.push(['Make', 'not read on this device. "' + esc(PD0.make_dropped) + '" is printed on the device next to it']);
@@ -870,7 +881,9 @@
   function renderReport(v) {
     var units = v.units || [], devs = (v.devices || []).slice().sort(function (a, b) { return unumOf(b.top) - unumOf(a.top); }), n = units.length;
     var st = function (u) { return unitState(v, u); }, RL = v.rack_label || {}, rid = (v.rack_id && v.rack_id.id) || (RL.id && RL.id.text), rname = RL.name && RL.name.text;
-    var used = units.filter(function (u) { return st(u) === 'In use'; }).length, unc = units.filter(function (u) { return st(u) === 'Not sure'; }).length, free = n - used - unc;
+    var held0 = {}; (v.record_passive || []).forEach(function (x) { held0[x.unit] = 1; });
+    var used = units.filter(function (u) { return st(u) === 'In use'; }).length, unc = units.filter(function (u) { return st(u) === 'Not sure'; }).length,
+      free = n - used - unc - units.filter(function (u) { return st(u) === 'Free' && held0[u.unit]; }).length;     // the record's cable managers are not free
     var kinds = byKind(devs), kindLine = kinds.map(function (g) { return g.devs.length + ' ' + (g.kind === 'Not sure' ? 'not sure' : g.kind.toLowerCase() + (g.devs.length > 1 ? (/ch$/.test(g.kind) ? 'es' : 's') : '')); }).join(' · ');
     var title = rid || (rname ? rname.replace(/\b(\w)(\w*)/g, function (m, a, b) { return a + b.toLowerCase(); }) : 'This rack');
     // the elevation: every unit a row, devices as tiles in their kind's colour, free units dotted green
@@ -887,12 +900,19 @@
     var table = devs.map(function (d) { var L = d.layout || {}, mm = L.vendor ? L.vendor + (L.model ? ' ' + L.model : '') : '', kind = d.kind && d.kind !== 'Other' ? d.kind : 'Not sure';
       return '<tr data-dev="' + d.index + '"><td class="mono">' + URANGE(d.top, d.bottom, d.height) + '</td><td><b>D' + d.index + '</b><span class="kd">' + esc(kind) + '</span></td><td>' + (mm ? esc(mm) : L.mode === 'patchpanel' && L.panel ? esc(L.panel) + ' patch panel' + (L.n_ports ? '<span class="kd">' + L.n_ports + (L.size_known === false ? ' ports seen' : ' ports') + '</span>' : '') : L.vendor_read ? esc(L.vendor_read + (L.model_read ? ' ' + L.model_read : '')) + '<span class="kd">' + (L.model_read ? 'read, not confirmed' : 'model not read') + '</span>' : '<span class="kd">not read</span>') + '</td></tr>'; }).join('');   // a patch panel has no make and model to read: its type stands there (user, 2026-10-28)
     // the free space as stretches
-    var runs = [], cur = null; units.forEach(function (u) { var s = st(u); if (s === 'Free') { if (cur) { cur.bottom = u.unit; cur.n++; } else { cur = { top: u.unit, bottom: u.unit, n: 1 }; runs.push(cur); } } else cur = null; });
-    var freeChips = runs.map(function (r) { return '<span class="fchip"><b>' + r.n + 'U</b> ' + URANGE(r.top, r.bottom, r.n) + '</span>'; }).join('');
+    // a unit the confirmed record fills with a cable manager or a blank panel is not free space, though the video sees it empty
+    var passive = {}; (v.record_passive || []).forEach(function (x) { passive[x.unit] = x; });
+    var runs = [], cur = null; units.forEach(function (u) { var s = st(u); if (s === 'Free' && !passive[u.unit]) { if (cur) { cur.bottom = u.unit; cur.n++; } else { cur = { top: u.unit, bottom: u.unit, n: 1 }; runs.push(cur); } } else cur = null; });
+    var held = units.filter(function (u) { return st(u) === 'Free' && passive[u.unit]; });
+    var freeChips = runs.map(function (r) { return '<span class="fchip"><b>' + r.n + 'U</b> ' + URANGE(r.top, r.bottom, r.n) + '</span>'; }).join('')
+      + (held.length ? '<p class="muted small">' + held.map(function (u) { return UP(u.unit); }).join(', ') + (held.length === 1 ? ' looks empty but holds a ' : ' look empty but hold ') + esc(String(passive[held[0].unit].kind).toLowerCase()) + (held.length === 1 ? '' : 's') + ' in ' + esc(passive[held[0].unit].source) + ', so ' + (held.length === 1 ? 'it is' : 'they are') + ' not free space.</p>' : '');
     var look = units.filter(function (u) { return st(u) === 'Not sure'; }).map(function (u) { return '<button class="lrow" type="button" data-unit="' + u.unit + '"><span class="iu">' + UP(u.unit) + '</span><b>Not sure if in use</b><span class="arr">›</span></button>'; })
       .concat(devs.map(function (d) { var ps = PORT_KINDS[d.kind] ? devState(d, v) : null, why = d.unsure ? 'device not sure' : !d.kind || d.kind === 'Other' ? 'type not sure'
           : ps && ps.key === 'unc' ? (ps.panel ? 'no ports seen' : 'needs a close photo') : ps && ps.key === 'auto' ? 'model not read' : ps && ps.key === 'off' ? 'make and model not checked yet' : null;   // the device page's own state
-        return why ? '<button class="lrow" type="button" data-dev="' + d.index + '"><span class="iu">' + UP(d.top) + '</span><b>D' + d.index + ' · ' + why + '</b><span class="arr">›</span></button>' : null; }).filter(Boolean));
+        return why ? '<button class="lrow" type="button" data-dev="' + d.index + '"><span class="iu">' + UP(d.top) + '</span><b>D' + d.index + ' · ' + why + '</b><span class="arr">›</span></button>' : null; }).filter(Boolean))
+      // the ports not sure, one row per device, as the worklist asks them ("Is there a cable in port 2 of D3?")
+      .concat(devs.map(function (d) { var un = ((d.layout || {}).ports || []).filter(function (p) { return p.status !== 'connected' && p.status !== 'empty'; });
+        return un.length ? '<button class="lrow" type="button" data-dev="' + d.index + '"><span class="iu">' + UP(d.top) + '</span><b>D' + d.index + ' · ' + (un.length === 1 ? 'port ' + esc(un[0].id) + ' not sure' : un.length + ' ports not sure: ' + esc(un.slice(0, 6).map(function (p) { return p.id; }).join(', ')) + (un.length > 6 ? ' and ' + (un.length - 6) + ' more' : '')) + '</b><span class="arr">›</span></button>' : null; }).filter(Boolean));
     $('rp-top').innerHTML = '<header class="rphead"><span class="eyebrow">Rack report</span><h2>' + esc(title) + '</h2><p class="muted">' + esc(v.title || '') + '</p><p class="rpline"><b>' + n + 'U</b> · <b>' + used + '</b> in use · <b class="free">' + free + '</b> free' + (unc ? ' · <b class="unc">' + unc + '</b> not sure' : '') + '</p></header>'
       + '<div class="rpcol b"><section class="card rpelev"><div class="rpkpis"><div><b>' + devs.length + '</b><span>devices</span></div><div><b>' + kinds.length + '</b><span>kinds</span></div><div><b>' + free + 'U</b><span>free</span></div><p class="muted small">' + esc(kindLine) + '</p></div>' + elev + '</section>'
       + '</div><div class="rpcol a"><span class="glabel">Devices, top to bottom</span><div class="card flush"><table class="rptable"><thead><tr><th>Unit</th><th>Device</th><th>Make and model</th></tr></thead><tbody>' + table + '</tbody></table></div></div><div class="rpcol c">'
@@ -925,7 +945,8 @@
   function setDb(body) { return api('/api/video/' + RES.id + '/database', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (d) { cmpStatus(''); renderCompare(d); return d; }).catch(function (e) { cmpStatus(String(e.message || 'The compare did not run.').replace(/\s*$/, '').replace(/([^.!?])$/, '$1.'), 'err'); }); }
   function copyWhen(d, s) { return d.imported[s] ? 'copy of ' + when(d.imported[s]) : 'no copy yet'; }
   var SRCLABEL = { excel: 'Excel workbook', netbox: 'NetBox', cmdb: 'ServiceNow CMDB' };
-  function firstSentence(t) { t = String(t || '').replace(/\s+/g, ' ').trim(); var m = t.match(/^.*?[.!?](\s|$)/); t = m ? m[0].trim() : t; return t.length > 110 ? t.slice(0, 107) + '...' : t; }
+  // the first sentence in full (never cut mid-word), starting with a capital letter
+  function firstSentence(t) { t = String(t || '').replace(/\s+/g, ' ').trim(); var m = t.match(/^.*?[.!?](\s|$)/); t = m ? m[0].trim() : t; return t.charAt(0).toUpperCase() + t.slice(1); }
   // the compare, in the owner's order: a button, a dropdown of the three databases, one panel to confirm the rack id, then the differences.
   // RES.cmpUi: idle (nothing shown) > confirm (the panel) > drift (the differences)
   function renderCompare(d) { try { renderCompareInner(d); } catch (e) { console.error('compare', e); cmpStatus('The compare could not be shown: ' + String(e.message || e).replace(/[.!?]*$/, '') + '.', 'err'); } }
@@ -1043,7 +1064,7 @@
     if (!d.copies.length) { $('cp-list').innerHTML = '<div class="card"><p class="muted">No copy yet. ' + (ADMIN ? 'Read a workbook or copy NetBox or the CMDB in above.' : 'An organization admin copies the databases in.') + '</p></div>'; return; }
     $('cp-list').innerHTML = '<div class="card flush"><table class="dftable cptable"><thead><tr><th>Source</th><th class="wide">Version</th><th class="wide">Copied</th><th class="cpn">Racks</th><th class="cpn">Devices</th><th class="cpn wide">Ports</th><th class="wide">From</th><th>State</th><th></th></tr></thead><tbody>'
       + d.copies.map(function (c) { return '<tr data-copy="' + c.id + '"' + (c.active ? ' class="on"' : '') + '><td><b>' + esc(d.sources[c.source] || c.source) + '</b><span class="cpwhen small muted">v' + c.version + ' · ' + esc(when(c.imported_at)) + '</span></td><td class="mono wide">v' + c.version + '</td><td class="mono small wide">' + esc(when(c.imported_at)) + '</td>'
-        + '<td class="cpn">' + c.racks + '</td><td class="cpn">' + c.devices + '</td><td class="cpn wide">' + (c.ports || 0) + '</td><td class="wide small muted">' + esc(String(c.file || '').replace(/^workbook_[0-9a-f]{8}_/, '')) + '</td>'
+        + '<td class="cpn">' + c.racks + '</td><td class="cpn">' + c.devices + '</td><td class="cpn wide">' + (c.ports || 0) + '</td><td class="wide small muted">' + esc(/^https?:\/\/(127\.0\.0\.1|localhost)[:/]/.test(String(c.file || '')) ? 'The local test copy' : /^https?:/.test(String(c.file || '')) ? String(c.file).replace(/^https?:\/\//, '').replace(/\/.*$/, '') : String(c.file || '').replace(/^workbook_[0-9a-f]{8}_/, '')) + '</td>'
         + '<td>' + (c.active ? '<span class="cpon">Active</span>' : '<span class="muted small">Older</span>') + '</td><td>' + (ADMIN ? '<button class="btn danger" type="button" data-cpdel="' + c.id + '">Delete</button>' : '') + '</td></tr>'; }).join('') + '</tbody></table></div>';
   }
   document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-cpdel]'); if (!b) return;
@@ -1083,11 +1104,13 @@
   // one line that answers 'what is it, what is plugged in': "1U Switch · 28 ports · 19 in use · 19 white RJ45"
   function summaryLine(dv, L, kind, mm) {
     var parts = [dv.height + 'U ' + (kind === 'Not sure' ? 'device, type not sure' : kind.toLowerCase())], ports = L.ports || [];
-    if (ports.length) { var on = ports.filter(function (p) { return p.status === 'connected'; }).length, cab = {};
-      ports.forEach(function (p) { if (p.status === 'connected' && p.cable_type) { var k = cableName(p); cab[k] = (cab[k] || 0) + 1; } });
+    if (ports.length) { var on = ports.filter(function (p) { return p.status === 'connected' && p.type !== 'hidden'; }).length, cab = {};   // a hidden port is not counted as in use
+      ports.forEach(function (p) { if (p.status === 'connected' && p.type !== 'hidden' && p.cable_type) { var k = cableName(p); cab[k] = (cab[k] || 0) + 1; } });
       var byT = {}; ports.forEach(function (p) { var t = typeName(p.type); byT[t] = (byT[t] || 0) + 1; }); var tk = Object.keys(byT);
       parts.push((L.mode === 'patchpanel' && L.size_known === false ? ports.length + ' ports seen' : tk.length > 1 && tk.length <= 3 ? tk.map(function (t) { return byT[t] + ' ' + t; }).join(' + ') : pl(ports.length, 'port')) + ' · ' + on + ' in use');
-      var ks = Object.keys(cab).sort(function (a, b) { return cab[b] - cab[a]; }); if (ks.length) parts.push('cables: ' + ks.slice(0, 2).map(function (k) { var w = k.split(' '); return cab[k] + ' ' + (w[1] ? w.slice(1).join(' ').toLowerCase() + ' ' : '') + w[0]; }).join(', ') + (ks.length > 2 ? ' and more' : '')); }
+      var ks = Object.keys(cab).sort(function (a, b) { return cab[b] - cab[a]; }), typed = ks.reduce(function (n, k) { return n + cab[k]; }, 0), untyped = on - typed;
+      // the cable line counts the same ports as "in use": a cable whose colour and type were not read is counted as such
+      if (ks.length) parts.push('cables: ' + ks.slice(0, 2).map(function (k) { var w = k.split(' '); return cab[k] + ' ' + (w[1] ? w.slice(1).join(' ').toLowerCase() + ' ' : '') + w[0]; }).join(', ') + (ks.length > 2 ? ' and ' + (typed - ks.slice(0, 2).reduce(function (n, k) { return n + cab[k]; }, 0)) + ' more' : '') + (untyped > 0 ? ', ' + untyped + ' not typed' : '')); }
     else if (PORT_KINDS[dv.kind]) parts.push(L.ports_state === 'running' ? 'reading the ports' : L.mapped ? 'no ports read' : 'ports not read yet');
     if (!mm && L.vendor_read) parts.push(esc(L.vendor_read + (L.model_read ? ' ' + L.model_read : '')) + ' read on the panel, not confirmed');
     return esc(parts.join(' · ')).replace(/&amp;/g, '&');
@@ -1110,7 +1133,7 @@
         : byKind(devs).map(function (g) { return kindHead(g) + g.devs.map(function (d) { var mm = devName(d).replace(/<[^>]+>/g, ''); mm = mm && mm.indexOf('not read') < 0 && mm.indexOf('reading') < 0 ? mm : '';
           var ur = URANGE(d.top, d.bottom, d.height), kindName = d.kind && d.kind !== 'Other' ? d.kind : 'Not sure';
           if (!PORT_KINDS[d.kind]) return '<button class="prow" type="button" data-dev="' + d.index + '"><img class="pthumb" src="' + d.crop + '" alt="" loading="lazy"><span class="pt"><b>' + esc(mm || kindName) + '</b><small>' + ur + ' · D' + d.index + ' · ' + d.height + 'U' + (d.kind_from === 'faceplate' || d.kind_from === 'ports' || d.kind_from === 'corrected' ? ' · ' + esc(d.kind_words) : '') + '</small></span><span class="arr">›</span></button>';
-          var st = devState(d, v); return '<button class="prow" type="button" data-dev="' + d.index + '"><img class="pthumb" src="' + d.crop + '" alt="" loading="lazy"><span class="pt"><b>' + esc(st.key === 'on' ? st.title : 'D' + d.index) + '</b><small>' + ur + ' · D' + d.index + ' · ' + esc(d.kind_words || kindName) + '</small></span><span class="stat ' + st.key + '"><i></i>' + st.word + '</span><span class="arr">›</span></button>'; }).join(''); }).join('');
+          var st = devState(d, v); return '<button class="prow" type="button" data-dev="' + d.index + '"><img class="pthumb" src="' + d.crop + '" alt="" loading="lazy"><span class="pt"><b>' + esc(st.key === 'on' ? st.title : (mm || kindName)) + '</b><small>' + ur + ' · D' + d.index + ' · ' + esc(d.kind_words || kindName) + '</small></span><span class="stat ' + st.key + '"><i></i>' + st.word + '</span><span class="arr">›</span></button>'; }).join(''); }).join('');
       [].forEach.call($('dv-list').children, function (el, i) { el.style.setProperty('--i', i); }); requestAnimationFrame(function () { $('dv-list').classList.add('in'); });
       return;
     }
@@ -1122,7 +1145,7 @@
     var loc = '<div class="loc" id="dv-loc" style="aspect-ratio:' + C[2] + ' / ' + C[3] + '"><canvas id="loc-cv"></canvas><svg viewBox="' + C.join(' ') + '" preserveAspectRatio="none">'
       + '<path class="ldim" fill-rule="evenodd" d="M' + C[0] + ' ' + C[1] + 'h' + C[2] + 'v' + C[3] + 'h' + (-C[2]) + 'Z' + (hl ? 'M' + G.L + ' ' + hl[0] + 'H' + G.R + 'V' + hl[1] + 'H' + G.L + 'Z' : '') + '"/>' + others
       + (hl ? '<rect class="lhl" id="dv-hl" x="' + (G.L - 4) + '" y="' + hl[0] + '" width="' + (G.R - G.L + 8) + '" height="' + (hl[1] - hl[0]) + '" rx="8"/>' : '') + '</svg>'
-      + (hl ? '<span class="ltap" style="top:' + ((hl[0] + hl[1]) / 2 - C[1]) / C[3] * 100 + '%">tap</span>' : '') + '</div>';
+      + (hl ? '<span class="ltap" style="top:' + ((hl[0] + hl[1]) / 2 - C[1]) / C[3] * 100 + '%">' + (matchMedia('(hover: none)').matches ? 'tap' : 'click') + '</span>' : '') + '</div>';
     var place = function (x) {                                          // what sits in a unit, in a few words
       if (!x) return 'Rack end'; var d = devOfUnit(v, x.unit), st = unitState(v, x);
       return UP(x.unit) + ' · ' + (d ? 'D' + d.index + (d.kind && d.kind !== 'Other' ? ' ' + esc(d.kind.toLowerCase()) : '') : st.toLowerCase()); };
@@ -1172,7 +1195,7 @@
       if (L.fitted && P.vendor) below = '<p class="figlab">In this rack</p>' + below + '<p class="figlab">The model</p><figure class="pshot vfig"><img src="' + P.vendor + '" alt="' + esc(mm) + '"></figure>';   // the model's own picture under the photo, never pinned on it (user, 2026-10-28)
       if (ps) {
         if (ps.key === 'on' && ps.panel) below += '';                                     // a patch panel: its type and its ports, no make and model (user, 2026-10-27)
-        else if (ps.key === 'on') below += (L.fitted ? '' : L.auto ? '<p class="pline">Ports found.</p>' : '<p class="pline">No port drawing for this model yet.</p>') + '<div class="specblock" data-vendor="' + esc(ps.vendor || '') + '" data-model="' + esc(ps.model || '') + '" data-spec="' + esc(L.spec ? JSON.stringify(L.spec) : '') + '"><span class="glabel">Specifications</span><div class="specbody"><p class="muted small">Looking up…</p></div></div>' + (L.confirm ? closeupBtn(dv) : '');
+        else if (ps.key === 'on') below += (L.fitted ? '' : L.auto ? '<p class="pline">Ports found.</p>' : '<p class="pline">No port drawing for this model yet.</p>') + '<div class="specblock" data-vendor="' + esc(ps.vendor || '') + '" data-model="' + esc(ps.model || '') + '" data-combo="' + ((L.combo || []).length) + '" data-spec="' + esc(L.spec ? JSON.stringify(L.spec) : '') + '"><span class="glabel">Specifications</span><div class="specbody"><p class="muted small">Looking up…</p></div></div>' + (L.confirm ? closeupBtn(dv) : '');
         else if (ps.key === 'busy') below += '<p class="pline">Finding the make and model in the video, about a minute…</p>';
         else if (ps.key === 'auto') below += '<p class="pline">' + pl((L.ports || []).length, 'port') + ' found and typed from the video; a port out of view or hidden is not counted. ' + (L.vendor_read ? 'Make read: <b>' + esc(L.vendor_read) + '</b>, model not read. ' : 'The make and model were not read. ') + 'A close, sharp photo of the front gives the model and its ports.</p>' + closeupBtn(dv) + modelForm(dv);
         else if (ps.key === 'unc' && ps.panel) below += '<p class="pline">No port was seen on this panel: a sealed enclosure, or the ports are hidden. A sharp photo of the front shows them.</p>' + closeupBtn(dv);
@@ -1259,6 +1282,13 @@
   function ready() { setTimeout(function () { $('splash').classList.add('gone'); setTimeout(function () { $('splash').hidden = true; }, 400); }, Math.max(0, 450 - (Date.now() - t0))); }
   // racktrack-app sign-in: find the sign-in service, then ask the engine who is signed in (a short session is renewed once)
   function whoAmI(again) {
+    // ask first whether there is a session or a renewal cookie at all: a signed-out browser then makes no refused call
+    if (!again) return fetch('/api/auth/state', { credentials: 'same-origin', cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).then(function (st) {
+      if (st.waiting) return { pending: true };
+      if (st.signed_in) return whoAmI(true);
+      if (st.can_renew) return AUTH.refresh().then(function (ok) { return ok ? whoAmI(true) : null; });
+      return null;
+    });
     return fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' }).then(function (r) {
       if (r.status === 401 && !again) return AUTH.refresh().then(function (ok) { return ok ? whoAmI(true) : null; });
       if (r.status === 403) return { pending: true };

@@ -1,3 +1,4 @@
+import { ORG_ONLY, toApp } from '../utils/orgOnly';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext.jsx';
@@ -33,8 +34,8 @@ export function datasetValue(summary) {
  */
 export function placesFor(role, { siteName, orgName, dataset } = {}) {
   const work = [
-    ['History', '/history', 'history', null],
-    isManager(role) ? ['Excel dataset', '/matrix', 'sheet', dataset || null] : null,
+    ORG_ONLY ? null : ['History', '/history', 'history', null],
+    isManager(role) && !ORG_ONLY ? ['Excel dataset', '/matrix', 'sheet', dataset || null] : null,
     isManager(role) ? ['Site and people', '/site', 'group', siteName || null] : null,
     isAdmin(role) ? ['Organization settings', '/settings', 'settings', orgName || null] : null,
     role === 'owner' ? ['Console', '/console', 'chart', null] : null,
@@ -43,7 +44,7 @@ export function placesFor(role, { siteName, orgName, dataset } = {}) {
     ['Help', '/help', 'help', null],
     ['Contact support', '/contact', 'mail', null],
   ];
-  return [work, help];
+  return ORG_ONLY ? [work] : [work, help];      // the /org/ build: help and contact are the app's
 }
 
 /** The items behind the three dots: [label, key]. The same for every role. */
@@ -160,7 +161,7 @@ export default function YouPage() {
       <Sheet open={out} onClose={() => setOut(false)} title="Sign out of RackTrack?">
         <Grey>You need your username and password to come back in.</Grey>
         <Actions>
-          <Button size="auto" onClick={() => { logout(); navigate('/login', { replace: true }); }}>Sign out</Button>
+          <Button size="auto" onClick={() => { logout(); if (ORG_ONLY) toApp(); else navigate('/login', { replace: true }); }}>Sign out</Button>
           <TextButton onClick={() => setOut(false)}>Stay signed in</TextButton>
         </Actions>
       </Sheet>

@@ -1763,12 +1763,13 @@ def switch_layouts(devices, views, out_dir, rack_bgr=None, progress=None, hints=
     return devices
 
 
-def read_device_ports(out_dir, video, rack_bgr, index, progress=None, hint=None):
+def read_device_ports(out_dir, video, rack_bgr, index, progress=None, hint=None, write_lock=None):
     """Steps 5 and 6 for ONE device of a finished run, when the user selects it: its top frames are read back from the
     video (frame numbers and homographies are in result.json), its crops go to the port agent, and result.json is
     updated in place. Returns the device. A device that is not a switch, router, firewall or gateway gets no layout."""
     out_dir = pathlib.Path(out_dir); rf = out_dir / "result.json"; result = json.load(open(rf))
     dv = next(d for d in result["devices"] if d["index"] == index)
+    before = json.loads(json.dumps(dv))                                   # to merge only what this read changed (write_lock)
     hint = hint or (dv.get("layout") or {}).get("typed")                 # a make and model a person typed stays the hint on every later read
     want = {tf["frame"] for tf in dv.get("top_frames") or [] if tf.get("H") is not None}
     imgs = {}
@@ -1788,10 +1789,17 @@ def read_device_ports(out_dir, video, rack_bgr, index, progress=None, hint=None)
     dv["layout_seconds"] = round(time.perf_counter() - t, 1)
     if hint and dv.get("layout") is not None:
         dv["layout"]["typed"] = hint
-    result["devices"] = [dv if d["index"] == index else d for d in result["devices"]]
-    result.setdefault("times_s", {})["layout"] = round(sum(d.get("layout_seconds") or 0 for d in result["devices"]), 1)
-    json.dump(result, open(rf, "w"), indent=1)
-    return dv
+    import contextlib
+    with (write_lock or contextlib.nullcontext()):
+        # the result as it is now (a person may have changed it during the read): only the fields this read changed are put in
+        result = json.load(open(rf))
+        cur = next((d for d in result["devices"] if d["index"] == index), None)
+        if cur is None:
+            return dv
+        cur.update({k: v for k, v in dv.items() if before.get(k) != v})
+        result.setdefault("times_s", {})["layout"] = round(sum(d.get("layout_seconds") or 0 for d in result["devices"]), 1)
+        json.dump(result, open(rf, "w"), indent=1)
+    return cur
 
 
 def best_device_frames(video, rack_bgr, devices, regs, by_idx, fr_by_idx, progress=None):
@@ -2081,7 +2089,8 @@ def run(rack_bgr, video, approach, out_dir, progress=None, stride=STRIDE, truth_
     views_ = {g["index"]: (fr_by_idx[g["index"]], g["H"]) for g in mapped}
     tall_ = [b for b in rack_boxes if b[3] - b[1] < 8 * lad["pitch"]]
     rails_x = (float(np.median([b[0] for b in tall_])), float(np.median([b[2] for b in tall_]))) if len(tall_) >= 2 else None
-    off_rail, base_top = RAILS.off_rail_rows(rack_bgr, rows, lad["pitch"], views_, rails_x)      # a unit counts only if most of it is on the rail, not on the base frame
+    owned_ = lambda r: any(DM.cover(r["box"], b) >= DM.COVER for b in rack_boxes)     # a device's unit is never the base frame  # noqa: E731
+    off_rail, base_top = RAILS.off_rail_rows(rack_bgr, rows, lad["pitch"], views_, rails_x, owned=owned_)      # a unit counts only if most of it is on the rail, not on the base frame
     if rails and "error" not in rails:
         rails.update(base_top=base_top, off_rail=off_rail)
     if off_rail:

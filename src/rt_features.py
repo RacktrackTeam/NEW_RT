@@ -28,6 +28,10 @@ import source_db as SDB
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 RT_EOS = ROOT / "rt_eos"
+# The RT-EOS readers run in RT-EOS's own environment (_cache/venv, numpy 1.26), as child processes; the engine runs in
+# _cache/venv-engine (racktrack-app's packages). RACKTRACK_RTEOS_PYTHON overrides it.
+RTEOS_PYTHON = os.environ.get("RACKTRACK_RTEOS_PYTHON") or next(
+    (str(p) for p in (ROOT / "_cache" / "venv" / "bin" / "python",) if p.exists()), sys.executable)
 
 
 # ------------------------------------------------------------------ 1 serials and asset tags (model_read.js)
@@ -83,7 +87,7 @@ def read_closeup_ids(image_path, timeout=240):
     share a name) on one picture, then the shapes above. The caller holds the model lock (the engine does)."""
     env = dict(os.environ, PYTHONPATH=str(RT_EOS), OMP_NUM_THREADS=os.environ.get("OMP_NUM_THREADS", "2"))
     try:
-        p = subprocess.run([sys.executable, "-m", "pipeline.ocr_closeup", str(image_path)], cwd=str(RT_EOS), env=env,
+        p = subprocess.run([RTEOS_PYTHON, "-m", "pipeline.ocr_closeup", str(image_path)], cwd=str(RT_EOS), env=env,
                            capture_output=True, text=True, timeout=timeout)
         line = (p.stdout or "").strip().splitlines()[-1] if (p.stdout or "").strip() else "{}"
         res = json.loads(line)
@@ -227,20 +231,33 @@ def store_cables(copy_id, path):
     return len(rows)
 
 
+def store_source_cables(copy_id, source, rows):
+    """The cables a NetBox or ServiceNow copy holds (dcim/cables; port-to-port cmdb_rel_ci), kept with the copy as the
+    workbook's matrix rows are."""
+    with SDB._db() as c:
+        c.execute(CABLES_SQL)
+        for r in rows:
+            c.execute("INSERT INTO src_cables VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (copy_id, source, r["row_no"], r.get("connection_id"),
+                      r.get("cable_id"), r.get("cable_label"), r.get("label_a"), r.get("label_z"), r.get("label_alias"), r.get("a_rack"), r.get("a_device"),
+                      r.get("a_port"), r.get("z_rack"), r.get("z_device"), r.get("z_port"), r.get("cable_type"), r.get("cable_color"), r.get("notes")))
+    return len(rows)
+
+
 def delete_cables(copy_id):
     with SDB._db() as c:
         c.execute(CABLES_SQL)
         c.execute("DELETE FROM src_cables WHERE copy_id = ?", (copy_id,))
 
 
-def cables_for(rack_keys):
-    """The matrix rows of the active Excel copy of each rack, the rows with either end in one of the racks."""
+def cables_for(rack_keys, source="excel"):
+    """The cable rows of the active copy of each rack in one source (the workbook's matrix, NetBox's cables, the CMDB's
+    port-to-port relations), the rows with either end in one of the racks."""
     keys = [k for k in rack_keys if k]
     out, seen = [], set()
     with SDB._db() as c:
         c.execute(CABLES_SQL)
         for k in keys:
-            cid = c.execute("SELECT MAX(copy_id) FROM src_racks WHERE source='excel' AND rack_key=?", (k,)).fetchone()[0]
+            cid = c.execute("SELECT MAX(copy_id) FROM src_racks WHERE source=? AND rack_key=?", (source, k)).fetchone()[0]
             if cid is None:
                 continue
             for x in c.execute("SELECT * FROM src_cables WHERE copy_id=? AND (a_rack=? OR z_rack=?) ORDER BY row_no", (cid, k, k)):
@@ -348,10 +365,13 @@ def run_view(result, record, rack_label):
     return {"rackLabel": rack_label, "visible": vis, "labels": _labels_read(result)}
 
 
-def az_check(a, z, cables, by):
+def az_check(a, z, cables, by, port_check=None):
     """checks.js run() on two runs (the same run at both ends is allowed, as RT-EOS allows it). a and z are run views (run_view) with
     scanId. Per cable end: matched (its label read on the device the sheet says), wrong_port (read on another device), missing_cable (no
-    label read and the port empty), not_found (no label read); a cable's status is the worst of its ends."""
+    label read and the port empty), not_found (no label read); a cable's status is the worst of its ends. port_check: the
+    port-by-port cable check of the same racks (cable_check rows); a cable it places in another port (its port empty, a
+    cable no row names next to it) is wrong_port here too, so one cable never gets two verdicts on one screen."""
+    moved = {(SDB._norm(r.get("cable")), r.get("end")): r for r in (port_check or []) if r.get("type") == "wrong_port" and r.get("cable")}
     same = a["scanId"] == z["scanId"]
     racks = {"a": a["rackLabel"], "z": z["rackLabel"]}
     views = {"a": a, "z": z}
@@ -402,6 +422,10 @@ def az_check(a, z, cables, by):
                 d = next((x for x in views[sd]["visible"] if SDB._norm(x["sheetName"]) == SDB._norm(exp["device"])), None)
                 p = next((x for x in (d or {}).get("ports") or [] if x["portNo"] == port_no(exp["port"])), None)
                 st, f = ("missing_cable" if p and p["state"] == "empty" else "not_found"), None
+                mv = moved.get((SDB._norm(c.get("cable_label")), e.upper()))
+                if st == "missing_cable" and mv:            # the port check found where it likely is
+                    st = "wrong_port"
+                    entry[f"{e}Explained"] = mv["words"]
             entry[e] = {"expected": exp, "found": f, "status": st}
             statuses.append(st)
         if not statuses:
@@ -439,7 +463,7 @@ def _csv_cell(v):
 
 def az_csv(check):
     """checks.js toCsv(): one row per cable end."""
-    head = ["Cable label", "Connection ID", "Cable ID", "Cable status", "End", "Rack", "Sheet device", "Sheet port", "Label expected", "Found device",
+    head = ["Cable label", "Connection ID", "Cable ID", "Cable status", "End", "Rack", "Workbook device", "Workbook port", "Label expected", "Found device",
             "Found port", "Found by", "End status", "Label read", "How the label matched"]
     rows = [head]
     for c in check.get("cables") or []:
@@ -657,7 +681,7 @@ SFP_STANDARDS = {"SFP": ("1 Gbps", "1000BASE-SX (multimode) or 1000BASE-LX (sing
                  "SFP28": ("25 Gbps", "25GBASE-SR (multimode) or 25GBASE-LR (single mode)"), "QSFP+": ("40 Gbps", "40GBASE-SR4 (multimode, MPO) or 40GBASE-LR4 (single mode, LC)"),
                  "QSFP28": ("100 Gbps", "100GBASE-SR4 (multimode, MPO) or 100GBASE-LR4 (single mode, LC)"), "QSFP-DD": ("400 Gbps", "400GBASE-DR4 or SR8 (MPO)"),
                  "OSFP": ("400 or 800 Gbps", "400GBASE-DR4 or FR4, or 800G DR8 (MPO)")}
-CABLE_STANDARDS = {"multimode": "LC-LC duplex, OM3 or OM4 multimode (up to 300 m at 10G)", "singlemode": "LC-LC duplex, OS2 single mode (up to 10 km)",
+CABLE_STANDARDS = {"multimode": "LC-LC duplex, OM3 or OM4 multimode", "singlemode": "LC-LC duplex, OS2 single mode (up to 10 km)",
                    "mpo": "MPO-12 trunk, OM4 multimode (up to 150 m)"}
 FIBRE_PORTS = {"SFP", "QSFP", "OSFP", "LC", "SC", "FC"}
 SWITCH_GEAR = {"switch", "router", "firewall", "gateway", "load balancer"}
@@ -703,7 +727,7 @@ def sfp_advice(result, record, cables):
         for pt, count in groups.items():
             if pt in ("LC", "SC", "FC"):
                 optic, cable = "No optic: a passive fibre port", sheet or f"{pt}-{pt} duplex patch cord, the same fibre type as the link"
-                note = f"The sheet lists {sheet} for {ranked[0][1]} {'cable' if ranked[0][1] == 1 else 'cables'} on this device." if sheet else "No cable type for this device in the sheet."
+                note = f"The workbook lists {sheet} for {ranked[0][1]} {'cable' if ranked[0][1] == 1 else 'cables'} on this device." if sheet else "The workbook names no cable type for this device."
             else:
                 slot = "OSFP" if pt == "OSFP" else (slot_from_model(s["manufacturer"], s["model"]) or ("QSFP+" if pt == "QSFP" else "SFP"))
                 speed, optics = SFP_STANDARDS.get(slot, SFP_STANDARDS["SFP"])
@@ -711,7 +735,7 @@ def sfp_advice(result, record, cables):
                 optic = f"{slot} {speed}: {pick}"
                 cable = sheet or (CABLE_STANDARDS[mode] if mode else f"{CABLE_STANDARDS['multimode']}; {CABLE_STANDARDS['singlemode']}")
                 note = " ".join(x for x in (None if s["model"] else "The model was not read, so the speed is assumed from the port type.",
-                                            f"The sheet lists {sheet} for this device, so the optic follows that fibre." if sheet else "No cable type for this device in the sheet.") if x)
+                                            f"The workbook lists {sheet} for this device, so the optic follows that fibre." if sheet else "The workbook names no cable type for this device.") if x)
             items.append({"index": s["index"], "device": (rec or {}).get("name") or f"D{s['index']}", "model": " ".join(x for x in (s["manufacturer"], s["model"]) if x) or None,
                           "unit": SDB._units(s["ru_start"], s["ru_height"]), "port_type": pt, "count": count, "suggestion": {"optic": optic, "cable": cable, "note": note}})
     return {"items": items}

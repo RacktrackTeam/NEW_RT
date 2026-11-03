@@ -8,6 +8,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs" / "proof" / "tabs"
 ENGINE = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8700"
 RUN = os.environ.get("RT_PROOF_RUN", "fx1hyd000001")   # a stored run of the signed-in user's own site
+import proof_guard  # noqa: E402
+proof_guard.check(os.environ.get("RT_PROOF_USER", "admin3"), RUN)
 PARTS = {"rack": "res-rack", "devices": "res-devices", "layout": "res-layout", "report": "res-report"}
 
 

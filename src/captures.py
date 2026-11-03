@@ -17,8 +17,9 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-SOURCES = {"app": ROOT / "data" / "captures",
-           "team": pathlib.Path(os.environ.get("RACKTRACK_TEAM_CAPTURES", ROOT / "data" / "team_captures"))}
+DATA = pathlib.Path(os.environ.get("RACKTRACK_DATA") or ROOT / "data")
+SOURCES = {"app": DATA / "captures",
+           "team": pathlib.Path(os.environ.get("RACKTRACK_TEAM_CAPTURES") or DATA / "team_captures")}
 ALLOWED_FILES = {"video.mp4", "video.webm", "log.json"}
 MAX_UPLOAD = 500 * 1024 * 1024          # bytes; a 90 s sweep at 8 Mbit/s is about 90 MB
 FOLDER_RE = re.compile(r"[A-Za-z0-9_-]+")

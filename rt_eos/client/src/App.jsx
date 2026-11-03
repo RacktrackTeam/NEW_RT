@@ -12,6 +12,8 @@ import NavBar, { hasOwnTabs } from './components/NavBar.jsx';
 import { setupDecision, setupUnknown } from './utils/setupGuard';
 import { clearPendingScan, fetchScanJob, getPendingScan } from './utils/pendingScan';
 import { isAdmin, isManager } from './utils/format';
+import { ORG_ONLY, rememberBack } from './utils/orgOnly';
+import BackToApp, { ToApp } from './components/BackToApp.jsx';
 import SignInPage from './pages/SignInPage.jsx';
 import AcceptInvitePage from './pages/AcceptInvitePage.jsx';
 import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx';
@@ -80,6 +82,7 @@ function SetupGate({ children }) {
 function Shell() {
   const { isAuthed, user } = useAuth();
   const { pathname } = useLocation();
+  if (ORG_ONLY) return (<><BackToApp /><Outlet /></>);       // the app's own navigation is the way around; here only the way back
   const nav = isAuthed && !orgNotActive(user) && !hasOwnTabs(pathname);
   return (
     <>
@@ -168,6 +171,37 @@ function PendingScanResumer() {
   );
 }
 
+/* The /org/ build (ORG_ONLY): only the organization pages. Home, Scan, Map, History, the results and the
+   Excel and help pages live in the app, so every other address goes back to it. */
+function OrgRouted() {
+  const { pathname } = useLocation();
+  const manager = (role) => isManager(role);
+  const admin = (role) => isAdmin(role);
+  const owner = (role) => role === 'owner';
+  return (
+    <ErrorBoundary resetKey={pathname}>
+      <Suspense fallback={<Loading />}>
+        <Routes>
+          <Route path="/login" element={<SignInPage />} />
+          <Route path="/invite/:code" element={<AcceptInvitePage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/pending" element={<PendingRoute><PendingPage /></PendingRoute>} />
+          <Route element={<Shell />}>
+            <Route path="/you" element={<Protected><YouPage /></Protected>} />
+            <Route path="/site" element={<Protected allow={manager}><SitePage /></Protected>} />
+            <Route path="/site/:siteId" element={<Protected allow={manager}><SitePage /></Protected>} />
+            <Route path="/settings" element={<Protected allow={admin}><OrgSettingsPage /></Protected>} />
+            <Route path="/console" element={<Protected allow={owner}><ConsolePage /></Protected>} />
+          </Route>
+          <Route path="/setup" element={<Protected allow={admin}><SetupPage /></Protected>} />
+          <Route path="/signup" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<ToApp />} />
+        </Routes>
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+
 function Routed() {
   const { pathname } = useLocation();
   const manager = (role) => isManager(role);
@@ -224,14 +258,16 @@ function Routed() {
   );
 }
 
+rememberBack();
+
 export default function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/+$/, '') || undefined} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <ToastProvider>
           <AndroidBack />
-          <PendingScanResumer />
-          <Routed />
+          {ORG_ONLY ? null : <PendingScanResumer />}
+          {ORG_ONLY ? <OrgRouted /> : <Routed />}
           <PhotoZoom />
         </ToastProvider>
       </AuthProvider>

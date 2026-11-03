@@ -141,10 +141,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--engine", default="http://127.0.0.1:8702")
     ap.add_argument("--auth", default="http://127.0.0.1:3305")
-    ap.add_argument("--user", default="admin")
+    ap.add_argument("--user", default="admint")
     ap.add_argument("--setup", action="store_true")
     ap.add_argument("--no-screens", action="store_true")
     a = ap.parse_args()
+    import proof_guard
+    proof_guard.check(a.user)
     pw = os.environ.get("RT_PROOF_PASSWORD") or (ROOT / "data" / "auth" / "seed-password.txt").read_text().strip()
     OUT.mkdir(parents=True, exist_ok=True)
     op, _ = opener(a.auth, a.user, pw)

@@ -7,7 +7,9 @@ from playwright.sync_api import sync_playwright
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs" / "proof" / "tabbar"
 ENGINE = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8700"
-RUN = os.environ.get("RT_PROOF_RUN", "dm1hyd000001")
+RUN = os.environ.get("RT_PROOF_RUN", "fx1hyd000001")
+import proof_guard  # noqa: E402
+proof_guard.check(os.environ.get("RT_PROOF_USER", "orgownert"), RUN)
 ORDER = ["Rack", "Devices", "Find a port", "Connections", "Cables", "Layout", "Report"]
 
 
@@ -21,7 +23,7 @@ def main():
             pg = b.new_page(viewport={"width": width, "height": height})
             pg.on("pageerror", lambda e, w=width: bad.append(f"{w}: page error: {e}"))
             pg.goto(ENGINE + "/app/#signin"); pg.wait_for_selector("#si-user", state="visible")
-            pg.fill("#si-user", os.environ.get("RT_PROOF_USER", "orgowner")); pg.fill("#si-pass", pw); pg.click("#signin button[type=submit]")
+            pg.fill("#si-user", os.environ.get("RT_PROOF_USER", "orgownert")); pg.fill("#si-pass", pw); pg.click("#signin button[type=submit]")
             pg.wait_for_selector('[data-screen="home"]:not([hidden])', timeout=20000)
             for name, hash_ in (("rack", ""), ("find", "find"), ("find_port", "find/DEV-PORT"), ("report", "report")):
                 if hash_ == "find/DEV-PORT":

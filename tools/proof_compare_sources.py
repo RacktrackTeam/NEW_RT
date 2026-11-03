@@ -1,7 +1,7 @@
 """Proof that the Report's compare works for Excel, NetBox and the CMDB as the platform owner, an organization owner and a technician,
 with a visible status line and a one-sentence error, and that the compare takes the top of the Report.
   PW_CHROMIUM=<headless_shell> _cache/venv/bin/python tools/proof_compare_sources.py [engine url]
-Signs in with the seed password (never printed); run dm1hyd000001. Screenshots go to docs/proof/tabbar/.
+Signs in with the seed password (never printed); run fx1hyd000001 (Test Organization). Screenshots go to docs/proof/tabbar/.
 The copy-in path is forced (the run is shown as having no NetBox or CMDB copy) so the import runs for owner and orgowner;
 a technician may not copy in, so there the one-sentence refusal is what must show (never a blank area)."""
 import os, pathlib, sys
@@ -11,8 +11,11 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs" / "proof" / "tabbar"
 ENGINE = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8700"
 SIGNIN = "http://127.0.0.1:8700"      # the sign-in service allows the main engine's origin; the session cookie is shared by every port of 127.0.0.1
-RUN = "dm1hyd000001"
-USERS = ("owner", "orgowner", "tech")
+RUN = "fx1hyd000001"                          # the Test Organization's run: proofs never change the Demo Organization
+USERS = ("owner", "orgownert", "techt")
+import proof_guard  # noqa: E402
+for _u in USERS:
+    proof_guard.check(_u, RUN)
 
 
 def main():
@@ -46,7 +49,7 @@ def main():
                 if forced:
                     pg.wait_for_timeout(300)
                     pg.screenshot(path=str(OUT / f"compare_{tag}_1_loading.png"))
-                if forced and user == "tech":
+                if forced and user == "techt":
                     pg.wait_for_timeout(2500)
                     t = pg.inner_text("#cmp-status").strip(); print(tag, "line:", t)
                     if "organization admin" not in t: bad.append(f"{tag}: expected the refusal sentence, got {t!r}")

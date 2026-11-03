@@ -9,6 +9,8 @@ OUT = ROOT / "docs" / "proof" / "tabs"
 ENGINE = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8700"
 SRC = sys.argv[2] if len(sys.argv) > 2 else "excel"
 RUN = os.environ.get("RT_PROOF_RUN", "fx1hyd000001")
+import proof_guard  # noqa: E402
+proof_guard.check(os.environ.get("RT_PROOF_USER", "admin3"), RUN)
 
 
 def main():

@@ -104,7 +104,7 @@ def _agent_env():
         env.setdefault("SSL_CERT_FILE", certifi.where()); env.setdefault("REQUESTS_CA_BUNDLE", certifi.where())
     except ImportError:
         pass
-    cache = ROOT / "data" / "port_agent_cache"; cache.mkdir(parents=True, exist_ok=True)
+    cache = pathlib.Path(os.environ.get("RACKTRACK_DATA") or ROOT / "data") / "port_agent_cache"; cache.mkdir(parents=True, exist_ok=True)
     env.setdefault("PORT_AGENT_CACHE_DIR", str(cache))    # his lasting cache for vendor pages and sitemaps: repeat lookups are fast
     env["OMP_NUM_THREADS"] = os.environ.get("OMP_NUM_THREADS", "2")
     env["PORT_AGENT_CROP_TIMEOUT"] = str(LAYOUT_TIMEOUT)

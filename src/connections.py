@@ -9,16 +9,19 @@ Test connection reads NetBox GET /api/status/ or one row of ServiceNow's Table A
 import base64
 import datetime
 import json
+import contextlib
 import os
 import pathlib
 import secrets as _rand
 import sqlite3
+import sys
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-DB = pathlib.Path(os.environ.get("RACKTRACK_SOURCES_DB", ROOT / "data" / "sources.db"))
-KEY_FILE = pathlib.Path(os.environ.get("RACKTRACK_CONN_KEY_FILE", ROOT / "data" / "connections.key"))
+DATA = pathlib.Path(os.environ.get("RACKTRACK_DATA") or ROOT / "data")
+DB = pathlib.Path(os.environ.get("RACKTRACK_SOURCES_DB") or DATA / "sources.db")
+KEY_FILE = pathlib.Path(os.environ.get("RACKTRACK_CONN_KEY_FILE") or DATA / "connections.key")
 TYPES = {"netbox": "NetBox", "cmdb": "ServiceNow CMDB"}
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS connection_profiles (organization_id TEXT NOT NULL, type TEXT NOT NULL, address TEXT NOT NULL, secret_blob TEXT NOT NULL,
@@ -26,10 +29,17 @@ CREATE TABLE IF NOT EXISTS connection_profiles (organization_id TEXT NOT NULL, t
 """
 
 
+@contextlib.contextmanager
 def _db():
+    """The logins table for one block: committed when the block ends without an error, always closed."""
     DB.parent.mkdir(parents=True, exist_ok=True)
-    c = sqlite3.connect(DB); c.row_factory = sqlite3.Row; c.executescript(SCHEMA)
-    return c
+    c = sqlite3.connect(DB); c.row_factory = sqlite3.Row
+    try:
+        with c:
+            c.executescript(SCHEMA)
+            yield c
+    finally:
+        c.close()
 
 
 def _key():
@@ -63,7 +73,8 @@ def unseal(sealed):
             return None
         d = base64.b64decode
         return AESGCM(_key()).decrypt(d(iv), d(body) + d(tag), None).decode()
-    except Exception:
+    except Exception as ex:                       # the reason goes to the log: a login that reads as not saved says why there
+        print(f"[racktrack] a saved login could not be opened ({type(ex).__name__}); it reads as not saved", file=sys.stderr)
         return None
 
 

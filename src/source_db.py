@@ -6,6 +6,7 @@ Three sources fill one table set in data/sources.db (racks and devices, each row
   cmdb    ServiceNow's Table API, read from the local ServiceNow mock (modules/sources/mock/servicenow.js)
 Nothing is ever written back to a source. Nothing here calls an outside system.
 """
+import contextlib
 import contextvars
 import datetime
 import json
@@ -15,7 +16,8 @@ import re
 import sqlite3
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-DB = pathlib.Path(os.environ.get("RACKTRACK_SOURCES_DB", ROOT / "data" / "sources.db"))
+DATA = pathlib.Path(os.environ.get("RACKTRACK_DATA") or ROOT / "data")   # the runtime data root: a test engine points it at its own copy
+DB = pathlib.Path(os.environ.get("RACKTRACK_SOURCES_DB") or DATA / "sources.db")
 SOURCES = {"excel": "Excel workbook", "netbox": "NetBox", "cmdb": "ServiceNow CMDB"}
 NOT_SEEN_KINDS = {"cable manager", "blank panel", "blank", "shelf", "tray"}   # the video's models have no class for these (as in RT-EOS)
 # Every import is a copy (src_copies) with its own version per source; the rows keep the copy's id. For each source and rack the
@@ -46,7 +48,18 @@ def db_path():
     return DB if org is None else DB.parent / "sources_by_org" / re.sub(r"[^A-Za-z0-9_-]", "_", str(org)) / DB.name
 
 
+@contextlib.contextmanager
 def _db():
+    """The organization's copy database for one block: committed when the block ends without an error, always closed."""
+    c = _open()
+    try:
+        with c:
+            yield c
+    finally:
+        c.close()
+
+
+def _open():
     path = db_path()
     path.parent.mkdir(parents=True, exist_ok=True)
     c = sqlite3.connect(path); c.row_factory = sqlite3.Row
@@ -73,6 +86,12 @@ def _num(v):
         return float(v) if v not in (None, "") else None
     except (TypeError, ValueError):
         return None
+
+
+def _port_no(v):
+    """The port number in a port name: the last run of digits (Eth25 -> 25, 1/0/25 -> 25)."""
+    m = re.search(r"(\d+)(?!.*\d)", str(v or ""))
+    return int(m.group(1)) if m else None
 
 
 def _s(v):
@@ -324,8 +343,47 @@ def _login(org, type_, default):
     return (lg["address"], connections.headers(type_, lg["secret"])) if lg else (default, None)
 
 
+# NetBox interface and port types (dcim choices) and ServiceNow port types to the PORT_INVENTORY words the port compare reads
+# (port_family: a read "sfp" fits SFP, SFP+, SFP28; "rj45" fits RJ45).
+def _port_word(t):
+    v = str(t or "").lower()
+    if not v:
+        return None
+    if "qsfp" in v:
+        return "QSFP28" if "28" in v or "100g" in v else "QSFP+"
+    if "sfp" in v or v.endswith("-x") or "base-x" in v:
+        return "SFP+" if ("sfpp" in v or "sfp+" in v or v.startswith("10g")) else "SFP"
+    if "base-t" in v or v in ("8p8c", "rj45", "rj-45") or "rj45" in v:
+        return "RJ45"
+    if v in ("lc", "lc-upc", "lc-apc", "sc", "sc-upc", "mpo", "st", "fc"):
+        return v.split("-")[0].upper()
+    if "usb" in v:
+        return "USB"
+    if "console" in v or "rj-11" in v:
+        return "Console"
+    return str(t)
+
+
+def _cabled(p):
+    """Whether NetBox says a port has a cable: Yes or No when the answer carries the cable field, else not known."""
+    if "cable" not in p and "mark_connected" not in p:
+        return None
+    return "Yes" if (p.get("cable") or p.get("mark_connected")) else "No"
+
+
+def _netbox_end(terms):
+    """The first termination of one end of a NetBox cable: (device name, port name)."""
+    for t in terms or []:
+        o = t.get("object") or t
+        dev = (o.get("device") or {}).get("name")
+        if dev:
+            return dev, o.get("name")
+    return None, None
+
+
 def import_netbox(org=None):
-    """NetBox's REST API (dcim/racks and dcim/devices), through the organization's saved login, else the local NetBox mock."""
+    """NetBox's REST API (dcim/racks, dcim/devices, the interfaces, front and rear ports, and dcim/cables), through the
+    organization's saved login, else the local NetBox mock."""
     base, hd = _login(org, "netbox", NETBOX_URL)
     rk = _get(base, "/api/dcim/racks/?limit=1000", hd)["results"]
     sites = {x["id"]: x for x in _get(base, "/api/dcim/sites/?limit=1000", hd)["results"]}
@@ -340,7 +398,28 @@ def import_netbox(org=None):
         devices.append({"rack_key": d["rack"]["name"], "device_key": d["name"], "name": d["name"], "role": (d.get("role") or {}).get("name"),
                         "manufacturer": _s((ty.get("manufacturer") or {}).get("name")), "model": _s(ty.get("model")), "serial": _s(d.get("serial")),
                         "asset_tag": _s(d.get("asset_tag")), "ru_start": _int(d.get("position")), "ru_height": _int(ty.get("u_height"))})
-    return _store("netbox", racks, devices, base)
+    rack_of = {d["device_key"]: d["rack_key"] for d in devices}
+    ports = []
+    for path in ("interfaces", "front-ports", "rear-ports"):
+        for p in _get(base, f"/api/dcim/{path}/?limit=100000", hd)["results"]:
+            dev = (p.get("device") or {}).get("name")
+            if dev not in rack_of:
+                continue
+            ports.append({"rack_key": rack_of[dev], "device_key": dev, "port_number": _port_no(p.get("name")), "port_name": _s(p.get("name")),
+                          "port_type": _port_word((p.get("type") or {}).get("value") if isinstance(p.get("type"), dict) else p.get("type")),
+                          "expected_occupied": _cabled(p), "expected_dust_cap": None})
+    cables = []
+    for n, c in enumerate(_get(base, "/api/dcim/cables/?limit=100000", hd)["results"], start=1):
+        (ad, ap), (zd, zp) = _netbox_end(c.get("a_terminations")), _netbox_end(c.get("b_terminations"))
+        if ad in rack_of or zd in rack_of:
+            cables.append({"row_no": n, "cable_id": _s(c.get("id")), "cable_label": _s(c.get("label")) or _s(c.get("id")), "a_rack": rack_of.get(ad),
+                           "a_device": ad, "a_port": _s(ap), "z_rack": rack_of.get(zd), "z_device": zd, "z_port": _s(zp),
+                           "cable_type": _s((c.get("type") or {}).get("value") if isinstance(c.get("type"), dict) else c.get("type")),
+                           "cable_color": _s(c.get("color"))})
+    out = _store("netbox", racks, devices, base, ports)
+    import rt_features as RTF
+    out["cables"] = RTF.store_source_cables(out["copy_id"], "netbox", cables)
+    return out
 
 
 def import_cmdb(org=None):
@@ -355,8 +434,9 @@ def import_cmdb(org=None):
     racks = [{"rack_key": r["name"], "name": r["name"], "label": r["name"], "height_ru": _int(r.get("rack_units")), "site": loc(r),
               "lat": (locs.get(loc(r)) or {}).get("latitude"), "lng": (locs.get(loc(r)) or {}).get("longitude")} for r in rk]
     rack_of = {r["sys_id"]: r["name"] for r in rk}
-    child_rack = {x["child"]["value"]: rack_of[x["parent"]["value"]] for x in _get(base, "/api/now/table/cmdb_rel_ci?sysparm_limit=100000", hd)["result"]
-                  if x["parent"]["value"] in rack_of}
+    rels = _get(base, "/api/now/table/cmdb_rel_ci?sysparm_limit=100000", hd)["result"]
+    ref = lambda v: (v or {}).get("value") if isinstance(v, dict) else v  # noqa: E731
+    child_rack = {ref(x["child"]): rack_of[ref(x["parent"])] for x in rels if ref(x["parent"]) in rack_of}
     devices = []
     for d in _get(base, "/api/now/table/cmdb_ci?sysparm_limit=100000&sysparm_display_value=true", hd)["result"]:
         if d.get("sys_id") not in child_rack:
@@ -365,7 +445,38 @@ def import_cmdb(org=None):
                         "kind": CMDB_KIND.get(d.get("sys_class_name")) or _kind(d.get("short_description")), "manufacturer": _s(d.get("manufacturer")),
                         "model": _s(d.get("model_id")), "serial": _s(d.get("serial_number")), "asset_tag": _s(d.get("asset_tag")),
                         "ru_start": _int(d.get("u_position")), "ru_height": _int(d.get("u_height"))})
-    return _store("cmdb", racks, devices, base)
+    # ports: cmdb_ci_network_adapter (switches, routers, servers) and cmdb_ci_port (patch panels), each naming its device
+    dev_of = {}                                       # device sys_id -> (rack, name)
+    for d in _get(base, "/api/now/table/cmdb_ci?sysparm_limit=100000", hd)["result"]:
+        if d.get("sys_id") in child_rack:
+            dev_of[d["sys_id"]] = (child_rack[d["sys_id"]], d["name"])
+    ports, port_of = [], {}
+    for table in ("cmdb_ci_network_adapter", "cmdb_ci_port"):
+        try:
+            rows = _get(base, f"/api/now/table/{table}?sysparm_limit=100000", hd)["result"]
+        except ConnectionError:
+            rows = []
+        for p in rows:
+            hit = dev_of.get(ref(p.get("cmdb_ci")))
+            if hit is None:
+                continue
+            port_of[p.get("sys_id")] = (hit[0], hit[1], _s(p.get("name")))
+            ports.append({"rack_key": hit[0], "device_key": hit[1], "port_number": _int(p.get("u_port_number")) or _port_no(p.get("name")),
+                          "port_name": _s(p.get("name")), "port_type": _port_word(p.get("u_port_type")),
+                          "expected_occupied": _yes_no(p.get("u_expected_occupied")) if p.get("u_expected_occupied") not in (None, "") else None,
+                          "expected_dust_cap": None})
+    # cables: a cmdb_rel_ci between two ports (Connects to / Connected by)
+    cables = []
+    for n, x in enumerate(rels, start=1):
+        a, z = port_of.get(ref(x.get("parent"))), port_of.get(ref(x.get("child")))
+        if a and z:
+            cables.append({"row_no": n, "cable_id": _s(x.get("sys_id")), "cable_label": _s(x.get("u_cable_label")) or _s(x.get("sys_id")),
+                           "a_rack": a[0], "a_device": a[1], "a_port": a[2], "z_rack": z[0], "z_device": z[1], "z_port": z[2],
+                           "cable_type": _s(x.get("u_cable_type")), "cable_color": None})
+    out = _store("cmdb", racks, devices, base, ports)
+    import rt_features as RTF
+    out["cables"] = RTF.store_source_cables(out["copy_id"], "cmdb", cables)
+    return out
 
 
 def racks(source=None):
@@ -696,7 +807,11 @@ def drift(result, record, ports=None):
         if want:
             pr, n = port_drift(name, s, want)
             rows += pr; ports_checked += n
-            if not n:
+            if not n and s.get("ports"):
+                k = len(s["ports"])
+                notes.append(f"{name} has {len(want)} ports in PORT_INVENTORY; the video read {k} port{'s' if k != 1 else ''} of it, "
+                             f"none numbered as in the record, so its ports are not checked.")
+            elif not n:
                 notes.append(f"{name} has {len(want)} ports in PORT_INVENTORY but the video read none of its ports, so they are not checked.")
     rows.sort(key=lambda x: (-(_unum(x["unit"]) or 0), x.get("port") or 0))
     return {"rows": rows, "checked": len(pairs), "record_devices": len(record), "video_devices": len(seen), "notes": notes, "ports_checked": ports_checked}
@@ -869,7 +984,7 @@ def identify(source, rack_id, result, position=None, label=None, rack_id_how=Non
             elif st["n"] == 2 and st["left"]:
                 c = 0.95 if person else max(0.5, float(lab.get("confidence") or 0.5)) if lab else 0.5
                 st["conf"] = round(c * (1.0 if st.get("how") == "exact" else 0.9), 2); st["agrees"] = st["left"][0] == key
-                st["why"] = (f"the label reader read {lab['text']}, {round(100 * float(lab.get('confidence') or 0))} % sure" if lab else "no label text read") \
+                st["why"] = (f"The label reader read {lab['text']}, {round(100 * float(lab.get('confidence') or 0))} % sure" if lab else "No label text was read") \
                     + (f"; a person confirmed it, so this step counts {round(100 * st['conf'])} %" if person else "") \
                     + (", exact match" if st.get("how") == "exact" else ", match with separators ignored") + ", no other rack has this label"
             elif st.get("ranked"):
@@ -880,7 +995,7 @@ def identify(source, rack_id, result, position=None, label=None, rack_id_how=Non
                     st["agrees"] = st["outcome"] != "one" or st["left"][0] == key
                     if not st["agrees"] and nxt:
                         st["conf"] = round(nxt["share"] * (1.0 if st["n"] == 6 else 0.8), 2)    # how strongly it points elsewhere
-                    st["why"] = f"{own['fits']} of {n_all} " + ("devices at the same units" if st["n"] == 6 else "reads found in this rack") + (f"; the next best rack fits {nxt['fits']} of {n_all}" if nxt else "; no other rack to compare")
+                    st["why"] = f"{own['fits']} of {n_all} " + ("devices at the same units" if st["n"] == 6 else "names read on the devices are in this rack") + (f"; the next best rack fits {nxt['fits']} of {n_all}" if nxt else "; no other rack to compare")
                     if st["agrees"] is False:
                         st["why"] = f"points to {st['left'][0]}: " + st["why"]
         lead = max([st for st in steps if st.get("conf") and st.get("agrees")], key=lambda st: st["conf"], default=None)

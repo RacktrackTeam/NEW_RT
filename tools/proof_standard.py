@@ -1,6 +1,6 @@
 """Every screen at 1280 and 400 px, side by side in one contact sheet (docs/proof/standard/sheet.png).
   PW_CHROMIUM=<headless_shell> _cache/venv/bin/python tools/proof_standard.py [engine url]
-Signs in as orgowner with the seed password (never printed); run dm1hyd000001."""
+Signs in as orgownert with the seed password (never printed); run fx1hyd000001 (Test Organization)."""
 import os, pathlib, sys
 from playwright.sync_api import sync_playwright
 from PIL import Image, ImageDraw
@@ -8,7 +8,9 @@ from PIL import Image, ImageDraw
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs" / "proof" / "standard"
 ENGINE = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8700"
-RUN = "dm1hyd000001"
+RUN = "fx1hyd000001"                          # the Test Organization's run: proofs never change the Demo Organization
+import proof_guard  # noqa: E402
+proof_guard.check("orgownert", RUN)
 SCREENS = [("Sign in", "signin"), ("Home", "home"), ("Scan", "sweep"), ("History", "history"), ("Run page", "job/" + RUN), ("Rack", "result/" + RUN),
            ("Devices", "result/" + RUN + "/devices"), ("Layout", "result/" + RUN + "/layout"), ("Report", "result/" + RUN + "/report"),
            ("Find a port", "tools/" + RUN + "/find/5-3"), ("Connections tab", "tools/" + RUN + "/connections"), ("Cables", "tools/" + RUN + "/cables"),
@@ -26,7 +28,7 @@ def main():
             ctx = b.new_context(viewport={"width": w, "height": h}); pg = ctx.new_page()
             pg.on("pageerror", lambda e, w=w: bad.append(f"{w}: {e}"))
             pg.goto(ENGINE + "/app/#signin"); pg.wait_for_selector("#si-user", state="visible")
-            pg.fill("#si-user", "orgowner"); pg.fill("#si-pass", pw); pg.click("#signin button[type=submit]")
+            pg.fill("#si-user", "orgownert"); pg.fill("#si-pass", pw); pg.click("#signin button[type=submit]")
             pg.wait_for_selector('[data-screen="home"]:not([hidden])', timeout=20000)
             for name, hsh in SCREENS:
                 if hsh == "signin":

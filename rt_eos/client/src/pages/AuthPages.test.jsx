@@ -106,14 +106,14 @@ describe('RackTrack frame', () => {
     expect(document.body.textContent).not.toMatch(/EOS/);
   });
 
-  test('the invite offers the providers the server has on, never Google', async () => {
+  test('the invite offers no Google, Apple or Facebook sign-in (removed by the owner, 2 Nov 2026)', async () => {
     mockApi({
       'GET /api/invites/abc': { ok: true, invite: { email: 'a@b.co', role: 'member', organization: 'Org' } },
       'GET /api/auth/providers': { providers: [{ name: 'google', label: 'Google' }, { name: 'apple', label: 'Apple' }] },
     }, null);
     renderScreen(<AcceptInvitePage />, { path: '/invite/abc', pattern: '/invite/:code', user: null });
-    expect(await screen.findByRole('button', { name: 'Sign in with Apple' })).toBeTruthy();
-    expect(screen.queryByRole('button', { name: /Google/ })).toBeNull();
+    expect((await screen.findAllByText(/Org/)).length).toBeGreaterThan(0);
+    expect(screen.queryByRole('button', { name: /Apple|Google|Facebook/ })).toBeNull();
   });
 });
 

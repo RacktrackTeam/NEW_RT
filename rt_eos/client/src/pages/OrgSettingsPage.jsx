@@ -1,3 +1,4 @@
+import { ORG_ONLY } from '../utils/orgOnly';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../AuthContext.jsx';
 import { TopBar } from '../components/TopBar.jsx';
@@ -237,11 +238,15 @@ function PilotData({ orgId, orgName }) {
           className={styles.days}
         />
         <ErrorLine>{saveErr}</ErrorLine>
-        <p className={styles.mt24}>
-          <TextButton danger onClick={() => { setDel(true); setTyped(''); setDelErr(null); }}>Delete all pilot data</TextButton>
-        </p>
-        <Grey>{`Removes every photo, scan, Excel dataset and result for ${orgName}. Accounts stay.`}</Grey>
-        <p><TextButton small to="/help/data">How your data is handled</TextButton></p>
+        {ORG_ONLY ? null : (                  /* the /org/ build: the scans are the app's; this store's delete would not touch them */
+          <>
+            <p className={styles.mt24}>
+              <TextButton danger onClick={() => { setDel(true); setTyped(''); setDelErr(null); }}>Delete all pilot data</TextButton>
+            </p>
+            <Grey>{`Removes every photo, scan, Excel dataset and result for ${orgName}. Accounts stay.`}</Grey>
+          </>
+        )}
+        {ORG_ONLY ? null : <p><TextButton small to="/help/data">How your data is handled</TextButton></p>}
       </>
     );
   }

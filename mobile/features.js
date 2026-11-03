@@ -200,12 +200,12 @@
         e.preventDefault(); $('az-out').innerHTML = loading('Checking the labels...');
         post('/api/cables/az', { a: $('az-a').value, z: $('az-z').value }).then(function (c) {
           var k = c.counts;
-          $('az-out').innerHTML = '<div class="fx-pills fx-in">' + pill(k.matched + ' matched', 'ok') + pill(k.wrongPort + ' wrong port', k.wrongPort ? 'bad' : 'na') + pill(k.missingCable + ' missing', k.missingCable ? 'bad' : 'na') + pill(k.notFound + ' not found', 'na') + pill(k.notInSheet + ' not in the sheet', 'na')
+          $('az-out').innerHTML = '<div class="fx-pills fx-in">' + pill(k.matched + ' matched', 'ok') + pill(k.wrongPort + ' wrong port', k.wrongPort ? 'bad' : 'na') + pill(k.missingCable + ' missing', k.missingCable ? 'bad' : 'na') + pill(k.notFound + ' not found', 'na') + pill(k.notInSheet + ' not in the workbook', 'na')
             + pill(c.accuracy.labelsRead + ' of ' + c.accuracy.labelsExpected + ' labels read') + '<a class="btn" id="az-csv" href="/api/cables/az/' + esc(c.id) + '.csv" download>Download the CSV</a></div>'
             + table(c.cables, [['Cable', function (x) { return x.cableLabel; }], ['Status', function (x) { return AZ[x.status] || x.status; }],
               ['A-end', function (x) { return x.a && x.a.expected ? [x.a.expected.device, x.a.expected.port ? 'port ' + x.a.expected.port : ''].filter(Boolean).join(' ') + ': ' + (AZ[x.a.status] || 'not in these racks') : x.a && x.a.found ? 'read on ' + x.a.found.device : ''; }],
               ['Z-end', function (x) { return x.z && x.z.expected ? [x.z.expected.device, x.z.expected.port ? 'port ' + x.z.expected.port : ''].filter(Boolean).join(' ') + ': ' + (AZ[x.z.status] || 'not in these racks') : ''; }],
-              ['Why', function (x) { return x.aExplained || x.zExplained || ''; }]]);
+              ['Why', function (x) { return x.aExplained || x.zExplained || ''; }]].filter(function (col) { return col[0] !== 'Why' || c.cables.some(function (x) { return x.aExplained || x.zExplained; }); }));   // no Why column when no row has a reason
         }).catch(function (e2) { $('az-out').innerHTML = '<p class="fx-err">' + esc(e2.message) + '. Check both racks are scanned and try again.</p>'; });
       });
     }).catch(fail);

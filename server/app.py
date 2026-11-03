@@ -33,12 +33,14 @@ import time
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts" / "video"))
+import local_models  # noqa: E402,F401  (first: model caches inside this folder, hub lookups off)
 os.environ.setdefault("OMP_NUM_THREADS", "2")
 
 import huggingface_hub  # noqa: E402,F401  (import order: before torch-based modules)
 import open_clip  # noqa: E402,F401
 import timm  # noqa: E402,F401
 import uvicorn  # noqa: E402
+from fastapi.exceptions import RequestValidationError  # noqa: E402
 from fastapi import Body, FastAPI, File, Form, HTTPException, Request, UploadFile  # noqa: E402
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
@@ -61,7 +63,8 @@ import rt_session  # noqa: E402  (racktrack-app sign-in: the RT-EOS session)
 PORT = int(os.environ.get("RACKTRACK_PORT", "8700"))          # never 8600, the live app's port
 HOST = os.environ.get("RACKTRACK_HOST", "127.0.0.1")           # this machine only: the sign-in service is the front door
 MOBILE = ROOT / "mobile"
-RUNS = pathlib.Path(os.environ.get("RACKTRACK_RUNS") or ROOT / "data" / "runs"); RUNS.mkdir(parents=True, exist_ok=True)
+DATA = pathlib.Path(os.environ.get("RACKTRACK_DATA") or ROOT / "data")   # runtime data (runs, copies, checks, uploads); a test engine sets its own
+RUNS = pathlib.Path(os.environ.get("RACKTRACK_RUNS") or DATA / "runs"); RUNS.mkdir(parents=True, exist_ok=True)
 SAMPLE_DIR = ROOT / "data" / "video"
 SAMPLES = {"vdo1": {"title": "Demo rack (stored run)", "video": SAMPLE_DIR / "vdo1.mp4", "truth": ROOT / "data" / "ground_truth" / "SP-HYD-RM01-R01-R1" / "netbox_devices.csv",
                     "run": ROOT / "results" / "video_experiment" / "vdo1", "report": ROOT / "reports" / "video" / "vdo1"}}
@@ -106,6 +109,30 @@ class ModelLock:
 
 MODEL_LOCK = ModelLock()              # one model call at a time, here and on the machine
 STATE_LOCK = threading.Lock()
+_RUN_LOCKS, _RUN_LOCKS_GUARD = {}, threading.Lock()
+
+
+def run_lock(job):
+    """One lock per run around every read-change-write of its result.json (verify pass 2, finding 19): a person's edit and a
+    background read never overwrite each other. A device read holds it only to merge its own answer, not while it reads."""
+    with _RUN_LOCKS_GUARD:
+        return _RUN_LOCKS.setdefault(job, threading.RLock())
+
+
+def _reading(j):
+    """A device read or a read again is going on this run."""
+    return any(v == "running" for v in (j.get("ports") or {}).values()) or (j.get("read_again") or {}).get("state") == "running"
+
+
+def edits_run(fn):
+    """A route that changes a run's result.json: it runs holding the run's lock."""
+    import functools
+
+    @functools.wraps(fn)
+    def wrapper(*a, **kw):
+        with run_lock(kw.get("job") or (a[0] if a else "")):
+            return fn(*a, **kw)
+    return wrapper
 app = FastAPI(title="RackTrack", docs_url="/api/docs", redoc_url=None)
 APPROACHES = {a.key: a for a in occ.build_approaches("v2")}
 ENSEMBLE = APPROACHES["ensemble"]
@@ -126,7 +153,8 @@ def keep_only(chosen):
 # ------------------------------------------------------------------ sign-in: the RT-EOS session (server/rt_session.py)
 # racktrack-app sign-in (auth merge): the name-only /api/login is gone. Every /api route except health needs the session
 # the sign-in service (auth.sh, rt_eos/server/auth_service.js) signs; a run of another organization or site is not there.
-OPEN_PATHS = ("/", "/app", "/app/", "/manifest.webmanifest", "/sw.js", "/api/health", "/api/auth-service", "/favicon.ico", "/logo.jpg", "/api/contact")
+OPEN_PATHS = ("/", "/app", "/app/", "/manifest.webmanifest", "/sw.js", "/api/health", "/api/auth-service", "/favicon.ico", "/logo.jpg", "/api/contact",
+              "/api/auth/state")
 RUN_PATH = re.compile(r"^/(?:api/video|video-report)/([A-Za-z0-9_-]+)(?:/|$)")
 # Who may write what (docs/AUTH.md, the five roles). A role outside the list gets 403 with the reason in words; the platform-only
 # pages answer 404 to everyone but the platform owner, as if they were not there (rule 11). Every other route is open to anyone
@@ -216,7 +244,7 @@ def api_contact(body: Contact, request: Request):
     if len(CONTACT_SEEN.get(who, [])) >= 3 or sum(len(v) for v in CONTACT_SEEN.values()) >= 60:
         raise HTTPException(429, "Too many messages just now. Try again in a minute.")
     CONTACT_SEEN.setdefault(who, []).append(now)
-    d = ROOT / "data" / "contact"; d.mkdir(parents=True, exist_ok=True)
+    d = DATA / "contact"; d.mkdir(parents=True, exist_ok=True)
     (d / f"{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}-{secrets.token_hex(3)}.json").write_text(json.dumps(body.model_dump(), indent=1))
     return {"ok": True}
 
@@ -226,6 +254,16 @@ def api_auth_service():
     """Where the screens reach the sign-in service (open: the sign-in screen needs it before anyone is signed in)."""
     url, port = rt_session.auth_base()
     return {"url": url, "port": port}
+
+
+@app.get("/api/auth/state")
+def api_auth_state(request: Request):
+    """Public: whether this browser holds a valid session, or only the sign-in service's renewal cookie (sent here too: the
+    cookie belongs to the host and its path is /api/auth). The app asks this first, so a signed-out browser opens the
+    sign-in screen without a refused call in its console (verify pass 2, finding 30). It says nothing about who."""
+    who = rt_session.from_request(request)
+    return {"signed_in": bool(who and not who.get("blocked")), "waiting": bool(who and who.get("blocked")),
+            "can_renew": bool(request.cookies.get("rt_refresh"))}
 
 
 @app.get("/api/me")
@@ -258,8 +296,9 @@ def _summary(res):
     try:
         s = res["occupancy_frames"]["summary"]; devs = res.get("devices") or []
         kinds = sum(1 for d in devs if SDB.device_kind(d)["kind"] not in (None, "Other"))       # the one kind every screen shows
-        used = lambda L: L.get("fitted") or L.get("auto")                 # a template fitted, or the agent's auto mode
-        fitted = sum(1 for d in devs if used(d.get("layout") or {}) or used(d.get("closeup") or {}))
+        # devices whose ports were read (a template fitted, the agent's auto mode, the video fallback or a close-up), as the
+        # device pages show them (verify pass 2, finding 36: "5 port layouts" while all ten pages list ports)
+        fitted = sum(1 for d in devs if (d.get("layout") or {}).get("ports") or (d.get("closeup") or {}).get("ports"))
         return {"units": res["ladder"]["units"], "occupied": s["occupied"], "free": s["free"], "uncertain": s["uncertain"],
                 "devices": len(devs), "named": kinds, "layouts": fitted, "warnings": len((res.get("stitch") or {}).get("warnings") or [])}
     except Exception:
@@ -351,9 +390,12 @@ def run_job(job, video_path, truth_path=None):
             msg = "No rack was found in this video: no frame showed rack units. Film the front of the rack from top to bottom, with the rack filling the picture."
         elif msg.startswith("the video could not be stitched"):
             msg = "The video could not be joined into one rack picture. Film the rack slowly from top to bottom, with the whole width in view."
-        else:
-            msg = "The rack could not be read from this video. Try again, or film the rack again slowly from top to bottom."
-        j.update(status="failed", error=msg, progress="failed", finished=datetime.datetime.now().isoformat(timespec="seconds"))
+        elif msg == "the stitched rack picture could not be read":
+            msg = "The joined rack picture could not be opened. Try again; if it stops again, film the rack again slowly from top to bottom."
+        else:                                       # a fault in the engine, not in the video: say so, the detail is in the log
+            msg = "The reading stopped because of a fault on our side, not because of your video. Try again; if it stops again, tell your admin."
+        # failed_at keeps the step the run was on, so the run screen keeps the ticks of the steps that finished
+        j.update(status="failed", error=msg, failed_at=j.get("progress"), progress="failed", finished=datetime.datetime.now().isoformat(timespec="seconds"))
     _save(j)
     if j.get("status") == "done":
         start_rack_label(job)                       # the rack's own label (ID and name), read after the run in the background
@@ -452,8 +494,14 @@ def api_rack_label(job: str):
     return {"state": "done" if rack_label_of(j) else "running"}
 
 
+def _when_words(t=None):
+    """The one date style every screen uses (mobile/app.js when()): 3 Nov 2026, 09:41."""
+    t = t or datetime.datetime.now()
+    return f"{t.day} {t.strftime('%b %Y, %H:%M')}"
+
+
 def public_job(j, with_result=False):
-    out = {k: j.get(k) for k in ("id", "status", "progress", "error", "started", "finished", "title", "name", "from_guide", "summary", "phase", "partial", "ports")}
+    out = {k: j.get(k) for k in ("id", "status", "progress", "failed_at", "error", "started", "finished", "title", "name", "from_guide", "summary", "phase", "partial", "ports")}
     out["report"] = f"/video-report/{j['id']}/index.html" if (j.get("status") == "done" or j.get("partial")) else None
     try:                                                   # the pictures made so far, so the run screen can show each step as it lands
         out["files"] = sorted(f.name for f in pathlib.Path(j["dir"]).iterdir() if f.suffix in (".jpg", ".png") and not f.name.startswith("closeup"))
@@ -580,7 +628,7 @@ async def _start_video(request, video, sample, capture, stride, lat, lng, accura
             shutil.rmtree(d, ignore_errors=True)
             _features_keep_position(same, lat, lng, accuracy)            # wt/features: a position sent with a video read before is kept on it
             return {"job": same, "reused": True}
-        title, name = f"{who}'s rack, {datetime.datetime.now().strftime('%d %b %H:%M')}", "upload"
+        title, name = f"{who}'s rack, {_when_words()}", "upload"
     else:
         raise HTTPException(400, "Send a rack video, a take, or ask for the sample.")
     j = {"id": job, "status": "running", "progress": "queued", "result": None, "dir": d, "error": "", "started": datetime.datetime.now().isoformat(timespec="seconds"),
@@ -670,7 +718,28 @@ def api_video_view(job: str):
             "pictures": {k: base + v for k, v in (r.get("pictures") or {}).items()},
             "units": units, "devices": devices, "times_s": r.get("times_s"), "report": f"/video-report/{job}/index.html",
             "rack_label": rack_label_of(j), "rack_label_running": job in RACK_LABEL_RUNNING,
-            "rack_id": j.get("rack_id"), "rack_id_options": rack_id_options(j)}
+            "rack_id": j.get("rack_id"), "rack_id_options": rack_id_options(j), "record_passive": _record_passive(j)}
+
+
+def _record_passive(j):
+    """The units the confirmed record fills with something the video has no class for (a cable manager, a blank panel, a
+    shelf): the screens must not offer them as free space (verify pass 2, finding 15). Empty until a person confirmed the
+    compare."""
+    if j.get("result") is None or not (j.get("db") or {}).get("source"):
+        return []
+    try:
+        dv = drift_view(j)
+    except Exception as ex:  # noqa: BLE001  a broken copy must not break the result screen
+        print(f"[racktrack] record of run {j.get('id')} not read for the free space: {type(ex).__name__}: {ex}", file=sys.stderr)
+        return []
+    if not (dv.get("match") and dv.get("confirmed")):
+        return []
+    out = []
+    for r in dv.get("record") or []:
+        if (r.get("kind") or "").lower() in SDB.NOT_SEEN_KINDS and r.get("ru_start"):
+            for u in range(int(r["ru_start"]), int(r["ru_start"]) + int(r.get("ru_height") or 1)):
+                out.append({"unit": f"u{u:02d}", "kind": r["kind"], "name": r.get("name"), "source": SDB.SOURCES.get(dv["source"], dv["source"])})
+    return out
 
 
 def _kind_of(d, when=None):
@@ -947,8 +1016,13 @@ def _read_panel_thread(job, index):
             dv = next(x for x in r["devices"] if x["index"] == index)
             if not crop.exists():
                 rack_video.clean_crop(dv, j.get("video_path"), d / "rack.png", crop, r["devices"])
-            dv["layout"] = dict(patch_panels.read_patch_panel(d, index, crop), typed=(dv.get("layout") or {}).get("typed"))
-            rf.write_text(json.dumps(r, indent=1)); j["result"] = r; j["summary"] = _summary(r)
+            lay = patch_panels.read_patch_panel(d, index, crop)
+            with run_lock(job):                         # merged into the result as it is now: an edit made meanwhile stays
+                r = json.loads(rf.read_text()); dv = next((x for x in r["devices"] if x["index"] == index), None)
+                if dv is not None:
+                    dv["layout"] = dict(lay, typed=(dv.get("layout") or {}).get("typed"))
+                    rf.write_text(json.dumps(r, indent=1))
+                j["result"] = r; j["summary"] = _summary(r)
             j["ports"][str(index)] = "done"
     except Exception as ex:  # noqa: BLE001
         print(f"[racktrack] panel D{index} of {job} not read: {type(ex).__name__}: {ex}", file=sys.stderr)
@@ -962,7 +1036,7 @@ def _read_ports_thread(job, index, hint=None):
     try:
         with MODEL_LOCK:
             rack = cv2.imread(str(j["rack_path"]))
-            dv = rack_video.read_device_ports(j["dir"], j["video_path"], rack, index, hint=hint)
+            dv = rack_video.read_device_ports(j["dir"], j["video_path"], rack, index, hint=hint, write_lock=run_lock(job))
             r = json.loads((pathlib.Path(j["dir"]) / "result.json").read_text()); j["result"] = r; j["summary"] = _summary(r)
             j["ports"][str(index)] = "done" if dv.get("layout") else "none"
         _closeup_rebuild(j)
@@ -977,7 +1051,7 @@ KINDS = ("Switch", "Router", "Firewall", "Gateway", "Patch Panel", "Server", "St
 
 # ------------------------------------------------------------------ specifications of an identified model (RT-EOS's switch_specs agent: local knowledge base, then its web lookup)
 SPECS_CLI = pathlib.Path(os.environ.get("RACKTRACK_SPECS_CLI", ROOT / "rt_eos" / "switch_specs" / "cli.py"))
-SPECS_CACHE = ROOT / "data" / "specs_cache.json"
+SPECS_CACHE = DATA / "specs_cache.json"
 SPEC_FIELDS = (("port_config", "Ports", ""), ("uplink_config", "Uplinks", ""), ("port_speed_max_gbps", "Max port speed", " Gbps"), ("switching_capacity_gbps", "Switching capacity", " Gbps"),
                ("poe_standard", "PoE", ""), ("poe_budget_w", "PoE budget", " W"), ("power_max_w", "Power max", " W"), ("layer", "Layer", ""), ("rack_units", "Height", "U"), ("nos", "Network OS", ""))
 
@@ -1015,14 +1089,17 @@ def api_specs(vendor: str = "", model: str = ""):
     except ValueError:
         cache = {}
     if key in cache:
-        return cache[key]
+        hit = cache[key]
+        if (hit.get("specs") or {}).get("Ports"):            # answers kept before the ports line was cleaned are cleaned on the way out
+            hit = dict(hit, specs=dict(hit["specs"], Ports=_spec_ports_line(hit["specs"]["Ports"])))
+        return hit
     online = online_lookups()
     out = {"ok": False, "specs": {}, "note": "No specifications found for this model." if online else "This model is not in the local knowledge base, and online lookups are off."}
     if SPECS_CLI.exists():
         try:
             rec, resp = None, {}
             for extra in (["--no-live"], ["--deadline", "8"]) if online else (["--no-live"],):   # the local knowledge base at once; the web only when allowed and it has nothing
-                p = subprocess.run([sys.executable, str(SPECS_CLI), "--json", *extra, f"{vendor} {model}".strip()], cwd=SPECS_CLI.parent, capture_output=True, text=True, timeout=30)
+                p = subprocess.run([RTF.RTEOS_PYTHON, str(SPECS_CLI), "--json", *extra, f"{vendor} {model}".strip()], cwd=SPECS_CLI.parent, capture_output=True, text=True, timeout=30)
                 line = next((ln for ln in reversed(p.stdout.splitlines()) if ln.startswith("{")), "{}")
                 resp = (json.loads(line).get("response") or {})
                 rec = resp.get("result") or (resp.get("results") or [None])[0]
@@ -1034,13 +1111,8 @@ def api_specs(vendor: str = "", model: str = ""):
                     v = rec.get(f)
                     if v not in (None, "", []):
                         specs[label] = (", ".join(str(x) for x in v) if isinstance(v, list) else str(v)) + unit
-                if specs.get("Ports"):                                  # a page read live lists the same ports twice: one line per port count
-                    seen, parts = set(), []
-                    for n, what in re.findall(r"(\d+)\s*x\s*([A-Za-z0-9/\-\+\.]+(?: [A-Za-z0-9/\-\+\.]+)*?)(?=\s+\d+\s*x|$)", specs["Ports"]):
-                        if n not in seen and "interface" not in what.lower():
-                            seen.add(n); parts.append(f"{n} x {what.replace(' ports', '')}")
-                    if parts:
-                        specs["Ports"] = " · ".join(parts)
+                if specs.get("Ports"):
+                    specs["Ports"] = _spec_ports_line(specs["Ports"])
                 if "Ports" not in specs and rec.get("port_count"):
                     specs["Ports"] = str(rec["port_count"])
                 out = {"ok": True, "specs": specs, "datasheet": rec.get("datasheet_url"), "vendor": rec.get("vendor"), "model": rec.get("model")}
@@ -1056,6 +1128,17 @@ def api_specs(vendor: str = "", model: str = ""):
     return out
 
 
+def _spec_ports_line(text):
+    """A page read live lists the same ports twice: one entry per port count, joined with " + " ("24 x 1G RJ45 + 4 x 1G SFP");
+    the "+" between two entries is not part of either (verify pass 2, finding 20: "1G RJ45 + · 4 x 1G SFP")."""
+    seen, parts = set(), []
+    for n, what in re.findall(r"(\d+)\s*x\s*([A-Za-z0-9/\-\+\.]+(?: [A-Za-z0-9/\-\+\.]+)*?)(?=\s*\+?\s+\d+\s*x|$)", text.replace("·", " ").strip()):
+        what = re.sub(r"\s*\+\s*$", "", what.replace(" ports", "")).strip()
+        if n not in seen and what and "interface" not in what.lower():
+            seen.add(n); parts.append(f"{n} x {what}")
+    return " + ".join(parts) if parts else text
+
+
 class NewDevice(BaseModel):
     top: str = Field(max_length=6)
     bottom: str = Field(max_length=6)
@@ -1063,7 +1146,10 @@ class NewDevice(BaseModel):
 
 
 @app.post("/api/video/{job}/device")
+@edits_run
 def api_add_device(job: str, body: NewDevice, request: Request):
+    if JOBS.get(job) is not None and _reading(JOBS[job]):
+        raise HTTPException(409, "A device of this rack is being read. Add the device when the reading has ended.")
     """A device the sweep missed, added by a person over the units it fills (user, 2026-10-27: Network Rack 2, U37-39 holds
     one device the detector never boxed). Its outline is the units' rows rail to rail; its crop is cut from the rack picture;
     its units become in use. Kept in result.json like any other device, with who added it."""
@@ -1115,6 +1201,7 @@ def given_to(dev):
 
 
 @app.post("/api/video/{job}/unit/{unit}")
+@edits_run
 def api_mark_unit(job: str, unit: str, body: UnitMark, request: Request):
     """Step 2, answered by a person (user, 2026-10-30: "give options for me to clarify whether that unit is occupied or
     unoccupied"): {"status": "occupied" | "unoccupied"}. Free: a device on the unit gives it up, and a device left
@@ -1129,7 +1216,7 @@ def api_mark_unit(job: str, unit: str, body: UnitMark, request: Request):
     row = next((x for x in rows if x["unit"] == unit.lower()), None)
     if row is None:
         raise HTTPException(404, "No such unit.")
-    on = datetime.datetime.now().strftime("%d %b").lstrip("0")
+    on = _when_words()
     if "before" not in row:                                              # what the frames said, kept the first time a person answers (for the report)
         row["before"] = {k: row.get(k) for k in ("status", "p_occupied", "frames_voting", "frames_device", "frames_empty", "decided_by")}
     row.update(status=body.status, p_occupied=1.0 if body.status == "occupied" else 0.0, confidence=1.0, decided_by="person", attention=None,
@@ -1184,7 +1271,10 @@ def api_mark_unit(job: str, unit: str, body: UnitMark, request: Request):
 
 
 @app.post("/api/video/{job}/device/{index}/remove")
+@edits_run
 def api_remove_device(job: str, index: int, request: Request):
+    if JOBS.get(job) is not None and _reading(JOBS[job]):
+        raise HTTPException(409, "A device of this rack is being read. Remove the device when the reading has ended.")
     """A box that is not a device, taken out by a person (user, 2026-10-27: Network Rack 1 'there is no D6'). The devices
     after it move up one number, with their files, layouts, panel reads and port states, so the rack reads D1..Dn without
     a hole; its units become free. The removal is kept in result.json with who did it."""
@@ -1205,11 +1295,11 @@ def api_remove_device(job: str, index: int, request: Request):
     rows = r["occupancy_frames"]["rows"]
     for row in rows:
         if row.get("device") == index:
-            row.update(status="unoccupied", p_occupied=0.0, confidence=1.0, decided_by="person", attention=None, device=None, reason=f"Marked free on {datetime.datetime.now().strftime('%d %b').lstrip('0')}.")
+            row.update(status="unoccupied", p_occupied=0.0, confidence=1.0, decided_by="person", attention=None, device=None, reason=f"Marked free on {_when_words()}.")
     for u in gone.get("units") or []:                                   # units the device sat on with no row of their own
         for row in rows:
             if row["unit"] == u and row.get("device") in (None, index) and row["status"] != "unoccupied":
-                row.update(status="unoccupied", p_occupied=0.0, confidence=1.0, decided_by="person", attention=None, device=None, reason=f"Marked free on {datetime.datetime.now().strftime('%d %b').lstrip('0')}.")
+                row.update(status="unoccupied", p_occupied=0.0, confidence=1.0, decided_by="person", attention=None, device=None, reason=f"Marked free on {_when_words()}.")
     r["devices"] = [x for x in r["devices"] if x["index"] != index]
     for a in r.get("answers") or []:                                    # earlier answers name the devices by their new numbers
         a["effect"] = re.sub(r"(?<!then )\bD(\d+)\b", lambda m: f"D{int(m.group(1)) - 1}" if int(m.group(1)) > index else m.group(0), a.get("effect") or "")
@@ -1282,6 +1372,7 @@ class ModelFix(BaseModel):
 
 
 @app.post("/api/video/{job}/device/{index}/model")
+@edits_run
 def api_set_model(job: str, index: int, body: ModelFix, request: Request):
     """A person types the make and model of a switch, router, firewall or gateway (user, 2026-10-27: the reader cannot
     see the model on a 576 px video): the mapper fits that model's vendor layout to the device's crops, in the background,
@@ -1317,6 +1408,7 @@ class KindFix(BaseModel):
 
 
 @app.post("/api/video/{job}/device/{index}/kind")
+@edits_run
 def api_fix_kind(job: str, index: int, body: KindFix, request: Request):
     """The person corrects what a device is (the classifier is wrong now and then). Kept in result.json as kind_override with
     who and when; the model's own answer stays in classification. kind null removes the correction."""
@@ -1402,10 +1494,12 @@ async def api_closeup(request: Request, file: UploadFile = File(...), job: str |
         rack = cv2.imread(str(jd["rack_path"]))
         with MODEL_LOCK:
             lays = await run_in_threadpool(rack_video.closeup_layouts, img, rack, switches, work, device, mapped)
-        for dv in r.get("devices") or []:
-            if dv["index"] in lays:
-                dv["closeup"] = rack_video.closeup_record(lays[dv["index"]], jd["dir"], dv["index"])
-        rf.write_text(json.dumps(r, indent=1))
+        with run_lock(jd["id"]):                          # merged into the result as it is now
+            r = json.loads(rf.read_text())
+            for dv in r.get("devices") or []:
+                if dv["index"] in lays:
+                    dv["closeup"] = rack_video.closeup_record(lays[dv["index"]], jd["dir"], dv["index"])
+            rf.write_text(json.dumps(r, indent=1))
         if job in JOBS:
             JOBS[job]["result"] = r
         threading.Thread(target=_closeup_rebuild, args=(jd,), daemon=True).start()
@@ -1548,7 +1642,7 @@ def _org():
 
 def _uploads():
     """Workbook uploads, one folder per organization, so one organization cannot import another's upload."""
-    return ROOT / "data" / "sources" / "orgs" / _org()
+    return DATA / "sources" / "orgs" / _org()
 
 
 
@@ -1629,7 +1723,7 @@ def _drift_view(j):
     out["confirmed"] = bool(db.get("confirmed")) and db.get("source") == source
     if out["match"]:
         out["record"] = SDB.devices(source, out["match"]["rack_key"])
-        out["drift"] = SDB.drift(result, out["record"], SDB.ports(source, out["match"]["rack_key"]) if source == "excel" else None)
+        out["drift"] = SDB.drift(result, out["record"], SDB.ports(source, out["match"]["rack_key"]))      # every source's copy holds its ports now
     return out
 
 
@@ -1682,7 +1776,7 @@ def api_video_database(job: str, request: Request, body: dict = Body(...)):
 # applies) or keeps to the signed-in person's organization.
 import rt_features as RTF  # noqa: E402
 
-CHECKS = ROOT / "data" / "checks"
+CHECKS = DATA / "checks"
 
 
 def _features_float(v):
@@ -1732,12 +1826,13 @@ def _features_closeup_ids(jd, device, raw, cid, by):
         return None
     with MODEL_LOCK:
         ids = RTF.read_closeup_ids(pic)
-    rf = pathlib.Path(jd["dir"]) / "result.json"; r = json.loads(rf.read_text())
-    dv = next((x for x in r.get("devices") or [] if x["index"] == device), None)
-    if dv is None:
-        return dict(ids, kept=False)
-    kept = RTF.keep_ids(dv, ids, str(pic.relative_to(jd["dir"])), by)
-    rf.write_text(json.dumps(r, indent=1))
+    with run_lock(jd["id"]):
+        rf = pathlib.Path(jd["dir"]) / "result.json"; r = json.loads(rf.read_text())
+        dv = next((x for x in r.get("devices") or [] if x["index"] == device), None)
+        if dv is None:
+            return dict(ids, kept=False)
+        kept = RTF.keep_ids(dv, ids, str(pic.relative_to(jd["dir"])), by)
+        rf.write_text(json.dumps(r, indent=1))
     if jd["id"] in JOBS:
         JOBS[jd["id"]]["result"] = r
     return dict(kept, kept=True, ok=ids.get("ok"), error=ids.get("error"))
@@ -1788,10 +1883,12 @@ def api_features_az(request: Request, body: dict = Body(...)):
     a, z = job_or_none(str(body.get("a") or "")), job_or_none(str(body.get("z") or body.get("a") or ""))
     if a is None or z is None or a.get("result") is None or z.get("result") is None:
         raise HTTPException(404, "No such run.")
-    views, keys = {}, []
+    views, keys, port_rows = {}, [], []
     for side, j in (("a", a), ("z", z)):
-        rid, key, result, record, _ = _features_record(j)
+        rid, key, result, record, rack_cables = _features_record(j)
         views[side] = dict(RTF.run_view(result, record, key or rid), scanId=j["id"]); keys.append(key or rid)
+        if key and rack_cables and (side == "a" or z is not a):
+            port_rows += RTF.cable_check(result, record, rack_cables, key)["rows"]     # the same verdict as the Cables list above
     tok = SDB.ORG.set(_copies_of(a))
     try:
         cables = RTF.cables_for(keys)
@@ -1799,7 +1896,7 @@ def api_features_az(request: Request, body: dict = Body(...)):
         SDB.ORG.reset(tok)
     if not cables:
         raise HTTPException(409, "The Excel matrix has no cable in these racks. Copy the workbook with its A_Z_CONNECTION_MATRIX in first.")
-    check = RTF.az_check(views["a"], views["z"], cables, rt_session.name(request))
+    check = RTF.az_check(views["a"], views["z"], cables, rt_session.name(request), port_check=port_rows)
     d = CHECKS / rt_session.org_key(rt_session.current()); d.mkdir(parents=True, exist_ok=True)
     (d / f"{check['id']}.json").write_text(json.dumps(check, indent=1))
     return check
@@ -1823,6 +1920,8 @@ def api_features_find_port(job: str, device: int, port: int):
     out = RTF.find_port(result, record, cables, key, device, port)
     if out is None:
         raise HTTPException(404, "No such device.")
+    if port < 1 or (out.get("ports") and port > max(out["ports"])):
+        raise HTTPException(404, f"D{device} has no port {port}.")
     return dict(out, picture=f"/api/video/{job}/find-port.jpg?device={device}&port={port}")
 
 
@@ -1872,6 +1971,7 @@ def api_features_worklist(job: str):
 
 
 @app.post("/api/video/{job}/worklist/{item}")
+@edits_run
 def api_features_worklist_answer(job: str, item: str, request: Request, body: dict = Body(...)):
     """Confirm or correct one item: a device's kind (as the device page corrects it) or a port's state (connected or empty)."""
     j = _features_job(job)
@@ -2006,6 +2106,13 @@ def api_features_topology(job: str):
 @app.exception_handler(HTTPException)
 async def http_error(_, exc: HTTPException):
     return JSONResponse({"error": exc.detail}, status_code=exc.status_code)
+
+
+@app.exception_handler(RequestValidationError)
+async def bad_request(_, exc: RequestValidationError):
+    """A malformed request answers one sentence in the app's own shape, not FastAPI's list (verify pass 2, finding 34)."""
+    names = sorted({str(e.get("loc", ["", ""])[-1]) for e in exc.errors()})
+    return JSONResponse({"error": "This request is not complete or has a wrong value" + (f" ({', '.join(names)})." if names else ".")}, status_code=400)
 
 
 @app.get("/logo.jpg")

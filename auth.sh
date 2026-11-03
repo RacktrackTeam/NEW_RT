@@ -44,7 +44,7 @@ export RT_ENV_FILE="$ENV_FILE"
 # The RT-EOS screens under /org/ (built once).
 if [ ! -f "$HERE/rt_eos/client/dist-org/index.html" ]; then
   echo "auth.sh: building the /org/ screens"
-  (cd "$HERE/rt_eos/client" && ./node_modules/.bin/vite build --base /org/ --outDir dist-org --emptyOutDir) >/dev/null || echo "auth.sh: the /org/ build failed; the service starts without it"
+  (cd "$HERE/rt_eos/client" && VITE_ORG_ONLY=1 ./node_modules/.bin/vite build --base /org/ --outDir dist-org --emptyOutDir) >/dev/null || echo "auth.sh: the /org/ build failed; the service starts without it"
 fi
 
 DB=$(grep '^RACKTRACK_AUTH_DB=' "$ENV_FILE" | cut -d= -f2-)

@@ -19,6 +19,7 @@ import os
 import pathlib
 import re
 import sqlite3
+import sys
 
 import jwt
 
@@ -92,8 +93,9 @@ def verify(token):
     try:
         if p.get("jti") and c.execute("SELECT 1 FROM revoked_tokens WHERE jti = ?", (str(p["jti"]),)).fetchone():
             return None
-    except sqlite3.Error:
-        pass
+    except sqlite3.Error as ex:                     # fail closed: a token whose sign-out cannot be checked is not let through
+        print(f"[racktrack] sign-out check failed, session refused: {ex}", file=sys.stderr)
+        return None
     finally:
         c.close()
     if u["active"] == 0 or int(p.get("tv") or 0) != int(u["token_version"] or 0):

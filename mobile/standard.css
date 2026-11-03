@@ -45,3 +45,6 @@ table td, .dftable td { font-size:14px; padding:12px var(--s2) !important; borde
 .runact, .dfrow.idbtns { width:100%; display:flex; flex-direction:row-reverse; justify-content:flex-start; flex-wrap:wrap; gap:var(--s1); }
 .swh { display:block !important; }
 .swh p.muted { margin-top:var(--s1) !important; }
+
+/* Side bar: the role and the site each on a line of their own, never broken mid-way (verify pass 2, finding 9) */
+.side .brand small span { display: block; white-space: nowrap; line-height: 1.35; }
