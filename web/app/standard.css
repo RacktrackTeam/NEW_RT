@@ -32,6 +32,7 @@ body.signed .screen { max-width:none !important; gap:var(--s3) !important; }
 
 /* pills: one size */
 .fx-pill, .acc, .chip, .idconf, .fchip { display:inline-flex; align-items:center; min-height:24px; height:24px; padding:0 10px !important; border-radius:999px; font-size:12px !important; font-weight:600; line-height:1; }
+.fchip { gap:4px; }                       /* a flex pill drops the space between "2U" and the units; the gap puts it back */
 
 /* tables: one header style */
 table th, .dftable th, .wbtable th { font-size:12px !important; font-weight:600 !important; color:#5b6573 !important; background:#f6f7f9 !important; text-transform:none !important; letter-spacing:0 !important; padding:12px var(--s2) !important; text-align:left; }
