@@ -76,6 +76,7 @@ table td, .dftable td { font-size:14px; padding:12px var(--s2) !important; borde
 
 /* Pickers on the tool screens stay inside the 16 px gutter on a phone (finding 29) */
 .fx-page select, .fx-page input, .fx-page label { box-sizing:border-box; max-width:100%; }
+.fx-page label > select { margin-left:0 !important; width:100% !important; min-width:0; }
 
 /* Rack tab, the device list beside the picture: the kind on its own line under the device number, never cut (finding 25) */
 .sidelist .srow { display:grid !important; grid-template-columns:62px minmax(0, 1fr) auto; column-gap:var(--s1); row-gap:2px; align-items:center; }
@@ -91,7 +92,7 @@ table td, .dftable td { font-size:14px; padding:12px var(--s2) !important; borde
 }
 
 /* Sign in: Forgot password and Contact us centred under the form at every width (finding 37) */
-.auth.signin .si-links { width:100%; align-self:stretch; box-sizing:border-box; }
+.auth.signin .si-links { width:100% !important; max-width:none !important; align-self:stretch !important; box-sizing:border-box; }   /* .auth > p caps paragraphs at 34ch */
 
 /* Devices list: the state pill under the title, so a long make and model read off a panel has the row's width and is never
    broken one letter per line (verify pass 2 follow-up on finding 8) */

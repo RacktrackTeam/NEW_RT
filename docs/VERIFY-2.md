@@ -147,3 +147,65 @@ Checked and fine
 3. Finding 3: keep Profile inside the app (or strip the /org/ client to the settings pages with a way back) so no one lands in the photo pipeline or sees "0 racks".
 4. Finding 7 with 6: replace Demo Organization's planted NetBox and CMDB copies with clean ones and copy NetBox and CMDB ports and cables in, so the demo accounts see only real drift and the port compare works for all three sources.
 5. Finding 4 with 5: say plainly when the server failed (not the filming), keep the ticks of the steps that finished, and hide Remove from roles that cannot remove.
+
+## Fixed in pass 2 (3 Nov 2026)
+
+How it was checked: my own engine on 127.0.0.1:8708 with RACKTRACK_DATA pointing at a copy of data/ in my scratch folder, every HTTP request that is not to this machine sent to a closed port (HTTP_PROXY and HTTPS_PROXY at 127.0.0.1:9), and a second sign-in service on 3312 on the same auth.db that allows the 8708 origin (3302, 3303, 3304 and 8700 were not stopped or changed). Proofs: tools/proof_video_run.py (one fresh run of samples/video/vdo1.mp4), tools/proof_pass2.py (passes), tools/proof_standard.py (every screen at 1280 and 400 px, no page error), the Python tests (140 pass under the model lock, the new tests/test_models_offline.py included), the RT-EOS client tests (285 pass).
+
+Format: number - verdict - what was done and how it was checked.
+
+1. Fixed - the engine now runs in _cache/venv-engine, racktrack-app's own tested packages (numpy 2.2.6, torch 2.14.1, transformers 5.11.0, faster-coco-eval 1.8.0, tensorboard 2.20.0, opencv-contrib 4.10) copied offline from this Mac's Python 3.10 by tools/make_engine_env.py (each installed package repacked into a wheel and installed with <venv>/bin/python -m pip --no-index; nothing downloaded); the RT-EOS readers stay in _cache/venv as child processes. The two numpy 2 classifiers and the k-NN gallery are also re-saved under numpy 1.26 with identical predictions (tools/resave_numpy2_models.py), so they load in either environment. Two more blockers of the same kind were found and fixed on the way: the DEIMv2 device detector's code was read from /Volumes/Racktrack/tools/DEIMv2 (outside this folder) and failed silently in _cache/venv, so runs went without the device detector (now src/third_party/DEIMv2), and the second device model needed transformers. A fresh run of vdo1 on 8708 finished in 145 s with no outside request; against the stored run it has the same 22 units, 14 in use, the same ten devices at the same units and the same rack label (SP-HYD-RM01-R01-R1); it differs in 3 units marked not sure instead of free, and in the kinds of U20, U19 and U18 (the stored kinds came from its port reads: Router and Firewall; the fresh run marks U19 and U18 Other because the two device models disagree, so their ports are not read, and reads "Planet" instead of "CTS" on U20). The stored run is from 27 Oct; torch 2.14.1 and ultralytics 8.4.123 were installed on this Mac on 29 Oct and the engine's ladder steps (rails, unit text) were added after it, and neither the older packages (torch 2.11, ultralytics 8.4.48 in requirements.txt) nor the older code exist on this Mac, so the stored run cannot be reproduced exactly here.
+2. Fixed - DINOv2 ViT-L/14 (torch hub code and checkpoint), CLIP ViT-B/32 openai, the timm DINOv2 ViT-B/14, ResNet-50, the DINOv2-B config and the easyocr weights are copied into models/; src/local_models.py (imported first) and engine.sh set HF_HUB_OFFLINE, TRANSFORMERS_OFFLINE, YOLO_OFFLINE, HF_HOME, TORCH_HOME and EASYOCR_MODULE_PATH inside the folder, and DINOv2 loads with torch.hub source="local". Checked with every outside request sent to a closed port: the first try caught the teammate model fetching ResNet-50 from download.pytorch.org (fixed by the copy), the next runs completed, and the engine log has no Hugging Face or GitHub line.
+3. Fixed - auth.sh builds the /org/ pages with VITE_ORG_ONLY=1: only setup, organization settings, sites and people, the person's own settings and the console, each with Back to RackTrack top left (to the app address the Profile link passes, same host only); no Home, Scan, Map, History, racks or scans; any other /org/ address goes back to the app. tools/proof_pass2.py checks it for orgownert and techt at 1280 and 400 (the technician's own page also crashed on an empty group; fixed).
+4. Fixed - the run screen keeps the ticks of the steps that finished and marks the step it stopped at (failed_at), and a fault in the engine says "a fault on our side, not because of your video"; checked on a failed run at 1280 and 400.
+5. Fixed - Remove this run shows only to a site manager, an organization admin or owner and the platform owner; checked hidden for techt.
+6. Fixed - NetBox copies read interfaces, front and rear ports and dcim/cables; CMDB copies read cmdb_ci_network_adapter, cmdb_ci_port and port-to-port relations; each copy now holds 346 ports, and the compare of fx1hyd000001 shows the same 8 "Wrong port type" rows (ports 25 to 28 of both TL-SG2428P) for Excel, NetBox and CMDB. The mocks hold no cables, so 0 cables are copied; the code reads them when there are some.
+7. Fixed - tools/reset_demo_copies.py replaced Demo Organization's 30 copies with one clean copy per source (Excel, NetBox, CMDB, each 346 ports) after resetting both mocks; every proof that signs in now uses Test Organization accounts and run fx1hyd000001 and refuses the Demo Organization's accounts and run (tools/proof_guard.py).
+8. Fixed - the Devices list shows the make and model read ("CTS ACX-09CW2A(SM-10)-EL, not confirmed") and the state under it, so the row is never broken one letter per line.
+9. Fixed - the side bar shows the role and the site each on its own line.
+10. Fixed - Needs a look lists, per device, the ports not sure ("D3 · 9 ports not sure: 2, 4, 6 ...").
+11. Fixed - the cable line counts the same ports as "in use": a connected port whose cable was not typed is counted as "not typed".
+12. Fixed - when the device's reading found combo ports, the agent's specification counts them once ("52 RJ45, 4 of them combo ports that also take an SFP module", All ports 52).
+13. Fixed - D2's state says "1 port found", how it was read says "from the video", Empty says "1" (not "all 1"), and the drift note says the video read 1 port of it, none numbered as in the record. The physical layer screen is removed in Part B.
+14. Fixed - the A-end / Z-end check takes the port check's verdict for a cable it places in another port; with the planted workbook on 8708, CBL-PL-032 is "Wrong port ... likely in port 24" in both.
+15. Fixed - once a compare is confirmed, the units the record fills with a cable manager or blank panel are not counted or offered as free space on the Rack tab and the Report, which say why (checked on fx1hyd000001: free 2U, U21-22).
+16. Fixed - the other views are cut again in the engine's environment (checked on a copy of dm1hyd000001); tools/strip_outside_paths.py removed every path into another folder from the copied runs (208 files; video_file is now video.mp4).
+17. Fixed - a sign-out check that fails refuses the session and logs why.
+18. Left for Part B - the read-again route and screen have no link; they are removed there (see Part B).
+19. Fixed in code - one lock per run around every edit of result.json; device reads read without it and merge only their own device's changes under it; adding or removing a device answers 409 while a device is being read. Not exercised with two writers at once.
+20. Fixed - the ports line is cleaned when looked up and when read from the cache ("24 x 1G RJ45 + 4 x 1G SFP").
+21. Fixed - main spans the full width between one 32 px gutter on each side (an older 95 % width left 83 px); checked on the screen proof.
+22. Fixed - at 400 px each Report device row is a small grid; no word broken, U10-11 whole.
+23. Fixed - copy names are never broken; the version and the date each sit on one line.
+24. Fixed - the primary action sits at the right of its block (Scan, run page, device page, close photo); Home's Scan a rack is not full width on a phone.
+25. Fixed - the Rack tab's device list puts the kind on its own line.
+26. Fixed - the step sentence is shown in full with a capital letter; at 400 px the label crop is shown 96 px high and scrolls sideways.
+27. Fixed - the tool screens show the rack name under the header on a phone.
+28. Fixed - a missing record field reads "not in the record", a missing reading "not read"; RJ-45 shows as RJ45.
+29. Fixed - the pickers end at 384 px of 400 (16 px gutter); measured.
+30. Fixed - the app asks /api/auth/state first; tools/proof_pass2.py sees no 401 on the sign-in screen or after Sign out, for orgownert and techt at both widths.
+31. Fixed - one date style: "3 Nov 2026, 09:41" in run titles and unit answers.
+32. Fixed - Compared with shows "-" when the state pill says Not compared.
+33. Fixed - the label sentence starts with a capital; "names read on the devices are in this rack"; workbook instead of sheet in the A-end / Z-end check, its CSV and the SFP notes; no Why column when no row has a reason; copies from a mock say "The local test copy"; "Tap" or "Click" by device; the multimode line no longer says "at 10G"; a hidden port is not counted as in use.
+34. Fixed - a malformed request answers one sentence with 400; a port that does not exist answers 404 "D4 has no port 9999".
+35. Fixed - a copy of the same scan (same start time) is no longer listed as an earlier scan.
+36. Partly - the History line now counts devices with ports read ("ports read on 10 devices"). Not a fault: "6 racks read" counts racks read; the failed run is a row on Home with its Failed state, not a rack read.
+37. Fixed - the links are centred under the form (an old 34ch cap on paragraphs narrowed them); measured.
+38. Left for Part B - dead code goes with the restructure.
+39. Fixed - no long dash remains in this app's own files (vendor/ goes in Part B); where a long dash is part of a rule that reads outside text it is written as an escape.
+40. Fixed - the listed swallows now log their reason; the copy and login databases are closed after each block.
+41. Fixed - RACKTRACK_DATA is the one root for everything the engine writes (runs, copies, uploads, checks, contact, specs cache); checked: the planted upload and the A-end / Z-end check went to my data root, nothing new in data/.
+42. Fixed - tests/test_models_offline.py loads every occupancy model and the Ensemble; conftest.py sends every outside request to a closed port.
+
+Pass 1 items marked not fixed or partly fixed:
+- 9 (D1's make on the Devices list): fixed, see 8.
+- 10 (D2): fixed, see 13.
+- 11 (D6 specifications): fixed, see 12.
+- 12 (Needs a look ports): fixed, see 10.
+- 23 (silent swallows): fixed, see 40.
+- 36 (label crop and step text): fixed, see 26.
+- 52 (401 on sign-out): fixed, see 30.
+- Partly 1: fixed, see 5. Partly 4: fixed, see 2. Partly 5: fixed, see 11. Partly 25: fixed, see 16. Partly 27: fixed, see 7. Partly 28: fixed, see 42. Partly 32: fixed, see 4.
+- Still left from pass 1: 22 (copies per organization, not per site), 30 (WhatsApp runs only the platform owner's), 49 (two old "default" logins in data/sources.db).
+
+Count: blocks 2 of 2 fixed; wrong 15 fixed and 1 fixed in code only (19) of 16; ugly 9 of 9 fixed; nit 12 fixed, 1 partly (36), 2 left for Part B (18, 38) of 15.
