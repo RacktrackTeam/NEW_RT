@@ -210,3 +210,24 @@ def test_contact_limit_is_per_sender(eng):
     finally:
         _p.Path.write_text = orig
         app.CONTACT_SEEN.clear()
+
+
+def test_a_file_that_is_not_a_video_is_refused(eng):
+    app, client, tmp = eng
+    before = {p for p in (tmp / "runs").rglob("*")} if (tmp / "runs").exists() else set()
+    r = _as(client, "tech").post("/api/video", files={"video": ("notes.txt", b"not a video", "text/plain")})
+    assert r.status_code == 400 and r.json()["error"] == "notes.txt is not a video. Send an MP4 or MOV video of the rack."
+    r = _as(client, "tech").post("/api/video")
+    assert r.status_code == 400 and r.json()["error"] == "Send a rack video or a take."
+    after = {p for p in (tmp / "runs").rglob("*")} if (tmp / "runs").exists() else set()
+    assert not [p for p in after - before if p.is_dir() and not any(p.iterdir())]          # no empty run folder is left behind
+
+
+def test_every_error_has_the_same_shape(eng):
+    app, client, _ = eng
+    c = _as(client, "tech")
+    assert c.get("/api/not-a-route").json() == {"error": "Not Found"}
+    r = c.put("/api/video/history")
+    assert r.status_code == 405 and "error" in r.json() and r.headers.get("allow") == "GET"
+    r = c.post("/api/video/x/database", content=b"{bad", headers={"Content-Type": "application/json"})
+    assert r.status_code in (400, 404) and "error" in r.json()

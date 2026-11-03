@@ -322,7 +322,7 @@
   <section class="screen" data-screen="copies" hidden>
     <div class="phead"><div><h1>Database copies</h1><p class="muted">Every time a workbook, NetBox or the CMDB is copied in, a new copy is kept. The newest copy of each rack is the one a result is compared with. Deleting a copy brings the one before it back.</p></div></div>
     <div class="card" id="cp-in"><b>Copy a database in</b><p class="muted small">Read the manager's workbook (it is checked first, then Import), or copy NetBox or the ServiceNow CMDB in through the login under Connections (with no login, the local test copy). Each copy-in makes a new copy below.</p>
-      <div class="dfrow"><input type="file" id="df-file" accept=".xlsx"><button class="btn" type="button" id="df-xlsx">Read workbook</button><button class="btn" type="button" data-dfimp="netbox">Copy in from NetBox</button><button class="btn" type="button" data-dfimp="cmdb">Copy in from CMDB</button></div>
+      <div class="dfrow"><input type="file" id="df-file" accept=".xlsx" aria-label="The workbook to read"><button class="btn" type="button" id="df-xlsx">Read workbook</button><button class="btn" type="button" data-dfimp="netbox">Copy in from NetBox</button><button class="btn" type="button" data-dfimp="cmdb">Copy in from CMDB</button></div>
       <div id="df-report"></div></div>
     <div id="cp-list"></div>
   </section>

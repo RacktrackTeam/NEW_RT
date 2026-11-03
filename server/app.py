@@ -43,6 +43,7 @@ from fastapi.exceptions import RequestValidationError  # noqa: E402
 from fastapi import Body, FastAPI, File, Form, HTTPException, Request, UploadFile  # noqa: E402
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
+from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 from PIL import Image, ImageOps, UnidentifiedImageError  # noqa: E402
 from pydantic import BaseModel, Field  # noqa: E402
 
@@ -579,6 +580,7 @@ async def api_video(request: Request, video: UploadFile | None = File(None), cap
         RUN_STARTING["n"] = 0
 
 
+VIDEO_SUFFIXES = {".mp4", ".mov", ".m4v", ".avi", ".mkv", ".webm", ".3gp"}   # an upload that is none of these, and not sent as video/*, is refused
 RUN_STARTING = {"n": 0}                    # a run being set up (its upload still arriving), so a second one waits
 
 
@@ -592,6 +594,7 @@ async def _start_video(request, video, capture, stride, lat, lng, accuracy):
         src, _, folder = capture.partition("/")
         td = CAP.take_dir(src, folder); t = CAP.read_take(src, td) if td else None
         if t is None or not t["video"] or not _take_visible(td):
+            shutil.rmtree(d, ignore_errors=True)
             raise HTTPException(404, "That take is not there, or its video has not arrived yet.")
         video_path = d / t["video"]; shutil.copy(td / t["video"], video_path)
         if (td / "log.json").is_file():
@@ -603,6 +606,9 @@ async def _start_video(request, video, capture, stride, lat, lng, accuracy):
             except ValueError as ex:
                 print(f"[racktrack] capture position not read ({ex}); the run has no position", file=sys.stderr)
     elif video is not None and video.filename:
+        if not (str(video.content_type or "").startswith("video/") or pathlib.Path(video.filename).suffix.lower() in VIDEO_SUFFIXES):
+            shutil.rmtree(d, ignore_errors=True)
+            raise HTTPException(400, f"{pathlib.Path(video.filename).name} is not a video. Send an MP4 or MOV video of the rack.")
         video_path = d / ("video" + (pathlib.Path(video.filename).suffix.lower() or ".mp4"))
         video_path.write_bytes(await video.read(MAX_VIDEO + 1))
         same = _same_video_run(video_path)                 # a video read before opens its result at once (user, 2026-10-30)
@@ -612,6 +618,7 @@ async def _start_video(request, video, capture, stride, lat, lng, accuracy):
             return {"job": same, "reused": True}
         title, name = f"{who}'s rack, {_when_words()}", "upload"
     else:
+        shutil.rmtree(d, ignore_errors=True)                # a refused start leaves no empty run folder
         raise HTTPException(400, "Send a rack video or a take.")
     j = {"id": job, "status": "running", "progress": "queued", "result": None, "dir": d, "error": "", "started": datetime.datetime.now().isoformat(timespec="seconds"),
          "title": title, "name": name, "from_guide": from_guide, "stride": max(1, min(30, int(stride))), "by": who,
@@ -1695,6 +1702,8 @@ def api_video_database(job: str, request: Request, body: dict = Body(...)):
         if not ident.get("certain"):
             j["db"] = prev
             raise HTTPException(409, "The rack is not certain enough to accept by itself. Confirm it or pick another.")
+    if body.get("confirmed") and body.get("rack_key") and not (j.get("rack_id") or {}).get("id"):   # a run with no rack id keeps the record a person
+        j["rack_id"] = {"id": body["rack_key"], "source": "picked", "on": datetime.datetime.now().isoformat(timespec="minutes")}   # confirmed as its id, so a reopen remembers it
     j["db"] = {"source": source, "rack_key": body.get("rack_key") or None, "confirmed": bool(body.get("confirmed")) or auto,
                "by": rt_session.name(request) + (" (accepted by itself: identified for certain)" if auto else ""),
                "auto": auto, "on": datetime.datetime.now().isoformat(timespec="minutes")}
@@ -1908,15 +1917,15 @@ def api_features_sfp(job: str):
     return RTF.sfp_advice(result, record, cables)
 
 
-@app.exception_handler(HTTPException)
-async def http_error(_, exc: HTTPException):
-    return JSONResponse({"error": exc.detail}, status_code=exc.status_code)
+@app.exception_handler(StarletteHTTPException)          # also the router's own 404 and 405, so every error has the same shape
+async def http_error(_, exc: StarletteHTTPException):
+    return JSONResponse({"error": exc.detail}, status_code=exc.status_code, headers=getattr(exc, "headers", None))
 
 
 @app.exception_handler(RequestValidationError)
 async def bad_request(_, exc: RequestValidationError):
     """A malformed request answers one sentence in the app's own shape, not FastAPI's list (verify pass 2, finding 34)."""
-    names = sorted({str(e.get("loc", ["", ""])[-1]) for e in exc.errors()})
+    names = sorted({str(e.get("loc", ["", ""])[-1]) for e in exc.errors() if not isinstance(e.get("loc", ["", ""])[-1], int)})   # not a JSON position
     return JSONResponse({"error": "This request is not complete or has a wrong value" + (f" ({', '.join(names)})." if names else ".")}, status_code=400)
 
 

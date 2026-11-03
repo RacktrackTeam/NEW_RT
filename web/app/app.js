@@ -262,7 +262,7 @@
   $('dropzone').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('vfile').click(); } });
   ['dragenter', 'dragover'].forEach(function (n) { $('dropzone').addEventListener(n, function (e) { e.preventDefault(); $('dropzone').classList.add('over'); }); });
   ['dragleave', 'drop'].forEach(function (n) { $('dropzone').addEventListener(n, function (e) { e.preventDefault(); $('dropzone').classList.remove('over'); }); });
-  $('dropzone').addEventListener('drop', function (e) { var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) showPick(f); });
+  $('dropzone').addEventListener('drop', function (e) { var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) onPicked({ files: [f] }); });
   $('dz-clear').addEventListener('click', function () { showPick(null); });
   function showPick(f) {
     picked = f || null; $('dz-idle').hidden = !!f; $('dz-pick').hidden = !f; $('vsend').disabled = !f; $('dropzone').classList.toggle('picked', !!f);
@@ -287,7 +287,10 @@
       return api('/api/video', { method: 'POST', body: fd }).then(function (r) { starting = false; stopGuide(true); $('sw-guide').hidden = true; $('sw-choices').hidden = false; if (r.reused) { analysingReused(r.job); return; } analysing(null, r.job); });
     }).catch(function (e) { starting = false; $('v-err').textContent = e.message; $('v-err').hidden = false; });
   }
-  function onPicked(inp) { var f = inp.files[0]; inp.value = ''; showPick(f || null); }
+  var VIDEO_EXT = /\.(mp4|mov|m4v|avi|mkv|webm|3gp)$/i;     // the server takes the same (server/app.py VIDEO_SUFFIXES)
+  function onPicked(inp) { var f = inp.files[0]; inp.value = ''; $('v-err').hidden = true;
+    if (f && !/^video\//.test(f.type || '') && !VIDEO_EXT.test(f.name || '')) { showPick(null); $('v-err').textContent = f.name + ' is not a video. Pick an MP4 or MOV video of the rack.'; $('v-err').hidden = false; return; }
+    showPick(f || null); }
   $('vfile').addEventListener('change', function () { onPicked($('vfile')); }); $('vcam').addEventListener('change', function () { onPicked($('vcam')); });
   $('vsend').addEventListener('click', function () {
     var f = picked; if (!f) return; $('vsend').disabled = true; $('v-err').hidden = true;
@@ -557,7 +560,7 @@
     var fresh = RES.id !== id;
     if (fresh) { RES.cmpUi = 'idle'; if (typeof cmpMode === 'function') cmpMode(false); RES.sel = null; RES.view = null; RES.pick = null; RES.labelAsked = null; RES.cmp = null; RES.cmpSrc = null; RES.cmpUi = 'idle'; RES.cmpPick = false; RES.diffMode = null; $('cmp-menu').hidden = true; $('df-top').innerHTML = ''; $('diff-top').innerHTML = ''; }
     RES.id = id; clearInterval(RES.timer); remember(id);
-    RES.tab = tab; $('res-eyebrow').textContent = 'Result'; $('rep-full').hidden = NATIVE;   // only the open tab shows (data-tab)
+    RES.tab = tab; $('res-eyebrow').textContent = 'Result';   // only the open tab shows (data-tab)
     loadView(true);
     watchPorts();
     if (fresh || !RES.cmp) loadDrift();
@@ -905,7 +908,7 @@
     var elev = '<svg class="elev" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="The rack, top to bottom"><rect x="' + (L0 - 2) + '" y="2" width="' + (R0 - L0 + 4) + '" height="' + (H - 4) + '" rx="6" class="ef"/>' + rows + '</svg>';
     // the devices, top to bottom, in a table
     var table = devs.map(function (d) { var L = d.layout || {}, mm = L.vendor ? L.vendor + (L.model ? ' ' + L.model : '') : '', kind = d.kind && d.kind !== 'Other' ? d.kind : 'Not sure';
-      return '<tr data-dev="' + d.index + '"><td class="mono">' + URANGE(d.top, d.bottom, d.height) + '</td><td><b>D' + d.index + '</b><span class="kd">' + esc(kind) + '</span></td><td>' + (mm ? esc(mm) : L.mode === 'patchpanel' && L.panel ? esc(L.panel) + ' patch panel' + (L.n_ports ? '<span class="kd">' + L.n_ports + (L.size_known === false ? ' ports seen' : ' ports') + '</span>' : '') : L.vendor_read ? esc(L.vendor_read + (L.model_read ? ' ' + L.model_read : '')) + '<span class="kd">' + (L.model_read ? 'read, not confirmed' : 'model not read') + '</span>' : '<span class="kd">not read</span>') + '</td></tr>'; }).join('');   // a patch panel has no make and model to read: its type stands there (user, 2026-10-28)
+      return '<tr data-dev="' + d.index + '" tabindex="0" role="link" aria-label="Open D' + d.index + ', ' + esc(kind) + ', ' + URANGE(d.top, d.bottom, d.height) + '"><td class="mono">' + URANGE(d.top, d.bottom, d.height) + '</td><td><b>D' + d.index + '</b><span class="kd">' + esc(kind) + '</span></td><td>' + (mm ? esc(mm) : L.mode === 'patchpanel' && L.panel ? esc(L.panel) + ' patch panel' + (L.n_ports ? '<span class="kd">' + L.n_ports + (L.size_known === false ? ' ports seen' : ' ports') + '</span>' : '') : L.vendor_read ? esc(L.vendor_read + (L.model_read ? ' ' + L.model_read : '')) + '<span class="kd">' + (L.model_read ? 'read, not confirmed' : 'model not read') + '</span>' : '<span class="kd">not read</span>') + '</td></tr>'; }).join('');   // a patch panel has no make and model to read: its type stands there (user, 2026-10-28)
     // the free space as stretches
     // a unit the confirmed record fills with a cable manager or a blank panel is not free space, though the video sees it empty
     var passive = {}; (v.record_passive || []).forEach(function (x) { passive[x.unit] = x; });
@@ -927,6 +930,7 @@
       + '<span class="glabel">Needs a look</span>' + (look.length ? '<div class="card flush look">' + look.join('') + '</div>' : '<div class="card look none"><i class="sig"></i>Nothing. Every unit and device is clear.</div>') + '</div>';
   }
   document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('#rp-top .ed, #rp-top tr[data-dev]'); if (t) { selectDevice(parseInt(t.dataset.dev, 10)); go('result/' + RES.id + '/devices'); } });
+  document.addEventListener('keydown', function (e) { if (e.key !== 'Enter' && e.key !== ' ') return; var t = e.target.closest && e.target.closest('#rp-top tr[data-dev]'); if (t) { e.preventDefault(); t.click(); } });   // the device rows open by keyboard too
   document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('#rp-top .lrow'); if (!b) return;
     if (b.dataset.unit) selectUnit(b.dataset.unit); else selectDevice(parseInt(b.dataset.dev, 10)); go('result/' + RES.id + '/devices'); });
   // the Drift tab: choose the database for this rack (Excel, NetBox or CMDB), see which record matched and why, and every difference
@@ -975,10 +979,10 @@
       return renderDiff(d, true);
     }
     if (ui !== 'confirm' || !(d.chosen && d.source === src)) { $('df-top').innerHTML = ''; return renderDiff(d, ui === 'drift'); }
-    var m = d.match, other = m && m.how === 'picked' && I.rack_key && I.rack_key !== m.rack_key;   // a person picked another record than the steps found: the steps' confidence is not this record's
+    var m = d.match, other = m && m.how === 'picked' && I.rack_key !== m.rack_key;   // a person picked another record than the steps found: the steps' confidence is not this record's
     var h = '<div class="card idcard"><div class="dfrow"><b>Confirm the verified rack id</b><span class="muted small">' + esc(SRCLABEL[src] || d.sources[src]) + '</span></div>'
       + '<div class="dfrow idhead"><span class="idrack">' + (m ? esc(m.rack_key) : 'No single rack found') + '</span>' + (other ? '<span class="muted small">' + esc(m.why) + '</span>' : I.confidence != null ? '<span class="idconf ' + esc(I.state) + '">' + pc(I.confidence) + ' overall</span>' : '') + '</div>'
-      + (other ? '<p class="muted small">The steps below found ' + esc(I.rack_key) + ', not this record. Confirm only if you are sure.</p>' : '')
+      + (other ? '<p class="muted small">' + (I.rack_key ? 'The steps below found ' + esc(I.rack_key) + ', not this record.' : 'The steps below found no single rack.') + ' Confirm only if you are sure.</p>' : '')
       + '<figure class="lblstrip"><img src="/api/video/' + encodeURIComponent(RES.id) + '/rack-label.jpg" alt="The rack label crop" onerror="this.parentNode.hidden=true"></figure>'
       + stepsHtml(I)
       + '<div class="dfrow idbtns"><button class="btn primary" type="button" id="cmp-continue"' + (m ? '' : ' disabled') + '>Confirm</button><button class="btn" type="button" id="cmp-change">Change</button></div>';
@@ -1024,6 +1028,7 @@
     if (t.dataset.cmpsrc) { try { src = t.dataset.cmpsrc; RES.cmpSrc = src; $('cmp-menu').hidden = true; $('cmp-btn').setAttribute('aria-expanded', 'false'); RES.cmpPick = false; RES.cmpUi = 'finding'; cmpMode(true);    // the confirm panel waits until the ladder says whether the rack is certain
       var toCompare = function () { var el = $('sec-compare'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); };   // on a phone the panel opens below the report: go to it
       if (RES.cmp && RES.cmp.imported[src]) { cmpStatus('Finding the rack...'); return Promise.resolve(setDb({ source: src })).then(afterFind(src)).then(toCompare); }
+      if (!ADMIN) { RES.cmpUi = 'idle'; cmpStatus('No ' + SRCLABEL[src] + ' copy yet, so there is nothing to compare with. An organization admin copies it in under Database copies.', 'err'); return; }   // a technician cannot copy in: say so, do not try
       if (src === 'excel') { RES.cmpUi = 'idle'; cmpMode(false); toast('No workbook is copied in yet. Copy one in under Database copies.'); return go('copies'); }
       cmpStatus('Copying in from ' + SRCLABEL[src] + '...');
       return api('/api/sources/' + src + '/import', { method: 'POST' }).then(function (r) { cmpStatus('Finding the rack...'); return Promise.resolve(setDb({ source: src })).then(afterFind(src)).then(toCompare); })

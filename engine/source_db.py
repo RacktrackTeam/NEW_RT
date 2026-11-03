@@ -994,7 +994,9 @@ def identify(source, rack_id, result, position=None, label=None, rack_id_how=Non
                 c = 0.95 if person else max(0.5, float(lab.get("confidence") or 0.5)) if lab else 0.5
                 st["conf"] = round(c * (1.0 if st.get("how") == "exact" else 0.9), 2); st["agrees"] = st["left"][0] == key
                 st["why"] = (f"The label reader read {lab['text']}, {round(100 * float(lab.get('confidence') or 0))} % sure" if lab else "No label text was read") \
-                    + (f"; a person confirmed it, so this step counts {round(100 * st['conf'])} %" if person else "") \
+                    + (f"; a person {'typed' if 'typed' in str(rack_id_how) else 'picked'} the rack id {rack_id}, so this step counts {round(100 * st['conf'])} %"
+                       if person and any(w in str(rack_id_how) for w in ("typed", "picked")) else
+                       f"; a person confirmed it, so this step counts {round(100 * st['conf'])} %" if person else "") \
                     + (", exact match" if st.get("how") == "exact" else ", match with separators ignored") + ", no other rack has this label"
             elif st.get("ranked"):
                 own = next((x for x in st["ranked"] if x["rack_key"] == key), None); nxt = next((x for x in st["ranked"] if x["rack_key"] != key), None)
