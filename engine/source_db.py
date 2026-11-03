@@ -854,7 +854,11 @@ def identify(source, rack_id, result, position=None, label=None, rack_id_how=Non
     rows, steps = racks(source), []
     # 0 a person confirmed the record for this rack label before (this run or an earlier one)
     if confirmed and any(r["rack_key"] == confirmed["rack_key"] for r in rows):
-        steps.append({"n": 0, "title": "Confirmed before", "proof": f"Confirmed by {confirmed['by']} on {_day(confirmed['on_']) or str(confirmed['on_'])[:10]}: the rack labelled {rack_id} is the record {confirmed['rack_key']}.",
+        auto_tail = " (accepted by itself: identified for certain)"        # server/app.py stores a certain rack's acceptance so
+        by = str(confirmed["by"] or "")
+        who = (f"Accepted by itself, identified for certain, when {by[:-len(auto_tail)]} compared" if by.endswith(auto_tail)
+               else f"Confirmed by {by}")
+        steps.append({"n": 0, "title": "Confirmed before", "proof": f"{who} on {_day(confirmed['on_']) or str(confirmed['on_'])[:10]}: the rack labelled {rack_id} is the record {confirmed['rack_key']}.",
                       "left": [confirmed["rack_key"]], "outcome": "one"})
     # 1 location: the run's phone position against each rack's site position
     # ---- wt/features: a rack with no position of its own takes its site's (the sign-in service's sites, by name, else the run's own
