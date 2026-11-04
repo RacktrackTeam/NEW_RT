@@ -705,7 +705,7 @@
     if (L.mode === 'patchpanel') return { key: 'on', word: 'Ports found', title: mm || ((L.panel ? L.panel + ' ' : '') + 'patch panel'), pic: P.overlay || d.crop, facts: true, panel: true, vendor: L.vendor, model: L.model };
     if (L.fitted) return { key: 'on', word: 'Identified', title: mm, pic: P.overlay || P.vendor_ports || P.trace || P.cut || d.crop, facts: true, vendor: L.vendor, model: L.model };
     if (busy) return { key: 'busy', word: 'Reading', title: 'Reading…', pic: d.crop };
-    if (mm && L.mapped) return { key: 'on', word: 'Identified', title: mm, pic: L.auto && P.overlay ? P.overlay : d.crop, facts: !!L.auto, vendor: L.vendor || L.typed.vendor, model: L.model || L.typed.model, nolayout: !L.auto };
+    if (mm && L.mapped) return { key: 'on', word: 'Identified', title: mm, pic: L.auto && P.overlay ? P.overlay : d.crop, facts: !!L.auto, vendor: L.vendor || (L.typed || {}).vendor, model: L.model || (L.typed || {}).model, nolayout: !L.auto };
     if (L.auto) return { key: 'auto', word: (L.ports || []).length ? (L.ports.length === 1 ? '1 port found' : L.ports.length + ' ports found') : 'Ports found', title: L.vendor_read ? L.vendor_read + ' · model not read' : 'Make and model not read', pic: P.overlay || d.crop, facts: true, ask: true };
     if (L.mapped) return { key: 'unc', word: 'Needs a close photo', title: L.vendor_read ? L.vendor_read + (L.model_read ? ' ' + L.model_read : ' · model not read') : 'Make and model not read', pic: d.crop, ask: true };
     return { key: 'off', word: L.ports_state === 'failed' ? 'Could not find it' : 'Not checked yet', title: 'Not checked yet', pic: d.crop, read: true };
