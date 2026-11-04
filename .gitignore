@@ -32,3 +32,4 @@ _cache/
 web/org/dist-org/
 # The patch panel reader's embeddings of one run's panels (runtime)
 engine/patchpanel/out/cache/test_*.npz
+videos/

@@ -60,7 +60,7 @@ requirements.txt   the engine's Python packages, pinned
 | modules/sources/ | server/mocks/ |
 | weights/ | models/weights/ |
 | rt_eos/Models, vendor/dark_mobile/Models (links) | models/rt_eos/, models/dark_mobile/ |
-| data/ground_truth/, data/video/ | samples/ground_truth/, samples/video/ |
+| data/ground_truth/, data/video/ | samples/ground_truth/, videos/ (the videos; samples/video/ keeps the three stored runs) |
 | scripts/occupancy, devices, units, switches | tools/training/ |
 
 ## Removed

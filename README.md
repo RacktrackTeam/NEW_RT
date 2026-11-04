@@ -57,9 +57,11 @@ On this Mac `_cache/venv-engine` was made offline from the packages already inst
 
 ## The test videos
 
-`samples/video`: `vdo1.mp4` (the owner's rack, SP-HYD-RM01-R01-R1, its record in `samples/ground_truth`) and the two
-WhatsApp videos (NETWORK RACK 1 and 2), each with a stored run (`run_of_vdo1`, `run_of_whatsapp_2143`,
-`run_of_whatsapp_2319`). Upload one under Scan, or run `tools/proof_video_run.py`.
+`videos/`: every video we have, in one folder at the root (`videos/VIDEOS.md` lists each one with where it came from).
+`vdo1.mp4` is the owner's rack, SP-HYD-RM01-R01-R1, its record in `samples/ground_truth`; the two WhatsApp videos of
+26 Oct are NETWORK RACK 1 and 2; tech1 to tech10 are the technicians' videos of 3 Nov. The stored runs of the first three
+stay in `samples/video/` (`run_of_vdo1`, `run_of_whatsapp_2143`, `run_of_whatsapp_2319`). Upload one under Scan, or run
+`tools/proof_video_run.py`.
 
 ## Tests and proofs
 

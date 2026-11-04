@@ -71,11 +71,11 @@ def stitch_rack(
     Parameters
     ----------
     video:
-        File name inside the input folder (default ``samples/video``), or a path.
+        File name inside the input folder (default ``videos/``), or a path.
     output_dir:
         Where to save the image (default ``data/stitched``; created if missing).
     input_dir:
-        Folder used to look up a bare file name (default ``samples/video``).
+        Folder used to look up a bare file name (default ``videos/``).
     output_name:
         Output file name. Default ``<video name>_rack.png``. ``.png``, ``.jpg`` are accepted.
     start_frame:

@@ -1,11 +1,11 @@
-"""Folder conventions (in this folder): videos in samples/video/, stitched rack pictures in data/stitched/ (runtime).
+"""Folder conventions (in this folder): videos in videos/ (one folder at the root for every video), stitched rack pictures in data/stitched/ (runtime).
 The app always passes its own paths; these defaults serve the command line (python3 -m rack_stitcher, from src/)."""
 from __future__ import annotations
 
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_INPUT_DIR = ROOT / "samples" / "video"
+DEFAULT_INPUT_DIR = ROOT / "videos"
 DEFAULT_OUTPUT_DIR = ROOT / "data" / "stitched"
 
 VIDEO_EXTENSIONS = {".mp4", ".mov", ".m4v", ".avi", ".mkv", ".webm"}
@@ -15,7 +15,7 @@ def resolve_input(video: str | Path, input_dir: str | Path | None = None) -> Pat
     """Find the video file.
 
     `video` may be an existing path (absolute or relative to the current directory) or just a
-    file name, which is then looked up in `input_dir` (default: samples/video).
+    file name, which is then looked up in `input_dir` (default: videos/).
     """
     candidate = Path(video).expanduser()
     if candidate.is_file():

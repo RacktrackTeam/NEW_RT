@@ -8,7 +8,7 @@ racktrack-app is the core: its video engine reads a rack from a sweep video. We 
 ## Rules from the owner (2 Nov 2026)
 - Alter and integrate, never rebuild: every function already exists in one of the three apps; copy it and wire it.
 - Deadline for the complete integration: Wednesday 4 Nov. Tokens are a weekly budget: one agent at a time, narrow scopes, no fleets.
-- Test with all three sample videos in samples/video. The owner's own rack is SP-HYD-RM01-R01-R1 (vdo1); its record is data/ground_truth/SP-HYD-RM01-R01-R1/netbox_devices.csv and it sits in all three databases through modules/sources (ground truth, mocks, filled workbooks).
+- Test with all three sample videos in videos/ (since 4 Nov every video sits in that one root folder; the stored runs stay in samples/video). The owner's own rack is SP-HYD-RM01-R01-R1 (vdo1); its record is data/ground_truth/SP-HYD-RM01-R01-R1/netbox_devices.csv and it sits in all three databases through modules/sources (ground truth, mocks, filled workbooks).
 - After the build: fresh verification passes (function, code, UI) until a pass finds nothing twice; the owner expects zero issues.
 - Plain English, plain hyphen only, white light theme, full device width, commits as plain sentences with no AI attribution. Never touch /Volumes/Racktrack/RT-EOS, dark_mobile or racktrack-app (the live apps), never call a real outside system, never push without the owner (the owner runs scripts/push-to-github.sh).
 

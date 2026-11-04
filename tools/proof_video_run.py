@@ -1,6 +1,6 @@
 """One fresh video run end to end, compared with the stored run of the same video.
 
-    tools/proof_video_run.py [--engine http://127.0.0.1:8708] [--video samples/video/vdo1.mp4] [--user techt]
+    tools/proof_video_run.py [--engine http://127.0.0.1:8708] [--video videos/vdo1.mp4] [--user techt]
 
 Signs in at the sign-in service (3302), uploads the video to the engine, waits for the run and the rack label read,
 then compares with samples/video/run_of_vdo1: units, occupied and free counts, the devices (their units), the kind the
@@ -37,7 +37,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--engine", default="http://127.0.0.1:8708")
     ap.add_argument("--auth", default="http://127.0.0.1:3302")
-    ap.add_argument("--video", default=str(ROOT / "samples/video/vdo1.mp4"))
+    ap.add_argument("--video", default=str(ROOT / "videos/vdo1.mp4"))
     ap.add_argument("--stored", default=str(ROOT / "samples/video/run_of_vdo1"))
     ap.add_argument("--user", default="techt")
     ap.add_argument("--data", default=os.environ.get("RACKTRACK_DATA") or str(ROOT / "data"), help="the engine's data root")
