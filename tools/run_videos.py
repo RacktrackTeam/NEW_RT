@@ -160,10 +160,23 @@ def write_report(run_dir, out, name, video, a):
         pdf = out / f"{name}.pdf"
         from playwright.sync_api import sync_playwright
         with sync_playwright() as p:
-            kw = {"executable_path": os.environ["PW_CHROMIUM"]} if os.environ.get("PW_CHROMIUM") else {}
+            shell = os.environ.get("PW_CHROMIUM") or next(iter(sorted(pathlib.Path.home().glob(
+                "Library/Caches/ms-playwright/chromium_headless_shell-*/chrome-headless-shell-mac-arm64/chrome-headless-shell"))[::-1]), None)
+            kw = {"executable_path": str(shell)} if shell else {}
             b = p.chromium.launch(**kw)
             pg = b.new_page(viewport={"width": 1280, "height": 900})
             pg.goto(page.resolve().as_uri(), wait_until="load")
+            # the page shows one step at a time; the PDF shows every step in order, each starting on a new page with its name
+            pg.evaluate("""() => {
+                document.querySelectorAll('.step').forEach((s, i) => {
+                    s.hidden = false;
+                    const a = document.querySelector('.rail a[href="#' + s.id + '"]');
+                    const h = document.createElement('h2'); h.className = 'pdfh'; h.textContent = a ? a.textContent : (i + 1) + ''; s.prepend(h);
+                });
+                document.querySelectorAll('.lsw[data-sw]').forEach(c => c.hidden = false);   // every switch card, not just the picked one
+                document.querySelectorAll('details').forEach(d => d.open = true);
+            }""")
+            pg.add_style_tag(content=".rail,.snav,.stick{display:none!important} .step{display:block!important;break-before:page} .step:first-of-type{break-before:auto} .pdfh{font-size:1.3rem;margin:0 0 12px;border-bottom:1px solid #dbe1ea;padding-bottom:6px} img{break-inside:avoid}")
             pg.emulate_media(media="print")
             pg.pdf(path=str(pdf), format="A4", print_background=True, margin={"top": "10mm", "bottom": "10mm", "left": "8mm", "right": "8mm"})
             b.close()
