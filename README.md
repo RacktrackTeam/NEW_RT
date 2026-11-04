@@ -92,3 +92,12 @@ and loads the server's app (`web/app`), so a screen change needs no new build. S
 
 Plain English and the plain hyphen on every screen, white light theme, full device width, accent #1f2a3a
 (docs/design/STANDARD.md). Every path stays inside this folder. Commits are plain sentences.
+
+## Testers outside the network
+
+The screens sign in against the sign-in service on the same host, so one public address must carry both the engine and
+the service. `tools/front.js` is that door: `node tools/front.js` listens on 127.0.0.1:8710, sends the sign-in and
+organization paths to 3302 and everything else to 8700, and answers `/api/auth-service` with the public address itself.
+Then open a tunnel to 8710 (`~/bin/ngrok http 8710`) and give testers the https address it prints, with the Test
+Organization accounts from docs/AUTH.md. Stop the door and the tunnel by their pids in data/pids (front.pid, ngrok.pid).
+A free ngrok address shows a "Visit Site" page once per browser before the app.
