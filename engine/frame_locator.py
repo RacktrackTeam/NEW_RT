@@ -88,9 +88,18 @@ class RackReference:
         pf = frame_pts[[a.queryIdx for a in good]] / scale
         pr = self._pts[[a.trainIdx for a in good]]
         H, inl = cv2.findHomography(pf, pr, cv2.USAC_MAGSAC, self._thr, maxIters=self._iters, confidence=self._conf)
-        if H is None or inl is None:
+        if H is None or inl is None or not _invertible(H):     # a degenerate fit cannot be turned back onto the frame
             return None
         return H, int(inl.ravel().astype(bool).sum())
+
+
+def _invertible(H):
+    """True when the homography can be inverted (a fit on a featureless or blurred frame can come back singular)."""
+    try:
+        np.linalg.inv(np.asarray(H, np.float64))
+        return True
+    except np.linalg.LinAlgError:
+        return False
 
 
 def project(H_frame2rack, rack_pts):
@@ -187,6 +196,8 @@ def _locate(video, rack_bgr, devs, cfg, hint, say, n_workers):
     def scan(n, frame):
         """One frame against every device: the records for this frame (by device key) and the homographies that passed."""
         Hh = hint(n) if hint else None
+        if Hh is not None and not _invertible(Hh):
+            Hh = None
         recs, Hs, todo = {}, {}, []
         for key in keys:
             d = devs[key]

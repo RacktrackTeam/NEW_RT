@@ -29,6 +29,7 @@ import sys
 import tempfile
 import threading
 import time
+import traceback
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "engine"))
@@ -374,6 +375,7 @@ def run_job(job, video_path, truth_path=None):
     except Exception as ex:  # noqa: BLE001
         msg = str(ex)
         print(f"[racktrack] run {job} failed: {type(ex).__name__}: {msg}", file=sys.stderr)      # the technical detail goes to the log, not the screen
+        traceback.print_exc(file=sys.stderr)        # where it failed, so a fault on our side can be found from the log
         if "no frame gave a ladder" in msg:
             msg = "No rack was found in this video: no frame showed rack units. Film the front of the rack from top to bottom, with the rack filling the picture."
         elif msg.startswith("the video could not be stitched"):

@@ -4,6 +4,7 @@
 Tabs: Input · Frames · How it works · Unit detection · Unit occupancy · Device detection · Why each device · Report.
 
     python3 engine/video_report.py <run folder>          builds the report of that run again
+    python3 engine/video_report.py <run folder> --self-contained FILE    and writes it as one page with the pictures inlined
 """
 import argparse
 import html
@@ -1908,15 +1909,55 @@ function esc2(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){retur
 """
 
 
+def self_contained(report_dir, dest, limit=15_500_000):
+    """One HTML file of a built report with every picture in pics/ inlined as a data URI, so it can be shared as one page.
+    When the pictures make the page larger than limit bytes they are inlined again smaller (narrower, lower JPEG quality)."""
+    import base64
+    import io
+    report_dir, dest = pathlib.Path(report_dir), pathlib.Path(dest)
+    page = (report_dir / "index.html").read_text()
+    names = sorted(set(re.findall(r'(?:src|href)="pics/([^"]+)"', page)))
+
+    def data_uri(name, width, quality):
+        f = report_dir / "pics" / name
+        if not f.is_file():
+            return None
+        if width is None:
+            raw, mime = f.read_bytes(), "image/png" if f.suffix.lower() == ".png" else "image/jpeg"
+        else:
+            im = Image.open(f).convert("RGB")
+            if im.width > width:
+                im = im.resize((width, round(im.height * width / im.width)))
+            b = io.BytesIO(); im.save(b, "JPEG", quality=quality); raw, mime = b.getvalue(), "image/jpeg"
+        return f"data:{mime};base64," + base64.b64encode(raw).decode()
+
+    for width, quality in ((None, None), (1200, 80), (900, 70), (700, 60), (500, 50)):
+        out = page
+        for name in names:
+            uri = data_uri(name, width, quality)
+            if uri:
+                out = out.replace(f'src="pics/{name}"', f'src="{uri}"').replace(f'href="pics/{name}"', f'href="{uri}"')
+        if len(out.encode()) <= limit:
+            break
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(out)
+    return dest, len(out.encode())
+
+
 def main():
-    """Build the report of one finished run folder again: engine/video_report.py <run folder>."""
+    """Build the report of one finished run folder again: engine/video_report.py <run folder> [--self-contained FILE]."""
     ap = argparse.ArgumentParser(description="The rack report of one finished run (result.json and its pictures) into <run>/report/.")
     ap.add_argument("run", type=pathlib.Path)
+    ap.add_argument("--self-contained", type=pathlib.Path, metavar="FILE",
+                    help="also write the report as one HTML file with every picture inlined (under 16 MB), to share as one page")
     a = ap.parse_args()
     st = json.loads((a.run / "status.json").read_text()) if (a.run / "status.json").exists() else {}
     video = next((p for p in a.run.glob("video*") if p.suffix in (".mp4", ".mov")), None)
     out = build_from(a.run, a.run / "report", a.run / "rack.png", video, st.get("title") or "Your rack", st.get("name") or a.run.name)
     print(out)
+    if a.self_contained:
+        dest, size = self_contained(a.run / "report", a.self_contained)
+        print(f"{dest} ({size / 1e6:.1f} MB)")
 
 
 if __name__ == "__main__":
