@@ -111,11 +111,13 @@
       }
       function pickers() {
         var d = devOf(cur.dev), ports = d && hasPorts(d) ? d.layout.ports.filter(function (p) { return p.id != null; }) : [];
+        var isNum = function (p) { return /^\d+$/.test(String(p.id)); }; ports = ports.filter(isNum).concat(ports.filter(function (p) { return !isNum(p); }));   // the numbered ports first, then console, USB and the like by their name (the tester's choice, 5 Nov 2026)
+        var pname = function (p) { return isNum(p) ? 'Port ' + p.id : String(p.id).replace(/_/g, ' ').toUpperCase(); };
         var rb = $('fp-readbox'); rb.hidden = !(d && !hasPorts(d)); $('fp-portlab').hidden = !!(d && !hasPorts(d)); $('fp-grid').hidden = !!(d && !hasPorts(d));
         if (d && !hasPorts(d) && !READING[d.index]) { var st = (d.layout || {}).ports_state;
           rb.innerHTML = st === 'running' ? '<p class="fx-note">The ports of D' + d.index + ' are being read, about a minute. The list fills in when they are there.</p>' : '<p class="fx-note">The ports of this device have not been read yet.</p><button class="btn primary" type="button" id="fp-read">Read the ports</button>';
           if (st === 'running') { READING[d.index] = 1; readPorts(d); } else { var b = $('fp-read'); if (b) b.onclick = function () { readPorts(d); }; } }
-        $('fp-port').innerHTML = (cur.port ? '' : '<option value="">Choose a port</option>') + ports.map(function (p) { return '<option value="' + p.id + '"' + (p.id === cur.port ? ' selected' : '') + '>Port ' + p.id + ' · ' + esc(stateWord(p.status)) + '</option>'; }).join('');
+        $('fp-port').innerHTML = (cur.port ? '' : '<option value="">Choose a port</option>') + ports.map(function (p) { return '<option value="' + p.id + '"' + (p.id === cur.port ? ' selected' : '') + '>' + esc(pname(p)) + ' · ' + esc(stateWord(p.status)) + '</option>'; }).join('');
         $('fp-port').disabled = !d; if (d) $('fp-dev').value = String(cur.dev);   // a device tapped on the rack picture shows in the picker too
         $('fp-grid').innerHTML = ports.map(function (p) { var st = p.status === 'connected' ? 'on' : p.status === 'empty' ? 'off' : 'na';
           return '<button type="button" class="ft-cell ' + st + (p.id === cur.port ? ' chosen' : '') + '" data-p="' + p.id + '" title="Port ' + p.id + ': ' + esc(stateWord(p.status)) + '" aria-pressed="' + (p.id === cur.port) + '">' + p.id + '</button>'; }).join('');
