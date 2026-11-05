@@ -231,3 +231,55 @@ def test_every_error_has_the_same_shape(eng):
     assert r.status_code == 405 and "error" in r.json() and r.headers.get("allow") == "GET"
     r = c.post("/api/video/x/database", content=b"{bad", headers={"Content-Type": "application/json"})
     assert r.status_code in (400, 404) and "error" in r.json()
+
+
+# ---- the testers' findings of 4 Nov 2026 (server side)
+def test_the_run_stage_never_goes_down(eng):
+    app = eng[0]
+    seq = ["checking which way the video runs", "stitching the video into one rack picture", "stitching: aligning the frames (40 %)", "rack image: the rails",
+           "rack image: units", "rack image: occupancy", "rack image: devices", "reading the video", "registering 40 frames", "registered frame 5 (1/40)",
+           "running the photo pipeline on 12 frames", "frame 12: 20 units (1/12)", "fusing", "reading text on the units", "best frames per device (every frame of the video)",
+           "drawing", "classifying devices", "units: 3 rows split, 0 inserted, 0 merged (equal-size count rule)", "units: picture corrected so every unit is 44 px tall",
+           "picture levelled: lean up to 1.2 % taken out", "devices: 5 outlines taken from their crop boxes", "ports: reading every switch, router, firewall and gateway",
+           "building the report", "done"]
+    stage, seen = 0, []
+    for m in seq:
+        stage = max(stage, app.stage_of(m) or 0); seen.append(stage)
+    assert seen == sorted(seen) and seen[0] == 1 and seen[-1] == 15
+    assert {3, 5, 8, 11, 14} <= set(seen)
+
+
+def test_a_re_encoded_video_is_the_same_video(eng, tmp_path):
+    import cv2
+    import numpy as np
+    app = eng[0]
+    def write(path, fps, skip_every=0, seed=1):
+        rng = np.random.default_rng(seed); vw = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"mp4v"), fps, (160, 120))
+        scenes = [cv2.GaussianBlur(rng.integers(0, 255, (120, 160, 3), dtype=np.uint8), (0, 0), 4) for _ in range(6)]
+        for i in range(60):
+            if skip_every and i % skip_every == 0:
+                continue
+            vw.write(scenes[i * 6 // 60])
+        vw.release()
+    write(tmp_path / "a.mp4", 30); write(tmp_path / "b.mp4", 29, skip_every=30); write(tmp_path / "c.mp4", 30, seed=2)
+    fa, fb, fc = (app._video_fingerprint(tmp_path / n) for n in ("a.mp4", "b.mp4", "c.mp4"))
+    assert fa and fb and fc
+    assert app._same_look(fa, fb)                               # the phone's re-encode: other frame rate and count, the same footage
+    assert not app._same_look(fa, fc)                           # another video of the same length is not it
+
+
+def test_a_port_read_does_not_refuse_an_upload(eng):
+    app, client, tmp = eng
+    with app.MODEL_LOCK:                                        # a device's ports being read holds the model lock
+        r = _as(client, "tech").post("/api/video", data={"sample": "vdo1"})
+    assert r.status_code == 400 and "video" in r.json()["error"]   # refused only for the missing video, not as "another rack is being read"
+
+
+def test_a_second_run_is_refused_with_the_step(eng):
+    app, client, tmp = eng
+    j = _run(app, tmp, "busy2", 1, 2); j["status"] = "running"; j["stage"] = 7
+    try:
+        r = _as(client, "tech").post("/api/video", data={"sample": "vdo1"})
+        assert r.status_code == 409 and "step 7 of 15" in r.json()["error"] and "one runs at a time" in r.json()["error"]
+    finally:
+        app.JOBS.pop("busy2")

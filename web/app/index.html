@@ -13,11 +13,11 @@
 <link rel="icon" href="/app/img/logo-96.png">
 <link rel="apple-touch-icon" href="/app/img/logo-192.png">
 <link rel="preload" href="/app/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/app/app.css?v=127">
+<link rel="stylesheet" href="/app/app.css?v=128">
 <link rel="stylesheet" href="/app/rt/rt-topology.css?v=12">
-<link rel="stylesheet" href="/app/flow.css?v=18">
-<link rel="stylesheet" href="/app/features.css?v=5"><!-- wt/features -->
-<link rel="stylesheet" href="/app/standard.css?v=10">
+<link rel="stylesheet" href="/app/flow.css?v=19">
+<link rel="stylesheet" href="/app/features.css?v=6"><!-- wt/features -->
+<link rel="stylesheet" href="/app/standard.css?v=11">
 <style>
 /* the Drift tab: the database the run is checked against, the matched record, the differences */
 #df-top { display:flex; flex-direction:column; gap:12px; width:100%; }
@@ -69,6 +69,11 @@
     <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6.5 3h7l4 4v12.5A1.5 1.5 0 0 1 16 21H6.5A1.5 1.5 0 0 1 5 19.5v-15A1.5 1.5 0 0 1 6.5 3z"/><path d="M13 3v4.5h4.5"/><path d="M8.5 12.5h7M8.5 16h5"/></symbol>
     <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11.5a8 8 0 0 0-14.3-4.6L4 9"/><path d="M4 4.5V9h4.5"/><path d="M4 12.5a8 8 0 0 0 14.3 4.6L20 15"/><path d="M20 19.5V15h-4.5"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-device" viewBox="0 0 24 24"><rect x="3" y="7.5" width="18" height="9" rx="1.8"/><path d="M7 12h.01M10.5 12h.01M14 12h.01"/><path d="M17.5 10.5v3"/></symbol>
+    <symbol id="i-port" viewBox="0 0 24 24"><rect x="7" y="9" width="10" height="9" rx="1.6"/><path d="M9.5 9V5M14.5 9V5"/><path d="M12 18v3"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1 1"/><path d="M14 10a3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1-1"/></symbol>
+    <symbol id="i-cable" viewBox="0 0 24 24"><path d="M4 7h4a3 3 0 0 1 3 3v4a3 3 0 0 0 3 3h6"/><path d="M4 4.5v5M20 14.5v5"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 6.5h15"/><path d="M9.5 6.5V4.5h5v2"/><path d="M6.5 6.5l1 13a1.5 1.5 0 0 0 1.5 1.4h6a1.5 1.5 0 0 0 1.5-1.4l1-13"/></symbol>
   </defs>
 </svg>
@@ -268,7 +273,7 @@
       <div class="rteos" id="rt-topo"></div>
     </div>
     <div class="rpart" id="res-report">
-      <div class="rpbar"><div class="cmpdd"><button class="btn primary" type="button" id="cmp-btn" aria-haspopup="true" aria-expanded="false">Compare against the database</button>
+      <div class="rpbar"><a class="btn" id="rep-pdf" href="#" download hidden><svg class="ic"><use href="#i-doc"/></svg>Download PDF</a><div class="cmpdd"><button class="btn primary" type="button" id="cmp-btn" aria-haspopup="true" aria-expanded="false">Compare against the database</button>
         <div class="ddmenu" id="cmp-menu" hidden><button type="button" data-cmpsrc="excel">Excel workbook</button><button type="button" data-cmpsrc="netbox">NetBox</button><button type="button" data-cmpsrc="cmdb">ServiceNow CMDB</button></div></div></div>
       <a href="#" id="cmp-back" class="cmpback" hidden>Back to the report</a>
       <div id="cmp-status" class="cmpstatus" hidden></div>
@@ -346,11 +351,11 @@
 <nav class="bottom" id="rnav" hidden>
   <div class="pill">
     <a href="#" data-rtab="rack"><svg class="ic"><use href="#i-rack"/></svg><span>Rack</span></a>
-    <a href="#" data-rtab="devices"><svg class="ic"><use href="#i-guide"/></svg><span>Devices</span></a>
-    <a href="#" data-rtab="find" data-tool="1"><svg class="ic"><use href="#i-rack"/></svg><span>Find a port</span></a>
-    <a href="#" data-rtab="connections" data-tool="1"><svg class="ic"><use href="#i-server"/></svg><span>Connections</span></a>
-    <a href="#" data-rtab="cables" data-tool="1"><svg class="ic"><use href="#i-doc"/></svg><span>Cables</span></a>
-    <a href="#" data-rtab="layout"><svg class="ic"><use href="#i-chart"/></svg><span>Layout</span></a>
+    <a href="#" data-rtab="devices"><svg class="ic"><use href="#i-device"/></svg><span>Devices</span></a>
+    <a href="#" data-rtab="find" data-tool="1"><svg class="ic"><use href="#i-port"/></svg><span>Find a port</span></a>
+    <a href="#" data-rtab="connections" data-tool="1"><svg class="ic"><use href="#i-link"/></svg><span>Connections</span></a>
+    <a href="#" data-rtab="cables" data-tool="1"><svg class="ic"><use href="#i-cable"/></svg><span>Cables</span></a>
+    <a href="#" data-rtab="layout"><svg class="ic"><use href="#i-grid"/></svg><span>Layout</span></a>
     <a href="#" data-rtab="report"><svg class="ic"><use href="#i-doc"/></svg><span>Report</span></a>
   </div>
 </nav>
@@ -366,7 +371,7 @@
 <div id="lb" hidden><img id="lbimg" alt=""><span>tap to close</span></div>
 <script src="/app/topology.js?v=1"></script>
 <script src="/app/rt/rt-topology.js?v=12" defer></script>
-<script src="/app/app.js?v=168"></script>
-<script src="/app/features.js?v=10"></script><!-- wt/features -->
+<script src="/app/app.js?v=169"></script>
+<script src="/app/features.js?v=11"></script><!-- wt/features -->
 </body>
 </html>

@@ -57,3 +57,32 @@ racktrack-app is the core: its video engine reads a rack from a sweep video. We 
 
 ## State at 4 Nov afternoon (testers outside the network)
 - A tester's run (a D-Link switch with its make read but no model, ports mapped automatically) bounced every tab of the result, the Report among them, back to the run page: the device state read the make and model off the typed record, which is null for such a device. Fixed in web/app/app.js (the typed record is treated as empty when missing), app script version 168. tools/proof_result_tabs.py now opens every tab of every finished run as a person at phone and laptop width and fails on any error, handled or not; it passes for the four Test Organization runs, through the front door and through the public address.
+
+## State at 5 Nov (the testers' 27 findings, built)
+
+The tester's 27 findings of 4 Nov were triaged (published plan: https://claude.ai/artifact/FAzWkXscQ9V9TXAPb1dvZa; her own page with
+her answers: https://claude.ai/artifact/BEtrRmtasSZvqNKq2qEBui) and built on 5 Nov, locally only, nothing deployed or pushed.
+- Screens (web/app): the app bar's chosen button is its own rounded shape (1); the signed-out screens are locked to the screen,
+  body[data-page] (2); the camera guide takes the whole screen (3); the run page keeps only main's clearance (4); the stage of a run
+  comes numbered from the server (status "stage", never going down) and the page uses it (5, 6); the rack picture fits the space
+  really left under the tab row, and the rack ID card is one line with the choices in a row and typing folded (7); the zoom keeps
+  the device's own crop unless the stitched band holds the whole detector box, the view now carries "box" (8); the tab row sits
+  under the measured header height, --topbar-h (14); one icon per tab (16); the compare shows the label strip only when a label
+  was read there, else the rack small, says "none of the N racks matches", and the record picker is a real dropdown plus a
+  search box (17, 18); Find a port lists every device, a device not read yet gets Read the ports there, the answer sits beside
+  the picture and scrolls into view (12, 21, 24, 25); the wheel over the 3D scene never scrolls the page (27).
+- Server (server/app.py): STAGE_WORDS and stage_of; an upload is refused only for another running run, with its step, never for
+  a device's port read holding the model lock (11); a video read before is also matched by size, duration and three sampled
+  frames when the phone re-encoded it, _video_fingerprint and _same_look (10); /api/video/<id>/report.pdf prints the report with
+  headless Chromium, a Download PDF button on the Report tab (22); after a run every port-bearing device is read on its own, one at
+  a time, start_ports_all (12, 21, 26).
+- Engine: a box the detector calls Empty is no device, its units go to uncertain (19, rack_video.devices_from; source_db treats
+  "Empty" as no kind); the patch panel grid never puts a slot past the picture's edge and a grid that leaves the picture means the
+  size guess was wrong (13, 15, patch_panels.complete_grid img_w); the unit ladder adds at most two rows past the model's outermost
+  box at each end (23, unit_grid._UNIT_EXTEND_MAX).
+- Tests: tests/test_panel_grid_and_ladder.py (new) and four new cases in tests/test_engine_routes.py.
+- tools/units_only/: the stand-alone unit tool a teammate tests on a laptop (video or picture in, the units said and drawn on the
+  picture and the video); make_zip.sh builds the Desktop zip from engine/ and models/.
+- Proofs: tools/proof_result_tabs.py on every run at both widths; the screenshot proof of the changed screens; the tester's 15:34
+  video re-run offline for the Empty box and the ladder end; her patch panel D2 re-read for the grid. The 13-video proof against
+  reports/2026-11-04 is the last step before a deploy.

@@ -66,6 +66,7 @@
     if (!me && !AUTH_SCREENS[name]) { name = 'signin'; }
     if (me && AUTH_SCREENS[name]) { name = 'home'; }
     document.querySelectorAll('.screen').forEach(function (s) { s.hidden = s.dataset.screen !== name; });
+    document.body.dataset.page = name;                                             // the sign-in screens are locked to the screen (testers, 4 Nov 2026: the page moved under the keyboard); not data-screen, which names the section elements
     document.body.classList.toggle('on-home', name === 'home');                  // the home page is white, like racktrack.ai
     var tab = name === 'job' ? 'sweep' : (name === 'history' || name === 'models' || name === 'connections' || name === 'copies') ? 'more' : name;
     var rn = $('rnav'), wide = window.matchMedia('(min-width:1000px)').matches;             // web layout: the result's tabs sit at the top of the page, not in a bar at the bottom (user, 2026-10-29)
@@ -81,6 +82,7 @@
     else if (rtab) { var onR = document.querySelector('#rnav a.on'), pill = onR && onR.parentNode; if (pill && pill.scrollWidth > pill.clientWidth) { var ra = onR.getBoundingClientRect(), rp = pill.getBoundingClientRect(); pill.scrollLeft += (ra.left + ra.width / 2) - (rp.left + rp.width / 2); } }   // on a phone the marked tab is brought into view sideways only (the page does not move)
     document.querySelectorAll('[data-nav]').forEach(function (a) { a.classList.toggle('on', a.dataset.nav === tab); });
     $('nav').hidden = !me || !!rtab || !!tool; $('top').hidden = !me; $('side').hidden = !me; document.body.classList.toggle('signed', !!me);
+    requestAnimationFrame(topbarHeight);                                           // the tab row sits under the header's real height, two lines or one (testers, 4 Nov 2026)
     $('back').hidden = !DETAIL[name]; $('topmark').hidden = !!DETAIL[name]; $('toptitle').textContent = (rtab || tool) ? 'Result' : (DETAIL[name] || 'RackTrack');
     $('top').classList.toggle('detail', !!DETAIL[name]); $('who').hidden = !!DETAIL[name]; $('topspacer').hidden = !DETAIL[name]; if (name !== 'result') { $('topsub').hidden = true; }
     var TT = { home: 'Racks', sweep: 'Scan a rack', job: 'Reading the rack', history: 'History', more: 'Profile', models: 'Models and accuracy', connections: 'Connections', copies: 'Database copies', signin: 'Sign in', contact: 'Contact us', forgot: 'Reset your password', invite: 'Accept your invite', pending: 'Waiting for approval' };
@@ -103,6 +105,8 @@
     if (name === 'forgot') AUTH.openForgot();
     if (name === 'tools' && window.RTFEAT) window.RTFEAT.open(arg, arg2, h.split('/')[3]);      // wt/features: the rack tools (mobile/features.js)
   }
+  function topbarHeight() { var t = $('top'); if (t && !t.hidden) document.body.style.setProperty('--topbar-h', t.offsetHeight + 'px'); }
+  window.addEventListener('resize', topbarHeight);
   window.addEventListener('hashchange', route);
   $('back').addEventListener('click', function () { if (location.hash.indexOf('#result/') === 0) return go('history'); if (history.length > 1) history.back(); else go('home'); });
 
@@ -227,7 +231,7 @@
       var running = rows.filter(function (x) { return x.status === 'running'; })[0], last = rows.filter(function (x) { return x.status === 'done' && !x.demo; })[0];
       if (last && !LAST) remember(last.id); else if (LAST) remember(LAST);
       $('now-card').hidden = !running;
-      if (running) { var n = stepOf(running.progress, running.status); $('now-title').textContent = running.partial ? 'Rack read, ports next' : 'Reading a rack'; $('now-step').textContent = running.partial ? '' : 'step ' + n + ' of 15'; $('now-card').href = (running.partial ? '#result/' : '#job/') + running.id;
+      if (running) { var n = running.stage || stepOf(running.progress, running.status); $('now-title').textContent = running.partial ? 'Rack read, ports next' : 'Reading a rack'; $('now-step').textContent = running.partial ? '' : 'step ' + n + ' of 15'; $('now-card').href = (running.partial ? '#result/' : '#job/') + running.id;
         clearInterval(pollTimer); pollTimer = setInterval(function () { if ((location.hash || '#home') === '#home') loadHome(); }, 5000); }
       // one row per rack: its latest run (with that run's compare state); earlier runs of the rack are listed on its result page
       var byRack = {}, order = [];
@@ -347,7 +351,7 @@
   }
   function portsLine(ports) { var k = Object.keys(ports || {}); if (!k.length) return ''; var d = k.filter(function (x) { return ports[x] === 'done'; }).length; return d + ' of ' + k.length + ' devices'; }
   function renderRun(j, id) {
-    var running = j.status === 'running', failed = j.status === 'failed', done = j.status === 'done', n = stepOf(failed ? j.failed_at : j.progress, j.status);
+    var running = j.status === 'running', failed = j.status === 'failed', done = j.status === 'done', n = done ? 15 : (j.stage || stepOf(failed ? j.failed_at : j.progress, j.status));   // the server numbers the stage; the words are only a fallback
     var html = RUN_STAGES.map(function (s) {
       var fin = done || n > s[2], on = running && !fin && n >= s[1], note = '';
       if (s[0] === 'Port layouts') { var pl = portsLine(j.ports); if (pl && (on || fin)) note = pl; }
@@ -408,7 +412,8 @@
     var inner = $('rackinner');
     if (!FIT) { sh.style.removeProperty('--fit-h'); var C = RES.crop; if (C && C[2] && inner.clientWidth) inner.style.height = Math.round(inner.clientWidth * C[3] / C[2]) + 'px'; return; }   // WebKit gives the box no height from its aspect ratio: set it
     inner.style.height = '';
-    var top = sh.getBoundingClientRect().top + window.scrollY, nav = $('rnav').getBoundingClientRect(), bottom = (nav.height ? nav.top : window.innerHeight) - 10 - $('caprow').offsetHeight - 8;
+    var top = sh.getBoundingClientRect().top, nav = $('rnav').getBoundingClientRect(), navBelow = nav.height && nav.top > top;   // the tab row counts only when it sits below the picture (a bar at the bottom), not when it is the row at the top
+    var bottom = (navBelow ? nav.top : window.innerHeight) - 10 - $('caprow').offsetHeight - 8;
     sh.style.setProperty('--fit-h', Math.max(240, bottom - top) + 'px');
     var settle = function () { var over = document.body.scrollHeight - window.innerHeight; if (over > 0) sh.style.setProperty('--fit-h', Math.max(240, parseFloat(sh.style.getPropertyValue('--fit-h')) - over) + 'px'); };   // nothing left to scroll
     requestAnimationFrame(settle); setTimeout(settle, 400);
@@ -615,6 +620,7 @@
     var mountRT = function () { if (!window.RTEOSTopology) return setTimeout(mountRT, 150);
       if (!$('rt-fit') && window.RTEOSTopology.classes) { var K = window.RTEOSTopology.classes, sty = document.createElement('style'); sty.id = 'rt-fit';   // the 2D drawing and the 3D scene fit the screen
         sty.textContent = '.rteos .' + K.scene + '{height:var(--elev-h);min-height:0;border:0;border-radius:14px;box-shadow:0 1px 2px rgba(17,22,20,.04),0 18px 40px -26px rgba(17,22,20,.32)}.rteos svg[data-zoom]{width:100% !important;height:auto !important;max-height:var(--elev-h)}.rteos .' + K.summary + ',.rteos .' + K.hint + ',.rteos .' + K.caption + ',.rteos .' + K.note + '{font-size:12px}'; document.head.appendChild(sty); }
+      var topo = $('rt-topo'); if (!topo.dataset.wheel) { topo.dataset.wheel = '1'; topo.addEventListener('wheel', function (e) { if (e.target.closest && e.target.closest('canvas')) e.preventDefault(); }, { passive: false }); }   // the wheel over the 3D scene zooms it, the page stays put (testers, 4 Nov 2026)
       window.RTEOSTopology.mount($('rt-topo'), detail, function (o) { if (o && o.deviceId != null) { selectDevice(parseInt(o.deviceId, 10)); go('result/' + RES.id + '/devices'); } }); };
     mountRT();
     // no filming notes on the result: they are for us, not for the person reading the rack
@@ -840,7 +846,7 @@
     var chips = opts.map(function (o, i) { return '<button class="rkopt' + (i === 0 && read && o.id === read ? ' first' : '') + '" type="button" data-rkid="' + esc(o.id) + '"><b>' + esc(o.id) + '</b><small>' + esc(o.why) + '</small></button>'; }).join('');
     el.innerHTML = '<div class="rkhead"><b>' + (read ? 'Is this rack ' + esc(read) + '?' : v.rack_label_running ? 'Which rack is this? Reading the label…' : 'Which rack is this?') + '</b><small>' + (read ? 'Read off the label in the video. Confirm it, pick another, or type the ID.' : 'No ID could be read off the label. Pick one or type it.') + ' The ID links this rack to the network layer.</small></div>'
       + (chips ? '<div class="rkopts">' + chips + '</div>' : '')
-      + '<form class="rktype" data-rkid-form><input type="text" name="id" placeholder="Type the rack ID, e.g. SP-HYD-RM01-R01-R2" autocomplete="off" spellcheck="false"><button class="btn primary" type="submit">Save</button></form>'
+      + '<details class="rktypef"' + (chips ? '' : ' open') + '><summary>Type the ID</summary><form class="rktype" data-rkid-form><input type="text" name="id" placeholder="Type the rack ID, e.g. SP-HYD-RM01-R01-R2" autocomplete="off" spellcheck="false"><button class="btn primary" type="submit">Save</button></form></details>'
       + '<button class="link rkskip" type="button" data-rkid-skip>Not now</button>';
   }
   // what to do next with this rack: one line, the first open step (user, 2026-10-30: no clear next step after a scan)
@@ -923,6 +929,7 @@
       // the ports not sure, one row per device, as the worklist asks them ("Is there a cable in port 2 of D3?")
       .concat(devs.map(function (d) { var un = ((d.layout || {}).ports || []).filter(function (p) { return p.status !== 'connected' && p.status !== 'empty'; });
         return un.length ? '<button class="lrow" type="button" data-dev="' + d.index + '"><span class="iu">' + UP(d.top) + '</span><b>D' + d.index + ' · ' + (un.length === 1 ? 'port ' + esc(un[0].id) + ' not sure' : un.length + ' ports not sure: ' + esc(un.slice(0, 6).map(function (p) { return p.id; }).join(', ')) + (un.length > 6 ? ' and ' + (un.length - 6) + ' more' : '')) + '</b><span class="arr">›</span></button>' : null; }).filter(Boolean));
+    var pdf = $('rep-pdf'); if (pdf) { pdf.href = '/api/video/' + encodeURIComponent(v.id) + '/report.pdf'; pdf.hidden = false; }   // the whole report as one PDF (testers, 4 Nov 2026)
     $('rp-top').innerHTML = '<header class="rphead"><span class="eyebrow">Rack report</span><h2>' + esc(title) + '</h2><p class="muted">' + esc(v.title || '') + '</p><p class="rpline"><b>' + n + 'U</b> · <b>' + used + '</b> in use · <b class="free">' + free + '</b> free' + (unc ? ' · <b class="unc">' + unc + '</b> not sure' : '') + '</p></header>'
       + '<div class="rpcol b"><section class="card rpelev"><div class="rpkpis"><div><b>' + devs.length + '</b><span>devices</span></div><div><b>' + kinds.length + '</b><span>kinds</span></div><div><b>' + free + 'U</b><span>free</span></div><p class="muted small">' + esc(kindLine) + '</p></div>' + elev + '</section>'
       + '</div><div class="rpcol a"><span class="glabel">Devices, top to bottom</span><div class="card flush"><table class="rptable"><thead><tr><th>Unit</th><th>Device</th><th>Make and model</th></tr></thead><tbody>' + table + '</tbody></table></div></div><div class="rpcol c">'
@@ -930,6 +937,7 @@
       + '<span class="glabel">Needs a look</span>' + (look.length ? '<div class="card flush look">' + look.join('') + '</div>' : '<div class="card look none"><i class="sig"></i>Nothing. Every unit and device is clear.</div>') + '</div>';
   }
   document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('#rp-top .ed, #rp-top tr[data-dev]'); if (t) { selectDevice(parseInt(t.dataset.dev, 10)); go('result/' + RES.id + '/devices'); } });
+  document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('#rep-pdf')) toast('Making the PDF, a few seconds. It downloads when ready.'); });
   document.addEventListener('keydown', function (e) { if (e.key !== 'Enter' && e.key !== ' ') return; var t = e.target.closest && e.target.closest('#rp-top tr[data-dev]'); if (t) { e.preventDefault(); t.click(); } });   // the device rows open by keyboard too
   document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('#rp-top .lrow'); if (!b) return;
     if (b.dataset.unit) selectUnit(b.dataset.unit); else selectDevice(parseInt(b.dataset.dev, 10)); go('result/' + RES.id + '/devices'); });
@@ -980,16 +988,20 @@
     }
     if (ui !== 'confirm' || !(d.chosen && d.source === src)) { $('df-top').innerHTML = ''; return renderDiff(d, ui === 'drift'); }
     var m = d.match, other = m && m.how === 'picked' && I.rack_key !== m.rack_key;   // a person picked another record than the steps found: the steps' confidence is not this record's
+    var RLv = (RES.view && RES.view.rack_label) || {}, labelRead = !!(RLv.id && RLv.id.text), nRacks = (d.candidates || []).length;   // the strip above the first unit is where the label is read: shown as proof only when one was read there (testers, 4 Nov 2026)
     var h = '<div class="card idcard"><div class="dfrow"><b>Confirm the verified rack id</b><span class="muted small">' + esc(SRCLABEL[src] || d.sources[src]) + '</span></div>'
-      + '<div class="dfrow idhead"><span class="idrack">' + (m ? esc(m.rack_key) : 'No single rack found') + '</span>' + (other ? '<span class="muted small">' + esc(m.why) + '</span>' : I.confidence != null ? '<span class="idconf ' + esc(I.state) + '">' + pc(I.confidence) + ' overall</span>' : '') + '</div>'
+      + '<div class="dfrow idhead"><span class="idrack">' + (m ? esc(m.rack_key) : 'None of the ' + nRacks + (nRacks === 1 ? ' rack' : ' racks') + ' in this copy matches') + '</span>' + (other ? '<span class="muted small">' + esc(m.why) + '</span>' : I.confidence != null ? '<span class="idconf ' + esc(I.state) + '">' + pc(I.confidence) + ' overall</span>' : '') + '</div>'
       + (other ? '<p class="muted small">' + (I.rack_key ? 'The steps below found ' + esc(I.rack_key) + ', not this record.' : 'The steps below found no single rack.') + ' Confirm only if you are sure.</p>' : '')
-      + '<figure class="lblstrip"><img src="/api/video/' + encodeURIComponent(RES.id) + '/rack-label.jpg" alt="The rack label crop" onerror="this.parentNode.hidden=true"></figure>'
+      + (!m ? '<p class="muted small">Pick the rack from the list below, or type its ID. The rack picture is shown for comparison.</p>' : '')
+      + (labelRead ? '<figure class="lblstrip"><img src="/api/video/' + encodeURIComponent(RES.id) + '/rack-label.jpg" alt="The rack label crop" onerror="this.parentNode.hidden=true"></figure>'
+         : (RES.view && RES.view.rack && RES.view.rack.picture ? '<figure class="lblstrip rackmini"><img src="' + esc(RES.view.rack.picture) + '" alt="The rack" onerror="this.parentNode.hidden=true"></figure>' : ''))
       + stepsHtml(I)
       + '<div class="dfrow idbtns"><button class="btn primary" type="button" id="cmp-continue"' + (m ? '' : ' disabled') + '>Confirm</button><button class="btn" type="button" id="cmp-change">Change</button></div>';
     if (RES.cmpPick || !m) {
       h += '<div class="idpick">' + (!m && I.top && I.top.length ? '<p class="glabel">The closest racks</p><div class="idtop">' + I.top.map(function (t) { return '<button class="btn" type="button" data-cmppick="' + esc(t.rack_key) + '">' + esc(t.rack_key) + '<small class="muted"> ' + esc(t.why) + '</small></button>'; }).join('') + '</div>' : '')
-        + '<div class="dfrow"><label class="muted small" for="cmp-type">Which record is this rack?</label><input id="cmp-type" list="cmp-list" placeholder="Search or type a rack id" autocomplete="off"><datalist id="cmp-list">'
-        + d.candidates.map(function (r) { return '<option value="' + esc(r.rack_key) + '">' + esc(r.rack_key) + ' - ' + pl(r.devices, 'device') + '</option>'; }).join('') + '</datalist><button class="btn" type="button" id="cmp-use">Use this record</button></div></div>';
+        + '<div class="dfrow cmppick"><label class="muted small" for="cmp-sel">Which record is this rack?</label><select id="cmp-sel"><option value="">Choose the rack</option>'
+        + d.candidates.map(function (r) { return '<option value="' + esc(r.rack_key) + '">' + esc(r.rack_key) + ' - ' + pl(r.devices, 'device') + '</option>'; }).join('') + '</select>'
+        + '<input id="cmp-type" placeholder="Search the list, or type a new rack id" autocomplete="off"><button class="btn" type="button" id="cmp-use">Use this record</button></div></div>';   // a real dropdown: the browser's typing suggestions did not open on the phone (testers, 4 Nov 2026)
     }
     $('df-top').innerHTML = h + '</div>';
     renderDiff(d, false);
@@ -1034,12 +1046,17 @@
       return api('/api/sources/' + src + '/import', { method: 'POST' }).then(function (r) { cmpStatus('Finding the rack...'); return Promise.resolve(setDb({ source: src })).then(afterFind(src)).then(toCompare); })
         .catch(function (er) { RES.cmpUi = 'idle'; cmpStatus(String(er.message || 'The copy did not work.').replace(/([^.!?])$/, '$1.'), 'err'); });  } catch (er) { console.error('compare', er); RES.cmpUi = 'idle'; cmpStatus(String(er && er.message || 'The compare did not start').replace(/[.!?]*$/, '') + '.', 'err'); } return; }
     if (t.dataset.cmppick) return setDb({ source: src, rack_key: t.dataset.cmppick });
-    if (t.id === 'cmp-use') { var v = ($('cmp-type').value || '').trim(); if (!v) return toast('Type or pick a rack id first.');
+    if (t.id === 'cmp-use') { var sel = $('cmp-sel'), v = ((sel && sel.value) || $('cmp-type').value || '').trim(); if (!v) return toast('Pick a rack from the list or type its id first.');
       var known = (RES.cmp.candidates || []).some(function (r) { return r.rack_key === v; });
       if (known) return setDb({ source: src, rack_key: v });
       return saveRackId({ id: v }).then(function () { toast(v + ' is kept as this rack\'s id; it is not in this copy.'); return setDb({ source: src }); }); }
     if (t.id === 'cmp-continue') { var m = RES.cmp.match; RES.cmpUi = 'drift'; return setDb({ source: src, rack_key: m && m.how === 'picked' ? m.rack_key : null, confirmed: true }).then(function () { secTo('diff'); }); }
   });
+  document.addEventListener('input', function (e) {                   // typing narrows the dropdown; an exact id selects it
+    var i = e.target; if (!i || i.id !== 'cmp-type') return; var sel = $('cmp-sel'); if (!sel) return; var q = i.value.trim().toLowerCase(), hit = null;
+    [].forEach.call(sel.options, function (o) { if (!o.value) return; var on = !q || o.textContent.toLowerCase().indexOf(q) >= 0; o.hidden = !on; if (on && o.value.toLowerCase() === q) hit = o.value; });
+    sel.value = hit || ''; });
+  document.addEventListener('change', function (e) { var s = e.target; if (s && s.id === 'cmp-sel' && s.value) { var i = $('cmp-type'); if (i) i.value = s.value; } });
   // the workbook's validation report (RT-EOS's checks), shown before anything is imported; Import makes a new Excel copy (Profile > Database copies)
   function pl(n, w) { return n + ' ' + w + (n === 1 ? '' : 's'); }
   document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('[data-dfimp], #df-xlsx'); if (!t) return;
@@ -1124,9 +1141,11 @@
     var p = g.getImageData(0, 0, w, h).data, gr = new Float32Array(w * h), s = 0, s2 = 0, n = 0; for (var i = 0; i < w * h; i++) gr[i] = p[i * 4] * .3 + p[i * 4 + 1] * .59 + p[i * 4 + 2] * .11;
     for (var y = 1; y < h - 1; y++) for (var x = 1; x < w - 1; x++) { var k = y * w + x, l = 4 * gr[k] - gr[k - 1] - gr[k + 1] - gr[k - w] - gr[k + w]; s += l; s2 += l * l; n++; } return n ? s2 / n - (s / n) * (s / n) : 0; }
   function clearestCrop(d, el) {
-    var rack = $('res-rack-plain'), q = d.polygon; el.src = d.crop;
-    if (!q || !rack.complete || !rack.naturalWidth) return;
+    var rack = $('res-rack-plain'), q = d.polygon, b = d.box; el.src = d.crop;
+    if (d.crop) return;                                                             // the zoom is the device's own crop, cut around the detector's box from its best frame: the band of the stitched picture is sheared where the stitch leans and cut a switch at its top (testers, 4 Nov 2026)
+    if (!q || !b || !rack.complete || !rack.naturalWidth) return;                 // no crop and no detector box: nothing better than the band
     var xs = q.map(function (p) { return p[0]; }), ys = q.map(function (p) { return p[1]; }), box = [Math.max(0, Math.min.apply(null, xs)), Math.max(0, Math.min.apply(null, ys)), Math.min(rack.naturalWidth, Math.max.apply(null, xs)), Math.min(rack.naturalHeight, Math.max.apply(null, ys))];
+    var m = (b[3] - b[1]) * 0.08; if (b[1] < box[1] - m || b[3] > box[3] + m) return;   // the band between the unit lines cuts the device (the grid is off by part of a unit): keep the device's own crop (testers, 4 Nov 2026)
     var fr = new Image(); fr.crossOrigin = 'anonymous'; fr.onload = function () { try {
       if (sharpness(rack, box) > sharpness(fr)) { var c = document.createElement('canvas'); c.width = box[2] - box[0]; c.height = box[3] - box[1]; c.getContext('2d').drawImage(rack, box[0], box[1], c.width, c.height, 0, 0, c.width, c.height); el.src = c.toDataURL('image/jpeg', .92); }
     } catch (e) {} }; fr.src = d.crop; }

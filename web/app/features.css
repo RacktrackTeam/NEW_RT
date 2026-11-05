@@ -36,6 +36,12 @@
   .ft-table td { display:flex; justify-content:space-between; gap:12px; border:0; padding:3px 12px; text-align:right; overflow-wrap:anywhere; }
   .ft-table td::before { content:attr(data-label); color:var(--t2); font-weight:600; flex:none; max-width:40%; text-align:left; } }
 
+/* Find a port: the picture on the left, the pickers and the answer on the right (testers, 4 Nov 2026: the answer sat far below the picture) */
+.fp-top { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px; align-items:start; }
+.fp-pick label { display:block; margin:0 0 10px; } .fp-pick label > span { display:block; font-size:12px; font-weight:600; color:var(--t2); margin-bottom:4px; }
+.fp-pick select { width:100%; } #fp-out { margin-top:16px; } #fp-out .fx-two { grid-template-columns:1fr; gap:14px; }
+.fp-read { display:flex; flex-direction:column; gap:8px; align-items:flex-start; margin:8px 0; }
+@media (max-width:799px) { .fp-top { grid-template-columns:1fr; } }
 /* The tool pages as screens of the app: a picture with the thing marked, the facts beside it. White page, #1f2a3a accent. */
 .fx-page { display:flex; flex-direction:column; gap:16px; } .fx-title h1 { margin:0; font-size:22px; }
 .fx-bar { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; } .fx-bar label { display:flex; flex-direction:column; gap:4px; flex:1 1 220px; min-width:0; font-size:12px; color:var(--t2); font-weight:600; } .fx-bar label.fx-num { flex:0 0 96px; }

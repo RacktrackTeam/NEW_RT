@@ -281,7 +281,7 @@ JOBS = {}                                   # id -> {"status", "progress", "resu
 
 def _save(j):
     """status.json beside the run: what the history and the app need, never the big result."""
-    keep = {k: j.get(k) for k in ("id", "status", "progress", "error", "started", "finished", "title", "name", "from_guide", "stride", "summary", "phase", "partial", "ports", "ports_error", "video_file", "rack_id", "video_md5", "video_probe", "db", "position", "org", "site")}
+    keep = {k: j.get(k) for k in ("id", "status", "progress", "error", "started", "finished", "title", "name", "from_guide", "stride", "summary", "phase", "partial", "ports", "ports_error", "video_file", "rack_id", "video_md5", "video_probe", "video_fp", "stage", "db", "position", "org", "site")}
     try:
         (pathlib.Path(j["dir"]) / "status.json").write_text(json.dumps(keep, indent=1))
     except OSError as ex:
@@ -348,11 +348,28 @@ def report_dir(j):
     return pathlib.Path(j["report"]) if j.get("report") else pathlib.Path(j["dir"]) / "report"
 
 
+# The run page's stage (1 to 15, the STEPS of web/app/app.js) from the engine's progress sentence, more specific words first.
+# The page used to guess the stage from the words itself and six sentences sent it back a step (testers, 4 Nov 2026);
+# now the server numbers it and the number never goes down within a run.
+STAGE_WORDS = (("done", 15), ("building the report", 14), ("ports: failed", 13), ("ports:", 11), ("devices:", 8), ("picture levelled", 8),
+               ("units:", 8), ("classifying", 8), ("drawing", 7), ("best frames", 7), ("rack image: devices", 7), ("rack image: occupancy", 6),
+               ("rack image: units", 5), ("rack image", 4), ("reading text", 6), ("fusing", 6), ("frame ", 5), ("running the photo pipeline", 5),
+               ("registered frame", 4), ("registering", 4), ("reading the video", 4), ("stitch", 3), ("checking which way", 1), ("queued", 1))
+
+
+def stage_of(msg):
+    """The stage a progress sentence belongs to, or None for a sentence that says nothing about the stage."""
+    m = str(msg or "").lower()
+    return next((n for k, n in STAGE_WORDS if k in m), None)
+
+
 def run_job(job, video_path, truth_path=None):
     import cv2
     j = JOBS[job]; d = pathlib.Path(j["dir"]); rack_path = d / "rack.png"
     j["rack_path"], j["video_path"] = rack_path, video_path
-    say = lambda m: (j.__setitem__("progress", m), _save(j))
+    j["stage"] = 0
+    def say(m):
+        j["progress"] = m; j["stage"] = max(j.get("stage") or 0, stage_of(m) or 0); _save(j)
     try:
         say("checking which way the video runs")
         video_path, turned = rack_stitch.upright(video_path, d, from_guide=j.get("from_guide", False)); j["video_path"] = video_path; j["video_file"] = str(video_path); _save(j)
@@ -389,6 +406,7 @@ def run_job(job, video_path, truth_path=None):
     _save(j)
     if j.get("status") == "done":
         start_rack_label(job)                       # the rack's own label (ID and name), read after the run in the background
+        start_ports_all(job)                        # then the ports of every port-bearing device, one at a time
 
 
 # ------------------------------------------------------------------ the rack's label: its ID and name, read once per run (engine/rack_label.py)
@@ -491,7 +509,7 @@ def _when_words(t=None):
 
 
 def public_job(j, with_result=False):
-    out = {k: j.get(k) for k in ("id", "status", "progress", "failed_at", "error", "started", "finished", "title", "name", "from_guide", "summary", "phase", "partial", "ports")}
+    out = {k: j.get(k) for k in ("id", "status", "progress", "stage", "failed_at", "error", "started", "finished", "title", "name", "from_guide", "summary", "phase", "partial", "ports")}
     out["report"] = f"/video-report/{j['id']}/index.html" if (j.get("status") == "done" or j.get("partial")) else None
     try:                                                   # the pictures made so far, so the run screen can show each step as it lands
         out["files"] = sorted(f.name for f in pathlib.Path(j["dir"]).iterdir() if f.suffix in (".jpg", ".png") and not f.name.startswith("closeup"))
@@ -532,6 +550,45 @@ def _video_probe(path):
         return None
 
 
+def _video_fingerprint(path):
+    """Size, duration and the look of three frames (10, 50 and 90 % of the way): a phone re-encodes a video it hands over
+    (another frame rate, another byte count) but keeps these (testers, 4 Nov 2026: the same video read again from the start)."""
+    try:
+        c = cv2.VideoCapture(str(path)); n = int(c.get(cv2.CAP_PROP_FRAME_COUNT)); fps = float(c.get(cv2.CAP_PROP_FPS) or 0)
+        w = int(c.get(cv2.CAP_PROP_FRAME_WIDTH)); h = int(c.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        if n <= 0 or w <= 0 or fps <= 0:
+            c.release(); return None
+        hashes = []
+        for q in (0.1, 0.5, 0.9):
+            c.set(cv2.CAP_PROP_POS_FRAMES, int(n * q)); ok, fr = c.read()
+            if not ok:
+                c.release(); return None
+            g = cv2.resize(cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY), (8, 8), interpolation=cv2.INTER_AREA).astype(float)
+            hashes.append("".join("1" if v > g.mean() else "0" for v in g.flatten()))
+        c.release()
+        return {"w": w, "h": h, "dur": round(n / fps, 2), "hashes": hashes}
+    except Exception:  # noqa: BLE001  an unreadable video simply has no fingerprint
+        return None
+
+
+def _run_fingerprint(j):
+    if j.get("video_fp"):
+        return j["video_fp"]
+    f = pathlib.Path(j["dir"]) / "video.mp4"
+    if not f.exists():
+        f = next(iter(pathlib.Path(j["dir"]).glob("video.*")), None)
+    fp = _video_fingerprint(f) if f else None
+    if fp:
+        j["video_fp"] = fp; _save(j)
+    return fp
+
+
+def _same_look(a, b):
+    """The same footage: same size, duration within 0.3 s, and each of the three sampled frames within 10 bits of 64."""
+    return bool(a and b and a["w"] == b["w"] and a["h"] == b["h"] and abs(a["dur"] - b["dur"]) <= 0.3
+                and all(sum(x != y for x, y in zip(p, q)) <= 10 for p, q in zip(a["hashes"], b["hashes"])))
+
+
 def _run_probe(j):
     if j.get("video_probe"):
         return j["video_probe"]
@@ -562,6 +619,11 @@ def _same_video_run(path):
         for o in done:
             if _run_probe(o) == pr:
                 return o["id"]
+    fp = _video_fingerprint(path)
+    if fp:
+        for o in done:
+            if _same_look(_run_fingerprint(o), fp):
+                return o["id"]
     return None
 
 
@@ -570,12 +632,15 @@ async def api_video(request: Request, video: UploadFile | None = File(None), cap
                     stride: int = Form(rack_video.STRIDE), lat: float | None = Form(None), lng: float | None = Form(None),
                     accuracy: float | None = Form(None)):   # wt/features: the phone's accuracy in metres (location.js)
     """Start a sweep: a video upload or a take from the camera guide (capture = "<source>/<folder>")."""
-    with STATE_LOCK:                                   # one run at a time, stitching included (the model lock covers only the model part)
-        busy = MODEL_LOCK.locked() or any(v.get("status") == "running" and not v.get("partial") for v in JOBS.values()) or RUN_STARTING["n"]
+    with STATE_LOCK:                                   # one run at a time, stitching included; a device's port read holds the model lock, and that is no
+        running = [v for v in JOBS.values() if v.get("status") == "running" and not v.get("partial")]   # reason to refuse: the run waits for the lock itself (testers, 4 Nov 2026)
+        busy = bool(running) or RUN_STARTING["n"]
         if not busy:
             RUN_STARTING["n"] = 1
     if busy:
-        raise HTTPException(409, "Another rack is being read. Wait for it to finish; one runs at a time on this server.")
+        r = running[0] if running else None
+        raise HTTPException(409, f"Another rack is being read, at step {r.get('stage') or 1} of 15. Yours can start when it is done; one runs at a time on this server." if r
+                            else "Another video is just arriving. Try again in a moment; one runs at a time on this server.")
     try:
         return await _start_video(request, video, capture, stride, lat, lng, accuracy)
     finally:
@@ -694,7 +759,7 @@ def api_video_view(job: str):
                 "portmap": base + pd["picture"] if pd.get("picture") else None, "mapped": bool(d.get("layout")),
                 "ports_state": (j.get("ports") or {}).get(str(d["index"])) or ("done" if d.get("layout") else None),
                 "seconds": d.get("layout_seconds")}
-    devices = [{"index": d["index"], "top": d["top"], "bottom": d["bottom"], "height": d["height"], "units": d.get("units"), "polygon": d.get("polygon"),
+    devices = [{"index": d["index"], "top": d["top"], "bottom": d["bottom"], "height": d["height"], "units": d.get("units"), "polygon": d.get("polygon"), "box": _detector_box(d),
                 **_kind_of(d, j.get("finished") or j.get("started")),
                 "prob": None if d.get("kind_override") else (d.get("classification") or {}).get("prob"), "unsure": bool(d.get("unsure")), "kind_model": (d.get("classification") or {}).get("label"), "corrected_by": (d.get("kind_override") or {}).get("by"), "crop": f"/api/video/{job}/crop/{d['index']}" + _crop_ver(j, d["index"]),   # the crop with nothing drawn on it (api_device_crop); a new cut gets a new link
                 "frames": [base + t["file"] for t in d.get("top_frames") or [] if t.get("file")],
@@ -710,6 +775,17 @@ def api_video_view(job: str):
             "units": units, "devices": devices, "times_s": r.get("times_s"), "report": f"/video-report/{job}/index.html",
             "rack_label": rack_label_of(j), "rack_label_running": job in RACK_LABEL_RUNNING,
             "rack_id": j.get("rack_id"), "rack_id_options": rack_id_options(j), "record_passive": _record_passive(j)}
+
+
+def _detector_box(d):
+    """The device's own outline on the rack picture before it was snapped to its unit rows (polygon_box, the detector's box
+    carried onto the rack), as a box; the unit band when there is none. The zoom uses it to tell whether the band between
+    the unit lines holds the whole device (testers, 4 Nov 2026: the band cut a switch in half)."""
+    q = d.get("polygon_box") or d.get("polygon_old")
+    if q and len(q) >= 3:
+        xs = [p[0] for p in q]; ys = [p[1] for p in q]
+        return [round(min(xs), 1), round(min(ys), 1), round(max(xs), 1), round(max(ys), 1)]
+    return d.get("box")
 
 
 def _record_passive(j):
@@ -818,6 +894,59 @@ def api_device_view(job: str, index: int, nth: int):
         if not rack_video.clean_crop(dv, j.get("video_path"), d / "rack.png", f, (j.get("result") or {}).get("devices"), nth=nth):
             raise HTTPException(404, "No other view.")
     return FileResponse(f, headers={"Cache-Control": "max-age=86400"})
+
+
+PDF_LOCK = threading.Lock()
+
+
+def _print_pdf(page, pdf):
+    """The self-contained report page printed to PDF with headless Chromium, every step in order with its name, every
+    switch card and every folded section open (as tools/run_videos.py prints the testers' reports)."""
+    from playwright.sync_api import sync_playwright
+    shell = os.environ.get("PW_CHROMIUM") or next(iter(sorted(pathlib.Path.home().glob(
+        "Library/Caches/ms-playwright/chromium_headless_shell-*/chrome-headless-shell-mac-arm64/chrome-headless-shell"))[::-1]), None)
+    with sync_playwright() as p:
+        b = p.chromium.launch(**({"executable_path": str(shell)} if shell else {}))
+        pg = b.new_page(viewport={"width": 1280, "height": 900})
+        pg.goto(pathlib.Path(page).resolve().as_uri(), wait_until="load")
+        pg.evaluate("""() => {
+            document.querySelectorAll('.step').forEach((s, i) => {
+                s.hidden = false;
+                const a = document.querySelector('.rail a[href="#' + s.id + '"]');
+                const h = document.createElement('h2'); h.className = 'pdfh'; h.textContent = a ? a.textContent : (i + 1) + ''; s.prepend(h);
+            });
+            document.querySelectorAll('.lsw[data-sw]').forEach(c => c.hidden = false);
+            document.querySelectorAll('details').forEach(d => d.open = true);
+        }""")
+        pg.add_style_tag(content=".rail,.snav,.stick{display:none!important} .step{display:block!important;break-before:page} .step:first-of-type{break-before:auto} .pdfh{font-size:1.3rem;margin:0 0 12px;border-bottom:1px solid #dbe1ea;padding-bottom:6px} img{break-inside:avoid}")
+        pg.emulate_media(media="print")
+        pg.pdf(path=str(pdf), format="A4", print_background=True, margin={"top": "10mm", "bottom": "10mm", "left": "8mm", "right": "8mm"})
+        b.close()
+
+
+@app.get("/api/video/{job}/report.pdf")
+def api_report_pdf(job: str):
+    """The whole report as one PDF to download (testers, 4 Nov 2026). Printed once per version of the report, then kept
+    beside the run; a report rebuilt after a port read or a close-up is printed again on the next download."""
+    j = job_or_none(job)
+    if j is None or j.get("result") is None:
+        raise HTTPException(404, "No report yet.")
+    rep = report_dir(j); d = pathlib.Path(j["dir"])
+    if not (rep / "index.html").exists():
+        raise HTTPException(404, "No report yet.")
+    pdf, page = d / "report.pdf", d / "report_print.html"
+    stamp = max(f.stat().st_mtime for f in rep.rglob("*") if f.is_file())
+    with PDF_LOCK:
+        if not pdf.exists() or pdf.stat().st_mtime < stamp:
+            try:
+                video_report.self_contained(rep, page); _print_pdf(page, pdf)
+            except ImportError:
+                raise HTTPException(503, "The PDF cannot be made on this server: no browser to print with. Open the report and use Print instead.")
+            except Exception as ex:  # noqa: BLE001
+                print(f"[racktrack] report of run {job} not printed: {type(ex).__name__}: {ex}", file=sys.stderr)
+                raise HTTPException(500, "The PDF could not be made. Try again in a moment.")
+    name = re.sub(r"[^A-Za-z0-9._-]+", "-", str((j.get("rack_id") or {}).get("id") or j.get("title") or job)).strip("-")
+    return FileResponse(pdf, media_type="application/pdf", filename=f"RackTrack-{name}.pdf", headers={"Cache-Control": "no-store"})
 
 
 @app.get("/api/video/{job}/file/{name}")
@@ -989,6 +1118,42 @@ def _read_ports_thread(job, index, hint=None):
         print(f"[racktrack] D{index} of {job} not read: {type(ex).__name__}: {ex}", file=sys.stderr)
         j["ports"][str(index)] = "failed"; j.setdefault("ports_error", {})[str(index)] = "The device could not be read."
     _save(j)
+
+
+PORTS_ALL_RUNNING = set()
+
+
+def start_ports_all(job):
+    """After a run: the ports of every switch, router, firewall, gateway and patch panel are read on their own, one at a
+    time in the background, so Find a port and the Connections list every device (testers, 4 Nov 2026: a device nobody
+    opened had no ports and was missing from the list). A device a person opens meanwhile is read then, as before."""
+    if job in PORTS_ALL_RUNNING:
+        return
+    PORTS_ALL_RUNNING.add(job)
+    threading.Thread(target=_ports_all_thread, args=(job,), daemon=True).start()
+
+
+def _ports_all_thread(job):
+    try:
+        j = JOBS.get(job)
+        if j is None or j.get("status") != "done":
+            return
+        devs = sorted((j.get("result") or {}).get("devices") or [], key=lambda d: -(SDB._unum(d.get("top")) or 0))   # top of the rack first
+        for dv in devs:
+            if JOBS.get(job) is not j or j.get("status") != "done":
+                return                                  # the run was removed or restarted meanwhile
+            kind = SDB.device_kind(dv)["kind"]          # the one kind: a correction, then the faceplate, then the picture
+            if kind not in PORT_KINDS and not (kind == "Patch Panel" and patch_panels.available()):
+                continue
+            ports = j["ports"] = j.get("ports") or {}
+            if ports.get(str(dv["index"])):
+                continue                                # read already, or being read because a person opened it
+            ports[str(dv["index"])] = "running"; _save(j)
+            (_read_panel_thread if kind == "Patch Panel" else _read_ports_thread)(job, dv["index"])
+    except Exception as ex:  # noqa: BLE001
+        print(f"[racktrack] ports of run {job} not read on their own: {type(ex).__name__}: {ex}", file=sys.stderr)
+    finally:
+        PORTS_ALL_RUNNING.discard(job)
 
 
 KINDS = ("Switch", "Router", "Firewall", "Gateway", "Patch Panel", "Server", "Storage unit", "PDU", "UPS", "Other")

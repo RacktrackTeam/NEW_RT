@@ -560,7 +560,7 @@ def device_kind(d, when=None):
     Returns {"kind", "from" (corrected, faceplate, ports, picture or None), "picture" (the classifier's label), "words"}."""
     cl = (d or {}).get("classification") or {}
     pic = cl.get("label") or (d or {}).get("type")
-    pic_known = pic if pic not in (None, "", "Other", "Not sure") else None
+    pic_known = pic if pic not in (None, "", "Other", "Not sure", "Empty") else None     # "Empty" is the detector saying no device, not a kind
     prob = cl.get("prob")
     pic_words = f"from the picture ({round(100 * prob)} %)" if prob is not None else "from the picture"
     ov = ((d or {}).get("kind_override") or {})

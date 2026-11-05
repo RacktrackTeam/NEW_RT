@@ -75,38 +75,56 @@
   // ---- Find a port: the device crop with the port outlined, the facts beside it
   function find(run, q) {
     view(run).then(function (v) {
-      var devs = (v.devices || []).filter(function (d) { return (d.layout || {}).ports && d.layout.ports.length; }).sort(function (a, b) { return parseInt(String(b.top).replace(/\D/g, ''), 10) - parseInt(String(a.top).replace(/\D/g, ''), 10); });
+      var hasPorts = function (d) { return !!((d.layout || {}).ports && d.layout.ports.length); };
+      var devs = (v.devices || []).slice().sort(function (a, b) { return parseInt(String(b.top).replace(/\D/g, ''), 10) - parseInt(String(a.top).replace(/\D/g, ''), 10); });   // every device, top to bottom; one not read yet gets a Read the ports button (testers, 4 Nov 2026)
       var want = (q || '').split('-'), cur = { dev: parseInt(want[0], 10) || null, port: parseInt(want[1], 10) || null }, seq = 0;
-      if (!devs.length) { root().innerHTML = shell('Find a port', run, empty('No device with ports was read on this rack', 'Scan the rack again with a slower pass.')); return; }
+      if (!devs.length) { root().innerHTML = shell('Find a port', run, empty('No device was read on this rack', 'Scan the rack again with a slower pass.')); return; }
       var devOf = function (i) { return devs.filter(function (d) { return Number(d.index) === i; })[0]; };
-      if (!devOf(cur.dev)) cur.port = null;
+      if (!devOf(cur.dev) || !hasPorts(devOf(cur.dev))) cur.port = null;
       var W = (v.rack.size || [1000, 2000])[0], H = (v.rack.size || [1000, 2000])[1];
       var boxes = (v.devices || []).filter(function (d) { return d.polygon && d.polygon.length > 1; }).map(function (d) {
         var xs = d.polygon.map(function (p) { return p[0]; }), ys = d.polygon.map(function (p) { return p[1]; });
-        return { i: Number(d.index), box: [Math.min.apply(null, xs), Math.min.apply(null, ys), Math.max.apply(null, xs), Math.max.apply(null, ys)], ports: !!devOf(Number(d.index)), tip: 'D' + d.index + ' · ' + unitOf(d) + ' · ' + (d.kind || 'Not sure') };
+        return { i: Number(d.index), box: [Math.min.apply(null, xs), Math.min.apply(null, ys), Math.max.apply(null, xs), Math.max.apply(null, ys)], ports: !!devOf(Number(d.index)), tip: 'D' + d.index + ' · ' + unitOf(d) + ' · ' + (d.kind || 'Not sure') + (hasPorts(d) ? '' : ' · ports not read yet') };
       });
       var picture = '<figure class="fx-fig fx-rack fp-rack" id="fp-rack"><img src="' + esc(v.rack.picture) + '" alt="The stitched rack"><svg aria-hidden="false" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' + boxes.map(function (b) {
         return '<rect class="fx-box fp-dev' + (b.ports ? '' : ' fp-none') + '" data-i="' + b.i + '" x="' + b.box[0] + '" y="' + b.box[1] + '" width="' + (b.box[2] - b.box[0]) + '" height="' + (b.box[3] - b.box[1]) + '" rx="2"><title>' + esc(b.tip) + '</title></rect>';
       }).join('') + '</svg></figure>';
       root().innerHTML = shell('Find a port', run, '<div class="fp-top">' + picture + '<div class="fp-pick"><label><span>Device</span><select id="fp-dev">' + (cur.dev ? '' : '<option value="">Choose a device</option>')
-        + devs.map(function (d) { return '<option value="' + d.index + '"' + (Number(d.index) === cur.dev ? ' selected' : '') + '>' + esc(devLabel(d)) + '</option>'; }).join('') + '</select></label>'
-        + '<label><span>Port</span><select id="fp-port"></select></label><div id="fp-grid" class="ft-cells fp-grid" role="group" aria-label="Ports of this device"></div>'
-        + '<p class="fx-note" id="fp-hint"></p></div></div><div id="fp-out"></div>');
+        + devs.map(function (d) { return '<option value="' + d.index + '"' + (Number(d.index) === cur.dev ? ' selected' : '') + '>' + esc(devLabel(d)) + (hasPorts(d) ? '' : ' · ports not read yet') + '</option>'; }).join('') + '</select></label>'
+        + '<label id="fp-portlab"><span>Port</span><select id="fp-port"></select></label><div id="fp-grid" class="ft-cells fp-grid" role="group" aria-label="Ports of this device"></div><div id="fp-readbox" class="fp-read" hidden></div>'
+        + '<p class="fx-note" id="fp-hint"></p><div id="fp-out"></div></div></div>');
       fitFigs(root());
       var out = $('fp-out');
       function mark() { [].forEach.call(document.querySelectorAll('#fp-rack .fp-dev'), function (r) { r.classList.toggle('sel', Number(r.dataset.i) === cur.dev); }); }
+      var READING = {};                                                        // devices whose ports are being read from this screen: polled until they are there
+      function readPorts(d) {
+        var box = $('fp-readbox'); if (!box) return; box.innerHTML = '<p class="fx-note">Reading the ports of D' + d.index + ', about a minute. The list fills in when they are there.</p>'; READING[d.index] = 1;
+        api('/api/video/' + encodeURIComponent(run) + '/ports/' + d.index, { method: 'POST' }).then(function (r) {
+          if (r.state === 'none') { box.innerHTML = '<p class="fx-note">' + esc(r.detail || 'This device has no ports to read.') + '</p>'; delete READING[d.index]; return; }
+          var tick = function () { if (!READING[d.index] || location.hash.indexOf('#tools/' + run + '/find') !== 0) return;
+            api('/api/video/' + encodeURIComponent(run) + '/view').then(function (nv) { var nd = (nv.devices || []).filter(function (x) { return Number(x.index) === Number(d.index); })[0], st = nd && nd.layout && nd.layout.ports_state;
+              if (nd && hasPorts(nd)) { delete READING[d.index]; VIEW[run] = nv; SHOWN = null; find(run, String(d.index)); return; }
+              if (st === 'failed' || st === 'none') { delete READING[d.index]; box.innerHTML = '<p class="fx-note">' + (st === 'failed' ? 'The ports could not be read from the video. A close photo of the front, on the Devices tab, reads them.' : 'No port was found on this device.') + '</p>'; return; }
+              setTimeout(tick, 6000); }).catch(function () { setTimeout(tick, 8000); }); };
+          setTimeout(tick, 6000);
+        }).catch(function (e) { box.innerHTML = '<p class="fx-err">' + esc(String(e.message).replace(/\.\s*$/, '')) + '.</p>'; delete READING[d.index]; });
+      }
       function pickers() {
-        var d = devOf(cur.dev), ports = d ? d.layout.ports.filter(function (p) { return p.id != null; }) : [];
+        var d = devOf(cur.dev), ports = d && hasPorts(d) ? d.layout.ports.filter(function (p) { return p.id != null; }) : [];
+        var rb = $('fp-readbox'); rb.hidden = !(d && !hasPorts(d)); $('fp-portlab').hidden = !!(d && !hasPorts(d)); $('fp-grid').hidden = !!(d && !hasPorts(d));
+        if (d && !hasPorts(d) && !READING[d.index]) { var st = (d.layout || {}).ports_state;
+          rb.innerHTML = st === 'running' ? '<p class="fx-note">The ports of D' + d.index + ' are being read, about a minute. The list fills in when they are there.</p>' : '<p class="fx-note">The ports of this device have not been read yet.</p><button class="btn primary" type="button" id="fp-read">Read the ports</button>';
+          if (st === 'running') { READING[d.index] = 1; readPorts(d); } else { var b = $('fp-read'); if (b) b.onclick = function () { readPorts(d); }; } }
         $('fp-port').innerHTML = (cur.port ? '' : '<option value="">Choose a port</option>') + ports.map(function (p) { return '<option value="' + p.id + '"' + (p.id === cur.port ? ' selected' : '') + '>Port ' + p.id + ' · ' + esc(stateWord(p.status)) + '</option>'; }).join('');
         $('fp-port').disabled = !d; if (d) $('fp-dev').value = String(cur.dev);   // a device tapped on the rack picture shows in the picker too
         $('fp-grid').innerHTML = ports.map(function (p) { var st = p.status === 'connected' ? 'on' : p.status === 'empty' ? 'off' : 'na';
           return '<button type="button" class="ft-cell ' + st + (p.id === cur.port ? ' chosen' : '') + '" data-p="' + p.id + '" title="Port ' + p.id + ': ' + esc(stateWord(p.status)) + '" aria-pressed="' + (p.id === cur.port) + '">' + p.id + '</button>'; }).join('');
-        $('fp-hint').textContent = d ? 'Filled number: cable plugged in. Plain: empty. Dashed: not sure.' : 'Choose a device here or tap one on the rack picture.';
+        $('fp-hint').textContent = d && hasPorts(d) ? 'Filled number: cable plugged in. Plain: empty. Dashed: not sure.' : d ? '' : 'Choose a device here or tap one on the rack picture.';
       }
       function show() {
         mark(); pickers();
         if (cur.dev) history.replaceState(null, '', '#tools/' + run + '/find/' + cur.dev + (cur.port ? '-' + cur.port : ''));
-        if (!(cur.dev && cur.port)) { out.innerHTML = empty(cur.dev ? 'Choose a port' : 'Choose a device and a port', 'The device and the port are marked, with the facts, below the pickers.'); return; }
+        if (!(cur.dev && cur.port)) { out.innerHTML = cur.dev && !hasPorts(devOf(cur.dev)) ? '' : empty(cur.dev ? 'Choose a port' : 'Choose a device and a port', 'The port is marked on the picture, with the facts, right here.'); return; }
         var my = ++seq; out.innerHTML = loading('Finding port ' + cur.port + '...');
         api('/api/video/' + encodeURIComponent(run) + '/find-port?device=' + cur.dev + '&port=' + cur.port).then(function (r) {
           if (my !== seq) return;
@@ -122,12 +140,14 @@
             + (r.found ? '<h2>Port ' + r.port + '</h2><div class="fx-pills">' + pill(stateWord(p.state), stCls(p.state)) + (r.kind ? pill(r.kind) : '') + '</div>' : '<h2>Port ' + r.port + ' was not read</h2><p class="muted">Ports read: ' + esc((r.ports || []).join(', ') || 'none') + '.</p>')
             + '<dl class="fx-kv">' + kv.map(function (x) { return '<dt>' + x[0] + '</dt><dd>' + (x[1] ? esc(x[1]) : '<em>' + x[2] + '</em>') + '</dd>'; }).join('') + '</dl></div></div>';
           fitFigs(out);
+          var ot = out.getBoundingClientRect().top; if (ot > window.innerHeight - 160 || ot < 0) out.scrollIntoView({ block: 'start', behavior: 'smooth' });   // the answer comes into view by itself (testers, 4 Nov 2026)
         }).catch(function (e) { if (my === seq) out.innerHTML = '<p class="fx-err">' + esc(String(e.message).replace(/\.\s*$/, '')) + '. Try another port.</p>'; });
       }
       $('fp-dev').onchange = function () { cur.dev = parseInt(this.value, 10) || null; cur.port = null; show(); };
+      $('fp-readbox').onclick = function (e) { var b = e.target.closest && e.target.closest('#fp-read'); if (b) { var d = devOf(cur.dev); if (d) readPorts(d); } };
       $('fp-port').onchange = function () { cur.port = parseInt(this.value, 10) || null; show(); };
       $('fp-grid').onclick = function (e) { var b = e.target.closest('[data-p]'); if (b) { cur.port = parseInt(b.dataset.p, 10); show(); } };
-      $('fp-rack').onclick = function (e) { var r = e.target.closest('.fp-dev'); if (!r || r.classList.contains('fp-none')) return; cur.dev = parseInt(r.dataset.i, 10); cur.port = null; show(); };
+      $('fp-rack').onclick = function (e) { var r = e.target.closest('.fp-dev'); if (!r) return; cur.dev = parseInt(r.dataset.i, 10); cur.port = null; show(); };
       out.onclick = function (e) { var b = e.target.closest && e.target.closest('.fx-box'); if (b && b.dataset.n) { cur.port = parseInt(b.dataset.n, 10); show(); } };
       show();
     }).catch(fail);

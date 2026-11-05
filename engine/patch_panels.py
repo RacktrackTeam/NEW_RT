@@ -6,6 +6,7 @@ its own command (its two models stay in separate processes, as its README asks) 
     python3 engine/patch_panels.py data/runs/<id> <device index>        prints what it reads
 """
 import csv
+from PIL import Image
 import json
 import os
 import pathlib
@@ -45,7 +46,7 @@ def dedupe(ports):
     return kept
 
 
-def complete_grid(ports, size):
+def complete_grid(ports, size, img_w=None):
     """Patch panel ports sit in a fixed grid: rows of 24 (12 for a 12-port panel), in groups with a wider gap between them
     (user, 2026-10-27: 'patch panels follow the rows of clustered patterns'). The boxes the detector found are laid on that
     grid and the slots it could not see (cables over them) are filled in as hidden ports, so every port has its place and
@@ -54,6 +55,7 @@ def complete_grid(ports, size):
         return ports
     ports = dedupe(ports)
     per_row = 12 if size <= 12 else 24
+    img_w = float(img_w) if img_w else None
     n_rows = max(1, round(size / per_row))
     boxes = [(sum(q[0] for q in p["polygon"]) / 4, sum(q[1] for q in p["polygon"]) / 4, max(q[0] for q in p["polygon"]) - min(q[0] for q in p["polygon"]),
               max(q[1] for q in p["polygon"]) - min(q[1] for q in p["polygon"]), p) for p in ports]
@@ -120,6 +122,8 @@ def complete_grid(ports, size):
             mx, my, sl = 0.0, r["y"], 0.0
         used = set()
         for k, x in enumerate(xs_):
+            if img_w is not None and (x + bw / 2 > img_w + 0.25 * bw or x - bw / 2 < -0.25 * bw):
+                continue                                                # a slot past the picture's edge is no port: the panel is not that size (testers, 4 Nov 2026)
             near = min(items, key=lambda b: abs(b[0] - x))
             y = my + sl * (x - mx)
             poly = [[round(v, 1) for v in q] for q in ([x - bw / 2, y - h / 2], [x + bw / 2, y - h / 2], [x + bw / 2, y + h / 2], [x - bw / 2, y + h / 2])]   # every port is its slot's box
@@ -176,8 +180,14 @@ def read_patch_panel(run_dir, index, crop_path, timeout=1200):
         total = size if size and len(ports) >= SEEN_SHARE * size else len(ports)
     seen = len(ports); size_known = total in STANDARD_SIZES                 # too few seen for any standard size: the size stays open
     if total != seen:
-        ports = complete_grid(ports, total)                              # every slot of the panel, the unseen ones as hidden
+        try:
+            img_w = Image.open(crop_path).size[0]
+        except Exception:  # noqa: BLE001  the grid is still laid, just not clipped
+            img_w = None
+        ports = complete_grid(ports, total, img_w=img_w)                 # every slot of the panel, the unseen ones as hidden
         seen = sum(1 for p_ in ports if p_.get("seen", True))            # boxes off the grid (a screw, a cable tag) are not ports
+        if len(ports) < total:                                           # slots fell past the picture's edge: the size guess was wrong, only what is on the picture counts
+            total, size_known = len(ports), False
     final = (row.get("final_class") or "").strip().lower(); key = "".join(ch for ch in final if ch.isalnum())   # "RJ-45" -> rj45
     return {"ok": True, "mode": "patchpanel", "panel": (PANEL_WORDS.get(key, final.capitalize() or None) if ports else None),   # no port seen: no type either (a sealed enclosure) "panel_status": row.get("verify_status"),
             "why": row.get("verify_why"), "port_counts": row.get("port_counts"), "ports": ports, "n_ports": max(total, len(ports)), "seen": seen, "hidden": max(total, len(ports)) - seen, "size_known": size_known,

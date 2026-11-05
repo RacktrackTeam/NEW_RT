@@ -1957,6 +1957,16 @@ def devices_from(rows, new_dev, taken, fa, rack_types, rack_devices, regs_used, 
         the rack picture, a detector box in a frame, or the device finder's sighting (user 2026-10-27: no device may be missed)."""
         return any(rows[k].get("candidate_box") or rows[k].get("frames_device") or rows[k].get("frames_typed") for k in d)
     groups = [d for d in DJ.cut(taken, new_dev) if not all(rows[k]["status"] == "uncertain" for k in d) or seen_something(d)]
+    # a group the detector itself calls "Empty" is empty space, not a device (testers, 4 Nov 2026: an empty area listed as a
+    # device): its units go to "uncertain" for a person to confirm, and the device numbers close up over it
+    def box_of(d):
+        return [int(min(rows[k]["box"][0] for k in d)), int(rows[d[0]]["box"][1]), int(max(rows[k]["box"][2] for k in d)), int(rows[d[-1]]["box"][3])]
+    empty = [d for d in groups if type_votes(box_of(d), fa, rack_types)[0] == "Empty"]
+    for d in empty:
+        for k in d:
+            rows[k].update(status="uncertain", decided_by="empty box", attention="empty box",
+                           reason="The device detector called this box empty space, not a device. Left for a person. " + str(rows[k].get("reason") or ""))
+    groups = [d for d in groups if d not in empty]
     for i, d in enumerate(groups, 1):
         top, bot = rows[d[0]], rows[d[-1]]
         dbox = [int(min(rows[k]["box"][0] for k in d)), int(top["box"][1]), int(max(rows[k]["box"][2] for k in d)), int(bot["box"][3])]

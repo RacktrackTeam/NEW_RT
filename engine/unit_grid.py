@@ -73,6 +73,7 @@ _UNIT_DUP_OVERLAP = 0.6
 _UNIT_HOLE_MIN = 0.5
 # Rack frame visible beyond the outermost unit by this much is another row.
 _UNIT_EXTEND_MIN = 0.6
+_UNIT_EXTEND_MAX = 2            # rows added past the model's outermost box at each end: a dark PDU at the floor, never the plinth and the floor (testers, 4 Nov 2026)
 
 # The tallest rack anybody builds is 58U (a 48U cabinet plus its extras), so a
 # ladder taller than this is a failed estimate rather than a tall rack.
@@ -247,12 +248,12 @@ def ladder_from_unit_boxes(units, racks, img_h, img_w, rails=None):
     rack_top, rack_bot = _cap_at_rails(rack_top, rack_bot, filled[0][0], filled[-1][1], rails)
     above = filled[0][0] - rack_top
     if above >= median_h * _UNIT_EXTEND_MIN:
-        for k in range(max(1, int(round(above / median_h)))):
+        for k in range(min(_UNIT_EXTEND_MAX, max(1, int(round(above / median_h))))):
             top = filled[0][0] - median_h
             filled.insert(0, [max(rack_top, top), filled[0][0]])
     below = rack_bot - filled[-1][1]
     if below >= median_h * _UNIT_EXTEND_MIN:
-        for k in range(max(1, int(round(below / median_h)))):
+        for k in range(min(_UNIT_EXTEND_MAX, max(1, int(round(below / median_h))))):
             filled.append([filled[-1][1], min(rack_bot, filled[-1][1] + median_h)])
 
     count = len(filled)

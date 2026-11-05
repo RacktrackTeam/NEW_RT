@@ -21,6 +21,31 @@ input[type=file] { padding:8px; }
 .glabel, .eyebrow { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t2); }
 .bottom .pill { background:#fff; border:1px solid var(--line); box-shadow:0 8px 24px rgba(17,17,17,.1), 0 2px 6px rgba(17,17,17,.05); }
 .pill a.on { background:#121212 !important; color:#fff !important; }
+/* the app bar: the chosen button is its own rounded shape inside the bar, a little space on every side (testers, 4 Nov 2026: one side curved, one flat) */
+#nav .pill { padding:6px !important; gap:4px; } #nav .pill a { border-radius:999px; }
+/* the signed-out screens are locked to the screen: no scroll, no bounce when the keyboard opens or the mouse wheel turns (testers, 4 Nov 2026) */
+body[data-page="signin"], body[data-page="forgot"], body[data-page="invite"], body[data-page="pending"] { position:fixed; inset:0; overflow:hidden; }
+body[data-page="signin"] main, body[data-page="forgot"] main, body[data-page="invite"] main, body[data-page="pending"] main { height:100%; min-height:0 !important; overflow:hidden; padding-bottom:0 !important; }
+body[data-page="signin"] .screen > .auth { padding-top:6vh; }
+/* the camera guide takes the whole screen, over the bars, its way back as a top line (testers, 4 Nov 2026: the card was cut at the top and under the bar) */
+#sw-guide:not([hidden]) { position:fixed; inset:0; z-index:60; background:#000; display:flex; flex-direction:column; gap:0 !important; margin:0; padding:0; }
+#sw-guide .swback { flex:none; color:#fff; background:#000; text-align:left; padding:12px 16px; padding-top:calc(12px + env(safe-area-inset-top, 0px)); font-weight:600; }
+#sw-guide .guide { flex:1 1 auto; min-height:0; height:auto !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; }
+#sw-guide > p.muted { flex:none; margin:0; padding:8px 16px calc(8px + env(safe-area-inset-bottom, 0px)); background:#000; color:#9a9a9a; font-size:12px; }
+/* the rack ID card on a phone: one line, the choices in a row that scrolls sideways, typing folded (testers, 4 Nov 2026: the box took the picture's room) */
+body:not(.web) .rkask:not(.done):not(.soft) { padding:10px 12px !important; gap:8px !important; }
+body:not(.web) .rkask .rkhead small { display:none; } body:not(.web) .rkask .rkhead b { font-size:15px; }
+body:not(.web) .rkopts { flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding-bottom:2px; } body:not(.web) .rkopts::-webkit-scrollbar { display:none; }
+body:not(.web) .rkopt { flex:none; padding:6px 10px; max-width:70vw; } body:not(.web) .rkopt small { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+.rktypef summary { list-style:none; cursor:pointer; color:var(--ink); font-size:13px; font-weight:600; display:inline-block; } .rktypef summary::-webkit-details-marker { display:none; }
+.rktypef[open] summary { margin-bottom:6px; } body:not(.web) .rkask .rkskip { align-self:flex-start; font-size:13px; }
+/* the compare: the whole rack, small, when no label was read above the first unit */
+.lblstrip.rackmini img { max-height:240px; width:auto; max-width:100%; margin:0 auto; background:#fff; }
+.cmppick select { flex:1 1 220px; min-width:0; } .cmppick input { flex:1 1 180px; }
+/* the zoom: a real zoom on a phone, the device at least a third of the screen tall and scrolled sideways (testers, 4 Nov 2026: a 1U device at screen width was a sliver that looked cut) */
+body:not(.web) .zoomov { padding:12px; } body:not(.web) .zcard { max-width:none; overflow-x:auto; -webkit-overflow-scrolling:touch; touch-action:pan-x pinch-zoom; }
+body:not(.web) .zcard .zimg { width:auto; max-width:none; height:min(34vh, 62vw); align-self:flex-start; flex:none; }   /* keeps its shape and overflows sideways instead of being squeezed to the card */ body:not(.web) .zcard .zhint { position:sticky; left:0; }
+body:not(.web) .zcard .ztitle { position:sticky; left:0; }
 
 /* full device width: no centred column */
 main { max-width:none !important; margin:0 !important; padding-left:16px !important; padding-right:16px !important; }
@@ -165,7 +190,7 @@ body.web.result #rnav.inpage { align-self:flex-start !important; margin:0 !impor
 .screen[data-screen="result"][data-tab="report"] > #res-rack, .screen[data-screen="result"][data-tab="report"] > #res-devices, .screen[data-screen="result"][data-tab="report"] > #res-layout { display:none !important; }
 
 /* the Report: a Compare button top right, a dropdown, one confirm panel, then the differences; More on this rack is a small link at the bottom */
-.rpbar { display:flex; justify-content:flex-end; position:relative; }
+.rpbar { display:flex; justify-content:flex-end; position:relative; gap:8px; flex-wrap:wrap; } #rep-pdf { display:inline-flex; align-items:center; gap:6px; }
 .cmpdd { position:relative; } .ddmenu { position:absolute; right:0; top:calc(100% + 6px); z-index:20; min-width:220px; background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.12); padding:6px; display:flex; flex-direction:column; }
 .ddmenu[hidden] { display:none; } .ddmenu button { border:0; background:none; text-align:left; font:inherit; font-size:14px; padding:10px 12px; border-radius:8px; cursor:pointer; color:var(--ink); } .ddmenu button:hover { background:var(--ground); }
 .idhead { justify-content:space-between; } .idrack { font:600 18px var(--mono); } .idlines { list-style:none; margin:0; padding:0; } .idlines li { display:grid; grid-template-columns:1fr auto; gap:2px 12px; padding:8px 0; border-top:1px solid var(--line); } .idlines .idw { grid-column:1 / -1; } .idlines .idc { font-weight:600; font-size:13px; }
@@ -201,7 +226,7 @@ body.web.result #rnav.inpage { align-self:flex-start !important; margin:0 !impor
 .runact .btn.primary, .btn.primary { background:#1f2a3a !important; border-color:#1f2a3a !important; }
 .pill a.on { background:#1f2a3a !important; }
 @media (max-width:760px) { .runpage { grid-template-columns:1fr; gap:16px; } .runact .btn { flex:1 1 100%; } }
-.runpage { padding-bottom:calc(var(--nav-clear, 90px) + 8px); }
+.runpage { padding-bottom:0; }                              /* the page keeps only the clearance main already has (testers, 4 Nov 2026: empty space under the buttons) */
 
 /* The result's bar now holds the rack tools too: it scrolls sideways when it does not fit. */
 #rnav .pill { overflow-x:auto; overflow-y:hidden; scrollbar-width:none; justify-content:flex-start; }
