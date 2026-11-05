@@ -351,15 +351,18 @@ def report_dir(j):
 # The run page's stage (1 to 15, the STEPS of web/app/app.js) from the engine's progress sentence, more specific words first.
 # The page used to guess the stage from the words itself and six sentences sent it back a step (testers, 4 Nov 2026);
 # now the server numbers it and the number never goes down within a run.
-STAGE_WORDS = (("done", 15), ("building the report", 14), ("ports: failed", 13), ("ports:", 11), ("devices:", 8), ("picture levelled", 8),
+STAGE_WORDS = (("building the report", 14), ("ports: failed", 13), ("ports:", 11), ("devices:", 8), ("picture levelled", 8),
                ("units:", 8), ("classifying", 8), ("drawing", 7), ("best frames", 7), ("rack image: devices", 7), ("rack image: occupancy", 6),
                ("rack image: units", 5), ("rack image", 4), ("reading text", 6), ("fusing", 6), ("frame ", 5), ("running the photo pipeline", 5),
                ("registered frame", 4), ("registering", 4), ("reading the video", 4), ("stitch", 3), ("checking which way", 1), ("queued", 1))
 
 
 def stage_of(msg):
-    """The stage a progress sentence belongs to, or None for a sentence that says nothing about the stage."""
-    m = str(msg or "").lower()
+    """The stage a progress sentence belongs to, or None for a sentence that says nothing about the stage. Only the bare
+    "done" is the end: the stitcher's own "stitching: done (100 %)" is still stage 3."""
+    m = str(msg or "").strip().lower()
+    if m == "done":
+        return 15
     return next((n for k, n in STAGE_WORDS if k in m), None)
 
 

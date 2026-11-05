@@ -86,3 +86,20 @@ her answers: https://claude.ai/artifact/BEtrRmtasSZvqNKq2qEBui) and built on 5 N
 - Proofs: tools/proof_result_tabs.py on every run at both widths; the screenshot proof of the changed screens; the tester's 15:34
   video re-run offline for the Empty box and the ladder end; her patch panel D2 re-read for the grid. The 13-video proof against
   reports/2026-11-04 is the last step before a deploy.
+- Proof results, 5 Nov afternoon: every tab of the 7 runs opens at 412 and 1280 px with no error (tools/proof_result_tabs.py);
+  the changed screens hold at 360, 412 and 1280 px with no console error; the PDF route answers 200 (15.7 MB for the office
+  rack); the tester's 14:33 and 15:34 uploads now count as the same video (frames within 1 bit, 40.03 against 40.04 s) and the
+  14:52 one does not; her 15:34 video re-run offline lost the empty area listed as D18 and the device at the floor edge (18 to 15
+  devices, the empty rows left to a person), its unit count stays 47 because those floor rows come from the model itself; her
+  patch panel D2 re-read gives 40 ports (23 seen, 17 hidden), size not sure, every box inside the 650 px picture (was 48 with
+  boxes to 722 px). All 13 videos offline (phase 1): tech1 43 units 15 devices, tech2 47 / 17 (seven phantom devices in empty
+  space gone, checked by eye), tech3 41 / 24, tech4 still cannot be stitched (as on 4 Nov), tech5 37 / 9, tech6 38 / 10, tech7
+  45 / 10, tech8 50 / 19, tech9 37 / 11, tech10 57 / 23, vdo1 22 / 10, whatsapp 2143 46 / 13, whatsapp 2319 43 / 12.
+- Live proof, 5 Nov 14:23, whatsapp-2026-10-26-2319.mp4 uploaded through the app as techt (run ebd221a2af96): the stage went
+  1, 3, 4, 5, 6, 7, 8, 14 and never down (the stitcher's own "done (100 %)" line had sent it to 15 on the first try; only the
+  bare "done" ends a run now); after the run the ports were read on their own, one device at a time, top of the rack first, for
+  every device whose one kind is port-bearing (two patch panels, three routers); an upload posted while a port read held the
+  model lock was accepted (200, a run started) instead of "another rack is being read"; Find a port lists all 12 devices,
+  the ones not read with "ports not read yet". Two switches the detector typed but the classifier called Other stay "Not sure"
+  and are not read on their own: a person sets the kind first, as the one-kind rule says. tech5 (servers and storage only)
+  rightly started no port read.

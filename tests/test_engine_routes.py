@@ -236,7 +236,7 @@ def test_every_error_has_the_same_shape(eng):
 # ---- the testers' findings of 4 Nov 2026 (server side)
 def test_the_run_stage_never_goes_down(eng):
     app = eng[0]
-    seq = ["checking which way the video runs", "stitching the video into one rack picture", "stitching: aligning the frames (40 %)", "rack image: the rails",
+    seq = ["checking which way the video runs", "stitching the video into one rack picture", "stitching: aligning the frames (40 %)", "stitching: done (100%)", "rack image: the rails",
            "rack image: units", "rack image: occupancy", "rack image: devices", "reading the video", "registering 40 frames", "registered frame 5 (1/40)",
            "running the photo pipeline on 12 frames", "frame 12: 20 units (1/12)", "fusing", "reading text on the units", "best frames per device (every frame of the video)",
            "drawing", "classifying devices", "units: 3 rows split, 0 inserted, 0 merged (equal-size count rule)", "units: picture corrected so every unit is 44 px tall",
@@ -247,6 +247,7 @@ def test_the_run_stage_never_goes_down(eng):
         stage = max(stage, app.stage_of(m) or 0); seen.append(stage)
     assert seen == sorted(seen) and seen[0] == 1 and seen[-1] == 15
     assert {3, 5, 8, 11, 14} <= set(seen)
+    assert seen[3] == 3 and seen.count(15) == 1                   # the stitcher's "done (100%)" is still the stitch; only the bare "done" ends the run
 
 
 def test_a_re_encoded_video_is_the_same_video(eng, tmp_path):
