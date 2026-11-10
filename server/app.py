@@ -351,7 +351,7 @@ def report_dir(j):
 # The run page's stage (1 to 15, the STEPS of web/app/app.js) from the engine's progress sentence, more specific words first.
 # The page used to guess the stage from the words itself and six sentences sent it back a step (testers, 4 Nov 2026);
 # now the server numbers it and the number never goes down within a run.
-STAGE_WORDS = (("building the report", 14), ("ports: failed", 13), ("ports:", 11), ("devices:", 8), ("picture levelled", 8),
+STAGE_WORDS = (("building the report", 14), ("checking that the video shows a rack", 2), ("ports: failed", 13), ("ports:", 11), ("devices:", 8), ("picture levelled", 8),
                ("units:", 8), ("classifying", 8), ("drawing", 7), ("best frames", 7), ("rack image: devices", 7), ("rack image: occupancy", 6),
                ("rack image: units", 5), ("rack image", 4), ("reading text", 6), ("fusing", 6), ("frame ", 5), ("running the photo pipeline", 5),
                ("registered frame", 4), ("registering", 4), ("reading the video", 4), ("stitch", 3), ("checking which way", 1), ("queued", 1))
@@ -366,6 +366,32 @@ def stage_of(msg):
     return next((n for k, n in STAGE_WORDS if k in m), None)
 
 
+RACK_CHECK_MIN = 3                                      # a video shows a rack when some sampled frame has at least this many unit rows
+
+
+def rack_in_video(video_path, samples=6):
+    """The most unit rows the unit model finds on `samples` frames spread through the video, or None when the video cannot
+    be read. A video of something other than a rack front is refused on this before the stitch (testers, 10 Nov 2026)."""
+    try:
+        c = cv2.VideoCapture(str(video_path)); n = int(c.get(cv2.CAP_PROP_FRAME_COUNT))
+        if n <= 0:
+            c.release(); return None
+        best = 0
+        for q in [(k + 0.5) / samples for k in range(samples)]:
+            c.set(cv2.CAP_PROP_POS_FRAMES, int(n * q)); ok, fr = c.read()
+            if not ok:
+                continue
+            rows = occ.detect_units(Image.fromarray(cv2.cvtColor(fr, cv2.COLOR_BGR2RGB)))
+            best = max(best, sum(1 for r in rows if r.get("source") == "detected"))
+            if best >= RACK_CHECK_MIN:
+                break
+        c.release()
+        return best
+    except Exception as ex:  # noqa: BLE001  the check must never stop a reading on its own fault
+        print(f"[racktrack] rack check skipped: {type(ex).__name__}: {ex}", file=sys.stderr)
+        return None
+
+
 def run_job(job, video_path, truth_path=None):
     import cv2
     j = JOBS[job]; d = pathlib.Path(j["dir"]); rack_path = d / "rack.png"
@@ -376,6 +402,11 @@ def run_job(job, video_path, truth_path=None):
     try:
         say("checking which way the video runs")
         video_path, turned = rack_stitch.upright(video_path, d, from_guide=j.get("from_guide", False)); j["video_path"] = video_path; j["video_file"] = str(video_path); _save(j)
+        say("checking that the video shows a rack")
+        with MODEL_LOCK:
+            seen = rack_in_video(video_path)
+        if seen is not None and seen < RACK_CHECK_MIN:
+            raise ValueError("no frame gave a ladder")       # the same message as the full reading gave after minutes; now in seconds (testers, 10 Nov 2026)
         say("stitching the video into one rack picture")
         try:
             j["stitch"] = dict(rack_stitch.stitch(video_path, rack_path, progress=say), upright=turned)
@@ -561,15 +592,18 @@ def _video_fingerprint(path):
         w = int(c.get(cv2.CAP_PROP_FRAME_WIDTH)); h = int(c.get(cv2.CAP_PROP_FRAME_HEIGHT))
         if n <= 0 or w <= 0 or fps <= 0:
             c.release(); return None
-        hashes = []
+        hashes, turned = [], []
         for q in (0.1, 0.5, 0.9):
             c.set(cv2.CAP_PROP_POS_FRAMES, int(n * q)); ok, fr = c.read()
             if not ok:
                 c.release(); return None
-            g = cv2.resize(cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY), (8, 8), interpolation=cv2.INTER_AREA).astype(float)
+            gray = cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY)
+            g = cv2.resize(gray, (8, 8), interpolation=cv2.INTER_AREA).astype(float)
             hashes.append("".join("1" if v > g.mean() else "0" for v in g.flatten()))
+            gr = cv2.resize(cv2.rotate(gray, cv2.ROTATE_90_CLOCKWISE), (8, 8), interpolation=cv2.INTER_AREA).astype(float)
+            turned.append("".join("1" if v > gr.mean() else "0" for v in gr.flatten()))
         c.release()
-        return {"w": w, "h": h, "dur": round(n / fps, 2), "hashes": hashes}
+        return {"w": w, "h": h, "dur": round(n / fps, 2), "hashes": hashes, "turned": turned}
     except Exception:  # noqa: BLE001  an unreadable video simply has no fingerprint
         return None
 
@@ -587,9 +621,16 @@ def _run_fingerprint(j):
 
 
 def _same_look(a, b):
-    """The same footage: same size, duration within 0.3 s, and each of the three sampled frames within 10 bits of 64."""
-    return bool(a and b and a["w"] == b["w"] and a["h"] == b["h"] and abs(a["dur"] - b["dur"]) <= 0.3
-                and all(sum(x != y for x, y in zip(p, q)) <= 10 for p, q in zip(a["hashes"], b["hashes"])))
+    """The same footage: same size, duration within 0.3 s, and each of the three sampled frames within 10 bits of 64; a copy
+    turned a quarter turn (the phone's export of a sideways video) matches through the turned hashes."""
+    if not (a and b) or abs(a["dur"] - b["dur"]) > 0.3:
+        return False
+    close = lambda hs, ks: bool(hs and ks and len(hs) == len(ks) and all(sum(x != y for x, y in zip(p, q)) <= 10 for p, q in zip(hs, ks)))
+    if a["w"] == b["w"] and a["h"] == b["h"]:
+        return close(a["hashes"], b["hashes"])
+    if a["w"] == b["h"] and a["h"] == b["w"]:
+        return close(a.get("turned"), b["hashes"]) or close(a["hashes"], b.get("turned"))
+    return False
 
 
 def _run_probe(j):
@@ -741,6 +782,8 @@ def api_video_view(job: str):
     j = job_or_none(job)
     if j is None or j.get("result") is None:
         raise HTTPException(404, "No result yet.")
+    if j.get("status") == "done" and job not in PORTS_ALL_RUNNING and job not in PORTS_ALL_SEEN:
+        PORTS_ALL_SEEN.add(job); start_ports_all(job)          # a run read before the automatic port reads existed gets them when it is opened (testers, 10 Nov 2026)
     r = SDB.with_corrections(_run_org(j), (j.get("rack_id") or {}).get("id"), j["result"]); base = f"/api/video/{job}/file/"   # corrections made on earlier scans of this rack
     ubox = {u["unit"]: u["box"] for u in r["occupancy_frames"]["rows"] if u.get("box")}
     def lay_of(d):
@@ -815,7 +858,7 @@ def _record_passive(j):
 def _kind_of(d, when=None):
     """The device's one kind for the screens (engine/source_db.py device_kind) and where it came from, in plain words."""
     k = SDB.device_kind(d, when)                 # when: the run's date, for a kind recorded when the ports were mapped
-    return {"kind": k["kind"], "kind_from": k["from"], "kind_words": k["words"]}
+    return {"kind": k["kind"], "kind_from": k["from"], "kind_words": k["words"], "likely": k.get("likely")}
 
 
 @app.delete("/api/video/{job}")
@@ -1094,6 +1137,17 @@ def _read_panel_thread(job, index):
             if not crop.exists():
                 rack_video.clean_crop(dv, j.get("video_path"), d / "rack.png", crop, r["devices"])
             lay = patch_panels.read_patch_panel(d, index, crop)
+            try:                                        # each jack's state from the status model on its own crop, not from the port class: an empty RJ45 jack is still an RJ45 (testers, 10 Nov 2026: "cable connected" where there was none)
+                pd_lay = pipe.add_port_details(dict(lay, auto=True), Image.open(crop), d / "switch_layouts", f"D{index}")
+                if pd_lay.get("port_details") and not pd_lay["port_details"].get("error"):
+                    lay["port_details"] = pd_lay["port_details"]; lay.setdefault("pictures", {})["portmap"] = pd_lay["port_details"].get("picture")
+                    known = {p.get("id"): p.get("status") for p in pd_lay["port_details"].get("ports") or [] if p.get("status") in ("connected", "empty")}
+                    for p_ in lay.get("ports") or []:
+                        if p_.get("id") in known:
+                            p_["status"] = known[p_["id"]]
+                    lay["connected"] = sum(p_.get("status") == "connected" for p_ in lay.get("ports") or [])
+            except Exception as ex:  # noqa: BLE001  the panel keeps the reader's own states
+                print(f"[racktrack] panel D{index} of {job}: port states not refined: {type(ex).__name__}: {ex}", file=sys.stderr)
             with run_lock(job):                         # merged into the result as it is now: an edit made meanwhile stays
                 r = json.loads(rf.read_text()); dv = next((x for x in r["devices"] if x["index"] == index), None)
                 if dv is not None:
@@ -1124,6 +1178,7 @@ def _read_ports_thread(job, index, hint=None):
 
 
 PORTS_ALL_RUNNING = set()
+PORTS_ALL_SEEN = set()                                  # runs looked at once for unread devices since this server started
 
 
 def start_ports_all(job):
@@ -1145,7 +1200,7 @@ def _ports_all_thread(job):
         for dv in devs:
             if JOBS.get(job) is not j or j.get("status") != "done":
                 return                                  # the run was removed or restarted meanwhile
-            kind = SDB.device_kind(dv)["kind"]          # the one kind: a correction, then the faceplate, then the picture
+            k = SDB.device_kind(dv); kind = k["kind"] or k.get("likely")   # the one kind, or the best guess when the picture was not sure: the read may settle it from the faceplate
             if kind not in PORT_KINDS and not (kind == "Patch Panel" and patch_panels.available()):
                 continue
             ports = j["ports"] = j.get("ports") or {}
@@ -1558,7 +1613,7 @@ def api_read_ports(job: str, index: int):
     dv = next((d for d in (j.get("result") or {}).get("devices") or [] if d["index"] == index), None)
     if dv is None:
         raise HTTPException(404, "No such device.")
-    kind = SDB.device_kind(dv)["kind"]   # the one kind (a correction, then the faceplate, then the picture)
+    k = SDB.device_kind(dv); kind = k["kind"] or k.get("likely")   # the one kind (a correction, then the faceplate, then the picture), else the best guess
     if kind not in PORT_KINDS and not (kind == "Patch Panel" and patch_panels.available()):
         return {"state": "none", "detail": "Not a switch, router, firewall, gateway or patch panel: no ports to read."}
     ports = j["ports"] = j.get("ports") or {}             # status.json keeps "ports": null until the first read

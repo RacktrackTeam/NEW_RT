@@ -156,6 +156,7 @@ button:disabled { opacity: .4; }
 /* The #toggles label rule above would otherwise beat the browser's own
    [hidden] rule, so the Buzz toggle hidden on iPhone needs this. */
 #toggles label[hidden] { display: none; }
+#toggles button { margin-top: 4px; padding: 6px 10px; border-radius: 10px; border: 1px solid #d5d8de; background: #fff; color: var(--ink); font: 600 12px system-ui, sans-serif; }
 
 #result, #intro { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: auto;
   background: var(--page); padding: 24px; }
@@ -285,6 +286,7 @@ body.landscape .links a, body.landscape .links .text-link { padding: 10px; }
     <div id="toggles">
       <label><input type="checkbox" id="tVoice" checked> Voice</label>
       <label id="lVibe"><input type="checkbox" id="tVibe" checked> Buzz</label>
+      <button type="button" id="tFlip" title="The buttons face the wrong way? Tap to turn the view the other way">Flip the view</button>
     </div>
 
     <div id="startTip" hidden>
@@ -440,6 +442,7 @@ const S = {
 const testerInput = $('tester');
 try { testerInput.value = localStorage.getItem('rackTester') || ''; } catch (e) {}
 testerInput.addEventListener('change', () => { try { localStorage.setItem('rackTester', testerInput.value.trim()); } catch (e) {} });
+$('tFlip').addEventListener('click', () => { flipView = !flipView; try { localStorage.setItem('rackGuideFlip', flipView ? '1' : '0'); } catch (e) {} manualRotateW = 0; updateManualRotate(); });
 const testerName = () => testerInput.value.trim() || 'unknown';
 
 $('bStart').onclick = async () => {
@@ -939,13 +942,17 @@ function syncLandscapeClass() {
 // guide-lines follow the same un-rotated video via the existing axis-swap
 // logic in analyze() (S.axis), not a CSS transform.
 let manualRotateDeg = 0, manualRotateW = 0, manualRotateH = 0;
+// A phone whose motion sensor reports gravity with the other sign shows the forced landscape view upside down (a tester,
+// 10 Nov 2026: "everything in the opposite direction"). Flip the view turns it the other way and the phone remembers it.
+let flipView = false; try { flipView = localStorage.getItem('rackGuideFlip') === '1'; } catch (e) {}
 function updateManualRotate() {
   const sensorSaysLandscape = S.gx != null && S.gy != null && isLandscape();
   // xDownSign() === 1 means the screen's right edge (+x) points at the
   // floor, i.e. the phone's top is to the operator's RIGHT. Text must then
   // have its tops pointing to -x, which is the -90 turn (checked against a
   // real iPhone with rotation lock on: +90 here showed everything upside down).
-  const needed = innerWidth > innerHeight ? 0 : (sensorSaysLandscape ? (xDownSign() === 1 ? -90 : 90) : 90);
+  const flip = flipView ? -1 : 1;
+  const needed = innerWidth > innerHeight ? 0 : (sensorSaysLandscape ? (xDownSign() * flip === 1 ? -90 : 90) : 90 * flip);
   // Re-apply sizing not just when the angle changes, but whenever the
   // viewport itself does - iOS Safari resizes the visible viewport (its
   // address bar growing/shrinking) without any rotation at all, which used

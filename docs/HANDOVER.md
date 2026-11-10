@@ -103,3 +103,26 @@ her answers: https://claude.ai/artifact/BEtrRmtasSZvqNKq2qEBui) and built on 5 N
   the ones not read with "ports not read yet". Two switches the detector typed but the classifier called Other stay "Not sure"
   and are not read on their own: a person sets the kind first, as the one-kind rule says. tech5 (servers and storage only)
   rightly started no port read.
+
+## State at 10 Nov (the tester's second round)
+
+The Mac rebooted on 6 Nov and the services were down until 10 Nov 11:30, so the tester's second list ("still ...") came from
+her 4 Nov results and one new upload on 5 Nov 15:31: a clip of people at an airport, sent to see whether a non-rack video is
+refused. Built on 10 Nov (local only):
+- A video with no rack is refused before the stitch: six sampled frames through the unit model, under 4 s (server
+  rack_in_video, RACK_CHECK_MIN 3); a rack video that cannot be stitched still gets the stitch message.
+- Device crops (the zoom, the list, the device page) are cut from the detector's own outline (polygon_box), not from the
+  unit band the outline was snapped to: on her rack the unit grid sits half a unit off and every band held halves of two
+  devices (the half crops, and part of the wrong kinds). The cached clean crops of every run were deleted so they re-cut.
+- A patch panel's jacks get their state from the status model on each jack's crop (pipe.add_port_details on the panel
+  layout), not from the port class: an empty RJ45 jack was "connected". A slot the reader did not see is "not sure".
+- "Not sure" devices carry a best guess (the second model at 50 % or more, else the detector's vote): the words say
+  "Not sure, likely Switch (92 %)", Find a port shows it, and the automatic port read takes such a device too.
+- A run read before the automatic port reads existed gets them when its result is opened (PORTS_ALL_SEEN).
+- A sideways export of a video read before counts as the same video (the fingerprint keeps quarter-turned hashes too).
+- The camera guide has a Flip the view control for a phone whose motion sensor reports gravity the other way (kept on the
+  phone, rackGuideFlip).
+- Her four 4 Nov runs and techt's two were re-read in place with the new rules (same run ids, reports rebuilt, ports reset),
+  so the results she opens show the fixes; see scratchpad rerun_inplace.sh in the session, and the ports fill in when a
+  result is opened.
+Not fixable without new models: the classifier calling her top device a server, and "Other" on a third of her devices.

@@ -578,7 +578,9 @@ def device_kind(d, when=None):
     elif pic_known and not ((d or {}).get("unsure") and (prob or 0) < 0.7):
         return {"kind": pic_known, "from": "picture", "picture": pic, "words": f"{pic_known}, {pic_words}"}
     else:
-        return {"kind": None, "from": None, "picture": pic, "words": "Not sure: the picture could not tell" + (f" (best guess {pic})" if pic_known else "")}
+        guess = best_guess(d)                                           # testers, 10 Nov 2026: "Not sure" alone told them nothing
+        return {"kind": None, "from": None, "picture": pic, "likely": guess[0] if guess else None,
+                "words": "Not sure" + (f", likely {guess[0]} ({round(100 * guess[1])} %)" if guess else ": the picture could not tell")}
     if src == "corrected" and lk and _norm(lk) != _norm(kind):
         words += f"; {lk} {lk_words}"
     if pic_known and _norm(pic_known) != _norm(kind):
@@ -586,6 +588,18 @@ def device_kind(d, when=None):
     elif not pic_known and cl.get("class"):
         words += f"; the picture was not sure ({cl['class']} {round(100 * (prob or 0))} %)"
     return {"kind": kind, "from": src, "picture": pic, "words": words}
+
+
+def best_guess(d):
+    """When the classifier is not sure: the second model's kind when it is at least half sure, else the detector's vote
+    on the frames (the "type" the device finder gave it). (kind, confidence) or None."""
+    cl = (d or {}).get("classification") or {}; sec = cl.get("second") or {}
+    if sec.get("class") and sec["class"] not in ("Other", "Empty", "Closed_Unit") and (sec.get("prob") or 0) >= 0.5:
+        return sec["class"], float(sec["prob"])
+    t = (d or {}).get("type")
+    if t and t not in ("Other", "Empty", "Closed_Unit"):
+        return t, float((d or {}).get("type_confidence") or 0.5)
+    return None
 
 
 def run_devices(result):

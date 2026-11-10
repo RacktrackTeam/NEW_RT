@@ -262,11 +262,18 @@ def test_a_re_encoded_video_is_the_same_video(eng, tmp_path):
                 continue
             vw.write(scenes[i * 6 // 60])
         vw.release()
-    write(tmp_path / "a.mp4", 30); write(tmp_path / "b.mp4", 29, skip_every=30); write(tmp_path / "c.mp4", 30, seed=2)
-    fa, fb, fc = (app._video_fingerprint(tmp_path / n) for n in ("a.mp4", "b.mp4", "c.mp4"))
-    assert fa and fb and fc
+    def write_turned(path, fps, seed=1):                        # the phone's export of a sideways video: every frame a quarter turn
+        rng = np.random.default_rng(seed); vw = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"mp4v"), fps, (120, 160))
+        scenes = [cv2.GaussianBlur(rng.integers(0, 255, (120, 160, 3), dtype=np.uint8), (0, 0), 4) for _ in range(6)]
+        for i in range(60):
+            vw.write(cv2.rotate(scenes[i * 6 // 60], cv2.ROTATE_90_CLOCKWISE))
+        vw.release()
+    write(tmp_path / "a.mp4", 30); write(tmp_path / "b.mp4", 29, skip_every=30); write(tmp_path / "c.mp4", 30, seed=2); write_turned(tmp_path / "d.mp4", 30)
+    fa, fb, fc, fd = (app._video_fingerprint(tmp_path / n) for n in ("a.mp4", "b.mp4", "c.mp4", "d.mp4"))
+    assert fa and fb and fc and fd
     assert app._same_look(fa, fb)                               # the phone's re-encode: other frame rate and count, the same footage
     assert not app._same_look(fa, fc)                           # another video of the same length is not it
+    assert app._same_look(fa, fd) and app._same_look(fd, fa)    # the same footage turned a quarter turn (a sideways video's export) is it
 
 
 def test_a_port_read_does_not_refuse_an_upload(eng):

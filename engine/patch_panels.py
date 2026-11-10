@@ -131,7 +131,7 @@ def complete_grid(ports, size, img_w=None):
                 used.add(id(near)); p = near[4]
                 out.append(dict(p, polygon=poly, seen=True, row=ri, col=k))
             else:
-                out.append({"type": "hidden", "status": "connected", "inferred": True, "polygon": poly, "seen": False, "row": ri, "col": k})
+                out.append({"type": "hidden", "status": "unknown", "inferred": True, "polygon": poly, "seen": False, "row": ri, "col": k})   # not seen: not sure, never "connected" (testers, 10 Nov 2026)
     for i, p in enumerate(out):
         p["id"] = i + 1
     return out

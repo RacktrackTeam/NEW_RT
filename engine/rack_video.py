@@ -823,7 +823,8 @@ def _crop_boxes(dv, devices):
         xs = [p[0] for p in q]; ys = [p[1] for p in q]
         return [min(xs), min(ys), max(xs), max(ys)]
     if dv.get("polygon_from") != "units" or not devices:          # a detector-confirmed device: its own frames place it
-        return [(t["frame"], bbox(back_project_poly(np.asarray(t["H"], np.float64), dv["polygon"])), t["H"]) for t in dv.get("top_frames") or [] if t.get("H") is not None]
+        own = dv.get("polygon_box") or dv["polygon"]              # the detector's own outline, not the unit band it was snapped to: when the unit grid sits half a unit off, the band holds halves of two devices (the tester's rack, 10 Nov 2026)
+        return [(t["frame"], bbox(back_project_poly(np.asarray(t["H"], np.float64), own)), t["H"]) for t in dv.get("top_frames") or [] if t.get("H") is not None]
     num = lambda u: int(str(u)[1:])
     T, B = num(dv["top"]), num(dv["bottom"])
     near = sorted((x for x in devices if x is not dv and x.get("polygon_from") == "frames" and x.get("polygon") and (num(x["bottom"]) > T or num(x["top"]) < B)),
@@ -1192,7 +1193,8 @@ def clean_crop(dv, video, rack_path, out, devices=None, nth=0):
     if fr is None and nth:
         return False
     if fr is None:
-        fr = cv2.imread(str(rack_path)); box = [min(p[0] for p in dv["polygon"]), min(p[1] for p in dv["polygon"]), max(p[0] for p in dv["polygon"]), max(p[1] for p in dv["polygon"])]
+        own = dv.get("polygon_box") or dv["polygon"]
+        fr = cv2.imread(str(rack_path)); box = [min(p[0] for p in own), min(p[1] for p in own), max(p[0] for p in own), max(p[1] for p in own)]
     elif "snapped to its units" not in str(dv.get("polygon_refined") or ""):
         try:                                                        # the box snaps to the device detector's box in that frame: the back-projected one
             import device_model                                     # can sit a little low and clip the device's top (D2 of the server room, 2026-10-29)

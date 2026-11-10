@@ -50,7 +50,7 @@
     var t = $('topsub'); if (t && v && /^#tools\//.test(location.hash)) { t.textContent = r; t.hidden = !r; } return v; }
   function view(run) { return VIEW[run] ? Promise.resolve(nameBar(VIEW[run])) : api('/api/video/' + encodeURIComponent(run) + '/view').then(function (v) { VIEW[run] = v; return nameBar(v); }); }
   function unitOf(d) { var a = parseInt(String(d.top).replace(/\D/g, ''), 10), b = parseInt(String(d.bottom).replace(/\D/g, ''), 10); return a === b ? 'U' + a : 'U' + Math.min(a, b) + '-' + Math.max(a, b); }
-  function devLabel(d) { var L = d.layout || {}; return 'D' + d.index + ' · ' + unitOf(d) + ' · ' + (d.kind || 'Not sure') + (L.vendor ? ' · ' + L.vendor + (L.model ? ' ' + L.model : '') : ''); }
+  function devLabel(d) { var L = d.layout || {}; return 'D' + d.index + ' · ' + unitOf(d) + ' · ' + (d.kind || (d.likely ? 'Not sure, likely ' + d.likely : 'Not sure')) + (L.vendor ? ' · ' + L.vendor + (L.model ? ' ' + L.model : '') : ''); }
 
   // ---- a picture with boxes drawn on it (an svg over the image, in the image's own pixels); the highlighted box pulses once
   function fig(src, boxes, cls) {
