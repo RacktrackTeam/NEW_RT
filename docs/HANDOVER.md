@@ -126,3 +126,9 @@ refused. Built on 10 Nov (local only):
   so the results she opens show the fixes; see scratchpad rerun_inplace.sh in the session, and the ports fill in when a
   result is opened.
 Not fixable without new models: the classifier calling her top device a server, and "Other" on a third of her devices.
+- Re-read in place on 10 Nov 11:40 to 12:12 (phase 1, reports rebuilt, ports reset): her office rack 785fb92f6137 23 units 10
+  devices (was 10, no empty rows); 09726ca843f3 48 / 13 (was 14; empty rows U28, U29); b82f26c94fd9 42 / 14 (was 17; U3, U8,
+  U11); 3ad1f49493c1 47 / 15 (was 18; U3 to U7, U12, U28, U29); techt's 8bb76d8c5766 43 / 15 (was 16); 8afd6d1aa988 47 / 17
+  (was 24). The ports of every port-bearing device read again by themselves when each result is opened.
+- The services do not survive a reboot: tools/boot.sh and tools/ai.racktrack.boot.plist are written; installing the login item
+  and opening the tunnel are the owner's two commands (the safety check here blocks both); the README has them.
