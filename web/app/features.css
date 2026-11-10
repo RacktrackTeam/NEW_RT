@@ -98,3 +98,10 @@
 .fx-card .ft-cell { cursor:pointer; }
 .fx-card .ft-cell.chosen { outline:2px solid #1f2a3a; outline-offset:2px; }
 .fx-portsay { margin:4px 0 0; color:#1f2a3a; font-weight:600; }
+/* the tester's second list of 10 Nov 2026: the key is three plain swatches (6); the Find a port column has no empty blocks and the picture sits centred (1) */
+.ft-key .ft-cell.sw { min-width:22px; width:22px; height:22px; padding:0; border-radius:5px; }
+#fp-grid:empty, #fp-out:empty, #fp-hint:empty { display:none; }
+#fp-hint { margin-top:4px; }
+@media (max-width:760px) { .fp-top .fx-rack { margin:0 auto; } }
+.fx-page.fx-page { gap:12px !important; } .fx-title { margin:0; padding:0; }   /* doubled and important: standard.css, loaded last, sets the page gap with !important */
+.fp-pick > label { margin:0; } #fp-out { margin-top:0; }

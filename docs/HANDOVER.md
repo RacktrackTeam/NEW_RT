@@ -174,3 +174,37 @@ item, Copy all notes; the URL is in the session's final message and in the memor
   at 412 and 1280 px as techt (scratchpad proof3/shots.py and shots2.py), and tools/proof_result_tabs.py on every run.
 - Not changed: the models (a wrong type on her rack is corrected by hand and remembered); the camera guide; no confirm
   step before a recorded video is read (the check does it).
+
+## State at 10 Nov night (the tester's fourth list, 12 items)
+
+Her second list of the day came in the evening ("Application Testing - Fixes to Be Done", 12 items in six groups); the owner's
+own summary: scroll bars, alignment and the highlighting of nav links and buttons remained, everything else done. Built the
+same night, local only (branch rt-eos-integration), and a page for her to verify each item was published: "Fourth Round Fixes"
+(same form as the third: your words, what you will see now, how to check, a tick and a note box, Copy all notes; the URL is in
+the session's final message and in the memory file). App script version 171; flow.css 21, features.css 8, features.js 13.
+- Find a port (1): the rack picture is centred on a phone, the empty blocks between the Port box and the key take no space
+  (#fp-grid:empty, #fp-out:empty), the tool page gap is 12 px.
+- The device arrows (2) are bold outlined buttons on a pale ground (.dvarrow); on a phone they have their own full-width row
+  at the top of the card (.dvtop, rendered next to the row inside .dvinfo, which is hidden on a phone): inside the text column
+  the row was wider than the column on a 360 px phone and ran past the card, dragging the page sideways (5). The app's scroll
+  bar (#sbar) is 6 px and darker (5).
+- Every text-styled action is a bold outlined pill (button.link, summary.link): Enter the make and model (with a turning chevron),
+  Not a device? Remove it (3), Change next to the type, Change ID and Zoom in on the Rack tab, Not this rack, Sign out, Back to
+  Record or upload, Specifications (11). The camera guide's own back button keeps its black look (#sw-guide .swback). Links to
+  other pages (a.link, Datasheet) stay underlined.
+- The result tabs on a phone are a six-column grid, each tab spanning two columns: three to a row, three rows for seven tabs,
+  the odd last one spanning the row (:last-child:nth-child(3n+1)), two leftovers half each (4).
+- The key on Connections and Find a port is three plain swatches, no numbers (.ft-cell.sw): the filled "1" had looked like a
+  chosen port (6).
+- The Layout tab's zoom controls (7): the device bar (#dv-bar) had stayed on the other tabs because renderOne re-ran on every
+  view refresh and unhid it; it now shows only when RES.tab is devices. The 2D controls (.xi) float fixed at the bottom right
+  on a phone; the drawing frame's entrance animation (.fr, keyframes gr, fill both) left an identity transform on the frame,
+  which made it the containing block of the fixed controls, so the frame's animation is off on a phone.
+- Every arrow that opens something is a navy chevron in a 28 px ring: .prow/.lrow/.irow .arr (Devices list, Needs a look rows),
+  every .chev (History and Home rows), Profile rows; dropdown chevrons (How to film, Details, details.card, .idhow) are navy
+  and 2.5 px; the Next strip's arrow and the back arrow are bolder (8, 10).
+- Upload a video has a 2 px navy frame, a navy icon tile and a tinted ground (9).
+- Item 12 was her note that everything earlier is fixed; nothing to build.
+- Proof: scratchpad proof4/before.py and after.py (412 px at 2x, 360 px, 1280 px as techt), measure.py (the device row's
+  overflow at 360: nav 236 px in a 184 px column, document 379 px wide; after: no overflow), tools/proof_result_tabs.py on every
+  run, the 28 tests pass.

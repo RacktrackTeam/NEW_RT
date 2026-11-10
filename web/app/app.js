@@ -1287,7 +1287,8 @@
       var prev = at > 0 ? devs[at - 1] : null, next = at < devs.length - 1 ? devs[at + 1] : null;
       var nav = '<div class="dvnav"><button class="btn dvarrow" type="button" data-dvnav="' + (prev ? prev.index : '') + '"' + (prev ? '' : ' disabled') + '>‹ ' + (prev ? 'D' + prev.index + ' above' : 'Top of the rack') + '</button><span class="dvpos">' + (at + 1) + ' of ' + devs.length + '</span><button class="btn dvarrow" type="button" data-dvnav="' + (next ? next.index : '') + '"' + (next ? '' : ' disabled') + '>' + (next ? 'D' + next.index + ' below' : 'Bottom of the rack') + ' ›</button></div>';   // real buttons; the same bar sits fixed at the bottom of a phone (testers, 10 Nov 2026: the arrows were not noticed)
       var web = document.body.classList.contains('web');
-      var bar = $('dv-bar'); if (bar) { bar.innerHTML = nav; bar.hidden = web; }
+      var bar = $('dv-bar'); if (bar) { bar.innerHTML = nav; bar.hidden = web || RES.tab !== 'devices'; }   // the bar belongs to the Devices tab only: it had stayed over the Layout tab's zoom controls (the tester, 10 Nov 2026)
+      var navTop = '<div class="dvtop">' + nav + '</div>';   // on a phone the arrows have their own row at the top of the card: inside the text column they ran past the card's edge on a narrow phone (the tester, 10 Nov 2026)
       info = nav + '<span class="eyebrow">D' + dv.index + ' · ' + URANGE(dv.top, dv.bottom, dv.height) + '</span><h2 class="onet">' + esc(mm || (ps && ps.panel ? ps.title : dv.kind && dv.kind !== 'Other' ? dv.kind : 'Device')) + '</h2>'
         + '<div class="stat ' + (dv.unsure ? 'unc' : ps ? ps.key : 'on') + '"><i></i>' + (dv.unsure ? 'Needs a look' : ps ? ps.word : 'Checked') + '</div>'
         + '<p class="dvsum">' + summaryLine(dv, L, kind, mm) + '</p>'
@@ -1310,7 +1311,7 @@
       RES.zoom = { html: '<img class="zimg" id="dv-crop" alt="D' + dv.index + '">', title: 'D' + dv.index + (mm ? ' · ' + esc(mm) : ''), dev: dv };
     }
     if (!isUnit && window.RTFEAT) below = window.RTFEAT.idsBlock(devs[at], RES.id) + below;     // wt/features: serial and asset tag from a close-up
-    $('res-dev').innerHTML = '<div class="dvwrap">' + loc + '<div class="dvinfo">' + info + '</div></div><div class="dvbelow">' + below + '</div>';
+    $('res-dev').innerHTML = (navTop || '') + '<div class="dvwrap">' + loc + '<div class="dvinfo">' + info + '</div></div><div class="dvbelow">' + below + '</div>';
     renderDevSide();
     var cine = $('cine'); if (cine) setTimeout(function () { cine.classList.add('play'); }, 350);
     var ob = $('res-dev').querySelector('.svgov .c-base'); if (ob) { var fitOv = function () { ob.nextElementSibling.setAttribute('viewBox', '0 0 ' + ob.naturalWidth + ' ' + ob.naturalHeight); }; if (ob.complete && ob.naturalWidth) fitOv(); else ob.onload = fitOv; }
