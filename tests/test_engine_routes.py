@@ -319,3 +319,19 @@ def test_a_stitched_picture_with_few_rows_and_nothing_in_use_is_no_rack(eng):
     assert app.stitched_looks_like_rack({"detected_rows": 5, "occupied": 9})         # a small rack full of devices
     assert app.stitched_looks_like_rack({"detected_rows": 40, "occupied": 0})        # an empty rack with its ladder
     assert not app.stitched_looks_like_rack(None)
+
+
+def test_a_sure_label_read_is_the_rack_id_without_asking(eng):
+    """The ID read off the label is taken as the rack's ID when enough reads agree; a shaky read still asks; a person's answer is never overwritten (owner, 10 Nov 2026)."""
+    app, client, tmp = eng
+    sure = _run(app, tmp, "lblA", 1, 2); shaky = _run(app, tmp, "lblB", 1, 2); kept = _run(app, tmp, "lblC", 1, 2, "PERSON-SAID-R9")
+    (sure["dir"] / "rack_label.json").write_text(json.dumps({"id": {"text": "SP-HYD-RM01-R01-R1", "confidence": 0.52, "seen": 5}, "name": None}))
+    (shaky["dir"] / "rack_label.json").write_text(json.dumps({"id": {"text": "SP-HYD-RM01-R01-RI", "confidence": 0.41, "seen": 3}, "name": None}))
+    (kept["dir"] / "rack_label.json").write_text(json.dumps({"id": {"text": "SP-HYD-RM01-R01-R1", "confidence": 0.9, "seen": 9}, "name": None}))
+    for j in (sure, shaky, kept):
+        app.auto_rack_id(j)
+    assert sure["rack_id"] and sure["rack_id"]["id"] == "SP-HYD-RM01-R01-R1" and sure["rack_id"]["source"] == "read from the label" and sure["rack_id"].get("auto")
+    assert shaky["rack_id"] is None
+    assert kept["rack_id"]["id"] == "PERSON-SAID-R9"
+    for rid in ("lblA", "lblB", "lblC"):
+        app.JOBS.pop(rid)

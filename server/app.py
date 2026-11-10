@@ -481,10 +481,26 @@ def _rack_label_thread(job):
             out = rack_label.read_rack_label(j["dir"])
         out.pop("reads", None)
         (pathlib.Path(j["dir"]) / "rack_label.json").write_text(json.dumps(out, indent=1))
+        auto_rack_id(j)
     except Exception as ex:  # noqa: BLE001
         print(f"[racktrack] rack label for {job} failed: {type(ex).__name__}: {ex}")
     finally:
         RACK_LABEL_RUNNING.discard(job)
+
+
+RACK_ID_SURE = (0.5, 3)                        # the label's ID is the rack's ID without asking when at least 3 reads agree at 0.5 or better, or 2 at 0.7 (owner, 10 Nov 2026)
+
+
+def auto_rack_id(j):
+    """When the label read off this video is sure, that is the rack's ID: no question to the person. Asked only when unsure."""
+    if j.get("rack_id"):
+        return
+    RL = rack_label_of(j) or {}; rid = RL.get("id") or {}
+    text = (rid.get("text") or "").strip()
+    conf, seen = (rid.get("confidence") or 0), (rid.get("seen") or 0)
+    if text and ((conf >= RACK_ID_SURE[0] and seen >= RACK_ID_SURE[1]) or (conf >= 0.7 and seen >= 2)):
+        j["rack_id"] = {"id": text, "source": "read from the label", "auto": True, "on": datetime.datetime.now().isoformat(timespec="minutes")}
+        _save(j)
 
 
 def start_rack_label(job):
@@ -842,7 +858,7 @@ def api_video_view(job: str):
             "pictures": {k: base + v for k, v in (r.get("pictures") or {}).items()},
             "units": units, "devices": devices, "times_s": r.get("times_s"), "report": f"/video-report/{job}/index.html",
             "rack_label": rack_label_of(j), "rack_label_running": job in RACK_LABEL_RUNNING,
-            "rack_id": j.get("rack_id"), "rack_id_options": rack_id_options(j), "record_passive": _record_passive(j)}
+            "rack_id": (auto_rack_id(j), j.get("rack_id"))[1], "rack_id_options": rack_id_options(j), "record_passive": _record_passive(j)}
 
 
 def _detector_box(d):

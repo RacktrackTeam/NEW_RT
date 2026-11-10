@@ -265,3 +265,36 @@ different. Built together (flow.css 23, features.css 9, app.js 173, features.js 
   cut to one line.
 - Proof: tests pass, every tab of every run (tools/proof_result_tabs.py), every screen shot on WebKit at iPhone size
   (scratchpad mobile/shoot7.py, wk3) and on Chromium at 412 (cr3).
+
+## State at 11 Nov, small hours (the owner's night pass: standard type, Home, Profile, Report, Layout, the result bar, motion, the rack ID)
+
+After the compact view the owner asked, in one burst: a rack drawing on Home; every font, size and alignment checked letter by
+letter on every screen with a second verification; Profile simpler and appealing; animations and effects on every page and
+button; the Report as a document that opens nothing; the Layout tab without the colour legend, fitted to the screen, with motion;
+the Connections key in one row without the note; the result page's tabs as a bottom bar of four and a More button; the rack ID
+not asked when we are sure; the header naming the open tab instead of "Result". Built together (flow.css 24, features.css 10,
+app.js 174, features.js 16, server/app.py).
+- Type audit (scratchpad mobile/audit.py): every visible text element on 16 screens measured on WebKit at iPhone size
+  (family, size, weight, transform, spacing, left edge), before and after. After: one family (Inter) on every screen, the
+  drawing bundle's own --font (Geist) overridden inside .rteos; nav labels 11 px; page titles 22 px; titles and bold at 600;
+  mono labels gone on a phone; the audit files audit.json / audit2.txt / audit3.txt are the two verifications.
+- Home: an inline SVG rack (.homeart) between the line and the button, LEDs blinking (rt-blink), the button with a slow glow.
+- Profile: a centred hero (dark avatar disc, name, role · site), no group labels, no counters, Sign out centred and red.
+- Report: renderReport builds an <article class="doc"> with a ruled header, five numbered sections (Summary, The rack,
+  Devices, Free space, Needs a look) and a footer; the device rows and the elevation open nothing (the three listeners are
+  gone, the rows are divs, the table rows carry no data-dev).
+- Layout: #rt-legend hidden; on a phone the 2D drawing's svg is height calc(100svh - 268px), width auto, so the whole rack is
+  on screen (zoom in enlarges it); the "Tap a device to open it" line is hidden; the drawing grows in (rt-grow).
+- Connections: the key is three equal cells in one row, no note; a tap still outlines the ports in that state.
+- The result bar: on a phone #rnav is fixed at the bottom with Rack, Devices, Layout, Report and More; moreBar() in app.js
+  moves Find a port, Connections and Cables into a sheet (.rmsheet) that More opens, and moves them back on a laptop; the
+  header title is the open tab's name (TABNAME); the device bar and the Layout zoom controls sit above the bar.
+- The rack ID: server auto_rack_id(j) sets rack_id {id, source "read from the label", auto true} when the label read off
+  the video agrees on at least 3 reads at 0.5 or better, or 2 at 0.7 (RACK_ID_SURE); it runs after the label read and when a
+  view is built, never over an ID a person set or a skip. The Rack tab then shows the ID with Change ID and no question.
+  On the current runs the two with a label (fx1hyd000001, 785fb92f6137) already had person-set IDs, so the rule is proven by
+  the unit test only.
+- Motion (flow.css, prefers-reduced-motion aware): screens rise in with a stagger (fill-mode backwards, never both: a kept
+  transform pins fixed children), buttons and rows press, chevrons slide on press, the active tab pops, the filming tiles and
+  the report's sections stagger in, the done bar and toasts slide.
+- Proof: the audit twice, every screen shot on WebKit (mobile/wk4) and Chromium (mobile/cr4), tests, tools/proof_result_tabs.py.

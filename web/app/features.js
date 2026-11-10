@@ -195,7 +195,7 @@
   function connections(run) {
     view(run).catch(function () { return null; });                      // the rack's name in the header
     api('/api/video/' + encodeURIComponent(run) + '/connections').then(function (r) {
-      root().innerHTML = shell('Connections', run, '<div class="fx-keybox"><span class="fx-eye">Key</span>' + keyHtml(true) + '<span class="fx-keynote">Tap a state to see where it is on this rack; tap a port on a card to see that port.</span><p class="fx-keyans" hidden></p></div>'
+      root().innerHTML = shell('Connections', run, '<div class="fx-keybox">' + keyHtml(true) + '<p class="fx-keyans" hidden></p></div>'
         + (r.devices.length ? '<div class="fx-grid">' + r.devices.map(function (d, i) {
           var boxes = d.ports.map(function (p) { return { box: p.box, n: p.n, cls: stCls(p.state), tip: 'Port ' + p.n + ': ' + stateWord(p.state) }; });
           var pic = d.cut && boxes.some(function (b) { return b.box; }) ? fig(fileUrl(run, d.cut), boxes) : '<figure class="fx-fig"><img src="/api/video/' + encodeURIComponent(run) + '/crop/' + d.index + '" alt=""></figure>';

@@ -111,3 +111,10 @@
 .fx-keybox .ft-key.on2 { border-color:#1f2a3a; box-shadow:0 0 0 1px #1f2a3a inset; }
 .fx-card .ft-cell.khl { outline:2px solid #1f2a3a; outline-offset:2px; }
 .fx-keyans { margin:0; font-size:13px; flex:1 1 100%; color:var(--ink); } .fx-keyans[hidden] { display:none; } .fx-keyans .link { min-height:30px; padding:0 10px; font-size:12.5px; margin-left:4px; }
+/* the Connections key: three equal cells in one row, no note (owner, 10 Nov 2026) */
+.fx-keybox { display:flex; flex-direction:column; gap:8px; padding:0; border:0; background:none; }
+.fx-keybox .ft-keys { display:flex; flex-wrap:nowrap; gap:8px; width:100%; }
+.fx-keybox .ft-key[data-key] { flex:1 1 0; min-width:0; justify-content:center; padding:9px 6px; font-size:12.5px; font-weight:600; border-radius:10px; white-space:nowrap; }
+.fx-keybox .ft-key .ft-cell.sw { width:16px; min-width:16px; height:16px; border-radius:4px; }
+.fx-keybox .ft-key.on2 { background:#f4f6f9; }
+.fx-keyans { padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#fff; }

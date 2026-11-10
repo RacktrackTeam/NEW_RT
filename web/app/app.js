@@ -68,7 +68,8 @@
   // ---------------------------------------------------------------- routing: #signin #home #history #sweep #job/<id> #result/<id> #report/<id> #more #models
   var DETAIL = { job: 'Run', result: 'Result', history: 'History', models: 'Models and accuracy', connections: 'Connections', copies: 'Database copies', tools: 'Rack tools' };   // tools: wt/features
   // the result's bar: Main is the rack read from the data; the other four show the report's steps in groups
-  var TABS = { rack: 'Rack', devices: 'Devices', layout: 'Layout', report: 'Report' };   // one page in four parts; the compare and its differences live inside the Report
+  var TABS = { rack: 'Rack', devices: 'Devices', layout: 'Layout', report: 'Report' };
+  var TABNAME = { rack: 'Rack', devices: 'Devices', find: 'Find a port', connections: 'Connections', cables: 'Cables', layout: 'Layout', report: 'Report' };   // one page in four parts; the compare and its differences live inside the Report
   var ALIAS = { elevation: 'layout', drift: 'compare', record: 'compare', diff: 'diff', ports: 'devices', compare: 'compare' };   // ports live on each device (user, 2026-10-27: one place per device)
   var KINDS = ['Switch', 'Router', 'Firewall', 'Gateway', 'Patch Panel', 'Server', 'Storage unit', 'PDU', 'UPS', 'Other'];
   var LAST = null;                                   // the run the Report tab opens: the one being looked at, else the newest finished one
@@ -108,12 +109,13 @@
     if (!(rtab === 'devices' && !wide)) $('dv-bar').hidden = true;                 // the device bar at the bottom of a phone lives on the Devices tab only
     if (rtab || tool) document.querySelectorAll('#rnav a').forEach(function (a) { a.href = a.dataset.tool ? '#tools/' + arg + '/' + a.dataset.rtab : '#result/' + arg + (a.dataset.rtab === 'rack' ? '' : '/' + a.dataset.rtab); a.classList.toggle('on', a.dataset.rtab === (rtab || tool)); });
     if (!tool) rn.dataset.rack = ''; else if (RES.id === arg && $('res-title').textContent) rn.dataset.rack = $('res-title').textContent;
+    moreBar(!!(me && (rtab || tool)) && !wide);
     if (tool) { var onA = document.querySelector('#rnav a.on'); if (onA && onA.scrollIntoView) onA.scrollIntoView({ inline: 'center', block: 'nearest' }); }
     else if (rtab) { var onR = document.querySelector('#rnav a.on'), pill = onR && onR.parentNode; if (pill && pill.scrollWidth > pill.clientWidth) { var ra = onR.getBoundingClientRect(), rp = pill.getBoundingClientRect(); pill.scrollLeft += (ra.left + ra.width / 2) - (rp.left + rp.width / 2); } }   // on a phone the marked tab is brought into view sideways only (the page does not move)
     document.querySelectorAll('[data-nav]').forEach(function (a) { a.classList.toggle('on', a.dataset.nav === tab); });
     $('nav').hidden = !me || !!rtab || !!tool; $('top').hidden = !me; $('side').hidden = !me; document.body.classList.toggle('signed', !!me);
     requestAnimationFrame(topbarHeight);                                           // the tab row sits under the header's real height, two lines or one (testers, 4 Nov 2026)
-    $('back').hidden = !DETAIL[name]; $('topmark').hidden = !!DETAIL[name]; $('toptitle').textContent = (rtab || tool) ? 'Result' : (DETAIL[name] || 'RackTrack');
+    $('back').hidden = !DETAIL[name]; $('topmark').hidden = !!DETAIL[name]; $('toptitle').textContent = (rtab || tool) ? (TABNAME[rtab || tool] || 'Result') : (DETAIL[name] || 'RackTrack');   // the header names the open tab (owner, 10 Nov 2026)
     $('top').classList.toggle('detail', !!DETAIL[name]); $('who').hidden = !!DETAIL[name]; $('topspacer').hidden = !DETAIL[name]; if (name !== 'result') { $('topsub').hidden = true; }
     var TT = { home: 'Racks', sweep: 'Scan a rack', job: 'Reading the rack', history: 'History', more: 'Profile', models: 'Models and accuracy', connections: 'Connections', copies: 'Database copies', signin: 'Sign in', contact: 'Contact us', forgot: 'Reset your password', invite: 'Accept your invite', pending: 'Waiting for approval' };
     var tt = rtab ? TABS[rtab] : tool ? ({ find: 'Find a port', connections: 'Connections', cables: 'Cables' }[tool] || 'Rack tool') : TT[name] || 'RackTrack';
@@ -134,6 +136,18 @@
     if (name === 'invite') AUTH.openInvite(arg);
     if (name === 'forgot') AUTH.openForgot();
     if (name === 'tools' && window.RTFEAT) window.RTFEAT.open(arg, arg2, h.split('/')[3]);      // wt/features: the rack tools (mobile/features.js)
+  }
+  // the result bar at the bottom of a phone: Rack, Devices, Layout, Report and More; Find a port, Connections and Cables sit in a sheet over More (owner, 10 Nov 2026)
+  function moreBar(on) {
+    var rn = $('rnav'), pill = rn.querySelector('.pill'), sheet = rn.querySelector('.rmsheet'), btn = pill.querySelector('.rmore'), tools = ['find', 'connections', 'cables'];
+    rn.classList.remove('more-open');                                            // a new page closes the sheet
+    if (on) {
+      if (!sheet) { sheet = document.createElement('div'); sheet.className = 'rmsheet'; rn.appendChild(sheet); tools.forEach(function (k) { var a = pill.querySelector('a[data-rtab="' + k + '"]'); if (a) sheet.appendChild(a); }); }
+      if (!btn) { btn = document.createElement('button'); btn.type = 'button'; btn.className = 'rmore'; btn.innerHTML = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span>More</span>'; pill.appendChild(btn);
+        btn.addEventListener('click', function () { rn.classList.toggle('more-open'); }); sheet.addEventListener('click', function () { rn.classList.remove('more-open'); });
+        document.addEventListener('click', function (e) { if (!rn.contains(e.target)) rn.classList.remove('more-open'); }); }
+      btn.classList.toggle('on', !!sheet.querySelector('a.on'));
+    } else if (sheet) { var lay = pill.querySelector('a[data-rtab="layout"]'); tools.forEach(function (k) { var a = sheet.querySelector('a[data-rtab="' + k + '"]'); if (a) pill.insertBefore(a, lay); }); sheet.remove(); if (btn) btn.remove(); rn.classList.remove('more-open'); }
   }
   function topbarHeight() { var t = $('top'); if (t && !t.hidden) document.body.style.setProperty('--topbar-h', t.offsetHeight + 'px');
     var rn = $('rnav'); if (rn && !rn.hidden && !rn.classList.contains('inpage')) document.body.style.setProperty('--rnav-h', rn.offsetHeight + 'px'); }   // the tab row wraps to two lines on a phone: the page starts under it
@@ -883,7 +897,7 @@
         var cr = $('caprow'); if (cr && !cr.querySelector('.rkchange')) $('fit-tog').insertAdjacentHTML('beforebegin', '<button class="link rkchange" type="button" data-rkid-clear>Change ID</button>');
         renderNext(v); return; }
       var rc = document.querySelector('#caprow .rkchange'); if (rc) rc.remove();
-      el.innerHTML = '<div class="rkrow"><span class="sig"></span><div><b>Rack ' + esc(R.id) + '</b><small>' + esc(R.source === 'verified from the label' ? 'verified from the label' : R.source === 'typed' ? 'entered' : 'chosen') + (R.on ? ' · ' + esc(when(R.on)) : '') + '</small></div><button class="link" type="button" data-rkid-clear>Change</button></div>';
+      el.innerHTML = '<div class="rkrow"><span class="sig"></span><div><b>Rack ' + esc(R.id) + '</b><small>' + esc(R.source === 'verified from the label' ? 'verified from the label' : R.source === 'read from the label' ? 'read from the label' : R.source === 'typed' ? 'entered' : 'chosen') + (R.on ? ' · ' + esc(when(R.on)) : '') + '</small></div><button class="link" type="button" data-rkid-clear>Change</button></div>';
       renderNext(v); return;
     }
     renderNext(v);
@@ -901,7 +915,7 @@
     var unsure = devs.filter(function (d) { return d.unsure || !d.kind || d.kind === 'Other'; });
     var unread = devs.filter(function (d) { return PORT_KINDS[d.kind] && !(d.layout && (d.layout.mapped || d.layout.ports_state)); });
     var steps = [
-      { done: !!(R && R.id), text: 'Verify the rack ID above', go: null },
+      { done: !!(R && R.id), text: 'Give the rack ID above', go: null },
       { done: !(v.units || []).some(function (u) { return u.status === 'uncertain'; }), text: 'Answer ' + (v.units || []).filter(function (u) { return u.status === 'uncertain'; }).length + ' units marked Not sure', go: (function () { var u = (v.units || []).filter(function (u) { return u.status === 'uncertain'; })[0]; return u ? { unit: u.unit } : null; })() },
       { done: !unsure.length, text: 'Check ' + unsure.length + (unsure.length === 1 ? ' device' : ' devices') + ' marked Not sure', go: unsure.length ? { dev: unsure[0].index } : null },
       { done: !unread.length, text: 'Read the ports of ' + unread.length + (unread.length === 1 ? ' device' : ' devices'), go: unread.length ? { dev: unread[0].index } : null }
@@ -963,7 +977,7 @@
     var elev = '<svg class="elev" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="The rack, top to bottom"><rect x="' + (L0 - 2) + '" y="2" width="' + (R0 - L0 + 4) + '" height="' + (H - 4) + '" rx="6" class="ef"/>' + rows + '</svg>';
     // the devices, top to bottom, in a table
     var table = devs.map(function (d) { var L = d.layout || {}, mm = L.vendor ? L.vendor + (L.model ? ' ' + L.model : '') : '', kind = d.kind && d.kind !== 'Other' ? d.kind : 'Not sure';
-      return '<tr data-dev="' + d.index + '" tabindex="0" role="link" aria-label="Open D' + d.index + ', ' + esc(kind) + ', ' + URANGE(d.top, d.bottom, d.height) + '"><td class="mono">' + URANGE(d.top, d.bottom, d.height) + '</td><td><b>D' + d.index + '</b><span class="kd">' + esc(kind) + '</span></td><td>' + (mm ? esc(mm) : L.mode === 'patchpanel' && L.panel ? esc(L.panel) + ' patch panel' + (L.n_ports ? '<span class="kd">' + L.n_ports + (L.size_known === false ? ' ports seen' : ' ports') + '</span>' : '') : L.vendor_read ? esc(L.vendor_read + (L.model_read ? ' ' + L.model_read : '')) + '<span class="kd">' + (L.model_read ? 'read, not confirmed' : 'model not read') + '</span>' : '<span class="kd">not read</span>') + '</td></tr>'; }).join('');   // a patch panel has no make and model to read: its type stands there (user, 2026-10-28)
+      return '<tr><td class="mono">' + URANGE(d.top, d.bottom, d.height) + '</td><td><b>D' + d.index + '</b><span class="kd">' + esc(kind) + '</span></td><td>' + (mm ? esc(mm) : L.mode === 'patchpanel' && L.panel ? esc(L.panel) + ' patch panel' + (L.n_ports ? '<span class="kd">' + L.n_ports + (L.size_known === false ? ' ports seen' : ' ports') + '</span>' : '') : L.vendor_read ? esc(L.vendor_read + (L.model_read ? ' ' + L.model_read : '')) + '<span class="kd">' + (L.model_read ? 'read, not confirmed' : 'model not read') + '</span>' : '<span class="kd">not read</span>') + '</td></tr>'; }).join('');   // a patch panel has no make and model to read: its type stands there (user, 2026-10-28)
     // the free space as stretches
     // a unit the confirmed record fills with a cable manager or a blank panel is not free space, though the video sees it empty
     var passive = {}; (v.record_passive || []).forEach(function (x) { passive[x.unit] = x; });
@@ -971,25 +985,25 @@
     var held = units.filter(function (u) { return st(u) === 'Free' && passive[u.unit]; });
     var freeChips = runs.map(function (r) { return '<span class="fchip"><b>' + r.n + 'U</b> ' + URANGE(r.top, r.bottom, r.n) + '</span>'; }).join('')
       + (held.length ? '<p class="muted small">' + held.map(function (u) { return UP(u.unit); }).join(', ') + (held.length === 1 ? ' looks empty but holds a ' : ' look empty but hold ') + esc(String(passive[held[0].unit].kind).toLowerCase()) + (held.length === 1 ? '' : 's') + ' in the ' + esc(passive[held[0].unit].source) + ', so ' + (held.length === 1 ? 'it is' : 'they are') + ' not free space.</p>' : '');
-    var look = units.filter(function (u) { return st(u) === 'Not sure'; }).map(function (u) { return '<button class="lrow" type="button" data-unit="' + u.unit + '"><span class="iu">' + UP(u.unit) + '</span><b>Not sure if in use</b><span class="arr">›</span></button>'; })
+    var look = units.filter(function (u) { return st(u) === 'Not sure'; }).map(function (u) { return '<div class="lrow"><span class="iu">' + UP(u.unit) + '</span><b>Not sure if in use</b></div>'; })
       .concat(devs.map(function (d) { var ps = PORT_KINDS[d.kind] ? devState(d, v) : null, why = d.unsure ? 'device not sure' : !d.kind || d.kind === 'Other' ? 'type not sure'
           : ps && ps.key === 'unc' ? (ps.panel ? 'no ports seen' : 'needs a close photo') : ps && ps.key === 'auto' ? 'model not read' : ps && ps.key === 'off' ? 'make and model not checked yet' : null;   // the device page's own state
-        return why ? '<button class="lrow" type="button" data-dev="' + d.index + '"><span class="iu">' + UP(d.top) + '</span><b>D' + d.index + ' · ' + why + '</b><span class="arr">›</span></button>' : null; }).filter(Boolean))
+        return why ? '<div class="lrow"><span class="iu">' + UP(d.top) + '</span><b>D' + d.index + ' · ' + why + '</b></div>' : null; }).filter(Boolean))
       // the ports not sure, one row per device, as the worklist asks them ("Is there a cable in port 2 of D3?")
       .concat(devs.map(function (d) { var un = ((d.layout || {}).ports || []).filter(function (p) { return p.status !== 'connected' && p.status !== 'empty'; });
-        return un.length ? '<button class="lrow" type="button" data-dev="' + d.index + '"><span class="iu">' + UP(d.top) + '</span><b>D' + d.index + ' · ' + (un.length === 1 ? 'port ' + esc(un[0].id) + ' not sure' : un.length + ' ports not sure: ' + esc(un.slice(0, 6).map(function (p) { return p.id; }).join(', ')) + (un.length > 6 ? ' and ' + (un.length - 6) + ' more' : '')) + '</b><span class="arr">›</span></button>' : null; }).filter(Boolean));
+        return un.length ? '<div class="lrow"><span class="iu">' + UP(d.top) + '</span><b>D' + d.index + ' · ' + (un.length === 1 ? 'port ' + esc(un[0].id) + ' not sure' : un.length + ' ports not sure: ' + esc(un.slice(0, 6).map(function (p) { return p.id; }).join(', ')) + (un.length > 6 ? ' and ' + (un.length - 6) + ' more' : '')) + '</b></div>' : null; }).filter(Boolean));
     var pdf = $('rep-pdf'); if (pdf) { pdf.href = '/api/video/' + encodeURIComponent(v.id) + '/report.pdf'; pdf.hidden = false; }   // the whole report as one PDF (testers, 4 Nov 2026)
-    $('rp-top').innerHTML = '<header class="rphead"><span class="eyebrow">Rack report</span><h2>' + esc(title) + '</h2><p class="muted">' + esc(v.title || '') + '</p><p class="rpline"><b>' + n + 'U</b> · <b>' + used + '</b> in use · <b class="free">' + free + '</b> free' + (unc ? ' · <b class="unc">' + unc + '</b> not sure' : '') + '</p></header>'
-      + '<div class="rpcol b"><section class="card rpelev"><div class="rpkpis"><div><b>' + devs.length + '</b><span>devices</span></div><div><b>' + kinds.length + '</b><span>kinds</span></div><div><b>' + free + 'U</b><span>free</span></div><p class="muted small">' + esc(kindLine) + '</p><p class="elegend2"><span class="elk">Colour = device type</span>' + kinds.map(function (g) { return '<span><i style="--k:' + g.colour + '"></i>' + esc(g.kind) + '</span>'; }).join('') + '</p></div>' + elev + '</section>'
-      + '</div><div class="rpcol a"><span class="glabel">Devices, top to bottom</span><div class="card flush"><table class="rptable"><thead><tr><th>Unit</th><th>Device</th><th>Make and model</th></tr></thead><tbody>' + table + '</tbody></table></div></div><div class="rpcol c">'
-      + '<span class="glabel">Free space</span><div class="fchips">' + (freeChips || '<span class="muted small">No free unit.</span>') + '</div>'
-      + '<span class="glabel">Needs a look</span>' + (look.length ? '<div class="card flush look">' + look.join('') + '</div>' : '<div class="card look none"><i class="sig"></i>Nothing. Every unit and device is clear.</div>') + '</div>';
+    $('rp-top').innerHTML = '<article class="doc">'   // a document, numbered sections, nothing in it opens another page (owner, 10 Nov 2026)
+      + '<header class="dochead"><span class="doc-k">Rack report</span><h2>' + esc(title) + '</h2><p class="doc-sub">' + esc(v.title || '') + '</p><p class="doc-meta"><b>' + n + 'U</b> · <b>' + used + '</b> in use · <b class="free">' + free + '</b> free' + (unc ? ' · <b class="unc">' + unc + '</b> not sure' : '') + '</p></header>'
+      + '<section class="docsec"><h3><i>1</i>Summary</h3><div class="dockpis"><div><b>' + devs.length + '</b><span>devices</span></div><div><b>' + kinds.length + '</b><span>kinds</span></div><div><b>' + free + 'U</b><span>free</span></div></div><p class="docline">' + esc(kindLine) + '</p></section>'
+      + '<section class="docsec"><h3><i>2</i>The rack, top to bottom</h3>' + elev + '</section>'
+      + '<section class="docsec"><h3><i>3</i>Devices</h3><table class="rptable"><thead><tr><th>Unit</th><th>Device</th><th>Make and model</th></tr></thead><tbody>' + table + '</tbody></table></section>'
+      + '<section class="docsec"><h3><i>4</i>Free space</h3><div class="fchips">' + (freeChips || '<span class="muted small">No free unit.</span>') + '</div></section>'
+      + '<section class="docsec"><h3><i>5</i>Needs a look</h3>' + (look.length ? '<div class="doclook">' + look.join('') + '</div>' : '<p class="docline">Nothing. Every unit and device is clear.</p>') + '</section>'
+      + '<footer class="docfoot">RackTrack rack report · ' + esc(v.title || '') + '</footer></article>';
   }
-  document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('#rp-top .ed, #rp-top tr[data-dev]'); if (t) { selectDevice(parseInt(t.dataset.dev, 10)); go('result/' + RES.id + '/devices'); } });
+  // the report opens nothing: it is read, not navigated (owner, 10 Nov 2026)
   document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('#rep-pdf')) toast('Making the PDF, a few seconds. It downloads when ready.'); });
-  document.addEventListener('keydown', function (e) { if (e.key !== 'Enter' && e.key !== ' ') return; var t = e.target.closest && e.target.closest('#rp-top tr[data-dev]'); if (t) { e.preventDefault(); t.click(); } });   // the device rows open by keyboard too
-  document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('#rp-top .lrow'); if (!b) return;
-    if (b.dataset.unit) selectUnit(b.dataset.unit); else selectDevice(parseInt(b.dataset.dev, 10)); go('result/' + RES.id + '/devices'); });
   // the Drift tab: choose the database for this rack (Excel, NetBox or CMDB), see which record matched and why, and every difference
   // ---------------------------------------------------------------- 3 The record and 4 Differences: compare the run against one database copy
   // (copying in and the logins live under Profile: Database copies and Connections)

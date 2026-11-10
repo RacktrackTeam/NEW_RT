@@ -562,3 +562,111 @@ body:not(.web) .web-only { display:none !important; } body.web .phone-only { dis
 .filmsteps li { display:flex; flex-direction:column; gap:6px; padding:10px; border:1px solid var(--line); border-radius:10px; background:#fff; font-size:12.5px; line-height:1.3; color:var(--ink); }
 .filmsteps li i { font-style:normal; width:24px; height:24px; border-radius:999px; background:#1f2a3a; color:#fff; font-size:12px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; }
 @media (min-width:761px) { .filmsteps { max-width:720px; } }
+
+/* ================= the owner's night pass, 10 Nov 2026: standard type, Home with a rack, a clean Profile, a document report, a fitted Layout, a bottom result bar, motion ================= */
+/* ---- type standard on a phone: one family, sentence case, one weight for titles ---- */
+@media (max-width:760px) {
+  #nav .pill a, #nav .pill a span { font-size:11px !important; letter-spacing:.04em; }
+  .rteos, .rteos *, .elev, .elev * { font-family:var(--font) !important; }
+  .swh h1, .phead h1, .fx-title h1, .ft-head h1 { font-size:22px !important; }
+  b, strong, h1, h2, h3, .toptitle { font-weight:600 !important; }
+  small.topsub { letter-spacing:0 !important; font-size:13px; }
+  .note2 { font-size:13px; } .ltap { font-size:10px; } .fx-pill { font-size:12.5px; }
+  .rpkpis span, .dockpis span { font-size:12.5px; }
+}
+/* ---- Home: the rack drawing between the line and the button ---- */
+.homeart { width:min(50vw, 200px); margin:4px auto 0; }
+.homeart svg { width:100%; height:auto; display:block; filter:drop-shadow(0 14px 24px rgba(31,42,58,.28)); }
+body:not(.web) .screen[data-screen="home"] .phead { gap:14px; padding-top:6vh; }
+/* ---- Profile: a centred hero, no group labels, tight groups ---- */
+@media (max-width:760px) {
+  .screen[data-screen="more"] .glabel.a3, .screen[data-screen="more"] .glabel.a4:not(#org-label) { display:none !important; }
+  .screen[data-screen="more"] .phero { flex-direction:column !important; text-align:center; gap:8px !important; padding:18px 14px 14px !important; border:0 !important; background:transparent !important; margin:0 !important; }
+  .screen[data-screen="more"] .phero .avatar.big { width:68px; height:68px; font-size:26px; background:#1f2a3a !important; color:#fff !important; box-shadow:0 10px 24px -10px rgba(31,42,58,.6); }
+  .screen[data-screen="more"] .phero .pwho { align-items:center; } .screen[data-screen="more"] .phero .pwho b { font-size:20px; } .screen[data-screen="more"] .phero .eyebrow { display:none; }
+  .screen[data-screen="more"] .card.group { margin-top:10px !important; }
+  .screen[data-screen="more"] .grow.danger { justify-content:center; color:#b3261e; border-top:1px solid var(--line); } .screen[data-screen="more"] .grow.danger .ic { display:none; }
+}
+/* ---- the report is a document ---- */
+#rp-top { display:block !important; }
+.doc { background:#fff; border:1px solid var(--line); border-radius:10px; padding:20px 16px 14px; max-width:760px; margin:0 auto; }
+.dochead { border-bottom:2px solid #1f2a3a; padding-bottom:12px; }
+.doc-k { display:block; font-size:12.5px; font-weight:600; color:var(--t2); }
+.dochead h2 { font-size:22px; line-height:1.2; margin:2px 0 2px; }
+.doc-sub { margin:0; color:var(--t2); font-size:14px; }
+.doc-meta { margin:10px 0 0; font-size:15px; } .doc-meta b { font-weight:600; } .doc-meta .free { color:#15803d; } .doc-meta .unc { color:#b45309; }
+.docsec { padding:16px 0 12px; border-bottom:1px solid var(--line); } .docsec:last-of-type { border-bottom:0; }
+.docsec h3 { display:flex; align-items:center; gap:10px; font-size:16px; margin:0 0 10px; }
+.docsec h3 i { font-style:normal; width:22px; height:22px; border-radius:6px; background:#1f2a3a; color:#fff; font-size:12px; font-weight:600; display:inline-flex; align-items:center; justify-content:center; flex:none; }
+.dockpis { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; } .dockpis div { padding:10px 8px; border:1px solid var(--line); border-radius:8px; text-align:center; } .dockpis b { display:block; font-size:22px; line-height:1.1; } .dockpis span { font-size:12.5px; color:var(--t2); }
+.docline { margin:10px 0 0; font-size:14px; color:var(--t2); }
+.doc .elev { width:100%; height:auto; max-height:72vh; display:block; margin:0 auto; } .doc .elev .ed { cursor:default !important; }
+.doc .rptable { width:100%; border-collapse:collapse; font-size:14px; } .doc .rptable th { font-size:12.5px; font-weight:600; color:var(--t2); background:none !important; padding:6px 0 !important; border-bottom:1px solid var(--line); }
+.doc .rptable td { padding:8px 0 !important; border-top:1px solid var(--line) !important; vertical-align:top; } .doc .rptable tr { padding:0 !important; }
+.doc .rptable td .kd { display:block; color:var(--t2); font-size:12.5px; }
+.doc .fchips { display:flex; flex-wrap:wrap; gap:6px; }
+.doclook { display:flex; flex-direction:column; } .doclook .lrow { display:flex; align-items:center; gap:12px; padding:8px 0; border-top:1px solid var(--line); background:none !important; font-size:14px; cursor:default; } .doclook .lrow:first-child { border-top:0; }
+.doclook .lrow .iu { width:52px; font-size:13px; color:var(--t2); } .doclook .lrow b { font-weight:500; }
+.docfoot { margin-top:6px; padding-top:10px; border-top:1px solid var(--line); font-size:12.5px; color:var(--t2); text-align:center; }
+@media (max-width:760px) { .doc .rptable tr { display:grid !important; grid-template-columns:62px minmax(0,1fr) !important; column-gap:10px; padding:8px 0 !important; border-top:1px solid var(--line); } .doc .rptable td { border:0 !important; padding:0 !important; } .doc .rptable td:nth-child(3) { grid-column:2; text-align:left !important; } .doc .rptable thead { display:none; } }
+/* ---- the Layout tab: no legend, the drawing fits the screen ---- */
+#rt-legend { display:none !important; }
+@media (max-width:760px) {
+  body.tabbed .rteos .fr svg.Ua { height:calc(100svh - 300px) !important; max-height:none !important; width:auto !important; max-width:100% !important; margin:0 auto; animation:rt-grow .55s cubic-bezier(.2,.7,.2,1) backwards; }
+  body.tabbed .rteos .fr { padding-bottom:0 !important; }
+}
+/* ---- the result bar at the bottom of a phone: four tabs and More ---- */
+@media (max-width:760px) {
+  body.tabbed #rnav { top:auto !important; bottom:0 !important; border-bottom:0 !important; border-top:1px solid var(--line); padding:0 0 env(safe-area-inset-bottom, 0px) !important; background:#fff; z-index:30; }
+  body.tabbed #rnav .pill { display:flex !important; flex-wrap:nowrap; gap:2px; padding:4px 4px !important; height:auto; background:#fff; border-radius:0; }
+  body.tabbed #rnav .pill a, body.tabbed #rnav .pill .rmore { flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; height:54px; padding:4px 2px; border:0; border-radius:10px; background:none; color:var(--t2); font:600 10.5px var(--font); text-decoration:none; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  body.tabbed #rnav .pill a span, body.tabbed #rnav .pill .rmore span { font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+  body.tabbed #rnav .pill a .ic, body.tabbed #rnav .pill .rmore .ic { width:22px; height:22px; stroke-width:1.8; }
+  body.tabbed #rnav .pill a.on, body.tabbed #rnav .pill .rmore.on { background:#1f2a3a; color:#fff !important; }
+  body.tabbed #rnav .pill a[data-rtab="layout"] { order:3; } body.tabbed #rnav .pill a[data-rtab="report"] { order:4; } body.tabbed #rnav .pill .rmore { order:5; }
+  body.tabbed main { padding-top:16px !important; padding-bottom:calc(76px + env(safe-area-inset-bottom, 0px)) !important; }
+  #rnav .rmsheet { position:fixed; left:12px; right:12px; bottom:calc(70px + env(safe-area-inset-bottom, 0px)); background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:0 12px 32px rgba(17,17,17,.18); padding:6px; display:none; flex-direction:column; z-index:31; }
+  #rnav.more-open .rmsheet { display:flex; animation:rt-up .2s ease-out; }
+  #rnav .rmsheet a { display:flex; flex-direction:row; align-items:center; gap:10px; height:46px; padding:0 12px; border-radius:8px; color:var(--ink); font-size:15px; font-weight:600; text-decoration:none; }
+  #rnav .rmsheet a .ic { width:20px; height:20px; } #rnav .rmsheet a.on { background:#1f2a3a; color:#fff; }
+  .dvbar { bottom:calc(63px + env(safe-area-inset-bottom, 0px)); }
+  body.tabbed .rteos .xi { bottom:calc(78px + env(safe-area-inset-bottom, 0px)); }
+}
+/* ---- motion: every screen rises in, every tap answers, every chevron moves ---- */
+@keyframes rt-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+@keyframes rt-up { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+@keyframes rt-pop { 0% { transform:scale(.9); } 60% { transform:scale(1.05); } 100% { transform:scale(1); } }
+@keyframes rt-blink { 0%, 100% { opacity:1; } 50% { opacity:.25; } }
+@keyframes rt-grow { from { opacity:0; transform:scaleY(.94); transform-origin:top center; } to { opacity:1; transform:none; } }
+@keyframes rt-glow { 0%, 100% { box-shadow:0 8px 20px -8px rgba(31,42,58,.45); } 50% { box-shadow:0 10px 28px -6px rgba(31,42,58,.65); } }
+@media (prefers-reduced-motion: no-preference) {
+  main .screen:not([hidden]) > :not(#res-layout):not(#sw-guide):not(nav):not(.dvbar) { animation:rt-in .34s cubic-bezier(.2,.7,.2,1) backwards; }
+  main .screen:not([hidden]) > :nth-child(2) { animation-delay:40ms; } main .screen:not([hidden]) > :nth-child(3) { animation-delay:80ms; } main .screen:not([hidden]) > :nth-child(4) { animation-delay:120ms; } main .screen:not([hidden]) > :nth-child(5) { animation-delay:160ms; } main .screen:not([hidden]) > :nth-child(n+6) { animation-delay:200ms; }
+  .btn, .grow, .prow, .choice, .rkrow2, .run, .ft-key, .ft-cell, .rkopt, #nav .pill a, #rnav .pill a, .rmore { transition:transform .16s cubic-bezier(.2,.8,.2,1), box-shadow .2s, background-color .18s, color .18s, border-color .18s; }
+  .btn:active, .choice:active, .grow:active, .prow:active, .rkrow2:active, .run:active, .rkopt:active { transform:scale(.975); }
+  .ft-cell:active, .ft-key:active { transform:scale(.92); }
+  .btn.primary { box-shadow:0 8px 20px -8px rgba(31,42,58,.45); } .btn.primary:active { box-shadow:0 3px 8px -4px rgba(31,42,58,.5); }
+  body:not(.web) .screen[data-screen="home"] .phead > a.btn { animation:rt-glow 2.8s ease-in-out infinite; }
+  .grow .arr, .prow .arr, .chev, .lrow .arr { transition:transform .22s cubic-bezier(.2,.8,.2,1); }
+  .grow:active .arr, .prow:active .arr, .rkrow2:active .chev, .run:active .chev { transform:translateX(3px); }
+  #nav .pill a.on, #rnav .pill a.on, .rmore.on { animation:rt-pop .28s ease-out; }
+  .choices .choice:active .cic { transform:scale(.9); } .choices .choice .cic { transition:transform .16s; }
+  .filmsteps li { animation:rt-in .4s cubic-bezier(.2,.7,.2,1) backwards; } .filmsteps li:nth-child(2) { animation-delay:80ms; } .filmsteps li:nth-child(3) { animation-delay:160ms; }
+  .homeart .led { animation:rt-blink 2.6s ease-in-out infinite; animation-delay:var(--d, 0s); }
+  .homeart svg { animation:rt-in .6s cubic-bezier(.2,.7,.2,1) backwards; animation-delay:120ms; }
+  details > summary::after, .dvmore > summary::after { transition:transform .25s cubic-bezier(.2,.8,.2,1), margin .25s; }
+  .donebar { animation:rt-in .3s ease-out backwards; } .toast { animation:rt-up .25s ease-out; }
+  .docsec { animation:rt-in .4s cubic-bezier(.2,.7,.2,1) backwards; } .docsec:nth-child(3) { animation-delay:60ms; } .docsec:nth-child(4) { animation-delay:120ms; } .docsec:nth-child(5) { animation-delay:180ms; } .docsec:nth-child(6) { animation-delay:240ms; }
+}
+/* second pass of the same night */
+.rteos { --font:'Inter', 'Helvetica Neue', Arial, system-ui, sans-serif !important; }   /* the drawing bundle names its own --font (Geist); the app's one family everywhere */
+.rteos, .rteos *, .rteos svg, .rteos text { font-family:'Inter', 'Helvetica Neue', Arial, system-ui, sans-serif !important; }
+@media (max-width:760px) {
+  .rteos p.kr { display:none; }                                                          /* "Tap a device to open it": the drawing is the hint */
+  body.tabbed .rteos .fr svg.Ua { height:calc(100svh - 268px) !important; }
+  .dvbar { bottom:calc(65px + env(safe-area-inset-bottom, 0px)); }
+  .screen[data-screen="more"] .grow.danger span { text-align:center; }
+  .fx-keybox .ft-key[data-key] { padding:9px 4px; font-size:12px; gap:5px; }
+  #nav .pill a.on, #nav .pill a.on span { font-weight:700 !important; }
+}
+#rnav .rmsheet, #rnav .rmsheet a { pointer-events:auto; }   /* the bar's container lets touches through; the sheet must take them */
