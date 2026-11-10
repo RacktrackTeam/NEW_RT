@@ -291,3 +291,31 @@ def test_a_second_run_is_refused_with_the_step(eng):
         assert r.status_code == 409 and "step 7 of 15" in r.json()["error"] and "one runs at a time" in r.json()["error"]
     finally:
         app.JOBS.pop("busy2")
+
+
+def test_a_video_is_a_rack_on_six_rows_or_two_sure_rows(eng):
+    app = eng[0]
+    assert not app.looks_like_rack({"rows": 4, "sure": 0})          # the desk with a monitor of 10 Nov 2026: came out as an 8U rack before
+    assert not app.looks_like_rack({"rows": 2, "sure": 0})          # the airport clip of 5 Nov
+    assert app.looks_like_rack({"rows": 8, "sure": 1})              # a rack video at WhatsApp size
+    assert app.looks_like_rack({"rows": 3, "sure": 2})              # a close pass with two sure rows
+    assert app.looks_like_rack(None)                                # a video that could not be sampled is read, not refused
+
+
+def test_background_port_reads_wait_while_a_rack_is_read(eng):
+    app = eng[0]
+    app.JOBS["t-run"] = {"status": "running", "partial": False}
+    try:
+        assert app._a_run_is_reading()
+        app.JOBS["t-run"]["partial"] = True                          # the background port phase of a run does not hold the reads back
+        assert not app._a_run_is_reading()
+    finally:
+        del app.JOBS["t-run"]
+
+
+def test_a_stitched_picture_with_few_rows_and_nothing_in_use_is_no_rack(eng):
+    app = eng[0]
+    assert not app.stitched_looks_like_rack({"detected_rows": 6, "occupied": 0})     # the desk of 10 Nov 2026
+    assert app.stitched_looks_like_rack({"detected_rows": 5, "occupied": 9})         # a small rack full of devices
+    assert app.stitched_looks_like_rack({"detected_rows": 40, "occupied": 0})        # an empty rack with its ladder
+    assert not app.stitched_looks_like_rack(None)

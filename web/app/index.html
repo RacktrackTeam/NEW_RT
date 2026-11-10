@@ -15,9 +15,9 @@
 <link rel="preload" href="/app/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/app/app.css?v=128">
 <link rel="stylesheet" href="/app/rt/rt-topology.css?v=12">
-<link rel="stylesheet" href="/app/flow.css?v=19">
-<link rel="stylesheet" href="/app/features.css?v=6"><!-- wt/features -->
-<link rel="stylesheet" href="/app/standard.css?v=11">
+<link rel="stylesheet" href="/app/flow.css?v=20">
+<link rel="stylesheet" href="/app/features.css?v=7"><!-- wt/features -->
+<link rel="stylesheet" href="/app/standard.css?v=12">
 <style>
 /* the Drift tab: the database the run is checked against, the matched record, the differences */
 #df-top { display:flex; flex-direction:column; gap:12px; width:100%; }
@@ -100,6 +100,7 @@
   <button class="avatar" id="who" type="button" aria-label="Profile"></button>
   <span class="topspacer" id="topspacer" hidden></span>
 </header>
+<div class="donebar" id="done-bar" hidden></div>
 
 <main id="view">
   <!-- sign in (racktrack-app sign-in: RT-EOS's sign-in service, auth.sh; the screens below call it, the engine trusts its session) -->
@@ -177,7 +178,7 @@
 
   <!-- home: the racks scanned and their state, one button -->
   <section class="screen" data-screen="home" hidden>
-    <div class="phead"><div><p class="eyebrow" id="greet-sub"></p><h1>Racks</h1><p class="muted">One row per rack: its last scan, what it was compared with and its state. Open a rack to see its result.</p></div>
+    <div class="phead"><div><p class="eyebrow" id="greet-sub"></p><h1>Racks</h1><p class="muted">One row per rack: when it was last read and how it compares with the database. Open a rack to see its result. A scan that stopped is listed under Profile, My racks.</p></div>
       <a class="btn primary big" href="#sweep"><svg class="ic"><use href="#n-camera"/></svg>Scan a rack</a></div>
     <a class="card nowcard" id="now-card" href="#" hidden><i class="sig live"></i><b id="now-title">Reading your rack</b><span class="mono muted small" id="now-step"></span></a>
     <div id="home-racks" class="racklist"><p class="muted">Loading...</p></div>
@@ -186,23 +187,23 @@
   <!-- history -->
   <section class="screen" data-screen="history" hidden>
     <div class="phead"><div><h1>History</h1><p class="muted">Every rack read at your site (all sites of the organization for an admin), newest first.</p></div>
-      <button class="btn ghost" id="hist-refresh" type="button">Refresh</button></div>
+      <button class="btn ghost" id="hist-refresh" type="button"><svg class="ic"><use href="#i-refresh"/></svg><span>Refresh</span></button></div>
     <div id="hist" class="runs"><p class="muted">Loading…</p></div>
   </section>
 
   <!-- sweep: two ways in, the camera (the guided capture) or an upload -->
   <section class="screen scanpage" data-screen="sweep" hidden>
-    <div class="swh a1"><h1>Scan a rack</h1><p class="muted">Film the rack from top to bottom, or upload a video of it.</p></div>
+    <div class="swh a1"><h1 id="sw-title">Scan a rack</h1><p class="muted" id="sw-lead">Film the rack from top to bottom, or upload a video of it.</p></div>
     <div class="scanbody a2" id="sw-choices">
       <div class="upcard dropzone" id="dropzone" role="button" tabindex="0" aria-label="Pick a video">
         <div class="dz-idle choices" id="dz-idle">
-          <button class="choice" id="sw-camera" type="button"><span class="cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="13" height="12" rx="2"/><path d="m15.5 10.5 6-3.5v10l-6-3.5"/></svg></span><b>Record with the camera</b><small>One slow pass, top to bottom</small></button>
-          <span class="choice" id="sw-pickvideo"><span class="cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m-5 5 5-5 5 5M4 20h16"/></svg></span><b>Upload a video</b><small>MP4 or MOV</small></span>
+          <button class="choice rec" id="sw-camera" type="button"><span class="cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="13" height="12" rx="2"/><path d="m15.5 10.5 6-3.5v10l-6-3.5"/></svg></span><b>Record with the camera</b><small>Opens the camera guide: one slow pass, top to bottom</small></button>
+          <span class="choice up" id="sw-pickvideo"><span class="cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m-5 5 5-5 5 5M4 20h16"/></svg></span><b>Upload a video</b><small>A video already on this phone or computer, MP4 or MOV</small></span>
         </div>
-        <div class="dz-pick" id="dz-pick" hidden><video id="dz-video" muted playsinline preload="metadata"></video><div class="dz-meta"><b id="dz-name"></b><small id="dz-info"></small><button class="link" id="dz-clear" type="button">Change</button></div></div>
+        <div class="dz-pick" id="dz-pick" hidden><button class="link dzback" id="dz-back" type="button">‹ Back to Record or upload</button><video id="dz-video" muted playsinline preload="metadata"></video><div class="dz-meta"><b id="dz-name"></b><small id="dz-info"></small></div><div class="dz-acts"><button class="btn" id="dz-clear" type="button"><svg class="ic"><use href="#i-upload"/></svg>Choose another video</button></div></div>
       </div>
       <div class="scanfoot a3"><button class="btn primary big" id="vsend" type="button" disabled>Read the rack</button></div>
-      <details class="rules a3" id="sw-tips"><summary>How to film</summary>
+      <details class="rules a3" id="sw-tips"><summary><span>How to film</span><span class="sumhint">3 rules</span></summary>
         <ul class="rulelist">
           <li><div><b>Hold the phone upright</b><small>The rack fills the picture</small></div></li>
           <li><div><b>Keep both rails in view</b><small>Left and right rails inside the frame</small></div></li>
@@ -293,18 +294,18 @@
     <div class="pstats a2"><div><b class="num" id="ps-racks" data-n="0">0</b><span>racks read</span></div><div><b class="num" id="ps-units" data-n="0">0</b><span>units</span></div><div><b class="num" id="ps-devs" data-n="0">0</b><span>devices</span></div></div>
     <span class="glabel a3">Your racks</span>
     <div class="card group a3">
-      <a class="grow" href="#history"><svg class="ic"><use href="#i-history"/></svg><span>My racks</span><em id="runs-count"></em><span class="arr">→</span></a>
+      <a class="grow" href="#history"><svg class="ic"><use href="#i-history"/></svg><span>My racks</span><em id="runs-count"></em><span class="arr"><svg class="ic"><use href="#i-next"/></svg></span></a>
     </div>
     <span class="glabel a3">Databases</span>
     <div class="card group a3">
-      <a class="grow" href="#connections"><svg class="ic"><use href="#i-server"/></svg><span>Connections</span><em>NetBox, ServiceNow</em><span class="arr">→</span></a>
-      <a class="grow" href="#copies"><svg class="ic"><use href="#i-history"/></svg><span>Database copies</span><em id="copies-count"></em><span class="arr">→</span></a>
-      <a class="grow" href="#tools/site" id="site-pos" hidden><svg class="ic"><use href="#i-server"/></svg><span>Site position</span><em>Latitude, longitude</em><span class="arr">→</span></a><!-- wt/features -->
+      <a class="grow" href="#connections"><svg class="ic"><use href="#i-server"/></svg><span>Connections</span><em>NetBox, ServiceNow</em><span class="arr"><svg class="ic"><use href="#i-next"/></svg></span></a>
+      <a class="grow" href="#copies"><svg class="ic"><use href="#i-history"/></svg><span>Database copies</span><em id="copies-count"></em><span class="arr"><svg class="ic"><use href="#i-next"/></svg></span></a>
+      <a class="grow" href="#tools/site" id="site-pos" hidden><svg class="ic"><use href="#i-server"/></svg><span>Site position</span><em>Latitude, longitude</em><span class="arr"><svg class="ic"><use href="#i-next"/></svg></span></a><!-- wt/features -->
     </div>
     <span class="glabel a3">RackTrack</span>
     <div class="card group a3">
-      <a class="grow" href="#models"><svg class="ic"><use href="#i-chart"/></svg><span>How accurate it is</span><span class="arr">→</span></a>
-      <button class="grow" id="install-btn" type="button"><svg class="ic"><use href="#i-phone"/></svg><span>Install on the phone</span><em>How to</em><span class="arr">→</span></button>
+      <a class="grow" href="#models"><svg class="ic"><use href="#i-chart"/></svg><span>How accurate it is</span><span class="arr"><svg class="ic"><use href="#i-next"/></svg></span></a>
+      <button class="grow" id="install-btn" type="button"><svg class="ic"><use href="#i-phone"/></svg><span>Install on the phone</span><em>How to</em><span class="arr"><svg class="ic"><use href="#i-next"/></svg></span></button>
     </div>
     <span class="glabel a4" id="install-label" hidden></span><div id="install-row" hidden></div>
     <span class="glabel a4" id="org-label" hidden>Organization</span>
@@ -335,13 +336,14 @@
   <section class="screen" data-screen="models" hidden>
     <div class="phead"><div><h1>How accurate it is</h1><p class="muted">How well each step scores on our test photos.</p></div></div>
     <div class="card flush mtable">
-      <div class="mrow"><div><b>Unit detection</b><small>YOLO unit detector and an end check</small></div><span class="acc">98.1 %</span></div>
-      <div class="mrow"><div><b>Unit occupancy</b><small>Five classifiers, averaged</small></div><span class="acc">99.4 %</span></div>
-      <div class="mrow"><div><b>Device detection</b><small>DEIMv2 detector and a boundary check</small></div><span class="acc">95.3 %</span></div>
-      <div class="mrow"><div><b>Device classification</b><small>ConvNeXt-Tiny and DINOv2-B; a device is named only when both agree, else left for a person</small></div><span class="acc">99.2 %</span></div>
-      <div class="mrow"><div><b>Make and model</b><small>Panel reading and vendor catalogues</small></div><span class="acc na">not measured</span></div>
-      <div class="mrow"><div><b>Port layout</b><small>Port detector and vendor templates</small></div><span class="acc na">not measured</span></div>
+      <div class="mrow"><div><b>Finding the units</b><small>Every unit row of the rack is found on the picture</small></div><span class="acc">98.1 %</span></div>
+      <div class="mrow"><div><b>Full or free</b><small>Whether a unit holds something</small></div><span class="acc">99.4 %</span></div>
+      <div class="mrow"><div><b>Finding the devices</b><small>Where each device starts and ends</small></div><span class="acc">95.3 %</span></div>
+      <div class="mrow"><div><b>Naming the type</b><small>Switch, router, patch panel and so on; a device is named only when two readings agree, else it is marked Not sure for a person to settle</small></div><span class="acc">99.2 %</span></div>
+      <div class="mrow"><div><b>Make and model</b><small>Read off the front panel</small></div><span class="acc na">not measured yet</span></div>
+      <div class="mrow"><div><b>Ports</b><small>Where each port is and whether a cable is in it</small></div><span class="acc na">not measured yet</span></div>
     </div>
+    <p class="muted small">Measured on our test photos of racks; a video of your own rack can score lower. "Not measured yet" means there is no test set for that step so far, so no number is claimed for it.</p>
   </section>
 </main>
 </div>
@@ -366,12 +368,14 @@
     <a href="#more" data-nav="more"><svg class="ic"><use href="#n-person"/></svg><span>Profile</span></a>
   </div>
 </nav>
+<div class="sbar" id="sbar" hidden><i id="sbar-thumb"></i></div>
+<div class="dvbar" id="dv-bar" hidden></div>
 <div class="zoomov" id="dv-zoomov" hidden></div>
 <div class="rteos" id="rt-analysing"></div>
 <div id="lb" hidden><img id="lbimg" alt=""><span>tap to close</span></div>
 <script src="/app/topology.js?v=1"></script>
-<script src="/app/rt/rt-topology.js?v=12" defer></script>
-<script src="/app/app.js?v=169"></script>
-<script src="/app/features.js?v=11"></script><!-- wt/features -->
+<script src="/app/rt/rt-topology.js?v=13" defer></script>
+<script src="/app/app.js?v=170"></script>
+<script src="/app/features.js?v=12"></script><!-- wt/features -->
 </body>
 </html>

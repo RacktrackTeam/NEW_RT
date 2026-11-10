@@ -132,3 +132,45 @@ Not fixable without new models: the classifier calling her top device a server, 
   (was 24). The ports of every port-bearing device read again by themselves when each result is opened.
 - The services do not survive a reboot: tools/boot.sh and tools/ai.racktrack.boot.plist are written; installing the login item
   and opening the tunnel are the owner's two commands (the safety check here blocks both); the README has them.
+
+## State at 10 Nov evening (the tester's third list, 35 items)
+
+The tester's third list came at 15:00 on 10 Nov (35 items in six groups: Home and Scan, recording and upload, Profile, results
+and devices, layout and navigation, report and History). Every item was built or answered the same afternoon, local only
+(branch rt-eos-integration), and a page for her to verify each one was published: "Third Round Fixes" (one note box per
+item, Copy all notes; the URL is in the session's final message and in the memory file). App script version 170.
+- Home lists only racks that were read; a scan that stopped stays in History; the last column is the compare result alone (1).
+- A done bar under the header (DONEBAR in app.js): a reading started here that finishes while the person is elsewhere; kept
+  in localStorage rt_done / rt_watch until that result is opened or dismissed (2).
+- A scroll bar of the app's own at the right edge on every page that scrolls (#sbar) (3). Tighter rows on Profile and Scan (4).
+- Scan: How to film is a chevron dropdown (5); Record is the filled card, Upload the outlined one (6); once a video is picked
+  the title says Upload a video and the line says what to check (7); Back to Record or upload and a Choose another video button (8, 12).
+- The background port reads (_ports_all_thread) wait while a rack is being read (_a_run_is_reading): on 10 Nov six re-read
+  results' port reads took turns with a new reading at every step, so each stage took minutes (9).
+- The rack ID card: every choice is a button, Type the ID and Not now too (10); the Next strip opens the question it names:
+  scrolls, rings it (.nudge), opens Type the ID with the cursor when there is no ID to pick (30).
+- The device page: Details is a bordered dropdown row (21) with Change next to the type (a select of the kinds, POST
+  /device/<i>/kind; the correction is remembered for the rack) (11, 22); the arrows are buttons that name the device above and
+  below, and the same bar sits fixed at the bottom of a phone (#dv-bar) (20); Not a device opens one question with Remove
+  and Keep it, no timer (25); the Devices list ends with A device missing? Choose a unit (22); the serial block says Take a
+  close photo of the label, a photo not a video (24).
+- The rack check (13): the frame rule is six rows or two sure rows in some frame (RACK_CHECK_MIN 6, RACK_CHECK_SURE 2, eight
+  frames), measured on seven rack videos and the two non-rack clips (scratchpad rackcheck_probe.py: the desk gave 4 rows,
+  the airport 2; the rack videos reach 8 rows or 2 sure rows); and a second net on the stitched ladder: fewer than eight
+  detected rows and no unit in use is no rack (stitched_looks_like_rack), because a copy of the desk video with its first
+  second cut passed the frame rule and came out as a 1U rack. The check's numbers are kept on the run (rack_check).
+- A technician's Connections screen shows the facts, no boxes (14); Database copies opens with The three sources and the copy
+  each compare uses, for everyone (18); the accuracy page names the steps in plain words, no model names, and explains
+  "not measured yet" (17); Profile rows have a chevron in a circle (16).
+- The result tab row on a phone wraps to two rows, nothing scrolls sideways (19); the header's second line never wraps and
+  the header is re-measured when its text changes (a run's name with its date wrapped and pushed the tab row over the
+  content) (28, 29); a legend "Colour = device type" on the Layout tab, under the report's drawing and on the Rack tab's
+  Types caption (23); the Layout controls say Zoom in, Zoom out, Reset (the built rt-topology.js's "Fit" label was renamed
+  with sed, no rebuild) (31); the Find a port key is drawn with the cells (26); Connections has a Key box, Ports of D<n>
+  labels and a tapped port answers under the cells (27); the back arrow goes one level up, never through browser history (32);
+  Download PDF is a bordered button (33); Refresh has an icon, spins and reports (34); Install on the phone opens the steps
+  and the browser's install prompt where offered (35). Profile colours: all white, red only on Sign out (15).
+- Tests: 28 in test_engine_routes.py (the rack rules, the port-read wait) and the panel tests pass. Proof: every changed screen
+  at 412 and 1280 px as techt (scratchpad proof3/shots.py and shots2.py), and tools/proof_result_tabs.py on every run.
+- Not changed: the models (a wrong type on her rack is corrected by hand and remembered); the camera guide; no confirm
+  step before a recorded video is read (the check does it).

@@ -37,6 +37,33 @@
   }
   function toast(t) { var el = document.querySelector('.toast'); if (!el) { el = document.createElement('div'); el.className = 'toast'; document.body.appendChild(el); }
     el.textContent = t; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.hidden = true; }, 3200); }
+  // a reading that finishes while the person is elsewhere: a bar under the header that stays until that result is opened or dismissed,
+  // kept in this browser across reloads (testers, 10 Nov 2026: nothing told them the scan was done)
+  var DONEBAR = (function () {
+    var WATCH = {}, timer = null, DONE = [];
+    try { DONE = JSON.parse(localStorage.getItem('rt_done') || '[]'); JSON.parse(localStorage.getItem('rt_watch') || '[]').forEach(function (id) { WATCH[id] = 1; }); } catch (e) {}
+    function keep() { try { localStorage.setItem('rt_done', JSON.stringify(DONE)); localStorage.setItem('rt_watch', JSON.stringify(Object.keys(WATCH))); } catch (e) {} }
+    function render() { var el = $('done-bar'); if (!el) return; var h = location.hash || '', show = DONE.filter(function (d) { return h.indexOf('#result/' + d.id) !== 0 && h.indexOf('#job/' + d.id) !== 0; });
+      if (!me || !show.length) { el.hidden = true; el.innerHTML = ''; document.body.classList.remove('has-donebar'); return; }
+      var d = show[show.length - 1];
+      el.innerHTML = '<span class="db-dot ' + (d.failed ? 'bad' : 'ok') + '"></span><span class="db-txt"><b>' + (d.failed ? 'A reading stopped' : 'Rack read') + '</b><small>' + esc(d.title || '') + (show.length > 1 ? ' and ' + (show.length - 1) + ' more' : '') + '</small></span><a class="btn primary" href="#' + (d.failed ? 'job/' : 'result/') + encodeURIComponent(d.id) + '">' + (d.failed ? 'See why' : 'Open the result') + '</a><button class="iconbtn db-x" type="button" aria-label="Dismiss" data-id="' + esc(d.id) + '">×</button>';
+      el.hidden = false; document.body.classList.add('has-donebar'); }
+    function tick() { var ids = Object.keys(WATCH); if (!ids.length) { clearInterval(timer); timer = null; return; }
+      ids.forEach(function (id) { api('/api/video/' + id).then(function (j) { var ready = j.status === 'done' || (j.partial && j.status === 'running'), failed = j.status === 'failed';
+        if (!ready && !failed) return; delete WATCH[id]; if (!DONE.some(function (d) { return d.id === id; })) DONE.push({ id: id, title: j.title || j.name || '', failed: failed }); keep(); render();
+        if ((location.hash || '#home') === '#home') loadHome(); }).catch(function () { delete WATCH[id]; keep(); }); }); }
+    function watch(id) { if (!id || WATCH[id] || DONE.some(function (d) { return d.id === id; })) return; WATCH[id] = 1; keep(); if (!timer) timer = setInterval(tick, 6000); }
+    function opened(id) { var n = DONE.length; DONE = DONE.filter(function (d) { return d.id !== id; }); if (DONE.length !== n) keep(); render(); }
+    document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('#done-bar .db-x'); if (b) opened(b.dataset.id); });
+    if (Object.keys(WATCH).length) timer = setInterval(tick, 6000);
+    return { watch: watch, opened: opened, render: render };
+  })();
+  // a scroll bar of our own at the right edge: phones hide theirs, so a page looked as if it ended at the fold (testers, 10 Nov 2026)
+  (function () { var bar = $('sbar'), th = $('sbar-thumb'); if (!bar) return;
+    function draw() { var doc = document.documentElement, H = doc.scrollHeight, V = window.innerHeight, locked = /^(signin|forgot|invite|pending|contact)$/.test(document.body.dataset.page || '');
+      if (locked || !me || H <= V + 8) { bar.hidden = true; return; } bar.hidden = false; var track = V - 16, h = Math.max(28, Math.round(track * V / H)), y = Math.round((track - h) * (window.scrollY / Math.max(1, H - V)));
+      th.style.height = h + 'px'; th.style.transform = 'translateY(' + y + 'px)'; }
+    window.addEventListener('scroll', draw, { passive: true }); window.addEventListener('resize', draw); setInterval(draw, 400); })();
 
   // ---------------------------------------------------------------- routing: #signin #home #history #sweep #job/<id> #result/<id> #report/<id> #more #models
   var DETAIL = { job: 'Run', result: 'Result', history: 'History', models: 'Models and accuracy', connections: 'Connections', copies: 'Database copies', tools: 'Rack tools' };   // tools: wt/features
@@ -65,6 +92,8 @@
     if (rtab) { var order = Object.keys(TABS), was = order.indexOf(RES.tab || 'rack'), now = order.indexOf(rtab); document.body.dataset.dir = now > was ? 'fwd' : now < was ? 'back' : 'same'; RES.tab = rtab; }   // the tab's content slides in from the side it came from
     if (!me && !AUTH_SCREENS[name]) { name = 'signin'; }
     if (me && AUTH_SCREENS[name]) { name = 'home'; }
+    if (name === 'home' || name === 'history') CAME.result = name;
+    if (name === 'result' || name === 'job') DONEBAR.opened(arg); else DONEBAR.render();
     document.querySelectorAll('.screen').forEach(function (s) { s.hidden = s.dataset.screen !== name; });
     document.body.dataset.page = name;                                             // the sign-in screens are locked to the screen (testers, 4 Nov 2026: the page moved under the keyboard); not data-screen, which names the section elements
     document.body.classList.toggle('on-home', name === 'home');                  // the home page is white, like racktrack.ai
@@ -76,6 +105,7 @@
     else if (rn.classList.contains('inpage')) { rn._home.insertBefore(rn, rn._next); rn.classList.remove('inpage'); }
     document.body.classList.toggle('web', wide);
     $('rnav').hidden = !(me && (rtab || tool)); document.body.classList.toggle('tabbed', !!(me && (rtab || tool))); document.body.classList.toggle('result', !!(me && rtab));
+    if (!(rtab === 'devices' && !wide)) $('dv-bar').hidden = true;                 // the device bar at the bottom of a phone lives on the Devices tab only
     if (rtab || tool) document.querySelectorAll('#rnav a').forEach(function (a) { a.href = a.dataset.tool ? '#tools/' + arg + '/' + a.dataset.rtab : '#result/' + arg + (a.dataset.rtab === 'rack' ? '' : '/' + a.dataset.rtab); a.classList.toggle('on', a.dataset.rtab === (rtab || tool)); });
     if (!tool) rn.dataset.rack = ''; else if (RES.id === arg && $('res-title').textContent) rn.dataset.rack = $('res-title').textContent;
     if (tool) { var onA = document.querySelector('#rnav a.on'); if (onA && onA.scrollIntoView) onA.scrollIntoView({ inline: 'center', block: 'nearest' }); }
@@ -105,10 +135,19 @@
     if (name === 'forgot') AUTH.openForgot();
     if (name === 'tools' && window.RTFEAT) window.RTFEAT.open(arg, arg2, h.split('/')[3]);      // wt/features: the rack tools (mobile/features.js)
   }
-  function topbarHeight() { var t = $('top'); if (t && !t.hidden) document.body.style.setProperty('--topbar-h', t.offsetHeight + 'px'); }
+  function topbarHeight() { var t = $('top'); if (t && !t.hidden) document.body.style.setProperty('--topbar-h', t.offsetHeight + 'px');
+    var rn = $('rnav'); if (rn && !rn.hidden && !rn.classList.contains('inpage')) document.body.style.setProperty('--rnav-h', rn.offsetHeight + 'px'); }   // the tab row wraps to two lines on a phone: the page starts under it
+  window.RTTopbarHeight = topbarHeight;
   window.addEventListener('resize', topbarHeight);
+  new MutationObserver(function () { requestAnimationFrame(topbarHeight); }).observe($('top'), { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });   // the header grows by a line when a run's name arrives (testers, 10 Nov 2026: the date and time covered the tab row)
   window.addEventListener('hashchange', route);
-  $('back').addEventListener('click', function () { if (location.hash.indexOf('#result/') === 0) return go('history'); if (history.length > 1) history.back(); else go('home'); });
+  // the top-left back goes one level up, never through the browser's history (testers, 10 Nov 2026: History and a result sent each other round in a loop)
+  var CAME = { result: 'home' };                                   // where the open result was opened from: Home or History
+  $('back').addEventListener('click', function () { var h = (location.hash || '#home').slice(1), name = h.split('/')[0], id = h.split('/')[1];
+    if (name === 'result') return go(CAME.result || 'home');
+    if (name === 'tools') return go(id && id !== 'site' ? 'result/' + id : 'more');
+    if (name === 'job') return go('home');
+    go('more'); });                                                 // History, the accuracy page, Connections and Database copies open from Profile
 
   // ---------------------------------------------------------------- sign in (racktrack-app sign-in)
   // RT-EOS's sign-in service (auth.sh, rt_eos/server/auth_service.js) signs the session: these screens call it directly and it sets
@@ -182,7 +221,7 @@
       if (role === 'owner') L.push(['/org/console', 'Platform console', 'Organizations waiting, activity']);
       if (role === 'owner' || role === 'org_owner' || role === 'org_admin') L.push(['/org/settings', 'Organization settings', 'Profile, sites, data settings']);
       if (role === 'owner' || role === 'org_owner' || role === 'org_admin' || role === 'site_manager') L.push(['/org/site', 'Sites and people', 'People, roles, invites']);
-      var row = function (x) { return '<a class="grow" href="' + esc(orgUrl(x[0])) + '"><svg class="ic"><use href="#i-server"/></svg><span>' + esc(x[1]) + '</span><em>' + esc(x[2]) + '</em><span class="arr">→</span></a>'; };
+      var row = function (x) { return '<a class="grow" href="' + esc(orgUrl(x[0])) + '"><svg class="ic"><use href="#i-server"/></svg><span>' + esc(x[1]) + '</span><em>' + esc(x[2]) + '</em><span class="arr"><svg class="ic"><use href="#i-next"/></svg></span></a>'; };
       $('org-links').innerHTML = L.map(row).join('');
       $('org-links').hidden = !L.length; $('org-label').hidden = !L.length;                // a technician has no organization entries: no empty heading
       $('acct-settings').innerHTML = row(['/org/you', 'Settings', 'Your account']);      // the person's own settings sit under Account, beside Sign out
@@ -213,7 +252,7 @@
   function summary(s) { if (!s || s.units == null) return ''; return s.units + ' units · ' + s.devices + ' devices' + (s.named != null ? ', ' + s.named + ' named' : '') + ' · ports read on ' + s.layouts + (s.layouts === 1 ? ' device' : ' devices'); }
   function thumb(x) { return (x.status === 'done' || x.partial) ? '<img class="thumbimg" src="/api/video/' + encodeURIComponent(x.id) + '/file/rack.png" alt="" loading="lazy">' : ''; }
   function loadHistory() {
-    api('/api/video/history').then(function (rows) {
+    return api('/api/video/history').then(function (rows) {
       $('hist').innerHTML = rows.length ? rows.map(function (x) {
         var href = (x.status === 'done' || x.partial) ? '#result/' + x.id : '#job/' + x.id;
         var note = x.status === 'running' ? esc(x.progress || '') : x.error ? esc(x.error) : esc(summary(x.summary));
@@ -222,7 +261,8 @@
       }).join('') : '<div class="card waitcard"><span class="dropic"><svg class="ic"><use href="#i-rack"/></svg></span><b>No scans yet</b><p class="muted small">Scan a rack to begin.</p><a class="btn primary" href="#sweep">Scan a rack</a></div>';
     }).catch(function (e) { $('hist').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
-  $('hist-refresh').addEventListener('click', loadHistory);
+  $('hist-refresh').addEventListener('click', function () { var b = this, was = $('hist').querySelectorAll('.run').length; b.disabled = true; b.classList.add('busy'); b.querySelector('span').textContent = 'Refreshing...';   // a visible refresh (testers, 10 Nov 2026: it looked like text and seemed to do nothing)
+    loadHistory().then(function () { var d = $('hist').querySelectorAll('.run').length - was; toast(d > 0 ? d + (d === 1 ? ' new scan.' : ' new scans.') : 'History is up to date.'); }).catch(function () {}).then(function () { b.disabled = false; b.classList.remove('busy'); b.querySelector('span').textContent = 'Refresh'; }); });
   document.addEventListener('error', function (e) { var t = e.target; if (t && t.classList && t.classList.contains('thumbimg')) t.remove(); }, true);
   function loadHome() {
     var hr = new Date().getHours(), part = hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening';
@@ -231,17 +271,17 @@
       var running = rows.filter(function (x) { return x.status === 'running'; })[0], last = rows.filter(function (x) { return x.status === 'done' && !x.demo; })[0];
       if (last && !LAST) remember(last.id); else if (LAST) remember(LAST);
       $('now-card').hidden = !running;
-      if (running) { var n = running.stage || stepOf(running.progress, running.status); $('now-title').textContent = running.partial ? 'Rack read, ports next' : 'Reading a rack'; $('now-step').textContent = running.partial ? '' : 'step ' + n + ' of 15'; $('now-card').href = (running.partial ? '#result/' : '#job/') + running.id;
+      if (running) { var n = running.stage || stepOf(running.progress, running.status); $('now-title').textContent = running.partial ? 'Rack read, ports next' : 'Reading a rack'; $('now-step').textContent = running.partial ? '' : 'step ' + n + ' of 15'; $('now-card').href = (running.partial ? '#result/' : '#job/') + running.id; if (!running.partial) DONEBAR.watch(running.id);
         clearInterval(pollTimer); pollTimer = setInterval(function () { if ((location.hash || '#home') === '#home') loadHome(); }, 5000); }
       // one row per rack: its latest run (with that run's compare state); earlier runs of the rack are listed on its result page
       var byRack = {}, order = [];
-      rows.filter(function (x) { return !x.demo && x.status !== 'running'; }).forEach(function (x) { var k = rackKey(x);
+      rows.filter(function (x) { return !x.demo && x.status !== 'running' && x.status !== 'failed'; }).forEach(function (x) { var k = rackKey(x);   // a scan that stopped is no rack: it stays in History (testers, 10 Nov 2026)
         if (!byRack[k]) { byRack[k] = []; order.push(k); } byRack[k].push(x); });
       var list = order.map(function (k) { var g = byRack[k].slice().sort(function (a, b) { return (b.started || '').localeCompare(a.started || '') || (b.record ? 1 : 0) - (a.record ? 1 : 0); }); g[0]._scans = g.length; return g[0]; });
-      $('home-racks').innerHTML = list.length ? '<div class="rktable"><div class="rkhead"><span>Rack</span><span>Last scan</span><span>Compared with</span><span>State</span><span></span></div>' + list.map(function (x) {
+      $('home-racks').innerHTML = list.length ? '<div class="rktable"><div class="rkhead"><span>Rack</span><span>Last read</span><span>Compared with</span><span>Result</span><span></span></div>' + list.map(function (x) {
         var href = (x.status === 'done' || x.partial) ? '#result/' + x.id : '#job/' + x.id, site = [me && me.role === 'owner' ? x.org_name : null, x.site_name].filter(Boolean).join(' · ') || (x.org == null && me && me.role === 'owner' ? 'From before sign-in' : '');
-        var rec = x.record ? esc(x.record.source) : '-';                  // the state pill on the same row already says Not compared
-        var st = x.status === 'failed' ? ['bad', 'Failed'] : x.differences == null ? (x.status === 'done' ? ['grey', 'Not compared'] : ['grey', 'Not finished']) : x.differences ? ['bad', pl(x.differences, 'difference')] : ['ok', 'No differences'];
+        var rec = x.record ? esc(x.record.source) : '<span class="muted">None yet</span>';
+        var st = x.differences == null ? (x.partial ? ['grey', 'Ports still reading'] : ['grey', 'Not compared yet']) : x.differences ? ['bad', pl(x.differences, 'difference')] : ['ok', 'No differences'];
         return '<a class="rkrow2" href="' + href + '"><span class="c-rack"><b>' + esc(x.rack_id || x.title || x.name) + '</b>' + (site ? '<small>' + esc(site) + '</small>' : '') + '</span>'
           + '<span class="c-when">' + esc(when(x.started)) + (x._scans > 1 ? '<small>' + x._scans + ' scans</small>' : '') + '</span><span class="c-with">' + rec + '</span><span class="c-state"><span class="spill ' + st[0] + '">' + esc(st[1]) + '</span></span><svg class="ic chev"><use href="#i-next"/></svg></a>'; }).join('') + '</div>'
         : '<div class="card waitcard"><b>No racks yet</b><p class="muted small">Scan a rack to begin: record it with the camera or upload a video.</p><a class="btn primary" href="#sweep">Scan a rack</a></div>';
@@ -267,9 +307,11 @@
   ['dragenter', 'dragover'].forEach(function (n) { $('dropzone').addEventListener(n, function (e) { e.preventDefault(); $('dropzone').classList.add('over'); }); });
   ['dragleave', 'drop'].forEach(function (n) { $('dropzone').addEventListener(n, function (e) { e.preventDefault(); $('dropzone').classList.remove('over'); }); });
   $('dropzone').addEventListener('drop', function (e) { var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) onPicked({ files: [f] }); });
-  $('dz-clear').addEventListener('click', function () { showPick(null); });
+  $('dz-clear').addEventListener('click', function () { $('vfile').click(); });                          // Choose another video opens the picker; Back returns to the two choices
+  $('dz-back').addEventListener('click', function () { showPick(null); });
   function showPick(f) {
     picked = f || null; $('dz-idle').hidden = !!f; $('dz-pick').hidden = !f; $('vsend').disabled = !f; $('dropzone').classList.toggle('picked', !!f);
+    $('sw-title').textContent = f ? 'Upload a video' : 'Scan a rack'; $('sw-lead').textContent = f ? 'Check that this is the video of the rack, then press Read the rack. The reading takes a few minutes.' : 'Film the rack from top to bottom, or upload a video of it.'; $('sw-tips').hidden = !!f;   // the words follow the choice (testers, 10 Nov 2026)
     var v = $('dz-video'); if (v.src) { try { URL.revokeObjectURL(v.src); } catch (e) {} v.removeAttribute('src'); }
     if (!f) return;
     $('dz-name').textContent = f.name; $('dz-info').textContent = (f.size / 1e6).toFixed(0) + ' MB';
@@ -329,7 +371,7 @@
     var word = (me && me.name) ? me.name + "'s rack" : 'Your rack';
     window.RTEOSAnalysing.mount(AN.el, { racks: [{ key: 'r', word: word, files: AN.file ? [AN.file] : [], state: 'reading' }], finished: false, label: 'Analysing the rack' });
     if (!AN.job) return;
-    var id = AN.job; remember(id); firstFrame(AN.file, id); var f = AN.file; analysingOff(); go('job/' + id);
+    var id = AN.job; remember(id); firstFrame(AN.file, id); DONEBAR.watch(id); var f = AN.file; analysingOff(); go('job/' + id);
   }
   function analysingReused(job) {                                      // a video read before: the analysing animation for a few seconds, then its result (user, 2026-10-30)
     remember(job); RES.sel = null; RES.pick = null;
@@ -368,6 +410,7 @@
         if (!t0) t0 = new Date(j.started).getTime() || Date.now();
         var secs = Math.max(0, Math.round(((j.finished ? new Date(j.finished).getTime() : Date.now()) - t0) / 1000));
         var ports = j.partial && j.status === 'running', ready = ports || j.status === 'done', failed = j.status === 'failed';
+        if (!ready && !failed) DONEBAR.watch(id);                        // the person may leave: the bar says when it is done
         $('run-time').textContent = (ready ? 'Took ' : 'Elapsed ') + (secs >= 60 ? Math.floor(secs / 60) + ' min ' + (secs % 60) + ' s' : secs + ' s');
         $('job-title').textContent = failed ? 'The reading stopped' : ready ? 'Rack read' : 'Reading the rack';
         $('run-line').textContent = failed ? 'The run could not finish.' : ready ? (ports ? 'Units, devices and kinds are in. Port layouts keep reading in the background.' : 'The rack is read. Open the result to see it.') : 'The video is read frame by frame. First one straight picture of the rack, then every unit, device and port.';
@@ -532,7 +575,7 @@
         if (hits(lx)) lx = x1 - tw - 12; var showTag = fD * px >= 7 && !hits(lx); if (showTag) placed.push([lx, ty - fD * 0.8, lx + tw, ty + fD * 0.8]);
         out.push('<g class="ld ' + which + (nU ? ' unc' : '') + '" data-dev="' + d.index + '" data-cls="' + esc(word) + '" style="--i:' + i + ';--k:' + col + '"><polygon pathLength="1" points="' + pts + '"/>'
           + (showTag ? '<rect class="dtag" x="' + lx + '" y="' + (ty - fD * 0.78) + '" width="' + tw + '" height="' + fD * 1.56 + '" rx="' + fD * 0.78 + '"/><text class="dtxt" x="' + (lx + tw / 2) + '" y="' + ty + '" font-size="' + fD + '">' + esc(label) + '</text>' : '') + '</g>'); });
-      cap = which === 'devices' ? '<b>' + devs.length + ' devices</b> · tap one' : '<b>' + devs.length + ' devices</b> · tap a type to filter';   // the counts are on the chips: not said twice
+      cap = which === 'devices' ? '<b>' + devs.length + ' devices</b> · tap one' : '<b>' + devs.length + ' devices</b> · one colour per type, named on the chips · tap a type to filter';   // the counts are on the chips: not said twice
     }
     var chips = which === 'space' ? [['free', 'Free', free, '#1fd67c'], ['used', 'In use', used, '#e9ece8'], ['unsure', 'Not sure', unsure, '#ff9a2e']].filter(function (c) { return c[2]; })
       : which === 'kinds' ? Object.keys(kinds).sort(function (a, b) { return kinds[b] - kinds[a]; }).map(function (k) { return [k, k, kinds[k], kcol[k]]; }) : [];
@@ -616,7 +659,7 @@
         return { deviceId: d.index, name: (L.vendor ? L.vendor + (L.model ? ' ' + L.model : '') : '') || 'D' + d.index, type: d.kind && d.kind !== 'Other' ? d.kind : 'unidentified',
           heightU: d.height, unitTop: unum(d.top), unitBottom: unum(d.bottom), make: L.vendor || null, model: L.model || null,
           ports: (L.ports || []).map(function (p) { return { portNo: p.id, kind: /^(sfp|qsfp|osfp|lc|sc|fc)$/.test(String(p.type || '')) ? 'sfp' : 'main', type: p.type, state: p.status, cableColor: p.cable_colour || null, cableConnector: p.cable_connector || null, cableType: p.cable_type || null }; }) }; }) };
-    $('rt-legend').innerHTML = byKind(devs).map(function (g, i) { return '<span style="--k:' + g.colour + ';--i:' + i + '"><i></i>' + esc(g.kind) + '<b>' + g.devs.length + '</b></span>'; }).join('');   // the kinds and their colours, as the drawing uses them
+    $('rt-legend').innerHTML = '<span class="elk">Colour = device type</span>' + byKind(devs).map(function (g, i) { return '<span style="--k:' + g.colour + ';--i:' + i + '"><i></i>' + esc(g.kind) + '<b>' + g.devs.length + '</b></span>'; }).join('');   // says what the colours mean (testers, 10 Nov 2026)   // the kinds and their colours, as the drawing uses them
     var mountRT = function () { if (!window.RTEOSTopology) return setTimeout(mountRT, 150);
       if (!$('rt-fit') && window.RTEOSTopology.classes) { var K = window.RTEOSTopology.classes, sty = document.createElement('style'); sty.id = 'rt-fit';   // the 2D drawing and the 3D scene fit the screen
         sty.textContent = '.rteos .' + K.scene + '{height:var(--elev-h);min-height:0;border:0;border-radius:14px;box-shadow:0 1px 2px rgba(17,22,20,.04),0 18px 40px -26px rgba(17,22,20,.32)}.rteos svg[data-zoom]{width:100% !important;height:auto !important;max-height:var(--elev-h)}.rteos .' + K.summary + ',.rteos .' + K.hint + ',.rteos .' + K.caption + ',.rteos .' + K.note + '{font-size:12px}'; document.head.appendChild(sty); }
@@ -694,12 +737,13 @@
     api('/api/video/' + RES.id + '/device', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ top: top, bottom: bottom, kind: kind }) })
       .then(function (r) { toast('D' + r.index + ' added.'); return api('/api/video/' + RES.id + '/view').then(function (v) { RES.view = v; RES.geo = null; drawLayer(v, LAY, false); selectDevice(r.index); }); })
       .catch(function (err) { toast(err.message); b.disabled = false; }); });
-  document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('.rmbtn'); if (!b) return;
-    if (!b.classList.contains('armed')) { b.classList.add('armed'); b.textContent = 'Tap again to remove D' + b.dataset.dev; setTimeout(function () { if (b.isConnected && !b.disabled) { b.classList.remove('armed'); b.textContent = 'Not a device? Remove it'; } }, 4000); return; }
+  document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('.rmbtn, .rmno, .rmyes'); if (!b) return; var box = b.closest('.rmdev'), ask = box.querySelector('.rmask'), open = box.querySelector('.rmbtn');
+    if (b.classList.contains('rmbtn')) { ask.hidden = false; open.hidden = true; return; }
+    if (b.classList.contains('rmno')) { ask.hidden = true; open.hidden = false; return; }
     b.disabled = true; b.textContent = 'Removing…';
     api('/api/video/' + RES.id + '/device/' + b.dataset.dev + '/remove', { method: 'POST' })
-      .then(function () { toast('D' + b.dataset.dev + ' removed. The devices below it moved up one number.'); return api('/api/video/' + RES.id + '/view').then(function (v) { RES.view = v; RES.geo = null; drawLayer(v, LAY, false); selectUnit(b.dataset.top); }); })
-      .catch(function (err) { toast(err.message); b.disabled = false; b.classList.remove('armed'); b.textContent = 'Not a device? Remove it'; }); });
+      .then(function () { toast('D' + b.dataset.dev + ' removed: its units are free now, and the devices below it moved up one number.'); return api('/api/video/' + RES.id + '/view').then(function (v) { RES.view = v; RES.geo = null; drawLayer(v, LAY, false); selectUnit(b.dataset.top); }); })
+      .catch(function (err) { toast(err.message); b.disabled = false; b.textContent = 'Remove D' + b.dataset.dev; }); });
   function closeupBtn(d) { return '<div class="up slim"><label class="btn primary file"><input type="file" accept="image/*" capture="environment" class="closeup-in" data-dev="' + d.index + '" hidden><svg class="ic"><use href="#i-upload"/></svg>Take a close photo</label><p class="muted small upmsg" hidden></p></div>'; }
   // a port-bearing device's state (user, 2026-10-27): identified = a template fitted OR the make and model known (typed or read)
   // even with no layout to lay over; auto = the port model found the ports but no make and model (the overlay is shown, a
@@ -846,8 +890,8 @@
     var chips = opts.map(function (o, i) { return '<button class="rkopt' + (i === 0 && read && o.id === read ? ' first' : '') + '" type="button" data-rkid="' + esc(o.id) + '"><b>' + esc(o.id) + '</b><small>' + esc(o.why) + '</small></button>'; }).join('');
     el.innerHTML = '<div class="rkhead"><b>' + (read ? 'Is this rack ' + esc(read) + '?' : v.rack_label_running ? 'Which rack is this? Reading the label…' : 'Which rack is this?') + '</b><small>' + (read ? 'Read off the label in the video. Confirm it, pick another, or type the ID.' : 'No ID could be read off the label. Pick one or type it.') + ' The ID links this rack to the network layer.</small></div>'
       + (chips ? '<div class="rkopts">' + chips + '</div>' : '')
-      + '<details class="rktypef"' + (chips ? '' : ' open') + '><summary>Type the ID</summary><form class="rktype" data-rkid-form><input type="text" name="id" placeholder="Type the rack ID, e.g. SP-HYD-RM01-R01-R2" autocomplete="off" spellcheck="false"><button class="btn primary" type="submit">Save</button></form></details>'
-      + '<button class="link rkskip" type="button" data-rkid-skip>Not now</button>';
+      + '<div class="rkfoot"><details class="rktypef"' + (chips ? '' : ' open') + '><summary class="btn rksum">Type the ID</summary><form class="rktype" data-rkid-form><input type="text" name="id" placeholder="Type the rack ID, e.g. SP-HYD-RM01-R01-R2" autocomplete="off" spellcheck="false"><button class="btn primary" type="submit">Save</button></form></details>'
+      + '<button class="btn rkskip" type="button" data-rkid-skip>Not now</button></div>';   // every choice looks like one (testers, 10 Nov 2026)
   }
   // what to do next with this rack: one line, the first open step (user, 2026-10-30: no clear next step after a scan)
   function nextSteps(v) {
@@ -855,7 +899,7 @@
     var unsure = devs.filter(function (d) { return d.unsure || !d.kind || d.kind === 'Other'; });
     var unread = devs.filter(function (d) { return PORT_KINDS[d.kind] && !(d.layout && (d.layout.mapped || d.layout.ports_state)); });
     var steps = [
-      { done: !!(R && R.id), text: 'Verify the rack ID', go: null },
+      { done: !!(R && R.id), text: 'Verify the rack ID above', go: null },
       { done: !(v.units || []).some(function (u) { return u.status === 'uncertain'; }), text: 'Answer ' + (v.units || []).filter(function (u) { return u.status === 'uncertain'; }).length + ' units marked Not sure', go: (function () { var u = (v.units || []).filter(function (u) { return u.status === 'uncertain'; })[0]; return u ? { unit: u.unit } : null; })() },
       { done: !unsure.length, text: 'Check ' + unsure.length + (unsure.length === 1 ? ' device' : ' devices') + ' marked Not sure', go: unsure.length ? { dev: unsure[0].index } : null },
       { done: !unread.length, text: 'Read the ports of ' + unread.length + (unread.length === 1 ? ' device' : ' devices'), go: unread.length ? { dev: unread[0].index } : null }
@@ -873,7 +917,10 @@
   document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('#rk-next'); if (!a) return;
     if (a.dataset.unit) { e.preventDefault(); selectUnit(a.dataset.unit); go('result/' + RES.id + '/devices'); return; }
     if (a.dataset.dev) { e.preventDefault(); selectDevice(parseInt(a.dataset.dev, 10)); go('result/' + RES.id + '/devices'); }
-    else if (a.getAttribute('href') === '#') { e.preventDefault(); var ask = $('rk-ask'); if (ask) { ask.scrollIntoView({ behavior: 'smooth', block: 'start' }); ask.classList.remove('nudge'); void ask.offsetWidth; ask.classList.add('nudge'); } } });
+    else if (a.getAttribute('href') === '#') { e.preventDefault(); var ask = $('rk-ask'); if (!ask) return;                   // the strip opens the question it names (testers, 10 Nov 2026: 'clicking it does nothing')
+      if (ask.hidden || ask.classList.contains('done') || ask.classList.contains('soft')) { var ch = ask.querySelector('[data-rkid-clear]') || document.querySelector('[data-rkid-clear]'); if (ch) ch.click(); }
+      ask.scrollIntoView({ behavior: 'smooth', block: 'start' }); ask.classList.remove('nudge'); void ask.offsetWidth; ask.classList.add('nudge');
+      var tf = ask.querySelector('.rktypef'), inp = ask.querySelector('.rktype input'); if (tf && !ask.querySelector('.rkopt')) tf.open = true; if (inp && tf && tf.open) setTimeout(function () { inp.focus(); }, 350); } });
   document.addEventListener('click', function (e) {                     // step 2 answers: in use / free, or part of the device next to it
     var b = e.target.closest && e.target.closest('[data-umark]'); if (!b) return;
     var unit = b.dataset.unit, status = b.dataset.umark, box = b.closest('.umark');
@@ -931,7 +978,7 @@
         return un.length ? '<button class="lrow" type="button" data-dev="' + d.index + '"><span class="iu">' + UP(d.top) + '</span><b>D' + d.index + ' · ' + (un.length === 1 ? 'port ' + esc(un[0].id) + ' not sure' : un.length + ' ports not sure: ' + esc(un.slice(0, 6).map(function (p) { return p.id; }).join(', ')) + (un.length > 6 ? ' and ' + (un.length - 6) + ' more' : '')) + '</b><span class="arr">›</span></button>' : null; }).filter(Boolean));
     var pdf = $('rep-pdf'); if (pdf) { pdf.href = '/api/video/' + encodeURIComponent(v.id) + '/report.pdf'; pdf.hidden = false; }   // the whole report as one PDF (testers, 4 Nov 2026)
     $('rp-top').innerHTML = '<header class="rphead"><span class="eyebrow">Rack report</span><h2>' + esc(title) + '</h2><p class="muted">' + esc(v.title || '') + '</p><p class="rpline"><b>' + n + 'U</b> · <b>' + used + '</b> in use · <b class="free">' + free + '</b> free' + (unc ? ' · <b class="unc">' + unc + '</b> not sure' : '') + '</p></header>'
-      + '<div class="rpcol b"><section class="card rpelev"><div class="rpkpis"><div><b>' + devs.length + '</b><span>devices</span></div><div><b>' + kinds.length + '</b><span>kinds</span></div><div><b>' + free + 'U</b><span>free</span></div><p class="muted small">' + esc(kindLine) + '</p></div>' + elev + '</section>'
+      + '<div class="rpcol b"><section class="card rpelev"><div class="rpkpis"><div><b>' + devs.length + '</b><span>devices</span></div><div><b>' + kinds.length + '</b><span>kinds</span></div><div><b>' + free + 'U</b><span>free</span></div><p class="muted small">' + esc(kindLine) + '</p><p class="elegend2"><span class="elk">Colour = device type</span>' + kinds.map(function (g) { return '<span><i style="--k:' + g.colour + '"></i>' + esc(g.kind) + '</span>'; }).join('') + '</p></div>' + elev + '</section>'
       + '</div><div class="rpcol a"><span class="glabel">Devices, top to bottom</span><div class="card flush"><table class="rptable"><thead><tr><th>Unit</th><th>Device</th><th>Make and model</th></tr></thead><tbody>' + table + '</tbody></table></div></div><div class="rpcol c">'
       + '<span class="glabel">Free space</span><div class="fchips">' + (freeChips || '<span class="muted small">No free unit.</span>') + '</div>'
       + '<span class="glabel">Needs a look</span>' + (look.length ? '<div class="card flush look">' + look.join('') + '</div>' : '<div class="card look none"><i class="sig"></i>Nothing. Every unit and device is clear.</div>') + '</div>';
@@ -1085,17 +1132,19 @@
   // Connections (Profile): the organization's NetBox and ServiceNow logins; the server sends back the address and the state only, never a secret
   function loadConnections() { api('/api/connections').then(renderConnections).catch(function (e) { $('cn-list').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
   function renderConnections(d) {
-    var c = d.connections;
-    $('cn-list').innerHTML = Object.keys(c).map(function (t) { var x = c[t], nb = t === 'netbox', held = function (k) { return x[k] ? 'saved, leave blank to keep' : ''; };
-      return '<form class="card cnform" data-cn="' + t + '"><div class="dfrow"><b>' + esc(x.label) + '</b><span class="cnstate ' + esc(x.state) + '">' + esc({ ok: 'Connected', failed: 'Not connected', untested: 'Not tested', mock: 'Local test copy' }[x.state] || x.state) + '</span></div>'
-        + '<p class="muted small" data-cnwords>' + esc(x.state_words || '') + (x.tested_at ? ' Tested ' + esc(when(x.tested_at)) + '.' : '') + '</p>'
+    var c = d.connections, STATE = { ok: 'Connected', failed: 'Not connected', untested: 'Not tested', mock: 'Local test copy' };
+    $('cn-list').innerHTML = (ADMIN ? '' : '<p class="muted small cnnote">Only an organization admin can change these logins. They are shown so you know which copy a compare uses.</p>')   // a technician sees the facts, not boxes that take no typing (testers, 10 Nov 2026)
+      + Object.keys(c).map(function (t) { var x = c[t], nb = t === 'netbox', held = function (k) { return x[k] ? 'saved, leave blank to keep' : ''; };
+      var head = '<div class="dfrow"><b>' + esc(x.label) + '</b><span class="cnstate ' + esc(x.state) + '">' + esc(STATE[x.state] || x.state) + '</span></div>'
+        + '<p class="muted small" data-cnwords>' + esc(x.state_words || '') + (x.tested_at ? ' Tested ' + esc(when(x.tested_at)) + '.' : '') + '</p>';
+      if (!ADMIN) return '<div class="card cnform" data-cn="' + t + '">' + head + '<div class="dfacts"><span>Address</span><b>' + (x.address ? esc(x.address) : 'None saved: the local test copy is used') + '</b><span>Login</span><b>' + (x.saved ? 'Saved' : 'None') + '</b></div></div>';
+      return '<form class="card cnform" data-cn="' + t + '">' + head
         + '<label>Address<input name="address" placeholder="' + (nb ? 'https://netbox.example.com' : 'https://example.service-now.com') + '" value="' + esc(x.address || '') + '" autocomplete="off"></label>'
         + (nb ? '<label>Token<input name="token" type="password" autocomplete="new-password" placeholder="' + held('token') + '"></label><p class="muted small">Or a username and password:</p>' : '')
         + '<label>Username<input name="username" autocomplete="off" placeholder="' + held('username') + '"></label>'
         + '<label>Password<input name="password" type="password" autocomplete="new-password" placeholder="' + held('password') + '"></label>'
-        + (ADMIN ? '<div class="dfrow"><button class="btn primary" type="submit">Save</button><button class="btn" type="button" data-cntest' + (x.saved ? '' : ' disabled') + '>Test connection</button>'
-        + (x.saved ? '<button class="btn danger" type="button" data-cndel>Remove</button>' : '') + '</div>' : '<p class="muted small">Only an organization admin can change this login.</p>') + '</form>'; }).join('');
-    if (!ADMIN) $('cn-list').querySelectorAll('input').forEach(function (i) { i.disabled = true; });
+        + '<div class="dfrow"><button class="btn primary" type="submit">Save</button><button class="btn" type="button" data-cntest' + (x.saved ? '' : ' disabled') + '>Test connection</button>'
+        + (x.saved ? '<button class="btn danger" type="button" data-cndel>Remove</button>' : '') + '</div></form>'; }).join('');
   }
   document.addEventListener('submit', function (e) { var f = e.target.closest && e.target.closest('form[data-cn]'); if (!f) return; e.preventDefault();
     var body = {}; ['address', 'username', 'password', 'token'].forEach(function (k) { if (f.elements[k]) body[k] = f.elements[k].value; });
@@ -1106,9 +1155,13 @@
     api('/api/connections/' + t, { method: 'DELETE' }).then(function (d) { toast('Login removed. The local test copy is used again.'); renderConnections(d); }).catch(function (er) { toast(er.message); }); });
   // Database copies (Profile): every copy with its source, version, time and counts; the active ones marked; delete
   function loadCopies() { api('/api/sources/copies').then(renderCopies).catch(function (e) { $('cp-list').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
+  // the three sources and the copy a compare uses, for everyone (testers, 10 Nov 2026: a technician saw no sources at all)
+  function sourcesCard(d) { var by = {}; d.copies.forEach(function (c) { if (c.active) by[c.source] = c; });
+    return '<span class="glabel">The three sources</span><div class="card flush srcs">' + ['excel', 'netbox', 'cmdb'].map(function (s) { var c = by[s];
+      return '<div class="srcrow"><b>' + esc(d.sources[s] || SRCLABEL[s] || s) + '</b><span>' + (c ? 'Copy v' + c.version + ' of ' + esc(when(c.imported_at)) + ' · ' + pl(c.racks, 'rack') + ', ' + pl(c.devices, 'device') : '<span class="muted">No copy yet</span>') + '</span></div>'; }).join('') + '</div>'; }
   function renderCopies(d) {
-    if (!d.copies.length) { $('cp-list').innerHTML = '<div class="card"><p class="muted">No copy yet. ' + (ADMIN ? 'Read a workbook or copy NetBox or the CMDB in above.' : 'An organization admin copies the databases in.') + '</p></div>'; return; }
-    $('cp-list').innerHTML = '<div class="card flush"><table class="dftable cptable"><thead><tr><th>Source</th><th class="wide">Version</th><th class="wide">Copied</th><th class="cpn">Racks</th><th class="cpn">Devices</th><th class="cpn wide">Ports</th><th class="wide">From</th><th>State</th><th></th></tr></thead><tbody>'
+    if (!d.copies.length) { $('cp-list').innerHTML = sourcesCard(d) + '<div class="card"><p class="muted">No copy yet. ' + (ADMIN ? 'Read a workbook or copy NetBox or the CMDB in above.' : 'An organization admin copies the databases in.') + '</p></div>'; return; }
+    $('cp-list').innerHTML = sourcesCard(d) + '<span class="glabel">Every copy</span><div class="card flush"><table class="dftable cptable"><thead><tr><th>Source</th><th class="wide">Version</th><th class="wide">Copied</th><th class="cpn">Racks</th><th class="cpn">Devices</th><th class="cpn wide">Ports</th><th class="wide">From</th><th>State</th><th></th></tr></thead><tbody>'
       + d.copies.map(function (c) { return '<tr data-copy="' + c.id + '"' + (c.active ? ' class="on"' : '') + '><td><b>' + esc(d.sources[c.source] || c.source) + '</b><span class="cpwhen small muted"><span>v' + c.version + '</span><span>' + esc(when(c.imported_at)) + '</span></span></td><td class="mono wide">v' + c.version + '</td><td class="mono small wide">' + esc(when(c.imported_at)) + '</td>'
         + '<td class="cpn">' + c.racks + '</td><td class="cpn">' + c.devices + '</td><td class="cpn wide">' + (c.ports || 0) + '</td><td class="wide small muted">' + esc(/^https?:\/\/(127\.0\.0\.1|localhost)[:/]/.test(String(c.file || '')) ? 'The local test copy' : /^https?:/.test(String(c.file || '')) ? String(c.file).replace(/^https?:\/\//, '').replace(/\/.*$/, '') : String(c.file || '').replace(/^workbook_[0-9a-f]{8}_/, '')) + '</td>'
         + '<td>' + (c.active ? '<span class="cpon">Active</span>' : '<span class="muted small">Older</span>') + '</td><td>' + (ADMIN ? '<button class="btn danger" type="button" data-cpdel="' + c.id + '">Delete</button>' : '') + '</td></tr>'; }).join('') + '</tbody></table></div>';
@@ -1163,7 +1216,7 @@
     if (!mm && L.vendor_read) parts.push(esc(L.vendor_read + (L.model_read ? ' ' + L.model_read : '')) + ' read on the panel, not confirmed');
     return esc(parts.join(' · ')).replace(/&amp;/g, '&');
   }
-  document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-dvnav]'); if (!b) return; RES.navDir = b.textContent.trim().charAt(0) === '‹' ? 'back' : 'fwd'; selectDevice(parseInt(b.dataset.dvnav, 10)); });
+  document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-dvnav]'); if (!b || !b.dataset.dvnav) return; RES.navDir = b.textContent.trim().charAt(0) === '‹' ? 'back' : 'fwd'; selectDevice(parseInt(b.dataset.dvnav, 10)); });
   (function () { var x0 = null, y0 = null; var el = document.getElementById('dv-one'); if (!el) return;              // a swipe on the device page: the device above or below
     el.addEventListener('touchstart', function (e) { var t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; }, { passive: true });
     el.addEventListener('touchend', function (e) { if (x0 == null) return; var t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; x0 = null;
@@ -1173,6 +1226,7 @@
     var isUnit = p && p.kind === 'unit', list = isUnit ? units.map(function (x) { return x.unit; }) : devs.map(function (d) { return d.index; });
     var at = p ? list.indexOf(p.id) : -1;
     $('dv-pick').hidden = at >= 0; $('dv-one').hidden = at < 0;
+    if (at < 0 || isUnit) { var bb = $('dv-bar'); if (bb) bb.hidden = true; }
     if (at < 0) {                                                       // the list: every device with its place (or every unit)
       var wantUnits = p && p.kind === 'unitlist';
       $('dv-pick-title').textContent = wantUnits ? 'Choose a unit' : 'Choose a device';
@@ -1182,6 +1236,7 @@
           var ur = URANGE(d.top, d.bottom, d.height), kindName = d.kind && d.kind !== 'Other' ? d.kind : 'Not sure';
           if (!PORT_KINDS[d.kind]) return '<button class="prow" type="button" data-dev="' + d.index + '"><img class="pthumb" src="' + d.crop + '" alt="" loading="lazy"><span class="pt"><b>' + esc(mm || kindName) + '</b><small>' + ur + ' · D' + d.index + ' · ' + d.height + 'U' + (d.kind_from === 'faceplate' || d.kind_from === 'ports' || d.kind_from === 'corrected' ? ' · ' + esc(d.kind_words) : '') + '</small></span><span class="arr">›</span></button>';
           var st = devState(d, v); return '<button class="prow" type="button" data-dev="' + d.index + '"><img class="pthumb" src="' + d.crop + '" alt="" loading="lazy"><span class="pt"><b>' + esc(st.key === 'on' ? st.title : (mm || kindName)) + '</b><small>' + ur + ' · D' + d.index + ' · ' + esc(d.kind_words || kindName) + '</small></span><span class="stat ' + st.key + '"><i></i>' + st.word + '</span><span class="arr">›</span></button>'; }).join(''); }).join('');
+      if (!wantUnits && devs.length) $('dv-list').insertAdjacentHTML('beforeend', '<div class="pgh pgfoot"><span class="pgs">A device missing from this list? Open the unit it sits in and add it there.</span><button class="btn" type="button" id="dv-units">Choose a unit</button></div>');   // testers, 10 Nov 2026
       [].forEach.call($('dv-list').children, function (el, i) { el.style.setProperty('--i', i); }); requestAnimationFrame(function () { $('dv-list').classList.add('in'); });
       return;
     }
@@ -1230,13 +1285,14 @@
       var dv = devs[at], L = dv.layout || {}, mm = L.vendor ? L.vendor + (L.model ? ' ' + L.model : '') : L.typed ? L.typed.vendor + ' ' + L.typed.model : '';
       var kind = dv.kind && dv.kind !== 'Other' ? esc(dv.kind) : 'Not sure', ps = PORT_KINDS[dv.kind] ? devState(dv, v) : null, P = L.pictures || {};
       var prev = at > 0 ? devs[at - 1] : null, next = at < devs.length - 1 ? devs[at + 1] : null;
-      var nav = '<div class="dvnav">' + (prev ? '<button class="link" type="button" data-dvnav="' + prev.index + '">‹ D' + prev.index + '</button>' : '<span></span>') + '<span class="dvpos">' + (at + 1) + ' of ' + devs.length + '</span>' + (next ? '<button class="link" type="button" data-dvnav="' + next.index + '">D' + next.index + ' ›</button>' : '<span></span>') + '</div>';
+      var nav = '<div class="dvnav"><button class="btn dvarrow" type="button" data-dvnav="' + (prev ? prev.index : '') + '"' + (prev ? '' : ' disabled') + '>‹ ' + (prev ? 'D' + prev.index + ' above' : 'Top of the rack') + '</button><span class="dvpos">' + (at + 1) + ' of ' + devs.length + '</span><button class="btn dvarrow" type="button" data-dvnav="' + (next ? next.index : '') + '"' + (next ? '' : ' disabled') + '>' + (next ? 'D' + next.index + ' below' : 'Bottom of the rack') + ' ›</button></div>';   // real buttons; the same bar sits fixed at the bottom of a phone (testers, 10 Nov 2026: the arrows were not noticed)
       var web = document.body.classList.contains('web');
+      var bar = $('dv-bar'); if (bar) { bar.innerHTML = nav; bar.hidden = web; }
       info = nav + '<span class="eyebrow">D' + dv.index + ' · ' + URANGE(dv.top, dv.bottom, dv.height) + '</span><h2 class="onet">' + esc(mm || (ps && ps.panel ? ps.title : dv.kind && dv.kind !== 'Other' ? dv.kind : 'Device')) + '</h2>'
         + '<div class="stat ' + (dv.unsure ? 'unc' : ps ? ps.key : 'on') + '"><i></i>' + (dv.unsure ? 'Needs a look' : ps ? ps.word : 'Checked') + '</div>'
         + '<p class="dvsum">' + summaryLine(dv, L, kind, mm) + '</p>'
-        + '<details class="dvmore"' + (web ? ' open' : '') + '><summary>Details</summary><div class="dfacts">' + row('Size', dv.height + 'U') + row('Type', esc(dv.kind_words || kind)) + (mm || (ps && ps.panel) ? '' : (L.vendor_read ? row('Make', esc(L.vendor_read) + ' <span class="kd">read, not confirmed</span>') : '') + row('Model', L.model_read ? esc(L.model_read) + ' <span class="kd">read, not confirmed</span>' : L.mapped ? 'Not read' : 'Not read yet'))
-        + (ps && ps.facts ? portFacts(L) : '') + '</div></details>';
+        + '<details class="dvmore"' + (web ? ' open' : '') + '><summary><span>Details</span><span class="sumhint">size, type, make, ports</span></summary><div class="dfacts">' + row('Size', dv.height + 'U') + row('Type', esc(dv.kind_words || kind) + ' <button class="link kind-edit" type="button">Change</button>') + (mm || (ps && ps.panel) ? '' : (L.vendor_read ? row('Make', esc(L.vendor_read) + ' <span class="kd">read, not confirmed</span>') : '') + row('Model', L.model_read ? esc(L.model_read) + ' <span class="kd">read, not confirmed</span>' : L.mapped ? 'Not read' : 'Not read yet'))
+        + (ps && ps.facts ? portFacts(L) : '') + '</div><div class="kindpick" id="kind-pick" hidden><label>What is this device?<select class="kind-sel"><option value="">Not sure</option>' + KINDS.filter(function (k) { return k !== 'Other'; }).map(function (k) { return '<option' + (dv.kind === k ? ' selected' : '') + '>' + k + '</option>'; }).join('') + '</select></label><button class="btn primary kind-save" type="button" data-dev="' + dv.index + '">Save</button><p class="pline">The type comes from the picture and can be wrong. Set it here: the rack view, the layout and the report follow, and the next scan of this rack remembers it.</p></div></details>';   // a person settles a wrong or missing type (testers, 10 Nov 2026)
       // the one picture: the port layout over the crop when identified (animated), else the crop
       below = ((L.fitted || L.mode === 'patchpanel') && portOverlay(dv, L, P)) || (L.fitted && P.overlay ? '<figure class="pshot cine one" id="cine" title="Tap to play again"><img class="c-base" src="' + (P.cut || dv.crop) + '" alt=""><img class="c-over" src="' + P.overlay + '" alt="D' + dv.index + '"><span class="c-scan"></span>' + '</figure>' : null)
         || '<figure class="pshot rv2 one"><img id="dv-inline" src="' + (ps && ps.pic ? ps.pic : dv.crop) + '" alt="D' + dv.index + '"></figure>';
@@ -1250,7 +1306,7 @@
         else if (ps.key === 'unc') below += '<p class="pline">' + (L.model_read ? 'Read once, not confirmed. ' : L.vendor_read ? 'The model was not read. ' : 'The make and model were not read. ') + 'A close, sharp photo of the front gives the model and its ports.</p>' + closeupBtn(dv) + modelForm(dv);
         else below += '<button class="btn primary readports" type="button" data-dev="' + dv.index + '"><svg class="ic"><use href="#i-refresh"/></svg>' + (L.ports_state === 'failed' ? 'Try again' : dv.kind === 'Patch Panel' ? 'Find the ports' : 'Find the make and model') + '</button>' + (dv.kind === 'Patch Panel' ? '' : modelForm(dv));
       } else below += modelForm(dv);
-      below += '<div class="rmdev"><button class="link rmbtn" type="button" data-dev="' + dv.index + '" data-top="' + dv.top + '">Not a device? Remove it</button></div>';   // a box that is no device (user, 2026-10-27: 'there is no D6')
+      below += '<div class="rmdev"><button class="link rmbtn" type="button" data-dev="' + dv.index + '" data-top="' + dv.top + '">Not a device? Remove it</button><div class="rmask" hidden><p class="pline">Remove D' + dv.index + '? Its units (' + URANGE(dv.top, dv.bottom, dv.height) + ') are then marked free, and the devices below it move up one number. If something else sits there, open that unit afterwards and mark it in use or add the device.</p><div class="dfrow"><button class="btn danger rmyes" type="button" data-dev="' + dv.index + '" data-top="' + dv.top + '">Remove D' + dv.index + '</button><button class="btn rmno" type="button">Keep it</button></div></div></div>';   // a box that is no device (user, 2026-10-27: 'there is no D6'); one plain question, no timer (testers, 10 Nov 2026)
       RES.zoom = { html: '<img class="zimg" id="dv-crop" alt="D' + dv.index + '">', title: 'D' + dv.index + (mm ? ' · ' + esc(mm) : ''), dev: dv };
     }
     if (!isUnit && window.RTFEAT) below = window.RTFEAT.idsBlock(devs[at], RES.id) + below;     // wt/features: serial and asset tag from a close-up
@@ -1277,7 +1333,7 @@
   function closeZoom() { var ov = $('dv-zoomov'); ov.classList.remove('on'); setTimeout(function () { ov.hidden = true; ov.innerHTML = ''; }, 280); }
   $('dv-another').addEventListener('click', function () { RES.pick = { kind: RES.pick && RES.pick.kind === 'unit' ? 'unitlist' : 'devlist' }; renderOne(); secTo('devices'); });
   $('dv-rack').addEventListener('click', function () { go('result/' + RES.id); });
-  $('dv-list').addEventListener('click', function (e) { var b = e.target.closest('.prow'); if (!b) return; if (b.dataset.unit) selectUnit(b.dataset.unit); else selectDevice(parseInt(b.dataset.dev, 10)); });
+  $('dv-list').addEventListener('click', function (e) { if (e.target.closest('#dv-units')) { RES.pick = { kind: 'unitlist' }; renderOne(); return; } var b = e.target.closest('.prow'); if (!b) return; if (b.dataset.unit) selectUnit(b.dataset.unit); else selectDevice(parseInt(b.dataset.dev, 10)); });
   $('res-dev').addEventListener('click', function (e) { var b = e.target.closest('[data-open-dev]'); if (b) return selectDevice(parseInt(b.dataset.openDev, 10));
     var o = e.target.closest('#dv-loc .lo'); if (o) return selectDevice(parseInt(o.dataset.dev, 10));
     if (e.target.closest('#dv-loc')) openZoom(); });
@@ -1301,16 +1357,24 @@
   // the kind can be corrected: Change -> the kinds -> saved with the run
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('.kind-edit'); if (b) { var pick = $('kind-pick'); pick.hidden = !pick.hidden; return; }
-    var o = e.target.closest && e.target.closest('.kind-opt'); if (!o) return;
-    var kind = o.dataset.kind === '' ? null : o.dataset.kind;
+    var o = e.target.closest && e.target.closest('.kind-save'); if (!o) return;
+    var sel = o.parentNode.querySelector('.kind-sel'), kind = sel && sel.value ? sel.value : null; o.disabled = true;
     api('/api/video/' + RES.id + '/device/' + o.dataset.dev + '/kind', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kind: kind }) })
-      .then(function () { toast(kind ? 'D' + o.dataset.dev + ' is now ' + kind + '.' : 'Back to what the model said.'); loadView(false); }).catch(function (err) { toast(err.message); });
+      .then(function () { toast(kind ? 'D' + o.dataset.dev + ' is now a ' + kind.toLowerCase() + '. The rack, the layout and the report follow.' : 'D' + o.dataset.dev + ' is back to what the picture said.'); loadView(false); }).catch(function (err) { o.disabled = false; toast(err.message); });
   });
   document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-scroll]'); if (b) { var strip = b.closest('.card').querySelector('.howstrip'); strip.scrollBy({ left: parseInt(b.dataset.scroll, 10) * Math.round(strip.clientWidth * 0.8), behavior: 'smooth' }); } });
 
   // ---------------------------------------------------------------- more
   $('install-btn').hidden = NATIVE || window.matchMedia('(display-mode: standalone)').matches;
-  $('install-btn').addEventListener('click', function () { toast(/iPhone|iPad/.test(navigator.userAgent) ? 'In Safari: Share, then Add to Home Screen.' : 'In Chrome: the menu, then Install app.'); });
+  // Install on the phone: the steps, written out, and the browser's own install prompt where it offers one (testers, 10 Nov 2026: the one-line message was not enough)
+  var installPrompt = null; window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); installPrompt = e; });
+  $('install-btn').addEventListener('click', function () { var ios = /iPhone|iPad/.test(navigator.userAgent), row = $('install-row'), lab = $('install-label'); if (!row.hidden) { row.hidden = true; lab.hidden = true; return; }
+    var steps = ios ? ['Open this page in Safari.', 'Tap Share: the square with an arrow at the bottom of the screen.', 'Scroll the sheet and tap Add to Home Screen.', 'Tap Add. RackTrack then opens from your home screen like an app.']
+      : ['Open this page in Chrome.', 'Tap the three dots at the top right.', 'Tap Install app, or Add to Home screen.', 'Tap Install. RackTrack then opens from your home screen like an app.'];
+    lab.textContent = 'Install on the phone'; lab.hidden = false; row.hidden = false;
+    row.innerHTML = '<div class="card instcard"><p class="muted small">Nothing is downloaded from a store: the app is this page, kept on your home screen with its own icon. It still needs the network.</p><ol class="inststeps">' + steps.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ol>' + (installPrompt ? '<button class="btn primary" type="button" id="install-now">Install now</button>' : '') + '<button class="link" type="button" id="install-close">Close</button></div>';
+    var b = $('install-now'); if (b) b.addEventListener('click', function () { installPrompt.prompt(); installPrompt = null; b.remove(); });
+    $('install-close').addEventListener('click', function () { row.hidden = true; lab.hidden = true; }); });
   if (NATIVE) { $('si-server').hidden = false; $('si-server').innerHTML = 'Server ' + esc(location.host) + ' · <a href="' + SHELL_URL + '?change=1">change</a>'; }
 
   // ---------------------------------------------------------------- pictures full size

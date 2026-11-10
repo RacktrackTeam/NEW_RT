@@ -281,7 +281,7 @@ JOBS = {}                                   # id -> {"status", "progress", "resu
 
 def _save(j):
     """status.json beside the run: what the history and the app need, never the big result."""
-    keep = {k: j.get(k) for k in ("id", "status", "progress", "error", "started", "finished", "title", "name", "from_guide", "stride", "summary", "phase", "partial", "ports", "ports_error", "video_file", "rack_id", "video_md5", "video_probe", "video_fp", "stage", "db", "position", "org", "site")}
+    keep = {k: j.get(k) for k in ("id", "status", "progress", "error", "started", "finished", "title", "name", "from_guide", "stride", "summary", "phase", "partial", "ports", "ports_error", "video_file", "rack_id", "video_md5", "video_probe", "video_fp", "stage", "rack_check", "db", "position", "org", "site")}
     try:
         (pathlib.Path(j["dir"]) / "status.json").write_text(json.dumps(keep, indent=1))
     except OSError as ex:
@@ -366,30 +366,49 @@ def stage_of(msg):
     return next((n for k, n in STAGE_WORDS if k in m), None)
 
 
-RACK_CHECK_MIN = 3                                      # a video shows a rack when some sampled frame has at least this many unit rows
+RACK_CHECK_MIN = 6                                      # a video shows a rack when some sampled frame has at least this many unit rows ...
+RACK_CHECK_SURE = 2                                     # ... or at least this many rows the unit model is at least half sure of
+RACK_CHECK_SAMPLES = 8
 
 
-def rack_in_video(video_path, samples=6):
-    """The most unit rows the unit model finds on `samples` frames spread through the video, or None when the video cannot
-    be read. A video of something other than a rack front is refused on this before the stitch (testers, 10 Nov 2026)."""
+def rack_in_video(video_path, samples=RACK_CHECK_SAMPLES):
+    """On `samples` frames spread through the video, the unit rows the unit model finds: the most in one frame (rows) and the
+    most in one frame it is at least half sure of (sure); None when the video cannot be read. A video of something other than
+    a rack front is refused on this before the stitch (testers, 10 Nov 2026). Measured on 10 Nov on seven rack videos and two
+    that were not: every rack video reaches 8 rows or 2 sure rows in some frame; an airport clip reached 2 rows, a desk with
+    a monitor 4 rows and no sure row (that desk passed the first rule, 3 rows, and came out as an 8U rack with one device)."""
     try:
         c = cv2.VideoCapture(str(video_path)); n = int(c.get(cv2.CAP_PROP_FRAME_COUNT))
         if n <= 0:
             c.release(); return None
-        best = 0
+        best, sure = 0, 0
         for q in [(k + 0.5) / samples for k in range(samples)]:
             c.set(cv2.CAP_PROP_POS_FRAMES, int(n * q)); ok, fr = c.read()
             if not ok:
                 continue
-            rows = occ.detect_units(Image.fromarray(cv2.cvtColor(fr, cv2.COLOR_BGR2RGB)))
-            best = max(best, sum(1 for r in rows if r.get("source") == "detected"))
-            if best >= RACK_CHECK_MIN:
-                break
+            det = [r for r in occ.detect_units(Image.fromarray(cv2.cvtColor(fr, cv2.COLOR_BGR2RGB))) if r.get("source") == "detected"]
+            best = max(best, len(det)); sure = max(sure, sum(1 for r in det if (r.get("det_conf") or 0) >= 0.5))
         c.release()
-        return best
+        return {"rows": best, "sure": sure}
     except Exception as ex:  # noqa: BLE001  the check must never stop a reading on its own fault
         print(f"[racktrack] rack check skipped: {type(ex).__name__}: {ex}", file=sys.stderr)
         return None
+
+
+def looks_like_rack(seen):
+    """The rule on rack_in_video's numbers; a video that could not be sampled is given the benefit of the doubt."""
+    return seen is None or seen["rows"] >= RACK_CHECK_MIN or seen["sure"] >= RACK_CHECK_SURE
+
+
+RACK_MIN_ROWS_STITCHED = 8
+
+
+def stitched_looks_like_rack(occupancy):
+    """The second net, on the stitched picture's ladder: fewer than eight detected unit rows and not one unit in use is no rack
+    (the desk of 10 Nov 2026 gave six rows, none in use, and a copy of it with its first second cut passed the frame rule). A
+    small rack with devices in it, or an empty rack with its full ladder, passes."""
+    o = occupancy or {}
+    return (o.get("detected_rows") or 0) >= RACK_MIN_ROWS_STITCHED or bool(o.get("occupied"))
 
 
 def run_job(job, video_path, truth_path=None):
@@ -405,7 +424,8 @@ def run_job(job, video_path, truth_path=None):
         say("checking that the video shows a rack")
         with MODEL_LOCK:
             seen = rack_in_video(video_path)
-        if seen is not None and seen < RACK_CHECK_MIN:
+        j["rack_check"] = seen; _save(j)
+        if not looks_like_rack(seen):
             raise ValueError("no frame gave a ladder")       # the same message as the full reading gave after minutes; now in seconds (testers, 10 Nov 2026)
         say("stitching the video into one rack picture")
         try:
@@ -420,6 +440,8 @@ def run_job(job, video_path, truth_path=None):
             # units, occupancy, devices and kinds; the ports of a device are read when the user selects it (api_read_ports)
             res = rack_video.run(rack, video_path, ENSEMBLE, d, progress=say, stride=j.get("stride") or rack_video.STRIDE,
                                  truth_csv=truth_path if truth_path and pathlib.Path(truth_path).exists() else None, stitch=j.get("stitch"), layouts=False)
+            if not stitched_looks_like_rack((res.get("rack") or {}).get("occupancy")):
+                raise ValueError("no frame gave a ladder")
             say("building the report")
             video_report.build_from(d, d / "report", rack_path, video_path, j.get("title") or "Your rack", j.get("name") or job)
         j.update(result=res, status="done", progress="done", phase="done", partial=False, finished=datetime.datetime.now().isoformat(timespec="seconds"), summary=_summary(res))
@@ -543,7 +565,7 @@ def _when_words(t=None):
 
 
 def public_job(j, with_result=False):
-    out = {k: j.get(k) for k in ("id", "status", "progress", "stage", "failed_at", "error", "started", "finished", "title", "name", "from_guide", "summary", "phase", "partial", "ports")}
+    out = {k: j.get(k) for k in ("id", "status", "progress", "stage", "failed_at", "error", "started", "finished", "title", "name", "from_guide", "summary", "phase", "partial", "ports", "rack_check")}
     out["report"] = f"/video-report/{j['id']}/index.html" if (j.get("status") == "done" or j.get("partial")) else None
     try:                                                   # the pictures made so far, so the run screen can show each step as it lands
         out["files"] = sorted(f.name for f in pathlib.Path(j["dir"]).iterdir() if f.suffix in (".jpg", ".png") and not f.name.startswith("closeup"))
@@ -1191,6 +1213,11 @@ def start_ports_all(job):
     threading.Thread(target=_ports_all_thread, args=(job,), daemon=True).start()
 
 
+def _a_run_is_reading():
+    """True while a rack is being read (a run in its own stages, not the background port phase)."""
+    return any(v.get("status") == "running" and not v.get("partial") for v in JOBS.values())
+
+
 def _ports_all_thread(job):
     try:
         j = JOBS.get(job)
@@ -1198,6 +1225,8 @@ def _ports_all_thread(job):
             return
         devs = sorted((j.get("result") or {}).get("devices") or [], key=lambda d: -(SDB._unum(d.get("top")) or 0))   # top of the rack first
         for dv in devs:
+            while _a_run_is_reading():                  # a rack being read goes first: its stages took turns with these reads, each a minute, and a run that used to take six minutes took twenty (testers, 10 Nov 2026)
+                time.sleep(3)
             if JOBS.get(job) is not j or j.get("status") != "done":
                 return                                  # the run was removed or restarted meanwhile
             k = SDB.device_kind(dv); kind = k["kind"] or k.get("likely")   # the one kind, or the best guess when the picture was not sure: the read may settle it from the faceplate

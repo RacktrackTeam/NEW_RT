@@ -30,8 +30,8 @@
     var rows = [['Serial', x.serial], ['Asset tag', x.asset_tag], ['Labels read', (x.labels || []).join(', ')], ['Cable labels read', (x.cables || []).join(', ')]];
     return '<div class="ft-ids card"><span class="eyebrow">Serial and asset tag</span>'
       + rows.map(function (r) { return '<div class="ft-kv"><span>' + r[0] + '</span><b class="mono">' + (r[1] ? esc(r[1]) : '<em class="muted">not read</em>') + '</b></div>'; }).join('')
-      + (x.from ? '<p class="muted small">From a close-up' + (x.by ? ' taken by ' + esc(x.by) : '') + (x.when ? ', ' + esc(window.RTWHEN ? window.RTWHEN(x.when) : x.when) : '') + '.</p>' : '<p class="muted small">The video is too small to read them. A close-up of the device label reads them.</p>')
-      + '<label class="btn file"><input type="file" accept="image/*" capture="environment" class="ft-ids-in" data-dev="' + d.index + '" data-run="' + esc(run) + '" hidden>Read from a close-up</label><p class="muted small ft-ids-msg" hidden></p></div>';
+      + (x.from ? '<p class="muted small">From a close photo' + (x.by ? ' taken by ' + esc(x.by) : '') + (x.when ? ', ' + esc(window.RTWHEN ? window.RTWHEN(x.when) : x.when) : '') + '.</p>' : '<p class="muted small">The video is too small to read them. Take a sharp photo of the device label, close up: a photo, not a video.</p>')
+      + '<label class="btn file"><input type="file" accept="image/*" capture="environment" class="ft-ids-in" data-dev="' + d.index + '" data-run="' + esc(run) + '" hidden><svg class="ic"><use href="#i-upload"/></svg>Take a close photo of the label</label><p class="muted small ft-ids-msg" hidden></p></div>';
   }
   document.addEventListener('change', function (e) {
     var inp = e.target; if (!inp.classList || !inp.classList.contains('ft-ids-in')) return;
@@ -47,7 +47,9 @@
   var VIEW = {};
   // the rack's name in the tab bar and, on a phone, under the header title, on every tool screen as on the result tabs (finding 27)
   function nameBar(v) { var n = $('rnav'), r = v ? ((v.rack_id && v.rack_id.id) || v.title || '') : ''; if (n && v) n.dataset.rack = r;
-    var t = $('topsub'); if (t && v && /^#tools\//.test(location.hash)) { t.textContent = r; t.hidden = !r; } return v; }
+    var t = $('topsub'); if (t && v && /^#tools\//.test(location.hash)) { t.textContent = r; t.hidden = !r; } if (window.RTTopbarHeight) requestAnimationFrame(window.RTTopbarHeight); return v; }   // the header may grow by a line: the tab row is placed under its real height (testers, 10 Nov 2026)
+  // the key to the port cells, drawn with the cells themselves (testers, 10 Nov 2026: 'Filled number, Plain, Dashed' meant nothing)
+  function keyHtml() { return '<span class="ft-keys"><span class="ft-key"><span class="ft-cell on">1</span>Cable plugged in</span><span class="ft-key"><span class="ft-cell off">2</span>Empty</span><span class="ft-key"><span class="ft-cell na">3</span>Not sure</span></span>'; }
   function view(run) { return VIEW[run] ? Promise.resolve(nameBar(VIEW[run])) : api('/api/video/' + encodeURIComponent(run) + '/view').then(function (v) { VIEW[run] = v; return nameBar(v); }); }
   function unitOf(d) { var a = parseInt(String(d.top).replace(/\D/g, ''), 10), b = parseInt(String(d.bottom).replace(/\D/g, ''), 10); return a === b ? 'U' + a : 'U' + Math.min(a, b) + '-' + Math.max(a, b); }
   function devLabel(d) { var L = d.layout || {}; return 'D' + d.index + ' · ' + unitOf(d) + ' · ' + (d.kind || (d.likely ? 'Not sure, likely ' + d.likely : 'Not sure')) + (L.vendor ? ' · ' + L.vendor + (L.model ? ' ' + L.model : '') : ''); }
@@ -121,7 +123,7 @@
         $('fp-port').disabled = !d; if (d) $('fp-dev').value = String(cur.dev);   // a device tapped on the rack picture shows in the picker too
         $('fp-grid').innerHTML = ports.map(function (p) { var st = p.status === 'connected' ? 'on' : p.status === 'empty' ? 'off' : 'na';
           return '<button type="button" class="ft-cell ' + st + (p.id === cur.port ? ' chosen' : '') + '" data-p="' + p.id + '" title="Port ' + p.id + ': ' + esc(stateWord(p.status)) + '" aria-pressed="' + (p.id === cur.port) + '">' + p.id + '</button>'; }).join('');
-        $('fp-hint').textContent = d && hasPorts(d) ? 'Filled number: cable plugged in. Plain: empty. Dashed: not sure.' : d ? '' : 'Choose a device here or tap one on the rack picture.';
+        $('fp-hint').innerHTML = d && hasPorts(d) ? keyHtml() : d ? '' : 'Choose a device here or tap one on the rack picture.';
       }
       function show() {
         mark(); pickers();
@@ -180,7 +182,7 @@
   function connections(run) {
     view(run).catch(function () { return null; });                      // the rack's name in the header
     api('/api/video/' + encodeURIComponent(run) + '/connections').then(function (r) {
-      root().innerHTML = shell('Connections', run, '<p class="fx-key">' + pill('Cable plugged in', 'on') + pill('Empty', 'off') + pill('Not sure', 'na') + '</p>'
+      root().innerHTML = shell('Connections', run, '<div class="fx-keybox"><span class="fx-eye">Key</span>' + keyHtml() + '<span class="fx-keynote">Each card below is one device; tap a port number on it to see that port.</span></div>'
         + (r.devices.length ? '<div class="fx-grid">' + r.devices.map(function (d, i) {
           var boxes = d.ports.map(function (p) { return { box: p.box, n: p.n, cls: stCls(p.state), tip: 'Port ' + p.n + ': ' + stateWord(p.state) }; });
           var pic = d.cut && boxes.some(function (b) { return b.box; }) ? fig(fileUrl(run, d.cut), boxes) : '<figure class="fx-fig"><img src="/api/video/' + encodeURIComponent(run) + '/crop/' + d.index + '" alt=""></figure>';
@@ -188,13 +190,15 @@
             + pill(d.problems.length ? d.problems.length + (d.problems.length === 1 ? ' problem' : ' problems') : 'No problem', d.problems.length ? 'bad' : 'ok') + '</div>'
             + '<div class="fx-pills">' + pill(d.kind || 'Not sure') + (d.ports.length ? pill(d.counts.connected + ' cabled', 'on') + pill(d.counts.empty + ' empty', 'off') + (d.counts.unknown ? pill(d.counts.unknown + ' not sure', 'na') : '') : pill('No port read', 'na')) + '</div>'
             + (d.problems.length ? '<ul class="fx-probs">' + probGroups(d.problems).map(function (p) { return '<li><b>' + esc(p.what) + (p.ports ? ', ports ' + p.ports : p.port ? ', port ' + p.port : '') + '</b> ' + esc(p.words) + '</li>'; }).join('') + '</ul>' : '')
-            + (d.ports.length ? cells(d.ports) : '') + '</div></section>';
+            + (d.ports.length ? '<span class="fx-eye fx-portsof">Ports of D' + d.index + '</span>' + cells(d.ports) + '<p class="fx-note fx-portsay" hidden></p>' : '') + '</div></section>';
         }).join('') + '</div>' : empty('No device was read on this rack', 'Scan the rack again with a slower pass.')));
       fitFigs(root());
       root().onclick = function (e) {
         var c = e.target.closest && e.target.closest('.ft-cell'); if (!c) return; var card = c.closest('.fx-card'), n = c.textContent.trim();
         [].forEach.call(card.querySelectorAll('.fx-box.hl'), function (b) { b.classList.remove('hl'); });
         var b = card.querySelector('.fx-box[data-n="' + n + '"]'); if (b) { void b.getBBox; b.classList.add('hl'); }
+        [].forEach.call(card.querySelectorAll('.ft-cell.chosen'), function (z) { z.classList.remove('chosen'); }); c.classList.add('chosen');
+        var say = card.querySelector('.fx-portsay'); if (say) { say.hidden = false; say.textContent = (c.title || '').replace(/^Port (\S+): /, 'Port $1 of D' + card.dataset.dev + ': ') + (b ? '. Outlined on the picture above.' : '. Not placed on the picture.'); }   // an empty port answers too (testers, 10 Nov 2026)
       };
     }).catch(fail);
   }

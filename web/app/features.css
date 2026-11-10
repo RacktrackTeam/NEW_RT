@@ -87,3 +87,14 @@
 .fp-dev { fill:rgba(255,255,255,.04); stroke:rgba(255,255,255,.75); stroke-width:1.5; } .fp-dev.fp-none { cursor:default; stroke-dasharray:4 4; stroke:rgba(255,255,255,.4); }
 .fp-dev.sel { fill:rgba(255,255,255,.28); stroke:#fff; stroke-width:4; }
 @media (max-width:760px) { .fp-top { grid-template-columns:1fr; gap:14px; } .fp-top .fx-rack img { max-height:55vh; } }
+
+/* The key to the port cells is drawn with the cells themselves; a tapped port answers under its card (testers, 10 Nov 2026) */
+.ft-keys { display:inline-flex; flex-wrap:wrap; gap:8px 18px; align-items:center; }
+.ft-key { display:inline-flex; align-items:center; gap:7px; font-size:13px; color:var(--t2); white-space:nowrap; }
+.fx-note .ft-keys { vertical-align:middle; }
+.fx-keybox { display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:#fff; }
+.fx-keynote { flex:1 1 100%; font-size:13px; color:var(--t2); }
+.fx-portsof { display:block; margin-top:4px; }
+.fx-card .ft-cell { cursor:pointer; }
+.fx-card .ft-cell.chosen { outline:2px solid #1f2a3a; outline-offset:2px; }
+.fx-portsay { margin:4px 0 0; color:#1f2a3a; font-weight:600; }
