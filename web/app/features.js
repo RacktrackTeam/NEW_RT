@@ -32,7 +32,7 @@
     return '<div class="ft-ids card"><span class="eyebrow">Serial and asset tag</span>'
       + (any ? rows.map(function (r) { return '<div class="ft-kv"><span>' + r[0] + '</span><b class="mono">' + (r[1] ? esc(r[1]) : '<em class="muted">not read</em>') + '</b></div>'; }).join('')
              : '<div class="ft-kv"><span>Serial, asset tag and labels</span><b class="mono"><em class="muted">not read</em></b></div>')
-      + (x.from ? '<p class="muted small">From a close photo' + (x.by ? ' taken by ' + esc(x.by) : '') + (x.when ? ', ' + esc(window.RTWHEN ? window.RTWHEN(x.when) : x.when) : '') + '.</p>' : '<p class="muted small">The video is too small to read them. Take a sharp photo of the device label, close up: a photo, not a video.</p>')
+      + (x.from ? '<p class="muted small">From a close photo' + (x.by ? ' taken by ' + esc(x.by) : '') + (x.when ? ', ' + esc(window.RTWHEN ? window.RTWHEN(x.when) : x.when) : '') + '.</p>' : '<p class="muted small">Not readable from the video. Take a close, sharp photo of the label.</p>')
       + '<label class="btn file"><input type="file" accept="image/*" capture="environment" class="ft-ids-in" data-dev="' + d.index + '" data-run="' + esc(run) + '" hidden><svg class="ic"><use href="#i-upload"/></svg>Take a close photo of the label</label><p class="muted small ft-ids-msg" hidden></p></div>';
   }
   document.addEventListener('change', function (e) {
@@ -51,7 +51,18 @@
   function nameBar(v) { var n = $('rnav'), r = v ? ((v.rack_id && v.rack_id.id) || v.title || '') : ''; if (n && v) n.dataset.rack = r;
     var t = $('topsub'); if (t && v && /^#tools\//.test(location.hash)) { t.textContent = r; t.hidden = !r; } if (window.RTTopbarHeight) requestAnimationFrame(window.RTTopbarHeight); return v; }   // the header may grow by a line: the tab row is placed under its real height (testers, 10 Nov 2026)
   // the key to the port cells, drawn with the cells themselves (testers, 10 Nov 2026: 'Filled number, Plain, Dashed' meant nothing)
-  function keyHtml() { return '<span class="ft-keys"><span class="ft-key"><span class="ft-cell on sw" aria-hidden="true"></span>Cable plugged in</span><span class="ft-key"><span class="ft-cell off sw" aria-hidden="true"></span>Empty</span><span class="ft-key"><span class="ft-cell na sw" aria-hidden="true"></span>Not sure</span></span>'; }   // plain swatches, no numbers: a numbered sample looked like a chosen port (the tester, 10 Nov 2026)
+  function keyHtml(tap) { var tag = tap ? 'button' : 'span'; return '<span class="ft-keys">' + [['on', 'Cable plugged in'], ['off', 'Empty'], ['na', 'Not sure']].map(function (k) { return '<' + tag + (tap ? ' type="button" data-key="' + k[0] + '"' : '') + ' class="ft-key"><span class="ft-cell ' + k[0] + ' sw" aria-hidden="true"></span>' + k[1] + '</' + tag + '>'; }).join('') + '</span>'; }   // on Connections each item is a button: it outlines every port in that state (the tester, 10 Nov 2026)
+  var KEY_MEAN = { on: 'a cable is plugged into the port', off: 'the port is empty', na: 'the reading could not tell whether a cable is in it' };
+  document.addEventListener('click', function (e) { var k = e.target.closest && e.target.closest('.fx-keybox .ft-key[data-key]'); if (!k) return;
+    var box = k.closest('.fx-keybox'), st = k.dataset.key, word = k.textContent.trim(), ans = box.querySelector('.fx-keyans');
+    [].forEach.call(box.querySelectorAll('.ft-key'), function (x) { x.classList.toggle('on2', x === k); });
+    [].forEach.call(document.querySelectorAll('.fx-card .ft-cell.khl'), function (c) { c.classList.remove('khl'); });
+    var cells = [].slice.call(document.querySelectorAll('.fx-card .ft-cell.' + st)); cells.forEach(function (c) { c.classList.add('khl'); });
+    ans.hidden = false;
+    if (!cells.length) { ans.innerHTML = '<b>' + esc(word) + '</b>: ' + KEY_MEAN[st] + '. No port on this rack is in this state.'; return; }
+    var card = cells[0].closest('.fx-card');
+    ans.innerHTML = '<b>' + esc(word) + '</b>: ' + KEY_MEAN[st] + '. ' + cells.length + (cells.length === 1 ? ' port' : ' ports') + ' on this rack, outlined on the cards below. <button type="button" class="link fx-keyeg">Show port ' + esc(cells[0].textContent.trim()) + ' of D' + esc(card.dataset.dev) + '</button>'; });
+  document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('.fx-keyeg'); if (!b) return; var c = document.querySelector('.fx-card .ft-cell.khl'); if (!c) return; c.scrollIntoView({ block: 'center' }); c.click(); });   // plain swatches, no numbers: a numbered sample looked like a chosen port (the tester, 10 Nov 2026)
   function view(run) { return VIEW[run] ? Promise.resolve(nameBar(VIEW[run])) : api('/api/video/' + encodeURIComponent(run) + '/view').then(function (v) { VIEW[run] = v; return nameBar(v); }); }
   function unitOf(d) { var a = parseInt(String(d.top).replace(/\D/g, ''), 10), b = parseInt(String(d.bottom).replace(/\D/g, ''), 10); return a === b ? 'U' + a : 'U' + Math.min(a, b) + '-' + Math.max(a, b); }
   function devLabel(d) { var L = d.layout || {}; return 'D' + d.index + ' · ' + unitOf(d) + ' · ' + (d.kind || (d.likely ? 'Not sure, likely ' + d.likely : 'Not sure')) + (L.vendor ? ' · ' + L.vendor + (L.model ? ' ' + L.model : '') : ''); }
@@ -125,12 +136,12 @@
         $('fp-port').disabled = !d; if (d) $('fp-dev').value = String(cur.dev);   // a device tapped on the rack picture shows in the picker too
         $('fp-grid').innerHTML = ports.map(function (p) { var st = p.status === 'connected' ? 'on' : p.status === 'empty' ? 'off' : 'na';
           return '<button type="button" class="ft-cell ' + st + (p.id === cur.port ? ' chosen' : '') + '" data-p="' + p.id + '" title="Port ' + p.id + ': ' + esc(stateWord(p.status)) + '" aria-pressed="' + (p.id === cur.port) + '">' + p.id + '</button>'; }).join('');
-        $('fp-hint').innerHTML = d && hasPorts(d) ? keyHtml() : d ? '' : 'Choose a device here or tap one on the rack picture.';
+        $('fp-hint').innerHTML = d && hasPorts(d) ? keyHtml() : d ? '' : 'Choose a device, or tap one on the picture.';
       }
       function show() {
         mark(); pickers();
         if (cur.dev) history.replaceState(null, '', '#tools/' + run + '/find/' + cur.dev + (cur.port ? '-' + cur.port : ''));
-        if (!(cur.dev && cur.port)) { out.innerHTML = cur.dev && !hasPorts(devOf(cur.dev)) ? '' : empty(cur.dev ? 'Choose a port' : 'Choose a device and a port', 'The port is marked on the picture, with the facts, right here.'); return; }
+        if (!(cur.dev && cur.port)) { out.innerHTML = ''; return; }   // no placeholder card: the line above says what to do (the tester, 10 Nov 2026)
         var my = ++seq; out.innerHTML = loading('Finding port ' + cur.port + '...');
         api('/api/video/' + encodeURIComponent(run) + '/find-port?device=' + cur.dev + '&port=' + cur.port).then(function (r) {
           if (my !== seq) return;
@@ -184,7 +195,7 @@
   function connections(run) {
     view(run).catch(function () { return null; });                      // the rack's name in the header
     api('/api/video/' + encodeURIComponent(run) + '/connections').then(function (r) {
-      root().innerHTML = shell('Connections', run, '<div class="fx-keybox"><span class="fx-eye">Key</span>' + keyHtml() + '<span class="fx-keynote">Each card below is one device; tap a port number on it to see that port.</span></div>'
+      root().innerHTML = shell('Connections', run, '<div class="fx-keybox"><span class="fx-eye">Key</span>' + keyHtml(true) + '<span class="fx-keynote">Tap a state to see where it is on this rack; tap a port on a card to see that port.</span><p class="fx-keyans" hidden></p></div>'
         + (r.devices.length ? '<div class="fx-grid">' + r.devices.map(function (d, i) {
           var boxes = d.ports.map(function (p) { return { box: p.box, n: p.n, cls: stCls(p.state), tip: 'Port ' + p.n + ': ' + stateWord(p.state) }; });
           var pic = d.cut && boxes.some(function (b) { return b.box; }) ? fig(fileUrl(run, d.cut), boxes) : '<figure class="fx-fig"><img src="/api/video/' + encodeURIComponent(run) + '/crop/' + d.index + '" alt=""></figure>';

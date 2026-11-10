@@ -15,8 +15,8 @@
 <link rel="preload" href="/app/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/app/app.css?v=128">
 <link rel="stylesheet" href="/app/rt/rt-topology.css?v=12">
-<link rel="stylesheet" href="/app/flow.css?v=22">
-<link rel="stylesheet" href="/app/features.css?v=8"><!-- wt/features -->
+<link rel="stylesheet" href="/app/flow.css?v=23">
+<link rel="stylesheet" href="/app/features.css?v=9"><!-- wt/features -->
 <link rel="stylesheet" href="/app/standard.css?v=12">
 <style>
 /* the Drift tab: the database the run is checked against, the matched record, the differences */
@@ -178,7 +178,7 @@
 
   <!-- home: the racks scanned and their state, one button -->
   <section class="screen" data-screen="home" hidden>
-    <div class="phead"><div><p class="eyebrow" id="greet-sub"></p><h1>Racks</h1><p class="muted">Each rack, when it was last read and its compare result. A scan that stopped is under Profile, My racks.</p></div>
+    <div class="phead"><div><p class="eyebrow web-only" id="greet-sub"></p><h1 class="web-only">Racks</h1><h1 class="phone-only">RackTrack</h1><p class="muted web-only">Each rack, when it was last read and its compare result.</p><p class="muted phone-only">Film a rack from top to bottom. Its units, devices and ports are read from the video; the results are under Profile, My racks.</p></div>
       <a class="btn primary big" href="#sweep"><svg class="ic"><use href="#n-camera"/></svg>Scan a rack</a></div>
     <a class="card nowcard" id="now-card" href="#" hidden><i class="sig live"></i><b id="now-title">Reading your rack</b><span class="mono muted small" id="now-step"></span></a>
     <div id="home-racks" class="racklist"><p class="muted">Loading...</p></div>
@@ -186,7 +186,7 @@
 
   <!-- history -->
   <section class="screen" data-screen="history" hidden>
-    <div class="phead"><div><h1>History</h1><p class="muted">Every rack read at your site (all sites of the organization for an admin), newest first.</p></div>
+    <div class="phead"><div><h1>History</h1><p class="muted">Every rack read, newest first.</p></div>
       <button class="btn ghost" id="hist-refresh" type="button"><svg class="ic"><use href="#i-refresh"/></svg><span>Refresh</span></button></div>
     <div id="hist" class="runs"><p class="muted">Loading…</p></div>
   </section>
@@ -197,19 +197,13 @@
     <div class="scanbody a2" id="sw-choices">
       <div class="upcard dropzone" id="dropzone" role="button" tabindex="0" aria-label="Pick a video">
         <div class="dz-idle choices" id="dz-idle">
-          <button class="choice rec" id="sw-camera" type="button"><span class="cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="13" height="12" rx="2"/><path d="m15.5 10.5 6-3.5v10l-6-3.5"/></svg></span><b>Record with the camera</b><small>Opens the camera guide: one slow pass, top to bottom</small></button>
-          <span class="choice up" id="sw-pickvideo"><span class="cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m-5 5 5-5 5 5M4 20h16"/></svg></span><b>Upload a video</b><small>A video already on this phone or computer, MP4 or MOV</small></span>
+          <button class="choice rec" id="sw-camera" type="button"><span class="cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="13" height="12" rx="2"/><path d="m15.5 10.5 6-3.5v10l-6-3.5"/></svg></span><b>Record with the camera</b><small>One slow pass, top to bottom</small></button>
+          <span class="choice up" id="sw-pickvideo"><span class="cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m-5 5 5-5 5 5M4 20h16"/></svg></span><b>Upload a video</b><small>MP4 or MOV from this phone or computer</small></span>
         </div>
         <div class="dz-pick" id="dz-pick" hidden><button class="link dzback" id="dz-back" type="button">‹ Back to Record or upload</button><video id="dz-video" muted playsinline preload="metadata"></video><div class="dz-meta"><b id="dz-name"></b><small id="dz-info"></small></div><div class="dz-acts"><button class="btn" id="dz-clear" type="button"><svg class="ic"><use href="#i-upload"/></svg>Choose another video</button></div></div>
       </div>
       <div class="scanfoot a3"><button class="btn primary big" id="vsend" type="button" disabled>Read the rack</button></div>
-      <details class="rules a3" id="sw-tips"><summary><span>How to film</span><span class="sumhint">3 rules</span></summary>
-        <ul class="rulelist">
-          <li><div><b>Hold the phone upright</b><small>The rack fills the picture</small></div></li>
-          <li><div><b>Keep both rails in view</b><small>Left and right rails inside the frame</small></div></li>
-          <li><div><b>Glide slowly, top to bottom</b><small>One pass, 20 to 60 seconds</small></div></li>
-        </ul>
-      </details>
+      <div class="filmrow a3" id="sw-tips"><span class="filmlab">How to film</span><ol class="filmsteps"><li><i>1</i><span>Hold the phone upright, the rack filling the picture</span></li><li><i>2</i><span>Keep both rails in view</span></li><li><i>3</i><span>One slow pass, top to bottom, 20 to 60 seconds</span></li></ol></div>
       <button id="sw-upload" type="button" hidden></button>
       <input type="file" id="vcam" accept="video/*" capture="environment" hidden>
       <input type="file" id="vfile" accept="video/*" hidden>
@@ -302,12 +296,6 @@
       <a class="grow" href="#copies"><svg class="ic"><use href="#i-history"/></svg><span>Database copies</span><em id="copies-count"></em><span class="arr"><svg class="ic"><use href="#i-next"/></svg></span></a>
       <a class="grow" href="#tools/site" id="site-pos" hidden><svg class="ic"><use href="#i-server"/></svg><span>Site position</span><em>Latitude, longitude</em><span class="arr"><svg class="ic"><use href="#i-next"/></svg></span></a><!-- wt/features -->
     </div>
-    <span class="glabel a3">RackTrack</span>
-    <div class="card group a3">
-      <a class="grow" href="#models"><svg class="ic"><use href="#i-chart"/></svg><span>How accurate it is</span><span class="arr"><svg class="ic"><use href="#i-next"/></svg></span></a>
-      <button class="grow" id="install-btn" type="button"><svg class="ic"><use href="#i-phone"/></svg><span>Install on the phone</span><em>How to</em><span class="arr"><svg class="ic"><use href="#i-next"/></svg></span></button>
-    </div>
-    <span class="glabel a4" id="install-label" hidden></span><div id="install-row" hidden></div>
     <span class="glabel a4" id="org-label" hidden>Organization</span>
     <div class="card group a4" id="org-links" hidden></div>
     <span class="glabel a4">Account</span>
@@ -315,19 +303,18 @@
       <div id="acct-settings" style="display:contents"></div>
       <button class="grow danger" id="signout" type="button"><svg class="ic"><use href="#i-out"/></svg><span>Sign out</span></button>
     </div>
-    <p class="muted small pfoot a4">RackTrack reads a rack from one video: its units, devices, makes, models and ports.</p>
   </section>
 
   <!-- the logins vault: NetBox and ServiceNow for this organization; secrets are kept encrypted and never shown again -->
   <section class="screen" data-screen="connections" hidden>
-    <div class="phead"><div><h1>Connections</h1><p class="muted">The logins RackTrack uses to copy your NetBox and ServiceNow records in. Passwords and tokens are kept encrypted and never shown again. With no login saved, the local test copy is used.</p></div></div>
+    <div class="phead"><div><h1>Connections</h1><p class="muted">The logins used to copy NetBox and ServiceNow records in. Passwords and tokens are stored encrypted.</p></div></div>
     <div id="cn-list" class="cnlist"></div>
   </section>
 
   <!-- every copy of a database read into ours (Excel, NetBox, CMDB): version, time, counts, the active one marked -->
   <section class="screen" data-screen="copies" hidden>
-    <div class="phead"><div><h1>Database copies</h1><p class="muted">Every time a workbook, NetBox or the CMDB is copied in, a new copy is kept. The newest copy of each rack is the one a result is compared with. Deleting a copy brings the one before it back.</p></div></div>
-    <div class="card" id="cp-in"><b>Copy a database in</b><p class="muted small">Read the manager's workbook (it is checked first, then Import), or copy NetBox or the ServiceNow CMDB in through the login under Connections (with no login, the local test copy). Each copy-in makes a new copy below.</p>
+    <div class="phead"><div><h1>Database copies</h1><p class="muted">Each copy-in keeps a new copy. A result is compared with the newest copy of its rack.</p></div></div>
+    <div class="card" id="cp-in"><b>Copy a database in</b><p class="muted small">Read the manager's workbook, or copy NetBox or the CMDB in with the login under Connections.</p>
       <div class="dfrow"><input type="file" id="df-file" accept=".xlsx" aria-label="The workbook to read"><button class="btn" type="button" id="df-xlsx">Read workbook</button><button class="btn" type="button" data-dfimp="netbox">Copy in from NetBox</button><button class="btn" type="button" data-dfimp="cmdb">Copy in from CMDB</button></div>
       <div id="df-report"></div></div>
     <div id="cp-list"></div>
@@ -340,10 +327,8 @@
       <div class="mrow"><div><b>Full or free</b><small>Whether a unit holds something</small></div><span class="acc">99.4 %</span></div>
       <div class="mrow"><div><b>Finding the devices</b><small>Where each device starts and ends</small></div><span class="acc">95.3 %</span></div>
       <div class="mrow"><div><b>Naming the type</b><small>Switch, router, patch panel and so on; a device is named only when two readings agree, else it is marked Not sure for a person to settle</small></div><span class="acc">99.2 %</span></div>
-      <div class="mrow"><div><b>Make and model</b><small>Read off the front panel</small></div><span class="acc na">not measured yet</span></div>
-      <div class="mrow"><div><b>Ports</b><small>Where each port is and whether a cable is in it</small></div><span class="acc na">not measured yet</span></div>
     </div>
-    <p class="muted small">Measured on our test photos of racks; a video of your own rack can score lower. "Not measured yet" means there is no test set for that step so far, so no number is claimed for it.</p>
+    <p class="muted small">Measured on our test photos of racks; a video of your own rack can score lower.</p>
   </section>
 </main>
 </div>
@@ -375,7 +360,7 @@
 <div id="lb" hidden><img id="lbimg" alt=""><span>tap to close</span></div>
 <script src="/app/topology.js?v=1"></script>
 <script src="/app/rt/rt-topology.js?v=13" defer></script>
-<script src="/app/app.js?v=172"></script>
-<script src="/app/features.js?v=14"></script><!-- wt/features -->
+<script src="/app/app.js?v=173"></script>
+<script src="/app/features.js?v=15"></script><!-- wt/features -->
 </body>
 </html>

@@ -239,3 +239,29 @@ app.js 172, features.js 14):
   the date one word per line). The header avatar is a ringed circle. The Details dropdown's hint ellipsizes instead of
   wrapping to two lines.
 - Proof: tests pass, tools/proof_result_tabs.py on every run, the wk2 screenshots.
+
+## State at 10 Nov, late (the tester's feedback document and the compact phone view)
+
+The tester sent "UI_Feedback_and_Reference_Images 1.docx" (7 points with her Android screenshots; the file sits in the repo
+root, untracked). The owner, the same night, after the mobile pass: the UI, alignment, fonts and spaces looked clumsy on
+Android and iOS, with information users do not need; Profile should not have Install on the phone or the accuracy page; Home
+should be a title, a subtitle and a button; the two Scan choices should look alike and appealing; How to film should look
+different. Built together (flow.css 23, features.css 9, app.js 173, features.js 15); page for her: "Fifth Round Fixes"
+(scratchpad tester6/build.py, her screenshot before and ours after on each point; URL in the session's final message).
+- Find a port: the dashed placeholder card is gone (fp-out stays empty until a device and a port are chosen); the hint line
+  is shorter; the picture at most 42vh (1, 6).
+- Connections key: keyHtml(true) renders each state as a button (data-key); a tap writes what the state means and how many
+  ports are in it, outlines them (.khl) and offers "Show port N of Dx", which scrolls to and clicks the first; no such port
+  says so (2).
+- The header's second line falls back to the run's title on the result tabs, as the tool tabs already did (3).
+- The accuracy page lost its two "not measured yet" rows and the explaining sentence (4); then the whole RackTrack group
+  (How accurate it is, Install on the phone) left Profile along with the three counters and the footer line (owner). The
+  #models screen still exists at its hash; the install handler is guarded for a page without the row.
+- How to film is a row of three numbered tiles (.filmrow/.filmsteps), no dropdown (7).
+- The compact phone view (max-width 760): mono labels become the app font in sentence case (eyebrow, glabel, fx-eye);
+  cards 14 px padding; Home on a phone (body:not(.web)) shows only RackTrack, one line and Scan a rack (#home-racks hidden;
+  .web-only / .phone-only spans in the Home head); the two Scan choices are one navy gradient card style with an icon tile and
+  a chevron; the rack ID question is a plain heading; every long explanatory sentence in index.html, app.js and features.js
+  cut to one line.
+- Proof: tests pass, every tab of every run (tools/proof_result_tabs.py), every screen shot on WebKit at iPhone size
+  (scratchpad mobile/shoot7.py, wk3) and on Chromium at 412 (cr3).
