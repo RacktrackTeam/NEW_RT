@@ -28,8 +28,10 @@
   function idsBlock(d, run) {
     var x = d.ids || {};
     var rows = [['Serial', x.serial], ['Asset tag', x.asset_tag], ['Labels read', (x.labels || []).join(', ')], ['Cable labels read', (x.cables || []).join(', ')]];
+    var any = rows.some(function (r) { return r[1]; });   // nothing read: one line instead of four rows of "not read" (mobile pass, 10 Nov 2026)
     return '<div class="ft-ids card"><span class="eyebrow">Serial and asset tag</span>'
-      + rows.map(function (r) { return '<div class="ft-kv"><span>' + r[0] + '</span><b class="mono">' + (r[1] ? esc(r[1]) : '<em class="muted">not read</em>') + '</b></div>'; }).join('')
+      + (any ? rows.map(function (r) { return '<div class="ft-kv"><span>' + r[0] + '</span><b class="mono">' + (r[1] ? esc(r[1]) : '<em class="muted">not read</em>') + '</b></div>'; }).join('')
+             : '<div class="ft-kv"><span>Serial, asset tag and labels</span><b class="mono"><em class="muted">not read</em></b></div>')
       + (x.from ? '<p class="muted small">From a close photo' + (x.by ? ' taken by ' + esc(x.by) : '') + (x.when ? ', ' + esc(window.RTWHEN ? window.RTWHEN(x.when) : x.when) : '') + '.</p>' : '<p class="muted small">The video is too small to read them. Take a sharp photo of the device label, close up: a photo, not a video.</p>')
       + '<label class="btn file"><input type="file" accept="image/*" capture="environment" class="ft-ids-in" data-dev="' + d.index + '" data-run="' + esc(run) + '" hidden><svg class="ic"><use href="#i-upload"/></svg>Take a close photo of the label</label><p class="muted small ft-ids-msg" hidden></p></div>';
   }

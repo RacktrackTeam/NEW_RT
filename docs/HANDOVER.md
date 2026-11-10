@@ -208,3 +208,34 @@ the session's final message and in the memory file). App script version 171; flo
 - Proof: scratchpad proof4/before.py and after.py (412 px at 2x, 360 px, 1280 px as techt), measure.py (the device row's
   overflow at 360: nav 236 px in a 184 px column, document 379 px wide; after: no overflow), tools/proof_result_tabs.py on every
   run, the 28 tests pass.
+
+## State at 10 Nov late night (the mobile pass: every screen on an iPhone)
+
+The owner's words after the fourth list: "go through all ui screens of mobile in simulator and test, the ui in mobile is
+horrible". Every screen and state was opened on Safari's engine (Playwright WebKit, iPhone 17 Pro viewport 402 x 874 at 3x,
+mobile user agent, touch) as techt and as orgownert: 62 screenshots each in scratchpad mobile/wk, the after pictures in
+mobile/wk2 (scripts shoot.py to shoot6.py). The native shell on the booted simulator (com.racktrack.sweep) still remembers an
+old server address (10.10.1.13:8600) and the engine listens on 127.0.0.1 only; changing the address there needs typing on the
+simulator, which is not done on this Mac, so the simulator's own Safari was opened at the sign-in only (simctl openurl) and
+every signed-in screen was tested on the same engine through Playwright. What was wrong and what changed (flow.css 22,
+app.js 172, features.js 14):
+- The result tab rows took 330 px of a 874 px screen (three rows of 38 px pills with 6 px gaps inside a padded bar). The
+  same three rows are 119 px now: 32 px cells, 4 px gaps, 12.5 px text.
+- A device or unit page: the rack locator was a column taller than the screen (height:auto, aspect ratio of the rack), the
+  facts beside it ended a third of the way down and the rest was white. On a phone the locator is a strip of at most 34vh
+  beside the facts (body:not(.web) #dv-one .loc).
+- The device page opened with four rows of "not read" (serial, asset tag, labels, cable labels) above the device's own
+  picture. When nothing was read the block is one line, and the block sits under the picture (idsBlock inserted after the
+  first figure in renderOne).
+- Home rows: the name was squeezed into a third of the width next to the chip and "None yet" sat under a chip that already
+  said Not compared yet. The row is name, chip, date; the compare source shows only when there is one; the Scan a rack
+  button spans the width; the lead is one sentence.
+- A stopped run showed an empty "The picture of the rack appears here" frame above seven stage rows with the reason at the
+  bottom. The reason now sits under the title and the frame is hidden when there is no picture.
+- The Rack tab's ID choices scrolled sideways off the screen; they stack now. The caption under the rack picture wraps
+  instead of cutting off. The Scan page's grey disabled Read the rack button under the two cards is hidden until a video is
+  chosen. The 2D layout drawing fills the width (svg.Ua width 100%). The Find a port picture is at most 42vh so the Device
+  box is in view. The Database copies Every copy table is one block per copy on a phone (the nine-column table had wrapped
+  the date one word per line). The header avatar is a ringed circle. The Details dropdown's hint ellipsizes instead of
+  wrapping to two lines.
+- Proof: tests pass, tools/proof_result_tabs.py on every run, the wk2 screenshots.

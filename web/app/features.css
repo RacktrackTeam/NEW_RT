@@ -105,3 +105,4 @@
 @media (max-width:760px) { .fp-top .fx-rack { margin:0 auto; } }
 .fx-page.fx-page { gap:12px !important; } .fx-title { margin:0; padding:0; }   /* doubled and important: standard.css, loaded last, sets the page gap with !important */
 .fp-pick > label { margin:0; } #fp-out { margin-top:0; }
+@media (max-width:760px) { .fp-top .fx-rack img { max-height:42vh; } }   /* the Device box stays in view under the picture on a phone */

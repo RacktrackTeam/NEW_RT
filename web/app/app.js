@@ -280,7 +280,7 @@
       var list = order.map(function (k) { var g = byRack[k].slice().sort(function (a, b) { return (b.started || '').localeCompare(a.started || '') || (b.record ? 1 : 0) - (a.record ? 1 : 0); }); g[0]._scans = g.length; return g[0]; });
       $('home-racks').innerHTML = list.length ? '<div class="rktable"><div class="rkhead"><span>Rack</span><span>Last read</span><span>Compared with</span><span>Result</span><span></span></div>' + list.map(function (x) {
         var href = (x.status === 'done' || x.partial) ? '#result/' + x.id : '#job/' + x.id, site = [me && me.role === 'owner' ? x.org_name : null, x.site_name].filter(Boolean).join(' · ') || (x.org == null && me && me.role === 'owner' ? 'From before sign-in' : '');
-        var rec = x.record ? esc(x.record.source) : '<span class="muted">None yet</span>';
+        var rec = x.record ? esc(x.record.source) : '<span class="muted none">None yet</span>';   // on a phone a row with no compare yet hides this cell: the chip already says Not compared yet
         var st = x.differences == null ? (x.partial ? ['grey', 'Ports still reading'] : ['grey', 'Not compared yet']) : x.differences ? ['bad', pl(x.differences, 'difference')] : ['ok', 'No differences'];
         return '<a class="rkrow2" href="' + href + '"><span class="c-rack"><b>' + esc(x.rack_id || x.title || x.name) + '</b>' + (site ? '<small>' + esc(site) + '</small>' : '') + '</span>'
           + '<span class="c-when">' + esc(when(x.started)) + (x._scans > 1 ? '<small>' + x._scans + ' scans</small>' : '') + '</span><span class="c-with">' + rec + '</span><span class="c-state"><span class="spill ' + st[0] + '">' + esc(st[1]) + '</span></span><svg class="ic chev"><use href="#i-next"/></svg></a>'; }).join('') + '</div>'
@@ -417,6 +417,8 @@
         $('run-leave').hidden = ready || failed;
         renderRun(j, id);
         $('job-err').hidden = !failed; $('job-err').textContent = j.error || 'The analysis failed.';
+        if (failed) { $('run-line').insertAdjacentElement('afterend', $('job-err')); $('run-pic').hidden = !shown; }   // a stopped run: the reason right under the title, no empty picture frame above seven stage rows (mobile pass, 10 Nov 2026)
+        else $('run-pic').hidden = false;
         $('job-open').hidden = !ready; $('job-open').href = '#result/' + id; $('job-retry').hidden = !failed;
         $('job-del').hidden = j.status === 'running' || !canRemoveRun();
         var files = j.files || [], pic = files.indexOf('rack.png') >= 0 ? '/api/video/' + id + '/file/rack.png' : (FIRST[id] || null);
@@ -1310,7 +1312,7 @@
       below += '<div class="rmdev"><button class="link rmbtn" type="button" data-dev="' + dv.index + '" data-top="' + dv.top + '">Not a device? Remove it</button><div class="rmask" hidden><p class="pline">Remove D' + dv.index + '? Its units (' + URANGE(dv.top, dv.bottom, dv.height) + ') are then marked free, and the devices below it move up one number. If something else sits there, open that unit afterwards and mark it in use or add the device.</p><div class="dfrow"><button class="btn danger rmyes" type="button" data-dev="' + dv.index + '" data-top="' + dv.top + '">Remove D' + dv.index + '</button><button class="btn rmno" type="button">Keep it</button></div></div></div>';   // a box that is no device (user, 2026-10-27: 'there is no D6'); one plain question, no timer (testers, 10 Nov 2026)
       RES.zoom = { html: '<img class="zimg" id="dv-crop" alt="D' + dv.index + '">', title: 'D' + dv.index + (mm ? ' · ' + esc(mm) : ''), dev: dv };
     }
-    if (!isUnit && window.RTFEAT) below = window.RTFEAT.idsBlock(devs[at], RES.id) + below;     // wt/features: serial and asset tag from a close-up
+    if (!isUnit && window.RTFEAT) { var ids = window.RTFEAT.idsBlock(devs[at], RES.id), cut = below.indexOf('</figure>'); below = cut >= 0 ? below.slice(0, cut + 9) + ids + below.slice(cut + 9) : ids + below; }     // wt/features: serial and asset tag from a close-up, under the device's own picture (mobile pass, 10 Nov 2026: the picture had sat below a block of not-read rows)
     $('res-dev').innerHTML = (navTop || '') + '<div class="dvwrap">' + loc + '<div class="dvinfo">' + info + '</div></div><div class="dvbelow">' + below + '</div>';
     renderDevSide();
     var cine = $('cine'); if (cine) setTimeout(function () { cine.classList.add('play'); }, 350);

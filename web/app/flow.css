@@ -477,3 +477,52 @@ details.rules summary::after, .dvmore > summary::after { border-color:#1f2a3a; b
 .dvmore > summary::after, details.rules summary::after, summary.link::after, details.card > summary::after, .idhow > summary::after { flex:none; }
 /* 4: on a narrow phone the tab cells keep their words whole */
 @media (max-width:380px) { body.tabbed #rnav .pill a { padding:0 4px; gap:4px; font-size:11.5px; } body.tabbed #rnav .pill a span { font-size:11.5px; } }
+
+/* ---- the mobile pass of 10 Nov 2026 night: every screen looked at on an iPhone-sized WebKit; the chrome shrinks, the content fills the width ---- */
+@media (max-width:760px) {
+  /* the result tabs: the same three rows, a third of the height they took (116 px instead of 330) */
+  body.tabbed #rnav .pill { gap:4px; padding:6px 8px; }
+  body.tabbed #rnav .pill a { height:32px; font-size:12.5px; padding:0 6px; gap:5px; border-radius:8px; font-weight:600; }
+  body.tabbed #rnav .pill a span { font-size:12.5px; } body.tabbed #rnav .pill a .ic { width:15px; height:15px; }
+  /* Home: the Scan button spans the width, a row with no compare yet does not say None yet under a chip that already says so */
+  body:not(.web) .screen[data-screen="home"] .phead > a.btn { width:100% !important; justify-content:center; }
+  .rkrow2 .c-with .none { display:none; } .rkrow2 .c-with:has(.none) { display:none; }
+  .rkrow2 .c-with { grid-area:with; justify-self:end; font-size:13px; } .rkrow2 .c-with::before { content:"Compared with "; }
+  /* the rack ID choices stack, nothing scrolls off the edge */
+  body:not(.web) .rkopts { flex-wrap:wrap; overflow:visible; } body:not(.web) .rkopt { flex:1 1 100%; max-width:none; }
+  /* the Layout drawing fills the width; the legend's label has its own line */
+  body.tabbed .rteos .fr svg.Ua { width:100% !important; height:auto !important; }
+  .elegend .elk { flex:1 1 100%; }
+}
+/* the avatar in the header is a ringed circle, not a bare letter */
+#who.avatar { width:36px; height:36px; background:#eef0f3 !important; border:1px solid #cfd6df !important; color:#1f2a3a; }
+/* a device or unit on a phone: the rack locator is a short strip beside the facts, not a column taller than the screen */
+@media (max-width:999px) {
+  body:not(.web) #dv-one .dvwrap { grid-template-columns:minmax(76px, 24%) 1fr; gap:14px; }
+  body:not(.web) #dv-one .loc { height:min(34vh, 300px) !important; aspect-ratio:auto !important; width:auto; }
+  .dvmore > summary > span:first-child { flex:none; } .dvmore > summary .sumhint { flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; }
+}
+@media (max-width:760px) {
+  /* Home rows: the name has the width, the chip sits under it, the date last */
+  .rkrow2 { grid-template-columns:minmax(0,1fr) 28px; grid-template-areas:"rack chev" "state state" "when when"; gap:4px 12px; align-items:center; }
+  .rkrow2 .c-state { justify-self:start; } .rkrow2 .c-when { margin-top:2px; }
+  .rkrow2 .c-with { grid-area:when; justify-self:end; align-self:center; }
+  /* Scan: the Read the rack button appears once a video is chosen; a grey disabled one under the two cards asked a question it could not answer */
+  .scanfoot .btn:disabled { display:none; } .dropzone.picked ~ .scanfoot .btn:disabled { display:inline-flex; }
+}
+@media (max-width:600px) {
+  /* Database copies, Every copy, on a phone: one block per copy (the nine-column table had wrapped the date one word per line) */
+  .cptable thead { display:none; }
+  .cptable tbody tr { display:flex; flex-wrap:wrap; align-items:center; gap:6px 12px; padding:12px 14px; border-top:1px solid var(--line); }
+  .cptable tbody tr:first-child { border-top:0; }
+  .cptable td { display:block; padding:0 !important; border:0 !important; background:none !important; }
+  .cptable td.wide, .cptable td:nth-child(4) { display:none !important; }
+  .cptable td:first-child { flex:1 1 100%; } .cptable td:first-child b { display:block; font-size:15px; }
+  .cptable .cpwhen > span { display:inline !important; white-space:nowrap !important; } .cptable .cpwhen > span + span::before { content:"\00a0\00b7\00a0"; }   /* important: standard.css, loaded last, stacks them */
+  .cptable td.cpn::after { content:" devices"; color:var(--t2); font-size:13px; }
+  .cptable td:last-child { margin-left:auto; }
+}
+@media (max-width:760px) {
+  /* the caption under the rack picture wraps instead of cutting off */
+  .caprow .laycap { white-space:normal !important; overflow:visible !important; text-overflow:clip !important; line-height:1.3; }
+}
