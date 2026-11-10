@@ -98,6 +98,12 @@ Plain English and the plain hyphen on every screen, white light theme, full devi
 The screens sign in against the sign-in service on the same host, so one public address must carry both the engine and
 the service. `tools/front.js` is that door: `node tools/front.js` listens on 127.0.0.1:8710, sends the sign-in and
 organization paths to 3302 and everything else to 8700, and answers `/api/auth-service` with the public address itself.
-Then open a tunnel to 8710 (`~/bin/ngrok http 8710`) and give testers the https address it prints, with the Test
+After a reboot of this Mac everything comes up by itself once the login item is installed (one command, once:
+`cp tools/ai.racktrack.boot.plist ~/Library/LaunchAgents/ && launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/ai.racktrack.boot.plist`):
+the login item `~/Library/LaunchAgents/ai.racktrack.boot.plist` runs
+`tools/boot.sh`, which waits for the volume, runs `./start.sh`, starts the front door on 8710 and the tunnel to it, each only
+when it is not already answering (`tools/boot.sh` by hand does the same; `tools/boot.sh tunnel` the tunnel only; the log is
+data/logs/boot.log). Turn it off with `launchctl bootout gui/$(id -u)/ai.racktrack.boot` and remove the plist.
+By hand instead: open a tunnel to 8710 (`~/bin/ngrok http 8710`) and give testers the https address it prints, with the Test
 Organization accounts from docs/AUTH.md. Stop the door and the tunnel by their pids in data/pids (front.pid, ngrok.pid).
 A free ngrok address shows a "Visit Site" page once per browser before the app.
