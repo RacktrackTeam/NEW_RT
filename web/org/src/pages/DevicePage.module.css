@@ -1,0 +1,84 @@
+.grid {
+  display: block;
+  animation: rise 220ms ease-out both;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grid { animation: none; }
+}
+
+.crop {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+  margin-bottom: var(--s4);
+  object-fit: contain;
+  border-radius: var(--r);
+  background: var(--photo);
+}
+
+.left > section > dl,
+.left > section > ul,
+.left > section > p {
+  padding: 4px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: #fff;
+}
+
+.left > section > p {
+  padding: 12px 16px;
+}
+
+.right {
+  margin-top: var(--s4);
+}
+
+.more {
+  margin-top: var(--s3);
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: var(--s12);
+    align-items: start;
+  }
+
+  .right {
+    margin-top: 0;
+  }
+}
+
+.lead {
+  margin-bottom: var(--s4);
+  color: var(--grey);
+}
+
+.fixLine {
+  margin: 0 0 var(--s4);
+  text-align: right;
+}
+
+.helpLink {
+  margin-top: var(--s2);
+}
+
+.src {
+  color: var(--grey);
+  font-size: 13px;
+}
+
+/* The device's two next steps. */
+.actions { margin-top: var(--s4); }
+
+/* 16 between the facts and the folded sections under them. */
+.left > section + * {
+  margin-top: var(--s4);
+}

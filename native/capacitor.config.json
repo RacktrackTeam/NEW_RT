@@ -1,0 +1,32 @@
+{
+  "appId": "com.racktrack.sweep",
+  "appName": "RackTrack",
+  "webDir": "www",
+  "backgroundColor": "#ffffff",
+  "appendUserAgent": "RackTrackSweep/1.0",
+  "server": {
+    "allowNavigation": [
+      "*"
+    ],
+    "cleartext": true
+  },
+  "ios": {
+    "contentInset": "never",
+    "limitsNavigationsToAppBoundDomains": false
+  },
+  "android": {
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 600,
+      "backgroundColor": "#ffffff",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#ffffff",
+      "overlaysWebView": true
+    }
+  }
+}

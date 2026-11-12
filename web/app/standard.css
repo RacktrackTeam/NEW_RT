@@ -1,0 +1,114 @@
+/* RackTrack screen standard (docs/design/STANDARD.md): loaded last; where things sit and how they look, never what a screen holds. */
+:root { --s1:8px; --s2:16px; --s3:24px; --s4:32px; --std-line:#e3e7ec; --std-ink:#1f2a3a; --std-gutter:16px; }
+@media (min-width:1000px) { :root { --std-gutter:32px; } }
+
+/* one gutter, full width, one gap between blocks */
+body.signed main { width:100% !important; max-width:none !important; box-sizing:border-box; padding-left:var(--std-gutter) !important; padding-right:var(--std-gutter) !important; }   /* one gutter each side: an older 90 % / 95 % width left 83 px on the right */
+body.signed .screen { max-width:none !important; gap:var(--s3) !important; }
+
+/* page header: title left, primary action right on the same line, the lead under the title */
+.phead, .swh { display:flex; align-items:flex-start; justify-content:space-between; gap:var(--s2); flex-wrap:wrap; padding:0 !important; margin:0 !important; }
+.phead > div, .swh { min-width:0; }
+.phead h1, .swh h1, .fx-title h1, .screen > h1 { font-size:24px !important; font-weight:600 !important; line-height:32px !important; letter-spacing:-.01em; margin:0 !important; color:#111; text-align:left !important; }
+.phead p.muted, .swh p.muted { font-size:14px; line-height:20px; margin:var(--s1) 0 0 !important; }
+.phead > .btn, .phead > a.btn { margin-left:auto; flex:none; }
+.fx-page { gap:var(--s3) !important; padding:0 !important; } .fx-title { margin:0 !important; }
+
+/* buttons: 40 px, 8 px radius; primary filled, secondary outline */
+.btn, .btn.big, .btn.mini, .btn.ghost, .btn.danger, button.btn, a.btn, .btn.mini.ink { min-height:40px !important; height:40px; padding:0 var(--s2) !important; border-radius:8px !important; font-size:14px !important; font-weight:600 !important; letter-spacing:0 !important; box-shadow:none !important; border:1px solid #cfd6df !important; background:#fff !important; color:#111 !important; }
+.btn.primary, .btn.mini.ink, .btn.primary.big { background:var(--std-ink) !important; border-color:var(--std-ink) !important; color:#fff !important; }
+.btn.danger { color:#b3261e !important; border-color:#e4b9b5 !important; }
+.btn:disabled { opacity:.45; }
+.btn.block { width:100%; }
+.ft-btns, .fx-acts, .dfrow:has(> .btn.primary) { justify-content:flex-end; }
+
+/* back links: top left, text link */
+#back, .cmpback { font-size:14px; font-weight:600; }
+
+/* cards: one border, one radius, one padding */
+.card, .run, .li, .kpirow, .film, .repbox, .choice, .fx-card, .upcard { background:#fff !important; border:1px solid var(--std-line) !important; border-radius:8px !important; box-shadow:none !important; padding:var(--s2); }
+.card.flush, .fx-card { padding:0 !important; }
+.card.group, .card.mtable { padding:0 !important; }
+
+/* pills: one size */
+.fx-pill, .acc, .chip, .idconf, .fchip { display:inline-flex; align-items:center; min-height:24px; height:24px; padding:0 10px !important; border-radius:999px; font-size:12px !important; font-weight:600; line-height:1; }
+.fchip { gap:4px; }                       /* a flex pill drops the space between "2U" and the units; the gap puts it back */
+
+/* tables: one header style */
+table th, .dftable th, .wbtable th { font-size:12px !important; font-weight:600 !important; color:#5b6573 !important; background:#f6f7f9 !important; text-transform:none !important; letter-spacing:0 !important; padding:12px var(--s2) !important; text-align:left; }
+table td, .dftable td { font-size:14px; padding:12px var(--s2) !important; border-top:1px solid var(--std-line); }
+
+/* the status line under an action */
+.cmpstatus { margin:var(--s1) 0 0; }
+@media (max-width:999px) { .phead > .btn, .phead > a.btn { margin-left:0; align-self:flex-end; } }
+
+/* the primary action is always at the right of its block: it comes last, so it is the right-most button */
+.runact, .dfrow.idbtns { width:100%; display:flex; flex-direction:row-reverse; justify-content:flex-start; flex-wrap:wrap; gap:var(--s1); }
+.swh { display:block !important; }
+.swh p.muted { margin-top:var(--s1) !important; }
+
+/* Side bar: the role and the site each on a line of their own, never broken mid-way (verify pass 2, finding 9) */
+.side .brand small span { display: block; white-space: nowrap; line-height: 1.35; }
+
+/* Report > Devices, top to bottom, on a phone: one row per device as a small grid (unit, then the device and its make), so no
+   word is broken mid-way and no unit range is cut (verify pass 2, finding 22) */
+@media (max-width:700px) {
+  .rptable thead { display:none; }
+  .rptable, .rptable tbody { display:block; width:100%; }
+  .rptable tr { display:grid; grid-template-columns:64px minmax(0, 1fr); column-gap:var(--s1); row-gap:4px; padding:12px var(--s2); border-top:1px solid var(--std-line); }
+  .rptable tr:first-child { border-top:0; }
+  .rptable td { display:block; padding:0 !important; border:0 !important; text-align:left !important; word-break:normal !important; overflow-wrap:break-word; white-space:normal; }
+  .rptable td:nth-child(3) { grid-column:2; }
+  .rptable td .kd { display:inline; margin-left:6px; }
+  .rptable td.mono { white-space:nowrap; }
+}
+
+/* Database copies on a phone: the source name never broken mid-word, the version and the date each on one line (finding 23) */
+.cptable td b { word-break:normal !important; overflow-wrap:normal !important; hyphens:none; }
+.cptable .cpwhen > span { display:block; white-space:nowrap; }
+.cptable .cpwhen > span + span { white-space:normal; }            /* the date may take two lines; the table never runs past the screen */
+
+/* The primary action at the right of its block, the secondary ones before it (finding 24) */
+.scanfoot { display:flex; justify-content:flex-end; }
+.runact { justify-content:flex-end; }
+.runact .btn { flex:0 0 auto !important; }
+.oneacts { display:flex; justify-content:flex-end; gap:var(--s1); flex-wrap:wrap; }
+.up.slim { display:flex; flex-direction:column; align-items:flex-end; }
+@media (max-width:999px) { .phead > .btn, .phead > a.btn { width:auto !important; flex:0 0 auto !important; } }
+
+/* Pickers on the tool screens stay inside the 16 px gutter on a phone (finding 29) */
+.fx-page select, .fx-page input, .fx-page label { box-sizing:border-box; max-width:100%; }
+.fx-page label > select { margin-left:0 !important; width:100% !important; min-width:0; }
+
+/* Rack tab, the device list beside the picture: the kind on its own line under the device number, never cut (finding 25) */
+.sidelist .srow { display:grid !important; grid-template-columns:62px minmax(0, 1fr) auto; column-gap:var(--s1); row-gap:2px; align-items:center; }
+.sidelist .srow .iu { grid-column:1; grid-row:1 / span 2; }
+.sidelist .srow b { grid-column:2; grid-row:1; }
+.sidelist .srow .sk { grid-column:2; grid-row:2; white-space:normal !important; overflow:visible !important; text-overflow:clip !important; }
+.sidelist .srow .sp { grid-column:3; grid-row:1 / span 2; }
+
+/* Confirm panel, the rack label crop on a phone: shown at a readable height, scrolling sideways, not a thin strip (finding 26) */
+@media (max-width:700px) {
+  .lblstrip { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .lblstrip img { height:96px !important; width:auto !important; max-width:none !important; display:block; }
+}
+
+/* Sign in: Forgot password and Contact us centred under the form at every width (finding 37) */
+.auth.signin .si-links { width:100% !important; max-width:none !important; align-self:stretch !important; box-sizing:border-box; }   /* .auth > p caps paragraphs at 34ch */
+
+/* Devices list: the state pill under the title, so a long make and model read off a panel has the row's width and is never
+   broken one letter per line (verify pass 2 follow-up on finding 8) */
+#dv-list .prow { display:grid !important; grid-template-columns:64px minmax(0, 1fr) 16px; column-gap:var(--s2); row-gap:4px; align-items:center; }
+#dv-list .prow .pthumb { grid-column:1; grid-row:1 / span 2; }
+#dv-list .prow .pt { grid-column:2; grid-row:1; }
+#dv-list .prow .pt b { overflow-wrap:anywhere; word-break:normal; }
+#dv-list .prow .stat { grid-column:2; grid-row:2; justify-self:start; }
+#dv-list .prow .arr { grid-column:3; grid-row:1 / span 2; }
+#dv-list .prow .iu { grid-column:1; grid-row:1 / span 2; }
+
+/* On a phone the screen's primary action drops under the title, still at the right (STANDARD.md, Page header) */
+@media (max-width:999px) {
+  .phead { display:flex !important; flex-direction:column !important; align-items:stretch !important; justify-content:flex-start !important; height:auto !important; }
+  .phead > div { flex:0 0 auto !important; }
+  .phead > .btn, .phead > a.btn { align-self:flex-end !important; margin-left:auto !important; }
+}

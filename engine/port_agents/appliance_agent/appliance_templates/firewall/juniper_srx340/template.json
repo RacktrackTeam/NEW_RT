@@ -1,0 +1,257 @@
+{
+ "vendor": "Juniper",
+ "model": "SRX340",
+ "device": "firewall",
+ "description": "",
+ "summary": "9x RJ45 | 8x SFP | 1 named port type(s): Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.juniper.net/documentation/us/en/quick-start/srx340/srx340-quick-start.pdf#page2-img317",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1787,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   455,
+   40,
+   640,
+   98
+  ]
+ ],
+ "ports": [
+  {
+   "id": "Mgmt",
+   "type": "management_port",
+   "poe": null,
+   "box": [
+    470,
+    56,
+    76,
+    67
+   ],
+   "name": "MGMT"
+  },
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    557,
+    56,
+    70,
+    65
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    624,
+    56,
+    67,
+    63
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    690,
+    57,
+    67,
+    62
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    754,
+    58,
+    66,
+    60
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    819,
+    56,
+    66,
+    62
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    884,
+    55,
+    66,
+    63
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    948,
+    56,
+    66,
+    62
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1014,
+    57,
+    67,
+    62
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1089,
+    70,
+    66,
+    52
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1154,
+    71,
+    61,
+    52
+   ]
+  },
+  {
+   "id": 11,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1212,
+    71,
+    60,
+    52
+   ]
+  },
+  {
+   "id": 12,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1270,
+    71,
+    67,
+    53
+   ]
+  },
+  {
+   "id": 13,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1438,
+    69,
+    64,
+    53
+   ]
+  },
+  {
+   "id": 14,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1500,
+    69,
+    61,
+    53
+   ]
+  },
+  {
+   "id": 15,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1558,
+    69,
+    62,
+    53
+   ]
+  },
+  {
+   "id": 16,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1616,
+    69,
+    66,
+    54
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    338,
+    62,
+    77,
+    60
+   ],
+   "name": "CONSOLE"
+  }
+ ],
+ "labels_read": [
+  "CONSOLE",
+  "MGMT"
+ ],
+ "chassis_votes": {
+  "Mgmt": 4,
+  "1": 4,
+  "2": 4,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "7": 4,
+  "8": 4,
+  "9": 4,
+  "10": 4,
+  "11": 4,
+  "12": 4,
+  "13": 4,
+  "14": 4,
+  "15": 4,
+  "16": 4,
+  "Console": 4
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.944,
+ "saved_label": "official/vendor data sheet srx340-quick-start.pdf p2",
+ "saved_at": "2026-10-19 16:43"
+}

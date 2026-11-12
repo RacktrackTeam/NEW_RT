@@ -1,0 +1,22 @@
+{
+  "models": {
+    "devices_seg": "Models/device_finder.pt",
+    "units": "Models/rack_unit_finder.pt",
+    "ports_typed": "Models/port_type_finder.pt",
+    "ports_status": "Models/port_connected_or_empty.pt",
+    "sfp_type": "pipeline/sfp_type_v2.json",
+    "pdu_ports": "Models/pdu_outlet_finder.pt",
+    "cable_classifier": "Models/cable_type_and_colour",
+    "cap_classifier": "Models/dust_cap_classifier.pth"
+  },
+  "detection": {
+    "device_detect_mode": "seg",
+    "units_conf": 0.25,
+    "devices_conf": 0.2,
+    "server_conf": 0.25,
+    "iou_dedup": 0.5,
+    "ports_conf": 0.23,
+    "sfp_conf": 0.3,
+    "pdu_conf": 0.4
+  }
+}

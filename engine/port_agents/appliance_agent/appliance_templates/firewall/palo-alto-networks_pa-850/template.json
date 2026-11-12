@@ -1,0 +1,266 @@
+{
+ "vendor": "Palo Alto Networks",
+ "model": "PA-850",
+ "device": "firewall",
+ "description": "",
+ "summary": "6x RJ45 | 11x SFP | 2 named port type(s): USB, Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.enbitcon.fr/media/c7/1e/21/1671722513/pa850-front.png?ts=1671722513",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1480,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   166,
+   31,
+   455,
+   117
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    178,
+    44,
+    51,
+    44
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    177,
+    90,
+    52,
+    45
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    228,
+    44,
+    50,
+    43
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    228,
+    91,
+    51,
+    45
+   ]
+  },
+  {
+   "id": 5,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    302,
+    43,
+    51,
+    44
+   ]
+  },
+  {
+   "id": 6,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    300,
+    91,
+    54,
+    48
+   ]
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    352,
+    44,
+    53,
+    44
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    352,
+    92,
+    54,
+    47
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    430,
+    42,
+    52,
+    45
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    428,
+    92,
+    55,
+    47
+   ]
+  },
+  {
+   "id": 11,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    480,
+    43,
+    53,
+    46
+   ]
+  },
+  {
+   "id": 12,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    480,
+    92,
+    54,
+    47
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    555,
+    42,
+    56,
+    45
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    553,
+    90,
+    58,
+    48
+   ]
+  },
+  {
+   "id": 15,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1218,
+    61,
+    29,
+    39
+   ]
+  },
+  {
+   "id": 16,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1246,
+    60,
+    32,
+    39
+   ]
+  },
+  {
+   "id": 17,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1278,
+    58,
+    34,
+    42
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    710,
+    78,
+    30,
+    60
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    634,
+    42,
+    58,
+    44
+   ]
+  }
+ ],
+ "labels_read": [
+  "P"
+ ],
+ "chassis_votes": {
+  "1": 4,
+  "2": 4,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "7": 4,
+  "8": 4,
+  "9": 4,
+  "10": 4,
+  "11": 4,
+  "12": 4,
+  "13": 4,
+  "14": 3,
+  "15": 0,
+  "16": 0,
+  "17": 0,
+  "USB": 4,
+  "Console": 4
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.851,
+ "saved_label": "template agent (internet/image_search)",
+ "saved_at": "2026-10-22 20:45"
+}

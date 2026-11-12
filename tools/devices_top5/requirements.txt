@@ -1,0 +1,9 @@
+torch>=2.5
+torchvision>=0.20
+ultralytics==8.4.123
+opencv-python>=4.10,<5
+numpy>=2,<3
+pillow>=10
+scipy>=1.10
+PyYAML>=6
+faster-coco-eval>=1.6.7

@@ -1,0 +1,631 @@
+/* Copied from RackTrack's AuthPages.module.css so the reset password, invite
+   and social sign-in landing screens are the same as RackTrack's. Adapted for
+   RT-EOS in three places only: the type tokens are declared on .authPage, the
+   field look RackTrack sets in its index.css under #root.rt-auth-wide is
+   written here on .input and .codeCell, and the #root.rt-auth-wide prefixes
+   are dropped because RT-EOS's #root has no width cap to lift. */
+
+/* ══ Auth pages ═══════════════════════════════════════════════════════
+   Footage of a real hall on the left, the form on plain white to the
+   right of a hard edge. Nothing here is decoration: the only shapes on the
+   right side are lines of type, hairline field borders and one filled
+   button.
+
+     < 768px     the form alone, full bleed
+     ≥ 768px     the form gains a measure and centres
+     ≥ 1024px    57 / 43 split
+
+   Class names avoid the substrings the depth-enforcement layer in index.css
+   matches on - panel, card, tile, surface. A class called `.panel` here was
+   handed --lift and a raised fill, which is where the stray white boxes
+   behind the back arrow and the top-right link came from. The field
+   appearance itself is handed back to these pages in index.css, under
+   `#root.rt-auth-wide`; the two files have to agree, so the tokens below are
+   the ones that rule reads. */
+
+.authPage {
+  --rt-auth-ink:  #1a1d21;   /* headings, the filled action, a focused border */
+  --rt-auth-line: #e1e3e6;   /* every hairline, including field borders */
+
+  /* The width of the content block on the form side. On a phone it is the
+     screen; on a laptop it is widened at the 1024px breakpoint so the form
+     carries its half of the page instead of floating in it. */
+  --measure: 420px;
+
+  --ink:  var(--rt-auth-ink);
+  --body: #6b7075;           /* labels, secondary copy */
+  --dim:  #9ba1a7;           /* footnotes, placeholders */
+  --line: var(--rt-auth-line);
+
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex; flex-direction: column;
+  background: transparent;
+  color: var(--ink);
+  overflow-x: hidden;
+  font-family: var(--font);
+  letter-spacing: -0.006em;
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  --fs-page: 22px;
+  --fs-head: 18px;
+  --fs-section: 15px;
+  --fs-item: 14px;
+  --fs-body: 13px;
+  --fs-sub: 12px;
+  --fw-body: 400;
+  --fw-label: 600;
+  --fw-title: 700;
+}
+
+/* ══ The footage ═══════════════════════════════════════════════════════
+   Hidden below 1024px, where the form already fills the screen and a moving
+   picture would only sit behind the keyboard. AuthLayout checks the same
+   1024px line in JS and doesn't render the <video> at all below it, so a
+   phone never downloads a frame of it. */
+.media { display: none; }
+
+/* ══ The form side ═════════════════════════════════════════════════════ */
+.formSide {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  display: flex; flex-direction: column;
+  background: transparent;
+}
+
+/* Top line - a back arrow and one contextual link, both type-weight. */
+.topBar {
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px 22px 0;
+  min-height: 40px;
+}
+.backArrow {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  margin-left: -7px;
+  display: grid; place-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--body);
+  cursor: pointer;
+  transition: color .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.backArrow:hover { color: var(--ink); }
+
+.asideNote {
+  margin-left: auto;
+  display: flex; align-items: baseline; gap: 6px;
+  font-size: var(--fs-body);
+  color: var(--body);
+}
+/* Below 420px the sentence and the link together crowd a narrow phone;
+   the link alone still says where it goes. */
+.asideText { display: none; }
+.asideLink {
+  background: none; border: 0; padding: 0;
+  font-family: inherit; font-size: var(--fs-body); font-weight: var(--fw-label);
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .15s;
+}
+.asideLink:hover { color: #000000; text-decoration: underline; text-underline-offset: 3px; }
+
+/* Sign-up progress - two rules, the live one longer and inked. */
+.stepDots { display: flex; align-items: center; gap: 5px; margin-left: auto; }
+.stepDot {
+  width: 16px; height: 2px;
+  background: var(--line);
+  transition: background .25s, width .25s;
+}
+.stepDotActive { width: 26px; background: var(--ink); }
+.stepDotDone   { background: #c4c8cc; }
+
+.formScroll {
+  flex: 1;
+  min-height: 0;
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ══ The measure ═══════════════════════════════════════════════════════
+   One number, used by the top bar and the form alike, so the two share a left
+   and a right edge at every width. */
+.authShell {
+  position: relative;
+  flex: 1;
+  display: flex; flex-direction: column;
+  justify-content: safe center;
+  padding: 14px 22px 20px;
+  max-width: var(--measure); width: 100%;
+  margin: 0 auto;
+}
+
+/* Brand lockup - lives in the top bar, and is the stand-in for the mark on
+   the photograph at widths where there is no photograph. */
+.brand {
+  display: flex; align-items: center; gap: 8px;
+  min-width: 0;
+}
+.brandMark { flex-shrink: 0; width: 22px; height: 22px; border-radius: 5px; object-fit: cover; }
+.brandName {
+  font-size: var(--fs-item); font-weight: var(--fw-label);
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* ── Headline ─────────────────────────────────────────────────────────
+   Sized to lead the form, not to shout over it. */
+.heading {
+  margin: 0 0 6px;
+  font-size: 1.5rem;
+  font-weight: var(--fw-label);
+  letter-spacing: -0.024em;
+  line-height: 1.2;
+  color: var(--ink);
+}
+.subheading {
+  margin: 0 0 22px;
+  font-size: var(--fs-section);
+  line-height: 1.5;
+  color: var(--body);
+  font-weight: var(--fw-body);
+}
+
+/* ── Form ── */
+.form { display: flex; flex-direction: column; gap: 14px; }
+
+.field { position: relative; }
+
+/* Label left, an optional inline action right - puts "Forgot password?" on
+   a line that already exists instead of buying it a row of its own. */
+.labelRow {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.label {
+  display: block;
+  font-size: var(--fs-body);
+  font-weight: var(--fw-label);
+  color: var(--body);
+  margin-bottom: 6px;
+}
+.labelRow .label { margin-bottom: 0; }
+.labelOpt { color: var(--dim); font-weight: var(--fw-body); }
+
+.inputWrap { position: relative; display: block; }
+
+/* Height, type and spacing only. The border, radius, fill and focus state
+   are set in index.css - see the header note. */
+.input {
+  width: 100%;
+  height: 44px;
+  color: var(--ink);
+  font-family: inherit;
+  /* 16px floor: anything smaller makes iOS Safari zoom the page on focus. */
+  font-size: var(--fs-section);
+  font-weight: var(--fw-body);
+  letter-spacing: -0.006em;
+  padding: 0 14px;
+  outline: none;
+  -webkit-appearance: none;
+}
+.input::placeholder { color: var(--dim); font-weight: var(--fw-body); }
+
+/* The field look RackTrack keeps in index.css under #root.rt-auth-wide. */
+.input, .codeCell {
+  box-shadow: none;
+  background-color: #ffffff;
+  border: 1px solid var(--rt-auth-line, #e1e3e6);
+  border-radius: 6px;
+  transition: border-color .16s ease;
+}
+.input:hover, .codeCell:hover { border-color: #c8ccd1; }
+.input:focus, .codeCell:focus { box-shadow: none; border-color: var(--rt-auth-ink, #1a1d21); outline: none; }
+.input:disabled, .codeCell:disabled { background-color: #f7f8f9; }
+.input:disabled { color: var(--body); cursor: not-allowed; }
+/* Chrome paints its own tinted fill over an autofilled field, which puts a
+   yellow slab into a page built out of hairlines. */
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--ink);
+  -webkit-box-shadow: 0 0 0 40px #ffffff inset !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+.inputPw    { padding-right: 42px; }
+.inputMatch { padding-right: 86px; }
+
+.eyeBtn {
+  position: absolute;
+  right: 1px; top: 50%; transform: translateY(-50%);
+  width: 34px; height: 34px;
+  background: transparent; border: none;
+  color: var(--dim);
+  display: grid; place-items: center;
+  cursor: pointer; z-index: 3;
+  -webkit-tap-highlight-color: transparent;
+  transition: color .15s;
+}
+.eyeBtn:hover { color: var(--ink); }
+
+.fieldNote { margin: 6px 0 0; font-size: var(--fs-sub); line-height: 1.45; color: var(--dim); }
+
+/* ── Password strength ── */
+.strength { margin-top: 9px; display: flex; align-items: center; gap: 10px; }
+.strengthTrack {
+  flex: 1; height: 2px;
+  background: var(--line);
+  overflow: hidden; position: relative;
+}
+.strengthFill {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+  background: var(--ink);
+  transition: width .28s ease;
+}
+.strengthHint {
+  font-size: var(--fs-sub); font-weight: var(--fw-label);
+  color: var(--body);
+  white-space: nowrap;
+}
+.strengthHintOk { color: var(--ink); }
+
+.matchHint {
+  position: absolute;
+  right: 12px; top: 50%; transform: translateY(-50%);
+  font-size: var(--fs-sub); font-weight: var(--fw-label);
+  pointer-events: none;
+  z-index: 3;
+}
+.matchOk  { color: var(--ink); }
+.matchBad { color: var(--dim); }
+
+/* ── Notices ──────────────────────────────────────────────────────────
+   A rule and a line of text. A tinted, rounded alert would be the one card
+   on a page that has none. */
+.errBox, .infoBox {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 9px 0 9px 11px;
+  font-size: var(--fs-body); font-weight: var(--fw-body); line-height: 1.5;
+}
+.errBox  { border-left: 2px solid #a5352b; color: #a5352b; }
+.infoBox { border-left: 2px solid var(--line); color: var(--body); }
+.errBox svg, .infoBox svg { flex-shrink: 0; margin-top: 2px; }
+
+/* ── Forgot link ─────────────────────────────────────────────────────
+   Its own line under the password field, pulled up tight against it so it
+   reads as belonging to that field rather than as another form row. */
+/* Centred, not right-aligned. Sitting hard against the right edge under a
+   full-width password field, it read as a stray caption rather than the way
+   out of a locked account - testers looked for it and did not find it. */
+.forgotRow {
+  display: flex; justify-content: center;
+  margin-top: -6px;
+}
+.forgotLink {
+  font-size: var(--fs-body); font-weight: var(--fw-body);
+  color: var(--body);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color .15s;
+}
+.forgotLink:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ── Primary action ── */
+.primaryBtn {
+  width: 100%;
+  min-height: 44px;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 0 16px;
+  border-radius: 6px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: var(--fs-section);
+  font-weight: var(--fw-label);
+  letter-spacing: -0.004em;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: background .15s, border-color .15s, opacity .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.primaryBtn:hover:not(:disabled) { background: #2c3036; border-color: #2c3036; }
+.primaryBtn:active:not(:disabled) { background: #101317; }
+.primaryBtn:disabled { opacity: .32; cursor: not-allowed; }
+.primaryBtn .spinner {
+  border-color: rgba(255,255,255,.32);
+  border-top-color: #ffffff;
+  margin: 0;
+}
+
+.ghostBtn {
+  width: 100%;
+  min-height: 44px;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  border-radius: 6px;
+  /* A hairline in --line against a white page is very nearly nothing, and this
+     is the "No, keep my password" half of a two-button choice - it has to be
+     findable. Solid enough to read as a control, still plainly quieter than
+     the filled primary beside it. */
+  border: 1.5px solid rgba(18, 18, 18, 0.34);
+  background: #ffffff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--fs-section); font-weight: var(--fw-label);
+  cursor: pointer;
+  transition: border-color .15s, background-color .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.ghostBtn:hover:not(:disabled) { border-color: #121212; background: rgba(18, 18, 18, 0.04); }
+.ghostBtn:disabled { opacity: .4; cursor: not-allowed; }
+
+.spinner {
+  width: 14px; height: 14px;
+  border: 1.5px solid rgba(26,29,33,.2);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin: 0 auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Alt-link row ── */
+.altRow {
+  margin-top: 20px;
+  font-size: var(--fs-item);
+  color: var(--body);
+}
+.altLink {
+  color: var(--ink);
+  font-weight: var(--fw-label);
+  text-decoration: none;
+  background: transparent; border: none;
+  padding: 0;
+  margin-left: 4px;
+  cursor: pointer;
+  font-family: inherit; font-size: inherit;
+  white-space: nowrap;
+}
+.altLink:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ── Footnote ─────────────────────────────────────────────────────────
+   A brand-new user has no way to know that joining an existing team is
+   invite-only, so the two routes in are spelled out - under a hairline, in
+   the smallest type on the page. */
+.note {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--body);
+}
+.noteLine + .noteLine { margin-top: 5px; }
+.note b { font-weight: var(--fw-label); color: var(--ink); }
+
+/* ── Verification code ────────────────────────────────────────────────
+   The cells are inputs, so they inherit the field border and radius set in
+   index.css; only the size and the numeral treatment belong here. */
+.codeGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+.codeCell {
+  width: 100%; height: 56px;
+  min-width: 0;
+  text-align: center;
+  font-family: inherit;
+  font-size: var(--fs-head); font-weight: var(--fw-label);
+  color: var(--ink);
+  outline: none;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: none;
+}
+
+.sentTo {
+  margin: 0 0 26px;
+  font-size: var(--fs-section);
+  line-height: 1.5;
+  color: var(--body);
+}
+.sentToEmail { color: var(--ink); font-weight: var(--fw-label); }
+
+/* ── Social sign-in ───────────────────────────────────────────────────
+   Outlined, so the page keeps exactly one filled action. */
+.socialBlock { margin-bottom: 18px; }
+
+.socialGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(196px, 1fr));
+  gap: 8px;
+}
+
+.socialDivider {
+  display: flex; align-items: center; gap: 14px;
+  margin: 20px 0 0;
+  font-size: var(--fs-sub); font-weight: var(--fw-body);
+  color: var(--dim);
+}
+.socialDivider::before,
+.socialDivider::after {
+  content: ''; flex: 1; height: 1px; background: var(--line);
+}
+
+.socialBtn {
+  width: 100%;
+  min-height: 44px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--fs-item);
+  font-weight: var(--fw-label);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.socialBtn:hover:not(:disabled) { border-color: #c8ccd1; background: #fcfcfd; }
+.socialBtn:disabled { opacity: .45; cursor: not-allowed; }
+
+.socialIcon { flex: 0 0 16px; display: grid; place-items: center; height: 16px; }
+.socialSpinner {
+  width: 13px; height: 13px;
+  border: 1.5px solid rgba(26,29,33,.2);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+
+/* ══ ≥420px - the top-right sentence fits ══════════════════════════════ */
+@media (min-width: 420px) {
+  .asideText { display: inline; }
+}
+
+/* ══ Tablet - the same page, given a measure ═══════════════════════════ */
+@media (min-width: 768px) {
+  .topBar     { padding: 24px 32px 0; }
+  .formScroll { justify-content: safe center; }
+  .authShell  { flex: 0 0 auto; margin: auto; padding: 36px 32px; }
+}
+
+/* ══ Laptop and up - 60 / 40 ═══════════════════════════════════════════ */
+@media (min-width: 1024px) {
+  .authPage {
+    display: grid;
+    grid-template-columns: 57% 43%;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    background: #ffffff;
+    /* The form block, sized to hold its own against the photograph. The
+       gutters below scale with the viewport, so this ceiling is only reached
+       on a genuinely wide screen - at 1440 the column itself is the limit and
+       the block lands near 480px. */
+    --measure: 560px;
+  }
+
+  .media {
+    display: block;
+    position: relative;
+    grid-column: 1;
+    overflow: hidden;
+    background: #16181c;
+  }
+  /* A <video> now, not an <img> - the class name is kept because it is the
+     same slot doing the same job, and renaming it would touch nothing else.
+     `height: 100%` here beats the global `video { height: auto }` in index.css
+     on specificity, so the frame fills the column instead of collapsing to its
+     intrinsic aspect ratio. */
+  .mediaImg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: 50% 50%;
+    /* Pulled toward charcoal and stopped down. The room stays a room - the
+       point is that it is a real one - but it sits behind the type rather
+       than competing with it. */
+    filter: saturate(.32) brightness(.8) contrast(1.02);
+  }
+  /* A legibility floor for the mark at the top and the copy at the bottom.
+     The footage has a bright far wall; without this the lower copy would
+     fall on it as the loop comes round. */
+  .mediaWash {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg,
+      rgba(14,16,19,.55) 0%, rgba(14,16,19,.18) 24%,
+      rgba(14,16,19,.46) 62%, rgba(14,16,19,.9) 100%);
+  }
+
+  .mediaBrand {
+    position: absolute; z-index: 2;
+    top: 40px; left: 48px;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .mediaMark { width: 22px; height: 22px; border-radius: 5px; object-fit: cover; }
+  .mediaName {
+    font-size: var(--fs-item); font-weight: var(--fw-label);
+    letter-spacing: -0.012em;
+    color: rgba(255,255,255,.94);
+  }
+
+  .mediaCopy {
+    position: absolute; z-index: 2;
+    left: 48px; right: 48px; bottom: 44px;
+    max-width: 30rem;
+  }
+  .mediaTitle {
+    margin: 0 0 10px;
+    font-size: var(--fs-page);
+    font-weight: var(--fw-label);
+    letter-spacing: -0.022em;
+    line-height: 1.28;
+    color: #ffffff;
+  }
+  .mediaSub {
+    margin: 0;
+    max-width: 42ch;
+    font-size: var(--fs-item);
+    line-height: 1.6;
+    font-weight: var(--fw-body);
+    color: rgba(255,255,255,.66);
+  }
+
+  /* The right column: plain white, one measure, no card.
+
+     The top bar and the form are the SAME 372px box, centred in the same
+     column - so both share one left edge and one right edge. Giving the top
+     bar its own padding instead is what had the back arrow sitting at a
+     margin the form never used. */
+  .formSide {
+    grid-column: 2;
+    height: 100%;
+    background: #ffffff;
+    /* Gutters, not a fixed inset: they grow with the viewport so the block
+       fills roughly four fifths of the column at 1280-1440 and stops
+       widening once it hits --measure. */
+    padding: 0 clamp(28px, 4.4vw, 92px);
+  }
+  .topBar,
+  .authShell {
+    width: 100%; max-width: var(--measure);
+    margin-left: auto; margin-right: auto;
+    padding-left: 0; padding-right: 0;
+  }
+  .heading     { font-size: 1.625rem; margin-bottom: 7px; }
+  .subheading  { margin-bottom: 26px; }
+  .socialBlock { margin-bottom: 22px; }
+
+  .topBar    { padding-top: 32px; }
+  .authShell { padding-top: 20px; padding-bottom: 30px; }
+
+  /* The photograph carries the mark; a second one above the heading would
+     just be the logo twice on one screen. */
+  .brand { display: none; }
+}
+
+/* Wider still: let the block take the top of its range rather than stranding
+   it in the middle of a very wide column. Raising --measure (not overriding
+   max-width on individual parts) keeps the top bar, the form and the footnote
+   on the same two edges. */
+@media (min-width: 1600px) {
+  .authPage { --measure: 600px; }
+  .mediaTitle { font-size: 1.5rem; }
+}

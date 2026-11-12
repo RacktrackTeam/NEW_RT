@@ -1,0 +1,77 @@
+{
+ "vendor": "Cisco",
+ "model": "CISCO2901",
+ "device": "router",
+ "description": "",
+ "summary": "2x RJ45 | 0x SFP | 2 named port type(s): Console, USB | built from the vendor image by the router mapper",
+ "image": "front.png",
+ "image_source": "https://c-bm.ru/image/cache/new/d3d2f5a789badc9e8c8ef401d8fa3e82-700x500-product_popup.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1321,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1003,
+    52,
+    58,
+    42
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1005,
+    97,
+    55,
+    45
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    1068,
+    83,
+    61,
+    60
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    1145,
+    83,
+    53,
+    24
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 2,
+  "2": 2,
+  "Console": 2,
+  "USB": 2
+ },
+ "chassis_aligned": 2,
+ "saved_quality": 0.826,
+ "saved_label": "router store #90",
+ "saved_at": "2026-10-23 18:49"
+}

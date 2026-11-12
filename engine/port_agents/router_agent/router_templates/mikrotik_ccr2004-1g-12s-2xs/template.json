@@ -1,0 +1,247 @@
+{
+ "vendor": "MikroTik",
+ "model": "CCR2004-1G-12S+2XS",
+ "device": "router",
+ "description": "",
+ "summary": "2x RJ45 | 14x SFP | built from the vendor image by the router mapper",
+ "image": "front.png",
+ "image_source": "https://cdn.mikrotik.com/web-assets/product_files/CCR2004-1G-12S2XS_250452.pdf#page2-img9",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1581,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    48,
+    42,
+    61,
+    47
+   ]
+  },
+  {
+   "id": 2,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    52,
+    94,
+    63,
+    49
+   ]
+  },
+  {
+   "id": 3,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    123,
+    93,
+    63,
+    51
+   ],
+   "name": "SFP+1"
+  },
+  {
+   "id": 4,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    192,
+    95,
+    64,
+    50
+   ],
+   "name": "SFP+2"
+  },
+  {
+   "id": 5,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    263,
+    95,
+    64,
+    50
+   ],
+   "name": "SFP+3"
+  },
+  {
+   "id": 6,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    334,
+    95,
+    64,
+    50
+   ],
+   "name": "SFP+4"
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    404,
+    96,
+    64,
+    48
+   ],
+   "name": "SFP+5"
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    474,
+    95,
+    64,
+    50
+   ],
+   "name": "SFP+6"
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    545,
+    95,
+    65,
+    50
+   ],
+   "name": "SFP+7"
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    615,
+    95,
+    64,
+    49
+   ],
+   "name": "SFP+8"
+  },
+  {
+   "id": 11,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    686,
+    95,
+    64,
+    49
+   ],
+   "name": "SFP+9"
+  },
+  {
+   "id": 12,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    757,
+    96,
+    63,
+    48
+   ],
+   "name": "SFP+10"
+  },
+  {
+   "id": 13,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    827,
+    96,
+    64,
+    48
+   ],
+   "name": "SFP+11"
+  },
+  {
+   "id": 14,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    898,
+    95,
+    62,
+    48
+   ],
+   "name": "SFP+12"
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    990,
+    47,
+    62,
+    46
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    990,
+    93,
+    61,
+    47
+   ]
+  }
+ ],
+ "labels_read": [
+  "SFP+1",
+  "SFP+2",
+  "SFP+3",
+  "SFP+4",
+  "SFP+5",
+  "SFP+6",
+  "SFP+7",
+  "SFP+8",
+  "SFP+9",
+  "SFP+10",
+  "SFP+11",
+  "SFP+12",
+  "CONSOLE"
+ ],
+ "chassis_votes": {
+  "1": 4,
+  "2": 4,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "7": 4,
+  "8": 4,
+  "9": 4,
+  "10": 4,
+  "11": 4,
+  "12": 4,
+  "13": 4,
+  "14": 4,
+  "15": 4,
+  "16": 3
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.838,
+ "saved_label": "official/vendor document CCR2004-1G-12S2XS_250452.pdf p2",
+ "saved_at": "2026-10-23 19:04"
+}

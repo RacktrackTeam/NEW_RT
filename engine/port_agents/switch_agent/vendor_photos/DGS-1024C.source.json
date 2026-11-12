@@ -1,0 +1,56 @@
+{
+ "vendor": "D-Link",
+ "model": "DGS-1024C",
+ "url": "http://www.dlink.com.sg/cdn/shop/files/DGS-1024C_Front.png?v=1758768328",
+ "page": "https://www.dlink.com.sg/products/dgs-1024c-24-port-gigabit-unmanaged-switch-dgs-1024c",
+ "source": "official_page",
+ "agent_score": 70,
+ "quality": 0.915,
+ "photo_inliers": 0,
+ "aspect": 8.33,
+ "ports_found": 24,
+ "ports_expected": 24,
+ "row_slope": 0.0046,
+ "others": [
+  {
+   "url": "http://www.dlink.com.my/cdn/shop/files/DGS-1024C_Front.png?v=1766377838",
+   "quality": 0.915,
+   "inliers": 0
+  },
+  {
+   "url": "https://www.dlink.com/en/-/media/product-pages/dgs/1024c/dgs1024c1.png?h=820&w=1000&la=en-GL&hash=0016F297185F2AB91138CB13AC7AA250",
+   "quality": 0.915,
+   "inliers": 0
+  },
+  {
+   "url": "https://www.dlink.com.sg/cdn/shop/files/DGS-1024C_Side1.png?v=1758768251",
+   "quality": 0.585,
+   "inliers": 0
+  },
+  {
+   "url": "https://www.dlink.com.my/cdn/shop/files/DGS-1024C_Side1.png?v=1766377838",
+   "quality": 0.585,
+   "inliers": 0
+  },
+  {
+   "url": "https://www.dlink.com.sg/cdn/shop/files/DGS-1024C_Back.png?v=1758768251",
+   "quality": 0.456,
+   "inliers": 0
+  },
+  {
+   "url": "https://www.dlink.com.my/cdn/shop/files/DGS-1024C_Back.png?v=1766377838",
+   "quality": 0.456,
+   "inliers": 0
+  },
+  {
+   "url": "https://www.dlink.com.sg/cdn/shop/files/DGS-1024C_Side2.png?v=1758768251",
+   "quality": 0.396,
+   "inliers": 0
+  },
+  {
+   "url": "https://www.dlink.com.my/cdn/shop/files/DGS-1024C_Side2.png?v=1766377838",
+   "quality": 0.396,
+   "inliers": 0
+  }
+ ]
+}

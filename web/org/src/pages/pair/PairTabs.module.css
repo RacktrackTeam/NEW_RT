@@ -1,0 +1,1075 @@
+/* The tabs of the two-rack result: A-Z, Flags, Units, Ports, Cables. */
+.grey {
+  color: var(--grey);
+  font-size: 13px;
+}
+
+.hint {
+  margin-top: var(--s4);
+  color: var(--grey);
+  font-size: 13px;
+}
+
+.gap {
+  margin-top: var(--s4);
+}
+
+.gapBottom {
+  margin-bottom: var(--s4);
+}
+
+.card {
+  padding: var(--s4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: #fff;
+  box-shadow: var(--lift);
+}
+
+.okLine {
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r);
+  background: var(--sunken);
+  color: var(--grey);
+  font-size: 13px;
+}
+
+.acts {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--s2) var(--s6);
+}
+
+.legend {
+  margin-bottom: var(--s4);
+}
+
+.filter {
+  margin-bottom: var(--s4);
+}
+
+/* ── A-Z ───────────────────────────────────────────────────────── */
+.azHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+}
+
+.azList {
+  display: grid;
+  gap: var(--s3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.azRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  padding: var(--s3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: #fff;
+  box-shadow: var(--lift);
+}
+
+.end {
+  min-width: 0;
+  padding: var(--s2) var(--s3);
+  border-radius: var(--r);
+  background: var(--sunken);
+}
+
+.endKick {
+  color: var(--grey);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.endDev {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.endRead {
+  color: var(--grey);
+  font-size: 13px;
+}
+
+.endSt {
+  font-size: 13px;
+}
+
+.azMid {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-left: var(--s6);
+}
+
+.azLine {
+  width: 2px;
+  height: 10px;
+  background: #121212;
+}
+
+.azLabel {
+  display: inline-flex;
+  margin-left: calc(-1 * var(--s3));
+  padding: 3px var(--s3);
+  border-radius: 999px;
+  background: #121212;
+  color: #fff;
+  font-size: 13px;
+}
+
+.azSt {
+  margin: 2px 0 0 calc(-1 * var(--s3));
+  font-size: 12.5px;
+}
+
+/* The two downloads: secondary buttons, half the width each. */
+.downloads {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--s2);
+  margin-top: var(--s4);
+}
+
+.dl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--btn);
+  padding: 0 var(--s4);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r);
+  background: #fff;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+@media (min-width: 1024px) {
+  .downloads {
+    display: flex;
+  }
+
+  .dl {
+    min-width: 200px;
+  }
+}
+
+/* ── Flags ─────────────────────────────────────────────────────── */
+.flags {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--s3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.flag {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: var(--s3);
+  padding: var(--s3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: #fff;
+  box-shadow: var(--lift);
+}
+
+.flagPic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 104px;
+  height: 78px;
+  border-radius: 10px;
+  background: var(--photo);
+  overflow: hidden;
+}
+
+.flagPic img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.noPic {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+}
+
+.flagText {
+  min-width: 0;
+  font-size: 13px;
+}
+
+.flagWhat {
+  margin-top: 2px;
+  font-size: 14.5px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.flagWhere {
+  color: var(--grey);
+}
+
+.flagDetail {
+  margin-top: 4px;
+  color: #3f4145;
+  overflow-wrap: anywhere;
+}
+
+/* ── Units and Ports ──────────────────────────────────────────── */
+.pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--s2);
+  align-items: start;
+}
+
+.side {
+  min-width: 0;
+}
+
+.sideHead {
+  margin-bottom: var(--s2);
+}
+
+.sideKick {
+  color: var(--grey);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sideName {
+  display: inline-block;
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 700;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+a.sideName:hover {
+  text-decoration: underline;
+}
+
+.sideMeta {
+  color: var(--grey);
+  font-size: 12px;
+}
+
+.dev {
+  min-width: 0;
+}
+
+.devName {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.portsPair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--s8);
+}
+
+.portsCol {
+  display: grid;
+  gap: var(--s3);
+  align-content: start;
+  min-width: 0;
+}
+
+.devCard {
+  padding: var(--s3) var(--s4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: #fff;
+  box-shadow: var(--lift);
+}
+
+.devTop {
+  margin-bottom: var(--s2);
+}
+
+.devT {
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.devM {
+  color: var(--grey);
+  font-size: 12.5px;
+}
+
+/* ── The port panel and the cable path ─────────────────────────── */
+.panelKick {
+  color: var(--grey);
+  font-size: 12px;
+}
+
+.panelT {
+  margin: 2px 0 var(--s3);
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.panelAct {
+  margin-top: var(--s4);
+}
+
+.path {
+  display: flex;
+  flex-direction: column;
+}
+
+.pathEnd {
+  padding: var(--s3) var(--s4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: #fff;
+  box-shadow: var(--lift);
+}
+
+.pathSide {
+  color: var(--grey);
+  font-size: 12px;
+}
+
+.pathDev {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.pathSt {
+  font-size: 13px;
+}
+
+.pathLabel {
+  margin-top: 2px;
+  color: var(--grey);
+  font-size: 12px;
+}
+
+.pathCable {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-left: var(--s6);
+}
+
+.pathLine {
+  width: 2px;
+  height: 14px;
+  background: #121212;
+}
+
+.pathMid {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px var(--s3);
+  margin-left: calc(-1 * var(--s3));
+  padding: 4px var(--s3);
+  border-radius: 999px;
+  background: #121212;
+  color: #fff;
+  font-size: 13px;
+}
+
+.pathType {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+}
+
+/* ── Cables ───────────────────────────────────────────────────── */
+.cables {
+  margin: 0;
+  padding: 0 16px;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: #fff;
+  box-shadow: var(--lift);
+}
+
+.cables li + li .cableRow {
+  border-top: 1px solid var(--line-soft);
+}
+
+.cableRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--s3);
+  width: 100%;
+  min-height: 48px;
+  padding: var(--s3) 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 14px;
+  text-align: left;
+}
+
+.cableRow:hover .cableEnds {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cableEnds {
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 1024px) {
+  .pair {
+    gap: var(--s8);
+  }
+
+  .devName {
+    font-size: 13px;
+  }
+
+  .portsPair {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .flags {
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  }
+
+  .flag {
+    grid-template-columns: 140px minmax(0, 1fr);
+  }
+
+  .flagPic {
+    width: 140px;
+    height: 100px;
+  }
+
+  .azRow {
+    grid-template-columns: minmax(0, 1fr) 200px minmax(0, 1fr);
+    align-items: center;
+    gap: var(--s3);
+  }
+
+  .azMid {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding-left: 0;
+    flex-wrap: wrap;
+  }
+
+  .azLine {
+    width: 16px;
+    height: 2px;
+  }
+
+  .azLabel,
+  .azSt {
+    margin-left: 0;
+  }
+
+  .azSt {
+    flex-basis: 100%;
+    text-align: center;
+  }
+}
+
+/* Cables seen, on a phone: one short row each. */
+.seen {
+  margin: 0;
+  padding: 0 var(--s4);
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: #fff;
+  box-shadow: var(--lift);
+}
+
+.seen li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  min-height: 52px;
+  padding: var(--s2) 0;
+  font-size: 13px;
+}
+
+.seen li + li {
+  border-top: 1px solid var(--line-soft);
+}
+
+.seenMain {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.seenMeta {
+  color: var(--grey);
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
+}
+
+/* ── A to Z, compact ─────────────────────────────────────────────── */
+.azRows {
+  list-style: none;
+  margin: var(--s3) 0 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.azRows > li {
+  border-bottom: 1px solid var(--line);
+}
+
+.azItem {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 2px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+button.azItem {
+  cursor: pointer;
+}
+
+button.azItem:hover {
+  background: var(--sunken);
+}
+
+.azMain {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.azName {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.azPath {
+  color: var(--grey);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.azSt {
+  flex: none;
+  font-size: 13px;
+}
+
+.azNew {
+  margin-top: var(--s6);
+}
+
+.azNewHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s3);
+}
+
+.azNewHead h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.azFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2) var(--s4);
+  margin-top: var(--s4);
+  font-size: 13px;
+}
+
+.azSheetSt {
+  margin: 0 0 var(--s3);
+}
+
+.azEnd {
+  padding: var(--s3) 0;
+  border-top: 1px solid var(--line);
+}
+
+.azEndKick {
+  margin: 0 0 var(--s2);
+  color: var(--grey);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 1024px) {
+  .azRows {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--s6);
+    border-top: 0;
+  }
+}
+
+.azShots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+}
+
+.azShot {
+  margin: 0;
+  min-width: 0;
+}
+
+.azShot figcaption {
+  margin-top: 6px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.azShotPic {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r);
+  background: var(--sunken);
+}
+
+.azShotPic img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.azBox {
+  position: absolute;
+  border: 2px solid var(--ok, #1d7f47);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.azKpis {
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  grid-auto-flow: column;
+}
+
+.azCrops {
+  display: flex;
+  flex: none;
+  gap: 4px;
+}
+
+.azCrop {
+  position: relative;
+  display: block;
+  flex: none;
+  width: 96px;
+  height: 64px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--sunken);
+}
+
+.azCrop img {
+  position: absolute;
+  max-width: none;
+}
+
+.azEndPic {
+  margin-bottom: var(--s2);
+}
+
+@media (max-width: 520px) {
+  .azCrop {
+    width: 72px;
+    height: 48px;
+  }
+}
+
+.rep {
+  display: grid;
+  gap: var(--s4);
+  padding-bottom: var(--s6);
+  border-bottom: 1px solid var(--line);
+}
+
+.repTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s2) var(--s4);
+}
+
+.repTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.repDl {
+  display: flex;
+  gap: var(--s4);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.repList {
+  border-top: 1px solid var(--line);
+}
+
+/* Phone: each cable stacked, label, From, To, result. */
+.repRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px var(--s3);
+  padding: 12px 2px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.repHeadRow {
+  display: none;
+}
+
+.repLabel {
+  grid-column: 1;
+  color: var(--ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.repRes {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+}
+
+.repEnd {
+  grid-column: 1 / -1;
+  color: var(--body);
+  overflow-wrap: anywhere;
+}
+
+.repK {
+  display: inline-block;
+  min-width: 44px;
+  color: var(--grey);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* Laptop: four columns. */
+@media (min-width: 760px) {
+  .repRow {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) 160px;
+    align-items: baseline;
+  }
+
+  .repHeadRow {
+    display: grid;
+    color: var(--grey);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .repLabel,
+  .repEnd,
+  .repRes {
+    grid-column: auto;
+    grid-row: auto;
+    justify-self: start;
+  }
+
+  .repK {
+    display: none;
+  }
+}
+
+.repRack {
+  margin: var(--s6) 0 var(--s3);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* ── Topology of two racks ─────────────────────────────────────── */
+.topo {
+  display: grid;
+  gap: var(--s4);
+}
+
+.connHead {
+  margin: 0 0 var(--s2);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.topoCables {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.topoCables li {
+  border-bottom: 1px solid var(--line);
+}
+
+.topoRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 2px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+}
+
+button.topoRow {
+  cursor: pointer;
+}
+
+button.topoRow[aria-pressed='true'] {
+  background: #f3f4f3;
+}
+
+.topoKey {
+  flex: none;
+  width: 14px;
+  border-top: 2px solid #1d7f47;
+}
+
+.topoKey[data-tone='bad'] { border-top-color: #c0362c; }
+.topoKey[data-tone='grey'] { border-top-color: #9aa19d; border-top-style: dashed; }
+
+.topoSt {
+  flex: none;
+  color: #1d7f47;
+  font-size: 12px;
+  font-weight: 550;
+}
+
+.topoSt[data-tone='bad'] { color: #c0362c; }
+.topoSt[data-tone='grey'] { color: #7b827e; }
+
+.topoLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+  flex: 1;
+  min-width: 0;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.topoArrow {
+  color: var(--grey);
+}
+
+/* ── Topology: one rack opened from the two, with the way back above it. ── */
+.backLine {
+  margin: 0 0 var(--s3);
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.backBtn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Rack A / Rack Z: one track, two halves, the rack shown raised in white. */
+.rackSwitch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: var(--s4);
+  border-radius: 14px;
+  background: rgba(18, 18, 18, 0.05);
+}
+.rackHalf {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  min-width: 0;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--grey);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.rackHalf:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.rackHalfOn {
+  background: var(--bg);
+  border-color: var(--line-strong);
+  box-shadow: 0 1px 3px rgba(18, 18, 18, 0.08);
+  color: var(--ink);
+}
+.rackEnd { font-size: var(--t4); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--grey); }
+.rackName { max-width: 100%; font-size: var(--t-title); font-weight: 600; overflow-wrap: anywhere; }
+
+/* A to Z: one card per cable. */
+.azCard {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 4px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.azCard:hover {
+  background: var(--sunken);
+}
+
+.azTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s3);
+}
+
+.azEnds {
+  display: grid;
+  gap: 4px;
+}
+
+.azEndRow {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13.5px;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.tagFrom,
+.tagTo {
+  justify-self: start;
+  padding: 1px 7px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.tagFrom {
+  background: #e6eefb;
+  color: #1f5fbf;
+}
+
+.tagTo {
+  background: #e3f2ea;
+  color: #0b6a44;
+}
+
+.azSay {
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.azCmp {
+  display: grid;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.azCmpHead,
+.azCmpRow {
+  display: grid;
+  grid-template-columns: 50px minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 8px;
+  align-items: baseline;
+  padding: 7px 10px;
+}
+
+.azCmpHead {
+  background: var(--sunken);
+  color: var(--grey);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.azCmpRow {
+  border-top: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+
+.azOk {
+  color: #1d7f47;
+}
+
+.azBad {
+  color: #b4232a;
+}
+
+.azNone {
+  color: var(--grey);
+}
+
+.azOk b,
+.azBad b {
+  font-weight: 700;
+}

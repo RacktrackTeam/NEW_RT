@@ -1,0 +1,336 @@
+{
+ "vendor": "Palo Alto Networks",
+ "model": "PA-3250",
+ "device": "firewall",
+ "description": "",
+ "summary": "15x RJ45 | 9x SFP | 1 named port type(s): USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://store.almitech.ru/wa-data/public/shop/products/27/05/10527/images/12966/12966.970.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1312,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   127,
+   25,
+   836,
+   123
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    136,
+    34,
+    41,
+    38
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    137,
+    75,
+    41,
+    38
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    176,
+    36,
+    39,
+    38
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    176,
+    76,
+    39,
+    38
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    213,
+    37,
+    39,
+    37
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    213,
+    77,
+    39,
+    39
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    249,
+    37,
+    41,
+    39
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    250,
+    78,
+    41,
+    40
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    288,
+    37,
+    40,
+    39
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    288,
+    79,
+    39,
+    38
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    326,
+    38,
+    43,
+    40
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    326,
+    80,
+    42,
+    40
+   ]
+  },
+  {
+   "id": 13,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    404,
+    39,
+    44,
+    40
+   ]
+  },
+  {
+   "id": 14,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    403,
+    83,
+    44,
+    40
+   ]
+  },
+  {
+   "id": 15,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    445,
+    41,
+    42,
+    39
+   ]
+  },
+  {
+   "id": 16,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    445,
+    83,
+    44,
+    41
+   ]
+  },
+  {
+   "id": 17,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    485,
+    42,
+    42,
+    40
+   ]
+  },
+  {
+   "id": 18,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    486,
+    86,
+    42,
+    40
+   ]
+  },
+  {
+   "id": 19,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    525,
+    43,
+    45,
+    41
+   ]
+  },
+  {
+   "id": 20,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    525,
+    88,
+    45,
+    40
+   ]
+  },
+  {
+   "id": 21,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    725,
+    94,
+    56,
+    45
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    835,
+    51,
+    52,
+    43
+   ]
+  },
+  {
+   "id": 23,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    834,
+    96,
+    53,
+    44
+   ]
+  },
+  {
+   "id": 24,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    901,
+    53,
+    54,
+    43
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    969,
+    90,
+    27,
+    53
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 0,
+  "2": 0,
+  "3": 0,
+  "4": 0,
+  "5": 0,
+  "6": 0,
+  "7": 0,
+  "8": 0,
+  "9": 0,
+  "10": 0,
+  "11": 0,
+  "12": 0,
+  "13": 0,
+  "14": 0,
+  "15": 0,
+  "16": 0,
+  "17": 0,
+  "18": 0,
+  "19": 0,
+  "20": 0,
+  "21": 0,
+  "22": 0,
+  "23": 0,
+  "24": 0,
+  "USB": 0
+ },
+ "chassis_aligned": 0,
+ "saved_quality": 0.631,
+ "saved_label": "internet/image_search",
+ "saved_at": "2026-10-19 15:45"
+}

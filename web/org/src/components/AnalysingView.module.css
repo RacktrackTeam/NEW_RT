@@ -1,0 +1,664 @@
+/* Analysing: the real photo in a rack frame, a scanner beam sweeping down
+   it, rack-unit ticks lighting on the left rail as the beam passes, status
+   LEDs on the right rail. All HTML and CSS over the real photo. White
+   ground, RackTrack ink, green only for the lights. */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--s6) + var(--safe-top)) var(--s4) calc(var(--s6) + var(--safe-bottom));
+  overflow-y: auto;
+  background:
+    radial-gradient(120% 70% at 50% 38%, #ffffff 0%, #ffffff 55%, #f6f6f6 100%);
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s6);
+  width: 100%;
+  margin: auto 0;
+}
+
+.racks {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.racks.two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  justify-content: center;
+  gap: var(--s3);
+}
+
+.rack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+}
+
+/* ---------- the frame: rail, photo, rail ---------- */
+.frame {
+  --p: 0;
+  --beam: 0;
+  --rail: 24px;
+  --pic-h: min(52vh, 540px);
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  max-width: 100%;
+  padding: 8px;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow:
+    0 1px 0 rgba(18, 18, 18, 0.04),
+    0 18px 44px rgba(17, 17, 17, 0.1),
+    0 4px 12px rgba(17, 17, 17, 0.05);
+  border: 1px solid var(--line);
+}
+
+.frame.compact {
+  width: 100%;
+  --rail: 14px;
+  --pic-h: min(38vh, 460px);
+  gap: 4px;
+  padding: 6px;
+  border-radius: 18px;
+}
+
+.rail {
+  position: relative;
+  flex: none;
+  width: var(--rail);
+  border-radius: 12px;
+  background: linear-gradient(90deg, #f1f1f1, #fafafa 60%, #efefef);
+  box-shadow: inset 0 0 0 1px rgba(18, 18, 18, 0.05);
+}
+
+.compact .rail {
+  border-radius: 8px;
+}
+
+/* A rack unit: a short tick that lights as the beam passes it. */
+.rail i {
+  position: absolute;
+  right: 3px;
+  width: 6px;
+  height: 1px;
+  background: var(--ink);
+  opacity: calc(0.16 + 0.84 * clamp(0, (var(--p) - var(--at)) * 40, 1));
+  transform: translateY(-50%);
+}
+
+.rail i.major {
+  width: 9px;
+}
+
+.compact .rail i {
+  right: 2px;
+  width: 4px;
+}
+
+.compact .rail i.major {
+  width: 7px;
+}
+
+.rail i b {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink);
+  font: 600 8.5px/1 var(--mono);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  /* Shown only once the beam has passed: no number is claimed ahead of it. */
+  opacity: clamp(0, (var(--p) - var(--at)) * 40, 1);
+}
+
+/* ---------- the photo ---------- */
+.shot {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--photo);
+  line-height: 0;
+}
+
+.compact .shot {
+  border-radius: 11px;
+}
+
+.pic {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: var(--pic-h);
+  min-height: 160px;
+  object-fit: contain;
+}
+
+.frame:not(.compact) .pic {
+  max-width: min(calc(100vw - 32px - 16px - 12px - 48px), 620px);
+}
+
+/* Two racks on a phone: the same shape side by side, so they line up. */
+.compact .pic {
+  width: 100%;
+  height: auto;
+  max-height: none;
+  min-height: 0;
+  aspect-ratio: 3 / 4.3;
+  object-fit: cover;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: min(62vw, 300px);
+  height: var(--pic-h);
+}
+
+.stack img {
+  display: block;
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  object-fit: cover;
+}
+
+.noPic {
+  display: flex;
+  align-items: flex-end;
+  width: min(62vw, 300px);
+  height: var(--pic-h);
+  padding: var(--s3);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.compact .noPic {
+  width: 100%;
+  min-width: 120px;
+}
+
+/* The part the beam has not reached yet is a touch darker. */
+.veil {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: calc(var(--p) * 100%);
+  background: rgba(8, 10, 12, 0.28);
+  opacity: var(--beam);
+  pointer-events: none;
+}
+
+/* The soft glow the beam leaves behind it. */
+.trail {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 26%;
+  top: calc(var(--p) * 100% - 26%);
+  background: linear-gradient(180deg, rgba(52, 208, 107, 0) 0%, rgba(52, 208, 107, 0.07) 60%, rgba(160, 255, 200, 0.22) 100%);
+  opacity: var(--beam);
+  pointer-events: none;
+}
+
+/* The scanner beam. */
+.beam {
+  position: absolute;
+  left: -2%;
+  right: -2%;
+  top: calc(var(--p) * 100%);
+  height: 2px;
+  margin-top: -1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(214, 255, 228, 0.95) 12%, #ffffff 50%, rgba(214, 255, 228, 0.95) 88%, rgba(255, 255, 255, 0) 100%);
+  box-shadow:
+    0 0 6px 1px rgba(170, 255, 205, 0.85),
+    0 0 22px 4px rgba(52, 208, 107, 0.45);
+  opacity: var(--beam);
+  pointer-events: none;
+}
+
+/* The rack unit the beam is on. */
+.count {
+  position: absolute;
+  left: 8px;
+  top: calc(var(--p) * 100%);
+  padding: 4px 7px;
+  border-radius: 9999px;
+  background: rgba(18, 18, 18, 0.78);
+  color: #fff;
+  font: 600 10.5px/1 var(--mono);
+  letter-spacing: 0.02em;
+  transform: translateY(-130%);
+  opacity: var(--beam);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
+.count:empty {
+  display: none;
+}
+
+.compact .count {
+  left: 5px;
+  padding: 3px 5px;
+  font-size: 9px;
+}
+
+/* Viewfinder corners. */
+.corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 0 solid rgba(255, 255, 255, 0.9);
+  pointer-events: none;
+}
+
+.compact .corner {
+  width: 12px;
+  height: 12px;
+}
+
+.tl {
+  top: 10px;
+  left: 10px;
+  border-top-width: 2px;
+  border-left-width: 2px;
+  border-top-left-radius: 6px;
+}
+
+.tr {
+  top: 10px;
+  right: 10px;
+  border-top-width: 2px;
+  border-right-width: 2px;
+  border-top-right-radius: 6px;
+}
+
+.bl {
+  bottom: 10px;
+  left: 10px;
+  border-bottom-width: 2px;
+  border-left-width: 2px;
+  border-bottom-left-radius: 6px;
+}
+
+.br {
+  bottom: 10px;
+  right: 10px;
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+  border-bottom-right-radius: 6px;
+}
+
+.compact .tl,
+.compact .tr {
+  top: 6px;
+}
+
+.compact .bl,
+.compact .br {
+  bottom: 6px;
+}
+
+.compact .tl,
+.compact .bl {
+  left: 6px;
+}
+
+.compact .tr,
+.compact .br {
+  right: 6px;
+}
+
+/* Reduced motion: no sweep, a gentle pulse over the photo instead. */
+.pulse {
+  position: absolute;
+  inset: 0;
+  display: none;
+  background: rgba(160, 255, 200, 0.16);
+  pointer-events: none;
+}
+
+.still .pulse {
+  display: block;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+/* ---------- status LEDs ---------- */
+.leds i {
+  left: 50%;
+  right: auto;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 1px rgba(21, 128, 61, 0.25), 0 0 6px rgba(34, 197, 94, 0.75);
+  opacity: 1;
+  animation: blink 1.5s steps(2, jump-none) infinite;
+}
+
+.compact .leds i {
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+}
+
+.leds i:nth-child(3n) {
+  background: #f59e0b;
+  box-shadow: 0 0 0 1px rgba(180, 83, 9, 0.25), 0 0 6px rgba(245, 158, 11, 0.7);
+  animation-duration: 2.1s;
+}
+
+.leds i:nth-child(4n + 1) {
+  animation-duration: 0.9s;
+}
+
+.is_done .leds i {
+  background: #22c55e;
+  box-shadow: 0 0 0 1px rgba(21, 128, 61, 0.25), 0 0 6px rgba(34, 197, 94, 0.75);
+  animation: none;
+}
+
+.is_failed .leds i {
+  background: #ef4444;
+  box-shadow: 0 0 0 1px rgba(186, 26, 26, 0.25), 0 0 6px rgba(239, 68, 68, 0.7);
+  animation: none;
+}
+
+.is_done .rail i,
+.is_failed .rail i {
+  opacity: 0.55;
+}
+
+.is_done .leds i,
+.is_failed .leds i {
+  opacity: 1;
+}
+
+.is_failed .shot {
+  filter: grayscale(0.7);
+}
+
+/* ---------- a rack's name and state (Map) ---------- */
+.cap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2);
+  width: 100%;
+  margin-top: var(--s2);
+  padding: 0 4px;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.word {
+  font-weight: 650;
+}
+
+.state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--grey);
+  white-space: nowrap;
+}
+
+.state::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.st_reading::before {
+  background: #22c55e;
+  animation: blink 1.2s steps(2, jump-none) infinite;
+}
+
+.st_done {
+  color: var(--ok);
+  font-weight: 600;
+}
+
+.st_failed {
+  color: var(--bad);
+  font-weight: 600;
+}
+
+/* ---------- mark, stage line, bar ---------- */
+.foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(100%, 300px);
+  text-align: center;
+}
+
+.logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  object-fit: cover;
+  box-shadow: var(--lift);
+}
+
+.stage {
+  margin-top: var(--s3);
+  font-size: 16px;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+  animation: rise 0.35s ease-out both;
+}
+
+.stage.done {
+  color: var(--ok);
+}
+
+.bar {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: 3px;
+  margin-top: var(--s3);
+  border-radius: 2px;
+  background: rgba(18, 18, 18, 0.08);
+  overflow: hidden;
+}
+
+.bar i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--ink);
+  transform-origin: left center;
+  transition: transform 0.5s ease-out;
+}
+
+.done + .bar i {
+  background: var(--ok);
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+  margin-top: var(--s3);
+}
+
+.dots i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(18, 18, 18, 0.14);
+  transition: background 0.3s;
+}
+
+.dots i.past {
+  background: var(--ink);
+}
+
+.dots i.now {
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.16);
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beam,
+  .trail,
+  .veil,
+  .count {
+    display: none;
+  }
+
+  .pulse {
+    display: block;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+
+  .leds i,
+  .st_reading::before {
+    animation: none;
+  }
+
+  .stage {
+    animation: none;
+  }
+
+  .bar i {
+    transition: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .inner {
+    gap: var(--s8);
+  }
+
+  .frame {
+    --rail: 30px;
+    --pic-h: min(58vh, 560px);
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .frame.compact {
+    width: auto;
+    --rail: 26px;
+    --pic-h: min(54vh, 520px);
+    padding: 10px;
+    gap: 8px;
+    border-radius: 22px;
+  }
+
+  .racks.two {
+    grid-template-columns: repeat(2, minmax(0, auto));
+  }
+
+  .compact .pic {
+    width: auto;
+    height: auto;
+    max-height: var(--pic-h);
+    min-height: 200px;
+    max-width: 38vw;
+    aspect-ratio: auto;
+    object-fit: contain;
+  }
+
+  .racks.two {
+    gap: var(--s12);
+  }
+
+  .compact .rail i {
+    right: 3px;
+    width: 6px;
+  }
+
+  .compact .rail i.major {
+    width: 9px;
+  }
+
+  .compact .leds i {
+    width: 6px;
+    height: 6px;
+    margin-left: -3px;
+  }
+
+  .cap {
+    font-size: 14px;
+  }
+
+  .stage {
+    font-size: 17px;
+  }
+}
+
+/* Two racks on a phone: each fills its column. */
+@media (max-width: 1023px) {
+  .two .rack {
+    align-items: stretch;
+  }
+
+  .compact .shot {
+    flex: 1 1 auto;
+  }
+}
+
+/* Read: the marks stay, their numbers go - the rack's real height is on the result. */
+.is_done .rail i b,
+.is_failed .rail i b {
+  opacity: 0;
+}

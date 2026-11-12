@@ -1,0 +1,333 @@
+{
+  "name": "vdo1",
+  "status": "ground truth from the NetBox export of the office rack (data/ground_truth/SP-HYD-RM01-R01-R1/netbox_devices.csv, read 2 Nov 2026); serials and asset tags are empty in that export",
+  "video": "vdo1.mp4",
+  "site": {
+    "name": "Office-Sprintpark",
+    "region": "Hyderabad",
+    "lat": 17.4486,
+    "lng": 78.3908,
+    "position_note": "a test position for the location step, not surveyed; replace with the real site position"
+  },
+  "rack": {
+    "label": "SP-HYD-RM01-R01-R1",
+    "name": "SP-HYD-RM01-R01-R1",
+    "facility_id": "SP-HYD-RM01-R01-R1",
+    "height_ru": 42,
+    "height_note": "42 assumed: the export holds no rack height"
+  },
+  "devices": [
+    {
+      "name": "SP-R1-U1-PP1",
+      "role": "Patch Panel",
+      "kind": "Patch Panel",
+      "manufacturer": "D-Link",
+      "model": "D-Link 48-Port Patch Panel",
+      "position": 1,
+      "height": 2,
+      "face": "Front",
+      "serial": null,
+      "asset_tag": null,
+      "ports": [
+        {
+          "group": "front",
+          "count": 48
+        },
+        {
+          "group": "rear",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "SP-R1-U3-CM1",
+      "role": "Cable Manager",
+      "kind": "Cable Manager",
+      "manufacturer": "Generic",
+      "model": "Generic Cable Manager",
+      "position": 3,
+      "height": 1,
+      "face": "Front",
+      "serial": null,
+      "asset_tag": null,
+      "ports": []
+    },
+    {
+      "name": "SP-R1-U4-PP2",
+      "role": "Patch Panel",
+      "kind": "Patch Panel",
+      "manufacturer": "D-Link",
+      "model": "D-Link 48-Port Patch Panel",
+      "position": 4,
+      "height": 2,
+      "face": "Front",
+      "serial": null,
+      "asset_tag": null,
+      "ports": [
+        {
+          "group": "front",
+          "count": 48
+        },
+        {
+          "group": "rear",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "SP-R1-U6-CM2",
+      "role": "Cable Manager",
+      "kind": "Cable Manager",
+      "manufacturer": "Generic",
+      "model": "Generic Cable Manager",
+      "position": 6,
+      "height": 1,
+      "face": "Front",
+      "serial": null,
+      "asset_tag": null,
+      "ports": []
+    },
+    {
+      "name": "SP-R1-U7-PP3",
+      "role": "Patch Panel",
+      "kind": "Patch Panel",
+      "manufacturer": "D-Link",
+      "model": "D-Link 48-Port Patch Panel",
+      "position": 7,
+      "height": 2,
+      "face": "Front",
+      "serial": null,
+      "asset_tag": null,
+      "ports": [
+        {
+          "group": "front",
+          "count": 48
+        },
+        {
+          "group": "rear",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "SP-R1-U9-CM3",
+      "role": "Cable Manager",
+      "kind": "Cable Manager",
+      "manufacturer": "Generic",
+      "model": "Generic Cable Manager",
+      "position": 9,
+      "height": 1,
+      "face": "Front",
+      "serial": null,
+      "asset_tag": null,
+      "ports": []
+    },
+    {
+      "name": "SP-R1-U10-PP4",
+      "role": "Patch Panel",
+      "kind": "Patch Panel",
+      "manufacturer": "D-Link",
+      "model": "D-Link 48-Port Patch Panel",
+      "position": 10,
+      "height": 2,
+      "face": "Front",
+      "serial": null,
+      "asset_tag": null,
+      "ports": [
+        {
+          "group": "front",
+          "count": 48
+        },
+        {
+          "group": "rear",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "SP-R1-U12-CM4",
+      "role": "Cable Manager",
+      "kind": "Cable Manager",
+      "manufacturer": "Generic",
+      "model": "Generic Cable Manager",
+      "position": 12,
+      "height": 1,
+      "face": "Front",
+      "serial": null,
+      "asset_tag": null,
+      "ports": []
+    },
+    {
+      "name": "SP-R1-U13-SW01",
+      "role": "Network Switch",
+      "kind": "Switch",
+      "manufacturer": "D-Link",
+      "model": "DGS-1210-52",
+      "position": 13,
+      "height": 1,
+      "face": "Front",
+      "serial": null,
+      "asset_tag": null,
+      "ports": [
+        {
+          "group": "interface",
+          "count": 52
+        }
+      ]
+    },
+    {
+      "name": "SP-R1-U14-CM5",
+      "role": "Cable Manager",
+      "kind": "Cable Manager",
+      "manufacturer": "Generic",
+      "model": "Generic Cable Manager",
+      "position": 14,
+      "height": 1,
+      "face": "Front",
+      "serial": null,
+      "asset_tag": null,
+      "ports": []
+    },
+    {
+      "name": "SP-R1-U15-SW02",
+      "role": "Network Switch",
+      "kind": "Switch",
+      "manufacturer": "TP-Link",
+      "model": "TL-SG2428P",
+      "position": 15,
+      "height": 1,
+      "face": "Front",
+      "serial": null,
+      "asset_tag": null,
+      "ports": [
+        {
+          "group": "interface",
+          "count": 28
+        }
+      ]
+    },
+    {
+      "name": "SP-R1-U16-CM6",
+      "role": "Cable Manager",
+      "kind": "Cable Manager",
+      "manufacturer": "Generic",
+      "model": "Generic Cable Manager",
+      "position": 16,
+      "height": 1,
+      "face": "Front",
+      "serial": null,
+      "asset_tag": null,
+      "ports": []
+    },
+    {
+      "name": "SP-R1-U17-SW03",
+      "role": "Network Switch",
+      "kind": "Switch",
+      "manufacturer": "TP-Link",
+      "model": "TL-SG2428P",
+      "position": 17,
+      "height": 1,
+      "face": "Front",
+      "serial": null,
+      "asset_tag": null,
+      "ports": [
+        {
+          "group": "interface",
+          "count": 28
+        }
+      ]
+    },
+    {
+      "name": "SP-R1-U18-SW04",
+      "role": "Network Switch",
+      "kind": "Switch",
+      "manufacturer": "D-Link",
+      "model": "DGS-1024C",
+      "position": 18,
+      "height": 1,
+      "face": "Front",
+      "serial": null,
+      "asset_tag": null,
+      "ports": [
+        {
+          "group": "interface",
+          "count": 24
+        }
+      ]
+    },
+    {
+      "name": "SP-R1-U19-FW",
+      "role": "Firewall",
+      "kind": "Firewall",
+      "manufacturer": "Sophos",
+      "model": "XGS 116",
+      "position": 19,
+      "height": 1,
+      "face": "Front",
+      "serial": null,
+      "asset_tag": null,
+      "ports": [
+        {
+          "group": "interface",
+          "count": 9
+        }
+      ]
+    },
+    {
+      "name": "SP-R1-U20-ACT",
+      "role": "Router",
+      "kind": "Router",
+      "manufacturer": "Connection Technology Systems (CTS)",
+      "model": "ACX-09CW2A(SM-10)-EL",
+      "position": 20,
+      "height": 1,
+      "face": "Front",
+      "serial": null,
+      "asset_tag": null,
+      "ports": [
+        {
+          "group": "interface",
+          "count": 8
+        }
+      ]
+    },
+    {
+      "name": "SP-R1-U24-PDU",
+      "role": "PDU",
+      "kind": "PDU",
+      "manufacturer": "Netfox",
+      "model": "NF-PS-6S-5A",
+      "position": 24,
+      "height": 1,
+      "face": "Rear",
+      "serial": null,
+      "asset_tag": null,
+      "ports": [
+        {
+          "group": "power",
+          "count": 6
+        }
+      ]
+    },
+    {
+      "name": "SP-R1-Bharat Fiber",
+      "role": "Bharat WiFi Backup",
+      "kind": "Router",
+      "manufacturer": "Bharat",
+      "model": "Bharat Fiber",
+      "position": null,
+      "height": 1,
+      "face": null,
+      "serial": null,
+      "asset_tag": null,
+      "ports": [
+        {
+          "group": "interface",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "cables": [],
+  "note_unpositioned": "SP-R1-Bharat Fiber (the ISP fibre box) has no position in the export, so it is in no unit"
+}

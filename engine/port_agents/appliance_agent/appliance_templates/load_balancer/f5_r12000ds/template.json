@@ -1,0 +1,341 @@
+{
+ "vendor": "F5",
+ "model": "R12000DS",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "1x RJ45 | 23x SFP | 2 named port type(s): USB, Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://clouddocs.f5.com/training/community/rseries-training/html/_images/r12000image1.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1439,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    203,
+    93,
+    50,
+    42
+   ]
+  },
+  {
+   "id": 2,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    274,
+    91,
+    66,
+    47
+   ]
+  },
+  {
+   "id": 3,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    336,
+    92,
+    65,
+    48
+   ]
+  },
+  {
+   "id": 4,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    434,
+    41,
+    49,
+    44
+   ]
+  },
+  {
+   "id": 5,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    431,
+    93,
+    52,
+    47
+   ]
+  },
+  {
+   "id": 6,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    480,
+    41,
+    47,
+    45
+   ]
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    480,
+    93,
+    48,
+    47
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    525,
+    41,
+    48,
+    44
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    525,
+    93,
+    48,
+    46
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    571,
+    40,
+    50,
+    45
+   ]
+  },
+  {
+   "id": 11,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    570,
+    92,
+    51,
+    47
+   ]
+  },
+  {
+   "id": 12,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    670,
+    92,
+    67,
+    48
+   ]
+  },
+  {
+   "id": 13,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    734,
+    91,
+    65,
+    48
+   ]
+  },
+  {
+   "id": 14,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    831,
+    41,
+    49,
+    45
+   ]
+  },
+  {
+   "id": 15,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    829,
+    93,
+    51,
+    48
+   ]
+  },
+  {
+   "id": 16,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    877,
+    41,
+    47,
+    45
+   ]
+  },
+  {
+   "id": 17,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    877,
+    92,
+    47,
+    48
+   ]
+  },
+  {
+   "id": 18,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    922,
+    41,
+    48,
+    44
+   ]
+  },
+  {
+   "id": 19,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    922,
+    93,
+    48,
+    46
+   ]
+  },
+  {
+   "id": 20,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    967,
+    41,
+    51,
+    45
+   ]
+  },
+  {
+   "id": 21,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    967,
+    94,
+    50,
+    46
+   ]
+  },
+  {
+   "id": 22,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1289,
+    22,
+    70,
+    57
+   ]
+  },
+  {
+   "id": 23,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1284,
+    79,
+    78,
+    62
+   ]
+  },
+  {
+   "id": 24,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1377,
+    20,
+    58,
+    59
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    162,
+    83,
+    28,
+    52
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    92,
+    88,
+    63,
+    50
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 2,
+  "2": 2,
+  "3": 2,
+  "4": 2,
+  "5": 2,
+  "6": 2,
+  "7": 2,
+  "8": 2,
+  "9": 2,
+  "10": 2,
+  "11": 2,
+  "12": 2,
+  "13": 2,
+  "14": 2,
+  "15": 2,
+  "16": 2,
+  "17": 2,
+  "18": 2,
+  "19": 2,
+  "20": 2,
+  "21": 2,
+  "22": 2,
+  "23": 2,
+  "24": 2,
+  "USB": 2,
+  "Console": 2
+ },
+ "chassis_aligned": 2,
+ "saved_quality": 0.985,
+ "saved_label": "template agent (internet/image_search)",
+ "saved_at": "2026-10-22 21:31"
+}

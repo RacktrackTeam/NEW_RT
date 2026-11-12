@@ -1,0 +1,181 @@
+/* Map two racks: two slots side by side, Rack A and Rack Z, then one
+   Analyse. Each slot is its name, the photo and two small buttons. */
+
+.siteLine {
+  margin-bottom: var(--s3);
+  color: var(--grey);
+  font-size: 14px;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s3);
+  align-items: start;
+}
+
+.slot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  min-width: 0;
+  padding: var(--s2);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: #fff;
+}
+
+.slot.drag {
+  border-color: var(--ink);
+  background: var(--sunken);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s2);
+  min-height: 24px;
+  padding: 0 2px;
+}
+
+.word {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+/* The photo's place: the same shape empty or filled, so nothing jumps. */
+.frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  border: 1.5px dashed rgba(18, 18, 18, 0.16);
+  background: var(--sunken);
+  text-align: center;
+}
+
+.filled {
+  background: var(--sunken);
+}
+
+.emptyIcon {
+  color: var(--grey);
+  font-size: 26px;
+  line-height: 0;
+}
+
+.emptyX {
+  margin: 0;
+  color: var(--grey);
+  font-size: 13px;
+}
+
+.prev {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.noPreview {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  height: 100%;
+  padding: var(--s3);
+  color: var(--grey);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.noPreview p {
+  margin: 0;
+}
+
+.noPreview p:first-child {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Two small buttons side by side, or one text action once a photo is in. */
+.acts {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  min-height: 36px;
+}
+
+.small {
+  flex: 1 1 0;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 140px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0 var(--s3);
+  border-width: 1px;
+  border-color: rgba(18, 18, 18, 0.18);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.go {
+  margin-top: var(--s2);
+}
+
+@media (max-width: 339px) {
+  .pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .pair {
+    gap: var(--s6);
+  }
+
+  .slot {
+    padding: var(--s3);
+  }
+
+  /* A laptop slot is wide: the photo keeps to the height of the window and
+     shows whole, on a light ground. */
+  .frame {
+    aspect-ratio: auto;
+    height: calc(100vh - var(--nav-top) - var(--top-lt) - 300px);
+    min-height: 280px;
+  }
+
+  .prev {
+    object-fit: contain;
+  }
+
+  .go {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .go > * {
+    width: 360px;
+  }
+
+  .sitePick {
+    max-width: 360px;
+  }
+}

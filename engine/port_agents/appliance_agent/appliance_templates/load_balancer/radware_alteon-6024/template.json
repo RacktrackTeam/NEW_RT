@@ -1,0 +1,365 @@
+{
+ "vendor": "Radware",
+ "model": "Alteon 6024",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "2x RJ45 | 24x SFP | 2 named port type(s): Console, USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://i.ebayimg.com/00/s/MTIwMFgxNjAw/z/8YgAAOSwXZtgOCKv/$_57.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1707,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    486,
+    46,
+    55,
+    45
+   ]
+  },
+  {
+   "id": 2,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    491,
+    95,
+    54,
+    42
+   ]
+  },
+  {
+   "id": 3,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    540,
+    46,
+    53,
+    46
+   ]
+  },
+  {
+   "id": 4,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    543,
+    95,
+    53,
+    44
+   ]
+  },
+  {
+   "id": 5,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    591,
+    47,
+    52,
+    46
+   ]
+  },
+  {
+   "id": 6,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    593,
+    95,
+    53,
+    44
+   ]
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    641,
+    47,
+    54,
+    45
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    643,
+    96,
+    55,
+    43
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    707,
+    46,
+    54,
+    44
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    707,
+    95,
+    56,
+    44
+   ]
+  },
+  {
+   "id": 11,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    760,
+    47,
+    52,
+    45
+   ]
+  },
+  {
+   "id": 12,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    761,
+    94,
+    52,
+    45
+   ]
+  },
+  {
+   "id": 13,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    810,
+    47,
+    53,
+    46
+   ]
+  },
+  {
+   "id": 14,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    811,
+    95,
+    53,
+    44
+   ]
+  },
+  {
+   "id": 15,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    861,
+    46,
+    56,
+    46
+   ]
+  },
+  {
+   "id": 16,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    861,
+    96,
+    54,
+    43
+   ]
+  },
+  {
+   "id": 17,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    927,
+    46,
+    53,
+    45
+   ]
+  },
+  {
+   "id": 18,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    925,
+    95,
+    54,
+    43
+   ]
+  },
+  {
+   "id": 19,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    978,
+    47,
+    54,
+    46
+   ]
+  },
+  {
+   "id": 20,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    977,
+    95,
+    53,
+    44
+   ]
+  },
+  {
+   "id": 21,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1030,
+    47,
+    51,
+    45
+   ]
+  },
+  {
+   "id": 22,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1027,
+    95,
+    52,
+    44
+   ]
+  },
+  {
+   "id": 23,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1079,
+    45,
+    55,
+    47
+   ]
+  },
+  {
+   "id": 24,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1077,
+    94,
+    54,
+    44
+   ]
+  },
+  {
+   "id": 25,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1169,
+    46,
+    59,
+    45
+   ]
+  },
+  {
+   "id": 26,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1166,
+    92,
+    59,
+    44
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    1236,
+    86,
+    62,
+    51
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    1315,
+    78,
+    32,
+    56
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 0,
+  "2": 0,
+  "3": 0,
+  "4": 0,
+  "5": 0,
+  "6": 0,
+  "7": 0,
+  "8": 0,
+  "9": 0,
+  "10": 0,
+  "11": 0,
+  "12": 0,
+  "13": 0,
+  "14": 0,
+  "15": 0,
+  "16": 0,
+  "17": 0,
+  "18": 0,
+  "19": 0,
+  "20": 0,
+  "21": 0,
+  "22": 0,
+  "23": 0,
+  "24": 0,
+  "25": 0,
+  "26": 0,
+  "Console": 0,
+  "USB": 0
+ },
+ "chassis_aligned": 0,
+ "saved_quality": 0.418,
+ "saved_label": "internet/image_search",
+ "saved_at": "2026-10-24 23:02"
+}

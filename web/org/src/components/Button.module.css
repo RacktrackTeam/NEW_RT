@@ -1,0 +1,184 @@
+/* Buttons: one size everywhere (52 tall, radius 12). Primary is ink with
+   white text; secondary is white with an ink outline; danger is a red
+   outline. Full width on a phone, their own width on a laptop. */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--btn);
+  margin-top: var(--s4);
+  padding: 0 var(--s6);
+  gap: 8px;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r);
+  background: var(--ink);
+  color: #fff;
+  font: 600 15px / 1.25 var(--font);
+  letter-spacing: 0;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.btn:active:not(:disabled) {
+  opacity: 0.85;
+}
+
+@media (hover: hover) {
+  .btn:hover:not(:disabled) {
+    background: #000;
+  }
+}
+
+.btn :global(.appIcon) {
+  font-size: 18px;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.btn[aria-busy='true'] {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+@media (min-width: 1024px) {
+  .btn {
+    display: inline-flex;
+    width: auto;
+    min-width: 200px;
+  }
+}
+
+.big {
+  margin-top: var(--s6);
+}
+
+.auto {
+  display: inline-flex;
+  width: auto;
+  margin-top: 0;
+}
+
+.big.auto {
+  width: 340px;
+  max-width: 100%;
+}
+
+/* A small button inside a row or a card (36 tall). */
+.sm {
+  display: inline-flex;
+  width: auto;
+  min-width: 0;
+  min-height: var(--pill);
+  margin-top: 0;
+  padding: 0 var(--s4);
+  font-size: 13px;
+}
+
+.secondary,
+.ghost {
+  background: #fff;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+}
+
+@media (hover: hover) {
+  .secondary:hover:not(:disabled),
+  .ghost:hover:not(:disabled) {
+    background: rgba(17, 17, 17, 0.04);
+  }
+}
+
+.danger {
+  background: #fff;
+  color: var(--bad);
+  border: 1.5px solid var(--bad);
+}
+
+@media (hover: hover) {
+  .danger:hover:not(:disabled) {
+    background: var(--bad-bg);
+  }
+}
+
+.lk {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 600 var(--t2) / 1.5 var(--font);
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(18, 18, 18, 0.25);
+  cursor: pointer;
+}
+
+.lk:hover {
+  text-decoration-color: var(--ink);
+}
+
+.lk:disabled {
+  color: var(--grey);
+  cursor: default;
+}
+
+.small {
+  font-size: var(--t3);
+}
+
+.danger.lk {
+  color: var(--bad);
+  border: 0;
+  background: none;
+}
+
+.onDark {
+  color: #fff;
+  text-decoration-color: rgba(255, 255, 255, 0.5);
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3) var(--s6);
+  margin-top: var(--s4);
+}
+
+.center {
+  justify-content: center;
+}
+
+.acts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s4) var(--s6);
+  margin-top: var(--s6);
+}
+
+.acts .btn {
+  margin-top: 0;
+}
+
+/* Two buttons side by side, each half the width (Back and Next, Previous and Next). */
+.pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--s2);
+  margin-top: var(--s4);
+}
+
+.pair .btn {
+  width: 100%;
+  min-width: 0;
+  margin-top: 0;
+}

@@ -1,0 +1,323 @@
+/* The Topology tab: the summary line, the 2D / 3D choice, the filters, the
+   drawing (components/TopologyDiagram) and the 3D scene as the second view. Built from the app's own tokens (styles/global.css): white
+   only, radius 12, one hairline, no shadow on a card. */
+
+.root {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.note {
+  margin: var(--s3) 0 0;
+  font-size: var(--t3);
+  color: var(--grey);
+}
+
+.dim {
+  color: var(--grey);
+}
+
+/* ── The key numbers and the 2D / 3D choice on one row; on a phone the choice wraps under. ── */
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2) var(--s3);
+}
+
+.kpis {
+  flex: 1 1 300px;
+  min-width: 0;
+}
+
+.view {
+  flex: none;
+  margin-left: auto;
+}
+
+/* ── Filters: one wrapping row of pills, no box around them. ── */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2) var(--s4);
+  margin-top: var(--s3);
+}
+
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+}
+
+.pill {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--pill);
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pill:hover {
+  border-color: rgba(17, 17, 17, 0.3);
+}
+
+.pill b {
+  color: var(--grey);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pillOn,
+.pillOn:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.pillOn b {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* The trace line under the filters. */
+.trace {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s1) var(--s3);
+  margin: var(--s2) 0 0;
+  font-size: var(--t3);
+  color: var(--grey);
+}
+
+.trace b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ── The drawing: one caption line under it, and the devices whose unit was not read. ── */
+.caption {
+  margin: var(--s2) 0 0;
+  min-height: 1.4em;
+  color: #4b5450;
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.caption b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.loose {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: var(--s2) 0 0;
+  color: var(--grey);
+  font-size: var(--t3);
+}
+
+/* ── Details: a card under the drawing on a laptop (a sheet on a phone). ── */
+.card {
+  margin-top: var(--s3);
+  padding: var(--s4);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: #fff;
+}
+
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s3);
+}
+
+.cardText {
+  min-width: 0;
+}
+
+.cardT {
+  font-size: var(--t-title);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.sub {
+  margin: 2px 0 0;
+  font-size: var(--t3);
+  color: var(--grey);
+}
+
+/* Label and value rows (the pattern of the port card's facts). */
+.facts {
+  margin: var(--s3) 0 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.facts > div {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.facts > div:last-child {
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.facts dt {
+  font-size: 13px;
+  color: var(--grey);
+}
+
+.facts dd {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.disc {
+  margin-top: var(--s3);
+}
+
+.acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3) var(--s6);
+  margin-top: var(--s4);
+}
+
+/* ── 3D scene: the same rack in three dimensions, one hint line under it. ── */
+.scene {
+  position: relative;
+  height: 60vh;
+  min-height: 320px;
+  margin-top: var(--s3);
+  border: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f4f6f3;
+  box-shadow: 0 1px 2px rgba(17, 22, 20, 0.04), 0 18px 40px -26px rgba(17, 22, 20, 0.32);
+  animation: sceneIn 0.6s ease both;
+}
+
+.scene canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  outline: none;
+}
+
+/* When zoomed in the scene sets cursor: grab on the canvas; grabbing while dragging to pan. */
+.scene canvas[style*="grab"]:active {
+  cursor: grabbing !important;
+}
+
+.sceneNote {
+  margin: 0;
+  padding: var(--s4);
+  font-size: var(--t3);
+  color: var(--grey);
+}
+
+.hint {
+  margin: var(--s2) 0 0;
+  font-size: var(--t3);
+  color: var(--grey);
+}
+
+.summary {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  color: var(--grey);
+  font-size: 14px;
+}
+
+.filtersToggle {
+  justify-self: start;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.filtersToggle:hover {
+  border-color: rgba(17, 17, 17, 0.3);
+}
+
+.filtersOpen,
+.filtersOpen:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.filtersCount {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.filtersOpen .filtersCount {
+  background: #fff;
+  color: var(--ink);
+}
+
+@keyframes sceneIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* ── RackTrack's own device card and kind legend on the phone ── */
+.legend { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 8px; }
+.legendItem { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 8px; border-radius: 999px; background: #f4f6f3; font: 500 12px var(--font); color: #4a544f; animation: legendIn 0.4s ease both; animation-delay: calc(var(--i, 0) * 60ms + 0.2s); }
+.legendItem i { width: 9px; height: 9px; border-radius: 999px; } .legendItem b { font: 600 11px var(--mono, monospace); color: #111614; }
+@keyframes legendIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.devcard { position: fixed; left: 12px; right: 12px; bottom: calc(var(--nav-clear, 100px) + 4px); z-index: 60; display: flex; gap: 12px; padding: 12px; border-radius: 16px; background: #fff; box-shadow: 0 2px 4px rgba(17, 22, 20, 0.06), 0 28px 60px -24px rgba(17, 22, 20, 0.5); animation: cardUp 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes cardUp { from { opacity: 0; transform: translateY(24px) scale(0.98); } to { opacity: 1; transform: none; } }
+.devcardImg { width: 96px; height: 64px; object-fit: cover; border-radius: 10px; background: #111614; flex: none; }
+.devcardBody { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+.devcardEyebrow { margin: 0; font: 500 11px var(--mono, monospace); letter-spacing: 0.04em; color: #4a544f; }
+.devcardName { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: -0.01em; color: #111614; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.devcardState { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; padding: 3px 9px; border-radius: 999px; font: 600 11px var(--font); background: rgba(31, 214, 124, 0.14); color: #04703f; }
+.devcardState i { width: 7px; height: 7px; border-radius: 999px; background: currentColor; }
+.st_unc, .st_auto { background: rgba(255, 154, 46, 0.18) !important; color: #a35a0c !important; } .st_off, .st_busy { background: rgba(17, 22, 20, 0.06) !important; color: #4a544f !important; }
+.devcardPorts { margin: 0; font-size: 12.5px; color: #4a544f; }
+.devcardActs { display: flex; gap: 8px; margin-top: 4px; }
+.devcardOpen, .devcardClose { min-height: 34px; padding: 0 14px; border: 0; border-radius: 8px; font: 600 13px var(--font); cursor: pointer; }
+.devcardOpen { background: #111614; color: #e9ece8; flex: 1; } .devcardClose { background: #f4f6f3; color: #111614; }

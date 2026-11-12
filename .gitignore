@@ -1,0 +1,36 @@
+# Runtime data, models and samples: inside this folder, never in git (docs/STRUCTURE.md)
+data/
+samples/
+models/*
+!models/MANIFEST.txt
+*.zip
+# Model files anywhere
+*.pt
+*.pth
+*.onnx
+*.safetensors
+# Private
+server/config.json
+server/cert.pem
+server/key.pem
+.env
+.env.*
+*.env
+search_keys.env
+# Build output and caches
+node_modules
+__pycache__/
+.pytest_cache/
+build/
+Pods/
+DerivedData/
+native/ios/App/App.xcworkspace/xcuserdata/
+.DS_Store
+# The Python environments, node packages and wheels (tools/make_engine_env.py, start.sh)
+_cache/
+# The organization pages built for /org/ (auth.sh and start.sh build them)
+web/org/dist-org/
+# The patch panel reader's embeddings of one run's panels (runtime)
+engine/patchpanel/out/cache/test_*.npz
+videos/
+reports/

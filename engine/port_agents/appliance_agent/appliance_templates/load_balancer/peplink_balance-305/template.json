@@ -1,0 +1,138 @@
+{
+ "vendor": "Peplink",
+ "model": "Balance 305",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "5x RJ45 | 0x SFP | 2 named port type(s): USB, Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.peplink.com/wp-content/uploads/2020/06/1Gbps-Multi-WAN-3-Ports-Router-Balance-305-3-1536x334.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1924,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   807,
+   49,
+   425,
+   91
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    823,
+    65,
+    72,
+    60
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    903,
+    65,
+    72,
+    61
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    985,
+    65,
+    72,
+    61
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1066,
+    66,
+    72,
+    59
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1147,
+    65,
+    71,
+    60
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    668,
+    88,
+    64,
+    35
+   ]
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    668,
+    53,
+    63,
+    33
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    584,
+    68,
+    74,
+    57
+   ],
+   "name": "CONSOLE"
+  }
+ ],
+ "labels_read": [
+  "CONSOLE",
+  "CONSOLE",
+  "LAN1",
+  "WAN1"
+ ],
+ "chassis_votes": {
+  "1": 0,
+  "2": 0,
+  "3": 0,
+  "4": 0,
+  "5": 0,
+  "USB": 0,
+  "USB 2": 0,
+  "Console": 0
+ },
+ "chassis_aligned": 0,
+ "saved_quality": 0.788,
+ "saved_label": "internet/panel_search",
+ "saved_at": "2026-10-22 20:49"
+}

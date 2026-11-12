@@ -1,0 +1,204 @@
+{
+ "vendor": "TP-Link",
+ "model": "ER8411",
+ "device": "router",
+ "description": "",
+ "summary": "8x RJ45 | 3x SFP | 2 named port type(s): Console, USB | built from the vendor image by the router mapper",
+ "image": "front.png",
+ "image_source": "https://static.tp-link.com/upload/image-line/ER8411_UN_1.0_overview_01_normal_20220617022403i.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1604,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   982,
+   42,
+   502,
+   96
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    773,
+    67,
+    70,
+    58
+   ]
+  },
+  {
+   "id": 2,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    847,
+    66,
+    69,
+    60
+   ]
+  },
+  {
+   "id": 3,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    920,
+    68,
+    68,
+    57
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    997,
+    60,
+    63,
+    62
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1059,
+    60,
+    61,
+    63
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1117,
+    60,
+    59,
+    63
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1175,
+    59,
+    59,
+    63
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1232,
+    59,
+    61,
+    64
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1290,
+    60,
+    60,
+    63
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1348,
+    59,
+    58,
+    63
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1405,
+    58,
+    64,
+    66
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    696,
+    59,
+    70,
+    64
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    624,
+    84,
+    68,
+    40
+   ]
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    492,
+    80,
+    74,
+    45
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 2,
+  "2": 2,
+  "3": 2,
+  "4": 2,
+  "5": 2,
+  "6": 2,
+  "7": 2,
+  "8": 2,
+  "9": 2,
+  "10": 2,
+  "11": 2,
+  "Console": 2,
+  "USB": 2,
+  "USB 2": 0
+ },
+ "chassis_aligned": 2,
+ "saved_quality": 0.948,
+ "saved_label": "official/vendor page www.omadanetworks.com: Omada VPN Gateway with 10G Ports 1",
+ "saved_at": "2026-10-23 19:10"
+}

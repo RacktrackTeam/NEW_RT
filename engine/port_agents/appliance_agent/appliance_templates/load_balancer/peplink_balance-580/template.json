@@ -1,0 +1,161 @@
+{
+ "vendor": "Peplink",
+ "model": "Balance 580",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "7x RJ45 | 0x SFP | 2 named port type(s): USB, Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://download.peplink.com/resources/peplink_balance_580_datasheet.pdf#page2-img13",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1931,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   810,
+   56,
+   686,
+   93
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    826,
+    73,
+    73,
+    61
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    907,
+    72,
+    74,
+    63
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    988,
+    71,
+    73,
+    63
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1070,
+    71,
+    72,
+    62
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1150,
+    71,
+    73,
+    63
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1231,
+    72,
+    73,
+    61
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1409,
+    71,
+    72,
+    63
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    671,
+    62,
+    64,
+    33
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    586,
+    72,
+    74,
+    62
+   ],
+   "name": "CONSOLE"
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    671,
+    97,
+    65,
+    36
+   ]
+  }
+ ],
+ "labels_read": [
+  "CONSOLE",
+  "CONSOLE",
+  "LAN"
+ ],
+ "chassis_votes": {
+  "1": 3,
+  "2": 3,
+  "3": 3,
+  "4": 3,
+  "5": 3,
+  "6": 2,
+  "7": 1,
+  "USB": 3,
+  "Console": 1,
+  "USB 2": 3
+ },
+ "chassis_aligned": 3,
+ "saved_quality": 0.823,
+ "saved_label": "official/vendor data sheet peplink_balance_580_datasheet.pdf p2",
+ "saved_at": "2026-10-22 20:51"
+}

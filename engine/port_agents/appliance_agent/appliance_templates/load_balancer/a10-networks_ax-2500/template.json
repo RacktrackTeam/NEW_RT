@@ -1,0 +1,216 @@
+{
+ "vendor": "A10 Networks",
+ "model": "AX 2500",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "10x RJ45 | 4x SFP | 1 named port type(s): USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.serverbasket.com/wp-content/uploads/2023/06/A10-AX-2500-AX2500-010-Load-Balancer.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1212,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   23,
+   29,
+   476,
+   119
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    35,
+    74,
+    53,
+    54
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    95,
+    74,
+    55,
+    53
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    246,
+    41,
+    55,
+    49
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    248,
+    89,
+    53,
+    47
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    310,
+    42,
+    54,
+    49
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    311,
+    88,
+    53,
+    48
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    371,
+    42,
+    56,
+    49
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    372,
+    89,
+    54,
+    48
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    433,
+    43,
+    55,
+    48
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    434,
+    89,
+    54,
+    48
+   ]
+  },
+  {
+   "id": 11,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    581,
+    90,
+    57,
+    46
+   ]
+  },
+  {
+   "id": 12,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    647,
+    90,
+    56,
+    46
+   ]
+  },
+  {
+   "id": 13,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    701,
+    90,
+    56,
+    48
+   ]
+  },
+  {
+   "id": 14,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    765,
+    90,
+    60,
+    46
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    1,
+    82,
+    32,
+    58
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 0,
+  "2": 0,
+  "3": 0,
+  "4": 0,
+  "5": 0,
+  "6": 0,
+  "7": 0,
+  "8": 0,
+  "9": 0,
+  "10": 0,
+  "11": 0,
+  "12": 0,
+  "13": 0,
+  "14": 0,
+  "USB": 0
+ },
+ "chassis_aligned": 0,
+ "saved_quality": 0.834,
+ "saved_label": "template agent (internet/image_search)",
+ "saved_at": "2026-10-22 21:19"
+}

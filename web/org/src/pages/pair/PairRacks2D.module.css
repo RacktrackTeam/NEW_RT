@@ -1,0 +1,31 @@
+/* Two racks as a topology: the drawing, one caption line, one legend line. */
+.wrap {
+  width: 100%;
+  min-width: 0;
+  background: #ffffff;
+}
+
+.caption {
+  margin: 4px 0 0;
+  min-height: 1.4em;
+  color: #4b5450;
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.caption b {
+  color: var(--ink, #1f2a24);
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.capLabel {
+  display: block;
+  color: var(--ink, #1f2a24);
+  font-size: 12px;
+}
+
+.capSt { color: #1d7f47; font-weight: 550; }
+.capSt[data-tone='bad'] { color: #c0362c; }
+.capSt[data-tone='grey'] { color: #7b827e; }

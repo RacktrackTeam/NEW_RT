@@ -1,0 +1,224 @@
+{
+ "vendor": "Barracuda",
+ "model": "F600",
+ "device": "firewall",
+ "description": "",
+ "summary": "12x RJ45 | 0x SFP | 2 named port type(s): USB, Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "http://store.jfxtechnologies.com/wp-content/uploads/2018/02/Jual-Barracuda-NextGen-Firewall-F600-Submodel-F20.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1714,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   693,
+   51,
+   922,
+   90
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    707,
+    67,
+    64,
+    60
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    770,
+    67,
+    63,
+    59
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    833,
+    67,
+    64,
+    59
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    898,
+    67,
+    65,
+    59
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    973,
+    67,
+    68,
+    60
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1040,
+    67,
+    62,
+    59
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1103,
+    67,
+    64,
+    59
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1167,
+    66,
+    65,
+    60
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1346,
+    66,
+    66,
+    62
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1412,
+    67,
+    63,
+    61
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1476,
+    67,
+    62,
+    61
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1539,
+    67,
+    63,
+    60
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    634,
+    92,
+    62,
+    38
+   ],
+   "name": "USB"
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    634,
+    55,
+    63,
+    35
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    554,
+    66,
+    72,
+    63
+   ]
+  }
+ ],
+ "labels_read": [
+  "USB",
+  "PORT3",
+  "PORT7",
+  "PORT8",
+  "PORT9",
+  "PORT12"
+ ],
+ "chassis_votes": {
+  "1": 2,
+  "2": 2,
+  "3": 2,
+  "4": 2,
+  "5": 2,
+  "6": 2,
+  "7": 2,
+  "8": 2,
+  "9": 2,
+  "10": 2,
+  "11": 2,
+  "12": 2,
+  "USB": 2,
+  "USB 2": 2,
+  "Console": 2
+ },
+ "chassis_aligned": 2,
+ "saved_quality": 0.848,
+ "saved_label": "internet/image_search",
+ "saved_at": "2026-10-19 16:07"
+}

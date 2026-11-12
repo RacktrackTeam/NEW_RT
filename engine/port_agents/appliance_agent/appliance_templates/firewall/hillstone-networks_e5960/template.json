@@ -1,0 +1,360 @@
+{
+ "vendor": "Hillstone Networks",
+ "model": "E5960",
+ "device": "firewall",
+ "description": "",
+ "summary": "12x RJ45 | 13x SFP | 2 named port type(s): USB, Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.proficomms.cz/fotocache/bigorig/E5960%20IOC-8SFP%2B.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   878,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   207,
+   22,
+   629,
+   135
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    162,
+    108,
+    44,
+    42
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    215,
+    86,
+    42,
+    33
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    216,
+    119,
+    41,
+    32
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    281,
+    87,
+    42,
+    32
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    282,
+    119,
+    41,
+    32
+   ]
+  },
+  {
+   "id": 6,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    354,
+    85,
+    43,
+    35
+   ]
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    356,
+    122,
+    40,
+    32
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    413,
+    85,
+    43,
+    35
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    414,
+    122,
+    41,
+    33
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    541,
+    30,
+    38,
+    32
+   ]
+  },
+  {
+   "id": 11,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    555,
+    88,
+    42,
+    32
+   ]
+  },
+  {
+   "id": 12,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    558,
+    119,
+    37,
+    26
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    577,
+    30,
+    35,
+    32
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    611,
+    30,
+    36,
+    32
+   ]
+  },
+  {
+   "id": 15,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    620,
+    87,
+    42,
+    32
+   ]
+  },
+  {
+   "id": 16,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    622,
+    119,
+    40,
+    26
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    644,
+    30,
+    38,
+    32
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    689,
+    30,
+    37,
+    31
+   ]
+  },
+  {
+   "id": 19,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    688,
+    87,
+    40,
+    32
+   ]
+  },
+  {
+   "id": 20,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    690,
+    118,
+    37,
+    27
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    724,
+    30,
+    35,
+    31
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    758,
+    30,
+    35,
+    30
+   ]
+  },
+  {
+   "id": 23,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    755,
+    86,
+    42,
+    33
+   ]
+  },
+  {
+   "id": 24,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    757,
+    118,
+    38,
+    26
+   ]
+  },
+  {
+   "id": 25,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    792,
+    30,
+    38,
+    31
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    76,
+    106,
+    24,
+    42
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    115,
+    109,
+    44,
+    40
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 0,
+  "2": 0,
+  "3": 0,
+  "4": 0,
+  "5": 0,
+  "6": 0,
+  "7": 0,
+  "8": 0,
+  "9": 0,
+  "10": 0,
+  "11": 0,
+  "12": 0,
+  "13": 0,
+  "14": 0,
+  "15": 0,
+  "16": 0,
+  "17": 0,
+  "18": 0,
+  "19": 0,
+  "20": 0,
+  "21": 0,
+  "22": 0,
+  "23": 0,
+  "24": 0,
+  "25": 0,
+  "USB": 0,
+  "Console": 0
+ },
+ "chassis_aligned": 0,
+ "saved_quality": 0.602,
+ "saved_label": "internet/image_search",
+ "saved_at": "2026-10-22 20:25"
+}

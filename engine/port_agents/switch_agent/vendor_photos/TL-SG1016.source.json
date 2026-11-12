@@ -1,0 +1,46 @@
+{
+ "vendor": "TP-Link",
+ "model": "TL-SG1016",
+ "url": "https://static.tp-link.com/TL-SG1016_UN_12.0_01_1499779346363t.jpg",
+ "page": "https://www.tp-link.com/us/business-networking/unmanaged-switch/tl-sg1016/",
+ "source": "official_page",
+ "agent_score": 60,
+ "quality": 0.988,
+ "photo_inliers": 19,
+ "aspect": 9.57,
+ "ports_found": 16,
+ "ports_expected": 16,
+ "row_slope": 0.0001,
+ "others": [
+  {
+   "url": "https://static.tp-link.com/upload/image-line/TL-SG1016(UN)_17.0-package_large_20230727100931q.png",
+   "quality": 0.973,
+   "inliers": 15
+  },
+  {
+   "url": "https://static.tp-link.com/upload/image-line/TL-SG1016(UN)_17.0-package_normal_20230727100931y.png",
+   "quality": 0.972,
+   "inliers": 0
+  },
+  {
+   "url": "https://static.tp-link.com/TL-SG1016_UN_12.0_01_1499779550583h.jpg",
+   "quality": 0.968,
+   "inliers": 0
+  },
+  {
+   "url": "https://static.tp-link.com/TL-SG1016_UN_12.0_03_1499779397430d.jpg",
+   "quality": 0.577,
+   "inliers": 0
+  },
+  {
+   "url": "https://static.tp-link.com/TL-SG1016_UN_12.0_02_1499779564880u.jpg",
+   "quality": 0.453,
+   "inliers": 11
+  },
+  {
+   "url": "https://static.tp-link.com/TL-SG1016_UN_12.0_02_1499779374013p.jpg",
+   "quality": 0.519,
+   "inliers": 0
+  }
+ ]
+}

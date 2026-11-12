@@ -1,0 +1,36 @@
+{
+ "vendor": "Cisco",
+ "model": "SG112-24",
+ "url": "https://www.memory4less.com/images/products/img0922a/SG112-24-NA-RF-lg.jpg",
+ "page": "https://www.memory4less.com/cisco-network-switch-sg112-24-na-rf",
+ "source": "image_search",
+ "agent_score": 20,
+ "quality": 0.901,
+ "photo_inliers": 30,
+ "aspect": 7.0,
+ "ports_found": 26,
+ "ports_expected": 26,
+ "row_slope": 0.0002,
+ "others": [
+  {
+   "url": "https://paykobo.com/media/catalog/product/image/41198cc9c/cisco-sg112-24-110-series-24-port-unmanaged-network-switch-cisg11224.jpg",
+   "quality": 0.588,
+   "inliers": 23
+  },
+  {
+   "url": "https://cdn10.bigcommerce.com/s-fvnwg3eobl/products/2557/images/2658/Cisco_SG112_24_NA__08591__38273.1589771753.1280.1280.jpg?c=2",
+   "quality": 0.551,
+   "inliers": 23
+  },
+  {
+   "url": "https://cdn11.bigcommerce.com/s-2nd68nduz7/images/stencil/1280x1280/products/3517/4080/SG112-24-NA__08628.1668109108.jpg?c=1",
+   "quality": 0.521,
+   "inliers": 0
+  },
+  {
+   "url": "https://cdn11.bigcommerce.com/s-23fyjn725n/images/stencil/1280x1280/products/35959/41281/SG112-24-NA__87074.1701644171.jpg?c=2",
+   "quality": 0.3,
+   "inliers": 0
+  }
+ ]
+}

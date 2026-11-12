@@ -1,0 +1,69 @@
+{
+ "vendor": "AKOM Technologies",
+ "model": "TGL2001",
+ "device": "gateway",
+ "description": "",
+ "summary": "2x RJ45 | 0x SFP | 1 named port type(s): Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.akom.in/E1%20T1%20%20VOIP%20Gateway/TGL2001-F.jpeg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   941,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    597,
+    59,
+    69,
+    65
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    664,
+    60,
+    70,
+    64
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    183,
+    58,
+    80,
+    67
+   ]
+  }
+ ],
+ "labels_read": [
+  "P",
+  "CONSOLE",
+  "LAN2"
+ ],
+ "chassis_votes": {
+  "1": 1,
+  "2": 1,
+  "Console": 1
+ },
+ "chassis_aligned": 1,
+ "saved_quality": 0.82,
+ "saved_label": "template agent (internet/image_search)",
+ "saved_at": "2026-10-19 15:59"
+}

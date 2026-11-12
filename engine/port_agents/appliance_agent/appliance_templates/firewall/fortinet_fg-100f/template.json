@@ -1,0 +1,452 @@
+{
+ "vendor": "Fortinet",
+ "model": "FG-100F",
+ "device": "firewall",
+ "description": "",
+ "summary": "22x RJ45 | 10x SFP | 2 named port type(s): USB, Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/zh_cn/fortigate-100f-series.pdf#page1-img454",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1057,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   106,
+   29,
+   957,
+   121
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    118,
+    42,
+    62,
+    48
+   ]
+  },
+  {
+   "id": "Mgmt",
+   "type": "management_port",
+   "poe": null,
+   "box": [
+    120,
+    94,
+    60,
+    46
+   ],
+   "name": "MGMT"
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    197,
+    42,
+    55,
+    47
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    197,
+    92,
+    55,
+    47
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    250,
+    42,
+    52,
+    47
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    250,
+    92,
+    52,
+    47
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    298,
+    42,
+    51,
+    48
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    298,
+    92,
+    50,
+    46
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    346,
+    41,
+    54,
+    48
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    346,
+    92,
+    54,
+    46
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    419,
+    42,
+    54,
+    46
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    419,
+    92,
+    54,
+    47
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    470,
+    42,
+    51,
+    46
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    470,
+    91,
+    52,
+    46
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    519,
+    42,
+    49,
+    45
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    519,
+    92,
+    50,
+    46
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    567,
+    42,
+    52,
+    46
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    566,
+    92,
+    54,
+    46
+   ]
+  },
+  {
+   "id": 18,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    634,
+    41,
+    58,
+    49
+   ]
+  },
+  {
+   "id": 19,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    635,
+    94,
+    57,
+    46
+   ]
+  },
+  {
+   "id": 20,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    702,
+    42,
+    52,
+    46
+   ]
+  },
+  {
+   "id": 21,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    701,
+    92,
+    54,
+    47
+   ]
+  },
+  {
+   "id": 22,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    753,
+    41,
+    50,
+    46
+   ]
+  },
+  {
+   "id": 23,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    753,
+    91,
+    51,
+    46
+   ]
+  },
+  {
+   "id": 24,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    802,
+    41,
+    51,
+    46
+   ]
+  },
+  {
+   "id": 25,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    802,
+    91,
+    51,
+    46
+   ]
+  },
+  {
+   "id": 26,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    853,
+    40,
+    52,
+    48
+   ]
+  },
+  {
+   "id": 27,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    851,
+    92,
+    53,
+    45
+   ]
+  },
+  {
+   "id": 28,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    918,
+    41,
+    60,
+    47
+   ]
+  },
+  {
+   "id": 29,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    919,
+    92,
+    58,
+    44
+   ]
+  },
+  {
+   "id": 30,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    994,
+    40,
+    59,
+    47
+   ]
+  },
+  {
+   "id": 31,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    993,
+    91,
+    59,
+    46
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    0,
+    80,
+    34,
+    59
+   ],
+   "name": "USB"
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    41,
+    84,
+    66,
+    55
+   ],
+   "name": "CONSOLE"
+  }
+ ],
+ "labels_read": [
+  "USB",
+  "CONSOLE",
+  "MGMT",
+  "WAN2"
+ ],
+ "chassis_votes": {
+  "1": 4,
+  "Mgmt": 4,
+  "2": 4,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "7": 4,
+  "8": 4,
+  "9": 4,
+  "10": 4,
+  "11": 4,
+  "12": 4,
+  "13": 4,
+  "14": 4,
+  "15": 4,
+  "16": 4,
+  "17": 4,
+  "18": 0,
+  "19": 0,
+  "20": 4,
+  "21": 0,
+  "22": 4,
+  "23": 0,
+  "24": 4,
+  "25": 2,
+  "26": 4,
+  "27": 0,
+  "28": 4,
+  "29": 4,
+  "30": 4,
+  "31": 4,
+  "USB": 4,
+  "Console": 4
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.957,
+ "saved_label": "official/vendor data sheet fortigate-100f-series.pdf p1",
+ "saved_at": "2026-10-15 16:13"
+}

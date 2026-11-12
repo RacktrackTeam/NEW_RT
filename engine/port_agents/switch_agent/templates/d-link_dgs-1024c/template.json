@@ -1,0 +1,292 @@
+{
+ "vendor": "D-Link",
+ "model": "DGS-1024C",
+ "description": "",
+ "summary": "24x RJ45 (ports 1-24) | detected automatically",
+ "image": "front.png",
+ "image_source": "engine/port_agents/switch_agent/switch_template_agent/template_store/images/D-LINK/DGS-1024C/29ac99e8cded9771.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   978,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   277,
+   26,
+   654,
+   129
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    289,
+    40,
+    56,
+    48
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    291,
+    93,
+    54,
+    48
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    343,
+    41,
+    51,
+    49
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    343,
+    92,
+    51,
+    49
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    391,
+    40,
+    51,
+    50
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    391,
+    92,
+    52,
+    50
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    439,
+    40,
+    51,
+    50
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    439,
+    92,
+    52,
+    51
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    488,
+    40,
+    52,
+    50
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    487,
+    92,
+    52,
+    50
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    536,
+    39,
+    55,
+    50
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    536,
+    92,
+    55,
+    51
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    618,
+    38,
+    54,
+    50
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    618,
+    91,
+    55,
+    52
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    671,
+    38,
+    51,
+    50
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    670,
+    91,
+    52,
+    51
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    719,
+    39,
+    51,
+    50
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    719,
+    92,
+    52,
+    51
+   ]
+  },
+  {
+   "id": 19,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    768,
+    38,
+    52,
+    50
+   ]
+  },
+  {
+   "id": 20,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    768,
+    92,
+    52,
+    50
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    816,
+    39,
+    52,
+    50
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    816,
+    92,
+    52,
+    50
+   ]
+  },
+  {
+   "id": 23,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    865,
+    40,
+    55,
+    50
+   ]
+  },
+  {
+   "id": 24,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    865,
+    92,
+    54,
+    50
+   ]
+  }
+ ]
+}

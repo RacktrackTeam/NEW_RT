@@ -1,0 +1,42 @@
+.head {
+  margin-bottom: var(--s3);
+}
+
+.body {
+  padding-top: 0;
+}
+
+.nameLine {
+  margin: calc(-1 * var(--s2)) 0 var(--s2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0 var(--s2);
+}
+
+.named {
+  color: var(--grey);
+  font-size: 13px;
+}
+
+.wrongRow {
+  margin-top: var(--s4);
+}
+
+
+.sideBySide {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s4);
+}
+
+.sideBySide > section {
+  min-width: 0;
+}
+
+.sideHead {
+  margin: 0 0 var(--s2);
+  font-size: 15px;
+  font-weight: 650;
+}

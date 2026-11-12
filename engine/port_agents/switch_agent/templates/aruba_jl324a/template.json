@@ -1,0 +1,319 @@
+{
+ "vendor": "Aruba",
+ "model": "JL324A",
+ "description": "",
+ "summary": "24x RJ45 | 0x SFP | front panel cut from the vendor photo, ports found by the RackTrack port models",
+ "image": "front.png",
+ "image_source": "mQ1Q7N4idEKN2W4y_aCp4g.c-r_0a33cffb-934b-4f76-96f9-fc80d42d6977.jpg?v=1758038933&width=1946",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1826,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    4,
+    62,
+    68,
+    73
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    66,
+    63,
+    64,
+    71
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    125,
+    62,
+    64,
+    70
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    184,
+    63,
+    70,
+    71
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    270,
+    64,
+    68,
+    68
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    335,
+    64,
+    63,
+    66
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    394,
+    62,
+    63,
+    68
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    454,
+    60,
+    70,
+    73
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    542,
+    62,
+    67,
+    69
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    606,
+    60,
+    62,
+    70
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    665,
+    60,
+    62,
+    70
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    724,
+    61,
+    70,
+    71
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    811,
+    60,
+    69,
+    68
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    877,
+    62,
+    62,
+    66
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    936,
+    60,
+    63,
+    69
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    995,
+    59,
+    69,
+    71
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1081,
+    58,
+    69,
+    71
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1147,
+    58,
+    62,
+    70
+   ]
+  },
+  {
+   "id": 19,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1205,
+    59,
+    62,
+    69
+   ]
+  },
+  {
+   "id": 20,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1264,
+    58,
+    70,
+    70
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1350,
+    58,
+    70,
+    70
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1416,
+    60,
+    63,
+    67
+   ]
+  },
+  {
+   "id": 23,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1475,
+    59,
+    63,
+    67
+   ]
+  },
+  {
+   "id": 24,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1535,
+    58,
+    70,
+    69
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    1727,
+    66,
+    78,
+    65
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    1644,
+    26,
+    76,
+    54
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    1643,
+    84,
+    75,
+    43
+   ]
+  }
+ ],
+ "ignore_regions_note": "cleared 24 Oct: the region ran past the image edge, so it never masked anything in the tested runs; cleared to keep the tested behaviour now that regions are clipped (review #22)"
+}

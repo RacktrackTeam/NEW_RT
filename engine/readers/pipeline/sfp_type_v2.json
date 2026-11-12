@@ -1,0 +1,25 @@
+{
+  "_about": "SFP / QSFP / OSFP cage identifier v2 (pipeline/sfp_identifier.py). Weights from the model team's port_identifier_v2_handover, 1 Oct 2026; params tuned by them on the validation set.",
+  "weights": "Models/sfp_cage_finder_tiles.pt",
+  "partner": "Models/sfp_cage_finder_full_photo.pt",
+  "params": {
+    "tiled": false,
+    "full_pass": true,
+    "ensemble": true,
+    "flip_tta": false,
+    "fuse_iou": 0.0,
+    "cand_conf": 0.2,
+    "seed_conf": 0.45,
+    "nms_iou": 0.5,
+    "ar_min": 0.6,
+    "ar_max": 2.8,
+    "size_tol": 0.25,
+    "single_conf": 0.6,
+    "min_group_mean": 0.25,
+    "prior_w": 1.0,
+    "qsfp_open_min": 2.25,
+    "open_min_n": 3,
+    "margin_min": 0.5,
+    "fallback_conf": 0.18
+  }
+}

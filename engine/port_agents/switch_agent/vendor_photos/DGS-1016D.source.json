@@ -1,0 +1,51 @@
+{
+ "vendor": "D-Link",
+ "model": "DGS-1016D",
+ "url": "http://www.dlink.com.sg/cdn/shop/files/DGS-1016D_Front_71c79e92-a5b4-4108-99a6-321e72dbf4a6.png?v=1778569551",
+ "page": "https://www.dlink.com.sg/products/dgs-1016d-16-port-gigabit-desktop-rackmount-switch-in-metal-casing-dgs-1016d",
+ "source": "official_page",
+ "agent_score": 70,
+ "quality": 0.913,
+ "photo_inliers": 0,
+ "aspect": 8.15,
+ "ports_found": 16,
+ "ports_expected": 16,
+ "row_slope": 0.0041,
+ "others": [
+  {
+   "url": "http://www.dlink.com.my/cdn/shop/files/0017-9087622650764364355.png?v=1766378146",
+   "quality": 0.467,
+   "inliers": 24
+  },
+  {
+   "url": "https://www.dlink.com.my/cdn/shop/files/DGS-1016D_Back.png?v=1766378147",
+   "quality": 0.562,
+   "inliers": 0
+  },
+  {
+   "url": "https://www.dlink.com.sg/cdn/shop/files/DGS-1016D_Side_cb3d7e47-5766-46a8-b9d9-e7d8dd0014ef.png?v=1778569552",
+   "quality": 0.514,
+   "inliers": 0
+  },
+  {
+   "url": "https://www.dlink.com.my/cdn/shop/files/DGS-1016D_Side.png?v=1766378146",
+   "quality": 0.3,
+   "inliers": 0
+  },
+  {
+   "url": "https://www.dlink.com.sg/cdn/shop/files/Main_8d40c27c-7194-49ba-a957-ae5d57bb25e6.jpg?v=1755840052&width=1521",
+   "quality": 0.328,
+   "inliers": 0
+  },
+  {
+   "url": "https://www.dlink.com.sg/cdn/shop/files/Main-1_108a0fd9-5202-4b8f-b21a-dc47522a8e33.jpg?v=1755840087&width=1521",
+   "quality": 0.328,
+   "inliers": 0
+  },
+  {
+   "url": "https://www.dlink.com.sg/cdn/shop/files/Main-2_831a0b9d-0d50-41ad-815f-507173c56c55.jpg?v=1755840130&width=1521",
+   "quality": 0.328,
+   "inliers": 0
+  }
+ ]
+}

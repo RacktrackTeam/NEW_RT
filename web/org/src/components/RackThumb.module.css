@@ -1,0 +1,77 @@
+.thumbs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: var(--s4) var(--s3);
+}
+
+.thumb {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  font: inherit;
+}
+
+.tph {
+  display: block;
+  width: 100%;
+  aspect-ratio: 104 / 168;
+  margin-bottom: var(--s2);
+  overflow: hidden;
+  border-radius: var(--r);
+  background: var(--photo);
+  box-shadow: var(--lift);
+}
+
+.img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.none {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--grey);
+  background: #fff;
+  color: var(--grey);
+  font-size: var(--t4);
+}
+
+.tn {
+  font-size: var(--t3);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.rm {
+  font-size: var(--t4);
+  color: var(--grey);
+}
+
+.st {
+  font-size: var(--t4);
+}
+
+.thumb:hover .tn {
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+}
+
+@media (min-width: 1024px) {
+  .thumbs {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--s6);
+  }
+}

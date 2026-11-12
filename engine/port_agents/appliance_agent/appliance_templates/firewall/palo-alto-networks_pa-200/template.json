@@ -1,0 +1,108 @@
+{
+ "vendor": "Palo Alto Networks",
+ "model": "PA-200",
+ "device": "firewall",
+ "description": "",
+ "summary": "5x RJ45 | 0x SFP | 1 named port type(s): USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://media.paloaltonetworks.com/documents/specsheet-pa-200.pdf#page1-img548",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   710,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   18,
+   37,
+   321,
+   97
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    30,
+    49,
+    51,
+    46
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    82,
+    52,
+    54,
+    48
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    135,
+    57,
+    54,
+    49
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    188,
+    62,
+    61,
+    51
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    258,
+    68,
+    70,
+    55
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    335,
+    72,
+    36,
+    58
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 4,
+  "2": 4,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "USB": 4
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.777,
+ "saved_label": "official/vendor data sheet specsheet-pa-200.pdf p1",
+ "saved_at": "2026-10-22 20:36"
+}

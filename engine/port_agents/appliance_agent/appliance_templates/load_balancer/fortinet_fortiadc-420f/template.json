@@ -1,0 +1,221 @@
+{
+ "vendor": "Fortinet",
+ "model": "FortiADC 420F",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "4x RJ45 | 8x SFP | 2 named port type(s): USB, Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/FortiADC.pdf#page8-img162",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1322,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   609,
+   32,
+   151,
+   127
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    622,
+    44,
+    56,
+    53
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    622,
+    99,
+    55,
+    46
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    691,
+    44,
+    58,
+    53
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    693,
+    99,
+    54,
+    48
+   ]
+  },
+  {
+   "id": 5,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    759,
+    44,
+    56,
+    55
+   ]
+  },
+  {
+   "id": 6,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    760,
+    100,
+    56,
+    50
+   ]
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    823,
+    43,
+    56,
+    55
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    822,
+    100,
+    56,
+    49
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1060,
+    98,
+    54,
+    51
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1112,
+    100,
+    45,
+    48
+   ]
+  },
+  {
+   "id": 11,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1155,
+    100,
+    45,
+    48
+   ]
+  },
+  {
+   "id": 12,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1197,
+    99,
+    50,
+    49
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    560,
+    112,
+    51,
+    30
+   ]
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    560,
+    81,
+    51,
+    30
+   ],
+   "name": "USB"
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    491,
+    92,
+    61,
+    52
+   ],
+   "name": "CONSOLE"
+  }
+ ],
+ "labels_read": [
+  "USB",
+  "CONSOLE"
+ ],
+ "chassis_votes": {
+  "1": 1,
+  "2": 2,
+  "3": 1,
+  "4": 2,
+  "5": 2,
+  "6": 2,
+  "7": 1,
+  "8": 2,
+  "9": 1,
+  "10": 1,
+  "11": 1,
+  "12": 1,
+  "USB": 2,
+  "USB 2": 2,
+  "Console": 2
+ },
+ "chassis_aligned": 2,
+ "saved_quality": 0.98,
+ "saved_label": "official/vendor data sheet FortiADC.pdf p8",
+ "saved_at": "2026-10-19 16:13"
+}

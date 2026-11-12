@@ -1,0 +1,336 @@
+{
+ "vendor": "TP-Link",
+ "model": "TL-602420P",
+ "description": "",
+ "summary": "24x RJ45 (ports 1-24) | 4x SFP (25, 26, 27, 28) | detected automatically",
+ "image": "front.png",
+ "image_source": "https://static.tp-link.com/res/images/products/gallery/TL-SG2424P.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1589,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   643,
+   25,
+   717,
+   135
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    656,
+    39,
+    61,
+    53
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    658,
+    93,
+    59,
+    53
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    714,
+    39,
+    54,
+    52
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    714,
+    92,
+    54,
+    54
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    765,
+    39,
+    54,
+    52
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    765,
+    92,
+    54,
+    54
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    816,
+    38,
+    58,
+    53
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    816,
+    93,
+    58,
+    54
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    895,
+    39,
+    57,
+    50
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    894,
+    92,
+    58,
+    54
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    950,
+    39,
+    55,
+    51
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    949,
+    92,
+    54,
+    54
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1001,
+    40,
+    54,
+    51
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1000,
+    92,
+    55,
+    55
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1053,
+    40,
+    56,
+    50
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1051,
+    92,
+    58,
+    55
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1132,
+    40,
+    56,
+    49
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1129,
+    93,
+    59,
+    55
+   ]
+  },
+  {
+   "id": 19,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1186,
+    40,
+    54,
+    50
+   ]
+  },
+  {
+   "id": 20,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1185,
+    93,
+    55,
+    54
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1238,
+    40,
+    54,
+    50
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1237,
+    92,
+    55,
+    54
+   ]
+  },
+  {
+   "id": 23,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1291,
+    41,
+    54,
+    49
+   ]
+  },
+  {
+   "id": 24,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1290,
+    93,
+    58,
+    53
+   ]
+  },
+  {
+   "id": 25,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1372,
+    37,
+    63,
+    53
+   ]
+  },
+  {
+   "id": 26,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1372,
+    92,
+    64,
+    54
+   ]
+  },
+  {
+   "id": 27,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1452,
+    37,
+    65,
+    54
+   ]
+  },
+  {
+   "id": 28,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1453,
+    92,
+    64,
+    54
+   ]
+  }
+ ]
+}

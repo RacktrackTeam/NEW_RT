@@ -1,0 +1,292 @@
+/* The 2D rack drawing in the app's own look (racktrack.ai: sage ground, ink, signal green):
+   the rack as a white rounded frame with soft depth, devices as tiles tinted by their kind that
+   slide in one after the other, free units as green dotted slots, port cells on the tiles. */
+.wrap {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  padding: 6px 0 40px;
+  background: transparent;
+  animation: wrapIn 0.5s ease both;
+}
+
+/* a green scan sweeps the drawing once as it comes up */
+.wrap::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -12%;
+  height: 14%;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(31, 214, 124, 0) 0%, rgba(31, 214, 124, 0.16) 55%, rgba(31, 214, 124, 0.55) 98%, rgba(31, 214, 124, 0) 100%);
+  animation: wrapScan 1.6s cubic-bezier(0.4, 0, 0.2, 1) 0.35s both;
+}
+
+@keyframes wrapIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes wrapScan { from { top: -14%; opacity: 1; } 90% { opacity: 1; } to { top: 100%; opacity: 0; } }
+
+.svg {
+  display: block;
+  margin: 0 auto;
+  font-family: var(--font, 'Inter', system-ui, sans-serif);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.frame {
+  fill: #ffffff;
+  stroke: none;
+  filter: drop-shadow(0 16px 28px rgba(17, 22, 20, 0.16));
+}
+
+.titleRule {
+  stroke: rgba(17, 22, 20, 0.07);
+  stroke-width: 1;
+}
+
+.rackName {
+  fill: #111614;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.rackUnits {
+  fill: #4a544f;
+  font-size: 10.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--mono, 'JetBrains Mono', ui-monospace, Menlo, monospace);
+}
+
+.ruler {
+  fill: #9aa39e;
+  font-family: var(--mono, 'JetBrains Mono', ui-monospace, Menlo, monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+.slot {
+  fill: rgba(31, 214, 124, 0.07);
+  stroke: rgba(4, 112, 63, 0.35);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  animation: slotIn 0.6s ease both;
+  animation-delay: calc(var(--i, 0) * 40ms + 0.3s);
+}
+
+@keyframes slotIn { from { opacity: 0; } to { opacity: 1; } }
+
+.dev {
+  transition: opacity 0.15s ease;
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: tileIn 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 45ms + 0.1s);
+}
+
+@keyframes tileIn { from { opacity: 0; transform: translateX(-12px) scaleX(0.94); } to { opacity: 1; transform: none; } }
+
+.tap {
+  cursor: pointer;
+  outline: none;
+}
+
+.block {
+  fill: color-mix(in srgb, var(--k, #9aa39e) 8%, #ffffff);
+  stroke: rgba(17, 22, 20, 0.08);
+  stroke-width: 1;
+  filter: drop-shadow(0 1px 1px rgba(17, 22, 20, 0.08));
+  transition: fill 0.15s ease, stroke 0.15s ease, filter 0.2s ease;
+}
+
+.block[data-unknown] {
+  fill: #f1f3f0;
+  stroke: rgba(17, 22, 20, 0.06);
+}
+
+.block[data-tone='ok'] { fill: #e4f7ec; stroke: #a9e3c3; }
+.block[data-tone='warn'] { fill: #fff1e0; stroke: #f3cfa5; }
+.block[data-tone='bad'] { fill: #fbe9e8; stroke: #e9bdb9; }
+
+.tap:hover .block,
+.tap:focus-visible .block {
+  stroke: rgba(17, 22, 20, 0.3);
+}
+
+.devOn .block {
+  stroke: #111614;
+  stroke-width: 1.6;
+  filter: drop-shadow(0 0 7px rgba(31, 214, 124, 0.75));
+  animation: glowOn 1.8s ease-in-out infinite;
+}
+
+@keyframes glowOn { 0%, 100% { filter: drop-shadow(0 0 3px rgba(31, 214, 124, 0.45)); } 50% { filter: drop-shadow(0 0 10px rgba(31, 214, 124, 0.95)); } }
+
+.blockName {
+  fill: #111614;
+  font-weight: 600;
+}
+
+.blockGrey {
+  fill: #8d948f;
+  font-weight: 500;
+}
+
+.sub {
+  fill: #6a736e;
+  font-size: 10px;
+}
+
+.kind {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.pcell {
+  fill: rgba(17, 22, 20, 0.12);
+  animation: cellIn 0.3s ease both;
+  animation-delay: calc(var(--i, 0) * 45ms + 0.5s);
+}
+
+.pcell[data-on] {
+  fill: #1fd67c;
+}
+
+@keyframes cellIn { from { opacity: 0; } to { opacity: 1; } }
+
+.cable {
+  cursor: pointer;
+  outline: none;
+  transition: opacity 0.15s ease;
+}
+
+.hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 14;
+}
+
+.line {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cable:hover .line,
+.cable:focus-visible .line {
+  stroke-width: 3;
+}
+
+.countBox {
+  fill: #ffffff;
+  stroke-width: 1;
+}
+
+.count {
+  font-size: 9px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.pill {
+  fill: #ffffff;
+  stroke: rgba(17, 22, 20, 0.12);
+  stroke-width: 1;
+}
+
+.tag {
+  fill: #4a544f;
+  font-weight: 500;
+}
+
+.tap:hover .pill,
+.tap:focus-visible .pill {
+  stroke: rgba(17, 22, 20, 0.3);
+}
+
+.devOn .pill {
+  stroke: #111614;
+  stroke-width: 1.5;
+}
+
+.devOn .tag {
+  fill: #111614;
+  font-weight: 650;
+}
+
+.faded {
+  opacity: 0.32;
+}
+
+.fadedSoft {
+  opacity: 0.2;
+}
+
+.fadedCable {
+  opacity: 0.2;
+}
+
+/* Zoom: three round white buttons with soft depth in the bottom-right corner. */
+.zoom {
+  position: absolute;
+  right: 4px;
+  bottom: 2px;
+  display: flex;
+  gap: 6px;
+}
+
+.zbtn {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #111614;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(17, 22, 20, 0.06), 0 10px 22px -12px rgba(17, 22, 20, 0.4);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zbtn:hover:not(:disabled) {
+  color: #04703f;
+}
+
+.zbtn:disabled {
+  color: #b8bfba;
+  cursor: default;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 6px 0 0;
+  color: #6a736e;
+  font-size: 12px;
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lkey {
+  display: inline-block;
+  width: 16px;
+  height: 0;
+  border-top: 2px solid var(--k);
+  border-radius: 1px;
+}
+
+.lkeyDash {
+  border-top-style: dashed;
+}

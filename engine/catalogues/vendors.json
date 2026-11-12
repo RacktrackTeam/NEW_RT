@@ -1,0 +1,1727 @@
+[
+ {
+  "name": "Adtran",
+  "domains": [
+   "adtran.com"
+  ],
+  "aliases": [
+   "adtran"
+  ],
+  "model_prefixes": [
+   "^NETVANTA",
+   "^NV"
+  ],
+  "sitemaps": [
+   "https://www.adtran.com/en/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Advantech",
+  "domains": [
+   "advantech.com"
+  ],
+  "aliases": [
+   "advantech"
+  ],
+  "model_prefixes": [
+   "^EKI-"
+  ],
+  "sitemaps": [
+   "https://www.advantech.com/emt/sitemap/index",
+   "https://www.advantech.com/en-au/sitemap/index",
+   "https://www.advantech.com/en-eu/sitemap/index",
+   "https://www.advantech.com/en-sg/sitemap/index",
+   "https://www.advantech.com/en-us/sitemap/index"
+  ]
+ },
+ {
+  "name": "Aerohive",
+  "domains": [
+   "aerohive.com",
+   "extremenetworks.com"
+  ],
+  "aliases": [
+   "aerohive"
+  ],
+  "model_prefixes": [
+   "^SR2\\d{3}"
+  ],
+  "sitemaps": [
+   "https://www.extremenetworks.com/sitemap.xml",
+   "https://www.extremenetworks.com/au/sitemap.xml",
+   "https://www.extremenetworks.com/es/sitemap.xml",
+   "https://www.extremenetworks.com/fr/sitemap.xml",
+   "https://www.extremenetworks.com/de/sitemap.xml"
+  ]
+ },
+ {
+  "name": "AirPro",
+  "domains": [
+   "airpro.com.cn"
+  ],
+  "aliases": [
+   "airpro"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "Alaxala",
+  "domains": [
+   "alaxala.com"
+  ],
+  "aliases": [
+   "alaxala"
+  ],
+  "model_prefixes": [
+   "^AX\\d"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Alcatel-Lucent Enterprise",
+  "domains": [
+   "al-enterprise.com"
+  ],
+  "aliases": [
+   "alcatel",
+   "lucent",
+   "omniswitch"
+  ],
+  "model_prefixes": [
+   "^OS\\d{4}"
+  ],
+  "sitemaps": [
+   "https://www.al-enterprise.com/en/sitemap.xml",
+   "https://www.al-enterprise.com/fr-fr/sitemap.xml",
+   "https://www.al-enterprise.com/de-de/sitemap.xml",
+   "https://www.al-enterprise.com/es-es/sitemap.xml",
+   "https://www.al-enterprise.com/zh-cn/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Allied Telesis",
+  "domains": [
+   "alliedtelesis.com"
+  ],
+  "aliases": [
+   "allied",
+   "telesis"
+  ],
+  "model_prefixes": [
+   "^AT-",
+   "^X\\d{3}-",
+   "^GS9\\d\\d"
+  ],
+  "sitemaps": [
+   "https://www.alliedtelesis.com/sitemap_index.xml"
+  ]
+ },
+ {
+  "name": "Alpha Networks",
+  "domains": [
+   "alphanetworks.com"
+  ],
+  "aliases": [
+   "alpha networks"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "AMG Systems",
+  "domains": [
+   "amgsystems.com"
+  ],
+  "aliases": [
+   "amg"
+  ],
+  "model_prefixes": [
+   "^AMG\\d"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Antaira",
+  "domains": [
+   "antaira.com"
+  ],
+  "aliases": [
+   "antaira"
+  ],
+  "model_prefixes": [
+   "^LNX-",
+   "^LMX-",
+   "^LMP-"
+  ],
+  "sitemaps": [
+   "https://www.antaira.com/Sitemap.xml"
+  ]
+ },
+ {
+  "name": "Araknis",
+  "domains": [
+   "snapone.com",
+   "araknisnetworks.com"
+  ],
+  "aliases": [
+   "araknis"
+  ],
+  "model_prefixes": [
+   "^AN-"
+  ],
+  "sitemaps": [
+   "https://www.adiglobal.com/sitemap.xml",
+   "https://araknisnetworks.com/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Arista",
+  "domains": [
+   "arista.com"
+  ],
+  "aliases": [
+   "arista"
+  ],
+  "model_prefixes": [
+   "^DCS-",
+   "^CCS-"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Aruba",
+  "domains": [
+   "arubanetworks.com",
+   "hpe.com"
+  ],
+  "aliases": [
+   "aruba",
+   "hpe"
+  ],
+  "model_prefixes": [
+   "^JL\\d{3}",
+   "^J9\\d{3}",
+   "^R8[A-Z]\\d"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Asterfusion",
+  "domains": [
+   "asterfusion.com",
+   "cloudswit.ch"
+  ],
+  "aliases": [
+   "asterfusion"
+  ],
+  "model_prefixes": [
+   "^CX\\d"
+  ],
+  "sitemaps": [
+   "https://cloudswit.ch/sitemap.xml"
+  ]
+ },
+ {
+  "name": "AvaLan Wireless",
+  "domains": [
+   "avalanwireless.com"
+  ],
+  "aliases": [
+   "avalan"
+  ],
+  "model_prefixes": [
+   "^AW-"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Avaya",
+  "domains": [
+   "avaya.com",
+   "extremenetworks.com"
+  ],
+  "aliases": [
+   "avaya"
+  ],
+  "model_prefixes": [
+   "^ERS",
+   "^VSP"
+  ],
+  "sitemaps": [
+   "https://www.avaya.com/en_us.sitemap.xml",
+   "https://www.avaya.com/de_de.sitemap.xml",
+   "https://www.avaya.com/es_mx.sitemap.xml",
+   "https://www.avaya.com/pt_br.sitemap.xml",
+   "https://www.avaya.com/fr_fr.sitemap.xml",
+   "https://www.extremenetworks.com/sitemap.xml",
+   "https://www.extremenetworks.com/au/sitemap.xml",
+   "https://www.extremenetworks.com/es/sitemap.xml",
+   "https://www.extremenetworks.com/fr/sitemap.xml",
+   "https://www.extremenetworks.com/de/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Beckhoff",
+  "domains": [
+   "beckhoff.com"
+  ],
+  "aliases": [
+   "beckhoff"
+  ],
+  "model_prefixes": [
+   "^CU\\d{4}"
+  ],
+  "sitemaps": [
+   "https://www.beckhoff.com/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Beijer Electronics",
+  "domains": [
+   "beijerelectronics.com"
+  ],
+  "aliases": [
+   "beijer",
+   "westermo"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "Beijing Fibridge",
+  "domains": [
+   "fibridge.com"
+  ],
+  "aliases": [
+   "fibridge"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "Belden",
+  "domains": [
+   "belden.com",
+   "hirschmann.com"
+  ],
+  "aliases": [
+   "belden",
+   "hirschmann"
+  ],
+  "model_prefixes": [
+   "^RSP",
+   "^MSP",
+   "^GRS",
+   "^BRS"
+  ],
+  "sitemaps": [
+   "https://www.belden.com/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Billion Electric",
+  "domains": [
+   "billion.com"
+  ],
+  "aliases": [
+   "billion"
+  ],
+  "model_prefixes": [
+   "^BIPAC"
+  ],
+  "sitemaps": [
+   "https://www.billion.com/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Brainboxes",
+  "domains": [
+   "brainboxes.com"
+  ],
+  "aliases": [
+   "brainboxes"
+  ],
+  "model_prefixes": [
+   "^SW-\\d"
+  ],
+  "sitemaps": [
+   "https://www.brainboxes.com/sitemap_index.xml"
+  ]
+ },
+ {
+  "name": "Brocade",
+  "domains": [
+   "broadcom.com",
+   "ruckusnetworks.com"
+  ],
+  "aliases": [
+   "brocade"
+  ],
+  "model_prefixes": [
+   "^ICX\\d",
+   "^FCX"
+  ],
+  "sitemaps": [
+   "https://www.broadcom.com/sitemap.xml",
+   "https://www.ruckusnetworks.com/sitemap.xml",
+   "https://www.ruckusnetworks.com/ethernetswitchessitemap.xml",
+   "https://www.ruckusnetworks.com/networkcontrolsitemap.xml",
+   "https://www.ruckusnetworks.com/accessoriessitemap.xml",
+   "https://www.ruckusnetworks.com/wirelessaccesssitemap.xml"
+  ]
+ },
+ {
+  "name": "Buffalo",
+  "domains": [
+   "buffalotech.com",
+   "buffalo.jp"
+  ],
+  "aliases": [
+   "buffalo"
+  ],
+  "model_prefixes": [
+   "^BS-"
+  ],
+  "sitemaps": [
+   "https://www.buffalo.jp/sitemap.xml",
+   "https://www.buffalo.jp/sitemap_all_01.xml",
+   "https://www.buffalo.jp/sitemap_all_02.xml",
+   "https://www.buffalo.jp/sitemap_all_03.xml",
+   "https://www.buffalo.jp/sitemap_all_04.xml"
+  ]
+ },
+ {
+  "name": "C-Data",
+  "domains": [
+   "cdatatec.com"
+  ],
+  "aliases": [
+   "c-data",
+   "cdata"
+  ],
+  "model_prefixes": [
+   "^FD\\d"
+  ],
+  "sitemaps": [
+   "https://www.cdatatec.com/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Celestica",
+  "domains": [
+   "celestica.com"
+  ],
+  "aliases": [
+   "celestica"
+  ],
+  "model_prefixes": [
+   "^DX\\d",
+   "^DS\\d"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "CERIO",
+  "domains": [
+   "cerio.com.tw"
+  ],
+  "aliases": [
+   "cerio"
+  ],
+  "model_prefixes": [],
+  "sitemaps": [
+   "https://www.cerio.com.tw/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Chilinkiot",
+  "domains": [
+   "chilinkiot.com"
+  ],
+  "aliases": [
+   "chilink"
+  ],
+  "model_prefixes": [],
+  "sitemaps": [
+   "https://www.chilinkiot.com/sitemaps.xml"
+  ]
+ },
+ {
+  "name": "Ciena",
+  "domains": [
+   "ciena.com"
+  ],
+  "aliases": [
+   "ciena"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "Cisco",
+  "domains": [
+   "cisco.com"
+  ],
+  "aliases": [
+   "cisco",
+   "catalyst",
+   "meraki",
+   "nexus"
+  ],
+  "model_prefixes": [
+   "^WS-C",
+   "^C9\\d{3}",
+   "^C1000",
+   "^C1200",
+   "^C1300",
+   "^CBS\\d",
+   "^SG\\d{3}",
+   "^SF\\d{3}",
+   "^N\\dK",
+   "^MS\\d{3}",
+   "^IE-?\\d"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "D-Link",
+  "domains": [
+   "dlink.com",
+   "dlink.com.tw"
+  ],
+  "aliases": [
+   "d-link",
+   "dlink"
+  ],
+  "model_prefixes": [
+   "^DGS-",
+   "^DES-",
+   "^DXS-",
+   "^DMS-"
+  ],
+  "sitemaps": [
+   "https://www.dlink.com/sitemap-index.aspx"
+  ]
+ },
+ {
+  "name": "Datto",
+  "domains": [
+   "datto.com"
+  ],
+  "aliases": [
+   "datto"
+  ],
+  "model_prefixes": [],
+  "sitemaps": [
+   "https://www.datto.com/sitemap_index.xml",
+   "https://www.datto.com/fr/sitemap_index.xml",
+   "https://www.datto.com/da/sitemap_index.xml",
+   "https://www.datto.com/de/sitemap_index.xml",
+   "https://www.datto.com/nl/sitemap_index.xml"
+  ]
+ },
+ {
+  "name": "Dell",
+  "domains": [
+   "dell.com"
+  ],
+  "aliases": [
+   "dell",
+   "powerconnect",
+   "powerswitch"
+  ],
+  "model_prefixes": [
+   "^N\\d{4}",
+   "^S\\d{4}-",
+   "^X10\\d\\d"
+  ],
+  "sitemaps": [
+   "https://www.dell.com/index-sr-sitemap.xml.gz",
+   "https://www.dell.com/index-deals-href-sitemap.xml.gz",
+   "https://www.dell.com/index-product-pages-hreflang-sitemap.xml.gz",
+   "https://www.dell.com/index-sitemap.xml.gz",
+   "https://www.dell.com/index-snp-apj-sitemap.xml.gz"
+  ]
+ },
+ {
+  "name": "Delta Electronics (Agema)",
+  "domains": [
+   "deltaww.com",
+   "agemasystems.com"
+  ],
+  "aliases": [
+   "delta",
+   "agema"
+  ],
+  "model_prefixes": [
+   "^DVS-",
+   "^AG\\d"
+  ],
+  "sitemaps": [
+   "https://www.deltaww.com/sitemap.xml"
+  ]
+ },
+ {
+  "name": "DrayTek",
+  "domains": [
+   "draytek.com"
+  ],
+  "aliases": [
+   "draytek",
+   "vigorswitch"
+  ],
+  "model_prefixes": [
+   "^VIGORSWITCH"
+  ],
+  "sitemaps": [
+   "https://www.draytek.com/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Edgecore",
+  "domains": [
+   "edge-core.com"
+  ],
+  "aliases": [
+   "edgecore",
+   "edge-core"
+  ],
+  "model_prefixes": [
+   "^ECS\\d",
+   "^AS\\d{4}",
+   "^EPS\\d"
+  ],
+  "sitemaps": [
+   "https://www.edge-core.com/sitemap_index.xml"
+  ]
+ },
+ {
+  "name": "Edimax",
+  "domains": [
+   "edimax.com"
+  ],
+  "aliases": [
+   "edimax"
+  ],
+  "model_prefixes": [
+   "^GS-\\d"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "eGenius",
+  "domains": [
+   "egenius.com.tw"
+  ],
+  "aliases": [
+   "egenius"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "EtherWAN",
+  "domains": [
+   "etherwan.com"
+  ],
+  "aliases": [
+   "etherwan"
+  ],
+  "model_prefixes": [
+   "^EX\\d{5}"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Extreme Networks",
+  "domains": [
+   "extremenetworks.com"
+  ],
+  "aliases": [
+   "extreme"
+  ],
+  "model_prefixes": [
+   "^X4\\d\\d",
+   "^X6\\d\\d",
+   "^5[0-9]{3}-",
+   "^VSP"
+  ],
+  "sitemaps": [
+   "https://www.extremenetworks.com/sitemap.xml",
+   "https://www.extremenetworks.com/au/sitemap.xml",
+   "https://www.extremenetworks.com/es/sitemap.xml",
+   "https://www.extremenetworks.com/fr/sitemap.xml",
+   "https://www.extremenetworks.com/de/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Fortinet",
+  "domains": [
+   "fortinet.com"
+  ],
+  "aliases": [
+   "fortinet",
+   "fortiswitch"
+  ],
+  "model_prefixes": [
+   "^FS-\\d",
+   "^FORTISWITCH"
+  ],
+  "sitemaps": [
+   "https://www.fortinet.com/sitemap-index.xml",
+   "https://www.fortinet.com/sitemap.xml",
+   "https://www.fortinet.com/it/sitemap.xml",
+   "https://www.fortinet.com/de/sitemap.xml",
+   "https://www.fortinet.com/fr/sitemap.xml"
+  ]
+ },
+ {
+  "name": "FS",
+  "domains": [
+   "fs.com"
+  ],
+  "aliases": [
+   "fs.com"
+  ],
+  "model_prefixes": [
+   "^S\\d{4}-\\d",
+   "^N\\d{4}-"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "H3C",
+  "domains": [
+   "h3c.com"
+  ],
+  "aliases": [
+   "h3c"
+  ],
+  "model_prefixes": [
+   "^S\\d{4}[A-Z]?-",
+   "^LS-"
+  ],
+  "sitemaps": [
+   "https://www.h3c.com/cn/sitemap.xml"
+  ]
+ },
+ {
+  "name": "HARTING",
+  "domains": [
+   "harting.com"
+  ],
+  "aliases": [
+   "harting"
+  ],
+  "model_prefixes": [
+   "^HA-VIS"
+  ],
+  "sitemaps": [
+   "https://www.harting.com/sitemap-index.xml"
+  ]
+ },
+ {
+  "name": "Hikvision",
+  "domains": [
+   "hikvision.com"
+  ],
+  "aliases": [
+   "hikvision",
+   "hik"
+  ],
+  "model_prefixes": [
+   "^DS-3E"
+  ],
+  "sitemaps": [
+   "https://www.hikvision.com/en/sitemap.xml",
+   "https://www.hikvision.com/africa/sitemap.xml",
+   "https://www.hikvision.com/ar/sitemap.xml",
+   "https://www.hikvision.com/au-en/sitemap.xml",
+   "https://www.hikvision.com/cn/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Huawei",
+  "domains": [
+   "huawei.com",
+   "e.huawei.com"
+  ],
+  "aliases": [
+   "huawei"
+  ],
+  "model_prefixes": [
+   "^S\\d{4}-",
+   "^CE\\d{4}",
+   "^S57",
+   "^S67"
+  ],
+  "sitemaps": [
+   "https://www.huawei.com/href-sitemap-index.xml",
+   "https://www.huawei.com/kz/href-sitemap-kk-KZ.xml",
+   "https://www.huawei.com/kz-ru/href-sitemap-ru-KZ.xml",
+   "https://www.huawei.com/tr/href-sitemap-tr.xml",
+   "https://www.huawei.com/ua/href-sitemap-uk.xml"
+  ]
+ },
+ {
+  "name": "ICP",
+  "domains": [
+   "icpdas.com"
+  ],
+  "aliases": [
+   "icp das",
+   "icp"
+  ],
+  "model_prefixes": [
+   "^NS-\\d",
+   "^NSM-"
+  ],
+  "sitemaps": [
+   "https://www.icpdas.com/sitemap.xml.gz"
+  ]
+ },
+ {
+  "name": "Intellisystem",
+  "domains": [
+   "intellisystem.it"
+  ],
+  "aliases": [
+   "intellisystem"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "IP Infusion",
+  "domains": [
+   "ipinfusion.com"
+  ],
+  "aliases": [
+   "ip infusion",
+   "ocnos"
+  ],
+  "model_prefixes": [],
+  "sitemaps": [
+   "https://www.ipinfusion.com/sitemap_index.xml"
+  ]
+ },
+ {
+  "name": "Juniper",
+  "domains": [
+   "juniper.net"
+  ],
+  "aliases": [
+   "juniper"
+  ],
+  "model_prefixes": [
+   "^EX\\d{4}",
+   "^QFX\\d",
+   "^EX-"
+  ],
+  "sitemaps": [
+   "https://www.juniper.net/content/dam/www/utils/xml-sitemaps/sitemap.xml",
+   "https://www.juniper.net/documentation/sitemap/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Korenix",
+  "domains": [
+   "korenix.com"
+  ],
+  "aliases": [
+   "korenix"
+  ],
+  "model_prefixes": [
+   "^JETNET"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Kyland",
+  "domains": [
+   "kyland.com"
+  ],
+  "aliases": [
+   "kyland"
+  ],
+  "model_prefixes": [
+   "^SICOM",
+   "^OPAL"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "L-com",
+  "domains": [
+   "l-com.com"
+  ],
+  "aliases": [
+   "l-com"
+  ],
+  "model_prefixes": [
+   "^ES\\d"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Lantech",
+  "domains": [
+   "lantechcom.tw"
+  ],
+  "aliases": [
+   "lantech"
+  ],
+  "model_prefixes": [
+   "^IES-",
+   "^IPES-"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Lantronix",
+  "domains": [
+   "lantronix.com"
+  ],
+  "aliases": [
+   "lantronix"
+  ],
+  "model_prefixes": [
+   "^SM\\d",
+   "^SISPM"
+  ],
+  "sitemaps": [
+   "https://www.lantronix.com/sitemap_index.xml"
+  ]
+ },
+ {
+  "name": "Lenovo",
+  "domains": [
+   "lenovo.com"
+  ],
+  "aliases": [
+   "lenovo",
+   "thinksystem"
+  ],
+  "model_prefixes": [
+   "^NE\\d{4}",
+   "^G\\d{4}"
+  ],
+  "sitemaps": [
+   "https://www.lenovo.com/sitemap.xml"
+  ]
+ },
+ {
+  "name": "LINKOH",
+  "domains": [
+   "linkoh.com"
+  ],
+  "aliases": [
+   "linkoh"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "Linksys",
+  "domains": [
+   "linksys.com"
+  ],
+  "aliases": [
+   "linksys"
+  ],
+  "model_prefixes": [
+   "^LGS\\d",
+   "^SE\\d{4}"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Maple Systems",
+  "domains": [
+   "maplesystems.com"
+  ],
+  "aliases": [
+   "maple"
+  ],
+  "model_prefixes": [
+   "^IMX\\d"
+  ],
+  "sitemaps": [
+   "https://maplesystems.com/sitemap_index.xml"
+  ]
+ },
+ {
+  "name": "Micas Networks",
+  "domains": [
+   "micasnetworks.com"
+  ],
+  "aliases": [
+   "micas"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "MICROSENS",
+  "domains": [
+   "microsens.com"
+  ],
+  "aliases": [
+   "microsens"
+  ],
+  "model_prefixes": [
+   "^MS\\d{6}"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "MikroTik",
+  "domains": [
+   "mikrotik.com"
+  ],
+  "aliases": [
+   "mikrotik",
+   "routerboard"
+  ],
+  "model_prefixes": [
+   "^CRS\\d",
+   "^CSS\\d",
+   "^CCR\\d",
+   "^RB\\d"
+  ],
+  "sitemaps": [
+   "https://mikrotik.com/sitemap.xml"
+  ]
+ },
+ {
+  "name": "MOXA",
+  "domains": [
+   "moxa.com"
+  ],
+  "aliases": [
+   "moxa"
+  ],
+  "model_prefixes": [
+   "^EDS-",
+   "^ICS-",
+   "^IKS-",
+   "^SDS-",
+   "^TSN-"
+  ],
+  "sitemaps": [
+   "https://www.moxa.com/en/sitemap.xml"
+  ]
+ },
+ {
+  "name": "NETGEAR",
+  "domains": [
+   "netgear.com"
+  ],
+  "aliases": [
+   "netgear",
+   "prosafe"
+  ],
+  "model_prefixes": [
+   "^GS\\d{3}",
+   "^XS\\d{3}",
+   "^M4\\d{3}",
+   "^MS\\d{3}",
+   "^JGS\\d",
+   "^GSM\\d"
+  ],
+  "sitemaps": [
+   "https://www.netgear.com/sitemap_index.xml",
+   "https://www.netgear.com/sitemap.xml",
+   "https://www.netgear.com/sitemap-netgear-us.xml",
+   "https://www.netgear.com/uk/sitemap.xml",
+   "https://www.netgear.com/au/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Nokia",
+  "domains": [
+   "nokia.com"
+  ],
+  "aliases": [
+   "nokia"
+  ],
+  "model_prefixes": [
+   "^7\\d{3}"
+  ],
+  "sitemaps": [
+   "https://www.nokia.com/sitemap_index.xml"
+  ]
+ },
+ {
+  "name": "Nomadix",
+  "domains": [
+   "nomadix.com"
+  ],
+  "aliases": [
+   "nomadix"
+  ],
+  "model_prefixes": [
+   "^AG\\s?\\d"
+  ],
+  "sitemaps": [
+   "https://nomadix.com/sitemap_index.xml"
+  ]
+ },
+ {
+  "name": "NoviFlow",
+  "domains": [
+   "noviflow.com"
+  ],
+  "aliases": [
+   "noviflow"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "NSGate",
+  "domains": [
+   "nsgate.com"
+  ],
+  "aliases": [
+   "nsgate"
+  ],
+  "model_prefixes": [
+   "^NSB"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "NVIDIA",
+  "domains": [
+   "nvidia.com"
+  ],
+  "aliases": [
+   "nvidia",
+   "mellanox",
+   "spectrum"
+  ],
+  "model_prefixes": [
+   "^SN\\d{4}",
+   "^MSN\\d{4}"
+  ],
+  "sitemaps": [
+   "https://www.nvidia.com/sitemap_index.xml"
+  ]
+ },
+ {
+  "name": "NVT Phybridge",
+  "domains": [
+   "nvtphybridge.com"
+  ],
+  "aliases": [
+   "phybridge",
+   "nvt"
+  ],
+  "model_prefixes": [
+   "^NV-FLX"
+  ],
+  "sitemaps": [
+   "https://www.nvtphybridge.com/sitemap_index.xml"
+  ]
+ },
+ {
+  "name": "Obsidian Control Systems",
+  "domains": [
+   "obsidiancontrol.com"
+  ],
+  "aliases": [
+   "obsidian",
+   "netron"
+  ],
+  "model_prefixes": [],
+  "sitemaps": [
+   "https://www.obsidiancontrol.com/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Omnitron",
+  "domains": [
+   "omnitron-systems.com"
+  ],
+  "aliases": [
+   "omnitron"
+  ],
+  "model_prefixes": [
+   "^OMNICONVERTER"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Oracle",
+  "domains": [
+   "oracle.com"
+  ],
+  "aliases": [
+   "oracle"
+  ],
+  "model_prefixes": [
+   "^ES\\d-"
+  ],
+  "sitemaps": [
+   "https://www.oracle.com/sitemap.xml",
+   "https://www.oracle.com/international.xml"
+  ]
+ },
+ {
+  "name": "ORing",
+  "domains": [
+   "oringnet.com"
+  ],
+  "aliases": [
+   "oring"
+  ],
+  "model_prefixes": [
+   "^IGS-",
+   "^IGPS-",
+   "^RGS-"
+  ],
+  "sitemaps": [
+   "https://www.oringnet.com/index.php?option=com_osmap&view=xml&tmpl=component&id=1"
+  ]
+ },
+ {
+  "name": "Perle",
+  "domains": [
+   "perle.com"
+  ],
+  "aliases": [
+   "perle"
+  ],
+  "model_prefixes": [
+   "^IDS-"
+  ],
+  "sitemaps": [
+   "https://www.perle.com/sitemap/",
+   "https://www.perle.com/video-sitemap.xml"
+  ]
+ },
+ {
+  "name": "Phoenix Contact",
+  "domains": [
+   "phoenixcontact.com"
+  ],
+  "aliases": [
+   "phoenix",
+   "contact"
+  ],
+  "model_prefixes": [
+   "^FL SWITCH",
+   "^FL-SWITCH"
+  ],
+  "sitemaps": [
+   "https://www.phoenixcontact.com/crisp_sitemap_index.xml"
+  ]
+ },
+ {
+  "name": "PLANET",
+  "domains": [
+   "planet.com.tw"
+  ],
+  "aliases": [
+   "planet"
+  ],
+  "model_prefixes": [
+   "^GS-\\d{4}",
+   "^FGSW",
+   "^IGS-",
+   "^XGS-",
+   "^MGS-"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Proscend",
+  "domains": [
+   "proscend.com"
+  ],
+  "aliases": [
+   "proscend"
+  ],
+  "model_prefixes": [],
+  "sitemaps": [
+   "https://www.proscend.com/sitemap.xml"
+  ]
+ },
+ {
+  "name": "QNAP",
+  "domains": [
+   "qnap.com"
+  ],
+  "aliases": [
+   "qnap"
+  ],
+  "model_prefixes": [
+   "^QSW-"
+  ],
+  "sitemaps": [
+   "https://www.qnap.com/sitemap/sitemap.xml"
+  ]
+ },
+ {
+  "name": "QCT",
+  "domains": [
+   "qct.io"
+  ],
+  "aliases": [
+   "qct",
+   "quanta"
+  ],
+  "model_prefixes": [
+   "^QUANTAMESH",
+   "^T\\d{4}"
+  ],
+  "sitemaps": [
+   "http://www.qct.io/sitemap-20170317.xml"
+  ]
+ },
+ {
+  "name": "Red Lion",
+  "domains": [
+   "redlion.net"
+  ],
+  "aliases": [
+   "red lion",
+   "n-tron"
+  ],
+  "model_prefixes": [
+   "^NT\\d{2}",
+   "^SLX",
+   "^\\d{3}TX"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "RS PRO",
+  "domains": [
+   "uk.rs-online.com",
+   "rs-online.com"
+  ],
+  "aliases": [
+   "rs pro"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "Rubytech",
+  "domains": [
+   "rubytech.com.tw"
+  ],
+  "aliases": [
+   "rubytech"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "RUCKUS",
+  "domains": [
+   "ruckusnetworks.com",
+   "commscope.com"
+  ],
+  "aliases": [
+   "ruckus",
+   "icx"
+  ],
+  "model_prefixes": [
+   "^ICX\\d"
+  ],
+  "sitemaps": [
+   "https://www.ruckusnetworks.com/sitemap.xml",
+   "https://www.ruckusnetworks.com/ethernetswitchessitemap.xml",
+   "https://www.ruckusnetworks.com/networkcontrolsitemap.xml",
+   "https://www.ruckusnetworks.com/accessoriessitemap.xml",
+   "https://www.ruckusnetworks.com/wirelessaccesssitemap.xml",
+   "https://www.commscope.com/sitemap.xml",
+   "https://www.commscope.com/cableassembliessitemap.xml",
+   "https://www.commscope.com/cablemanagementsitemap.xml",
+   "https://www.commscope.com/cablessitemap.xml",
+   "https://www.commscope.com/connectorssitemap.xml"
+  ]
+ },
+ {
+  "name": "Ruijie",
+  "domains": [
+   "ruijienetworks.com"
+  ],
+  "aliases": [
+   "ruijie",
+   "reyee"
+  ],
+  "model_prefixes": [
+   "^RG-",
+   "^ES\\d{3}"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Schneider Electric",
+  "domains": [
+   "se.com"
+  ],
+  "aliases": [
+   "schneider"
+  ],
+  "model_prefixes": [
+   "^TCSESM",
+   "^TCSESU"
+  ],
+  "sitemaps": [
+   "https://www.se.com/ae/en/download/sitemapindex/",
+   "https://www.se.com/ae/en/faqs/sitemap.xml",
+   "https://www.se.com/ae/en/product/google-product-sitemapindex-AE-en.xml",
+   "https://www.se.com/ae/en/product-category/google-category-sitemapindex-AE-en.xml",
+   "https://www.se.com/ae/en/product-range/google-range-sitemapindex-AE-en.xml"
+  ]
+ },
+ {
+  "name": "SEL",
+  "domains": [
+   "selinc.com"
+  ],
+  "aliases": [
+   "sel",
+   "schweitzer"
+  ],
+  "model_prefixes": [
+   "^SEL-\\d"
+  ],
+  "sitemaps": [
+   "https://selinc.com/sitemap_index.xml"
+  ]
+ },
+ {
+  "name": "Scomp",
+  "domains": [
+   "scomp.co.in"
+  ],
+  "aliases": [
+   "scomp"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "Signamax",
+  "domains": [
+   "signamax.com"
+  ],
+  "aliases": [
+   "signamax"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "Silicom",
+  "domains": [
+   "silicom-usa.com"
+  ],
+  "aliases": [
+   "silicom"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "StarTech",
+  "domains": [
+   "startech.com"
+  ],
+  "aliases": [
+   "startech"
+  ],
+  "model_prefixes": [
+   "^IES\\d",
+   "^DS\\d"
+  ],
+  "sitemaps": [
+   "https://www.startech.com/sitemaps/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Supermicro",
+  "domains": [
+   "supermicro.com"
+  ],
+  "aliases": [
+   "supermicro"
+  ],
+  "model_prefixes": [
+   "^SSE-"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "TE Connectivity",
+  "domains": [
+   "te.com"
+  ],
+  "aliases": [
+   "te connectivity"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "Tejas Networks",
+  "domains": [
+   "tejasnetworks.com"
+  ],
+  "aliases": [
+   "tejas"
+  ],
+  "model_prefixes": [
+   "^TJ\\d"
+  ],
+  "sitemaps": [
+   "https://www.tejasnetworks.com/sitemap_index.xml"
+  ]
+ },
+ {
+  "name": "Teltonika",
+  "domains": [
+   "teltonika-networks.com"
+  ],
+  "aliases": [
+   "teltonika"
+  ],
+  "model_prefixes": [
+   "^TSW\\d"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "TOTOLINK",
+  "domains": [
+   "totolink.net"
+  ],
+  "aliases": [
+   "totolink"
+  ],
+  "model_prefixes": [
+   "^SG\\d"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "TP-Link",
+  "domains": [
+   "tp-link.com",
+   "omadanetworks.com"
+  ],
+  "aliases": [
+   "tp-link",
+   "tplink",
+   "omada",
+   "jetstream"
+  ],
+  "model_prefixes": [
+   "^TL-",
+   "^SG\\d{4}",
+   "^SX\\d{4}",
+   "^DS\\d{3}"
+  ],
+  "sitemaps": [
+   "https://www.tp-link.com/nl/sitemap.xml",
+   "https://www.omadanetworks.com/sitemap.xml"
+  ]
+ },
+ {
+  "name": "TRENDnet",
+  "domains": [
+   "trendnet.com"
+  ],
+  "aliases": [
+   "trendnet"
+  ],
+  "model_prefixes": [
+   "^TEG-",
+   "^TPE-",
+   "^TI-",
+   "^TL2-"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Ubiquiti",
+  "domains": [
+   "ui.com",
+   "store.ui.com"
+  ],
+  "aliases": [
+   "ubiquiti",
+   "unifi",
+   "edgeswitch"
+  ],
+  "model_prefixes": [
+   "^USW",
+   "^US-",
+   "^ES-\\d"
+  ],
+  "sitemaps": [
+   "https://ui.com/sitemap.xml"
+  ]
+ },
+ {
+  "name": "UfiSpace",
+  "domains": [
+   "ufispace.com"
+  ],
+  "aliases": [
+   "ufispace"
+  ],
+  "model_prefixes": [
+   "^S\\d{4}-"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Versa Networks",
+  "domains": [
+   "versa-networks.com"
+  ],
+  "aliases": [
+   "versa"
+  ],
+  "model_prefixes": [],
+  "sitemaps": [
+   "https://versa-networks.com/sitemap.xml",
+   "https://versa-networks.com/fr/sitemap.xml",
+   "https://versa-networks.com/es/sitemap.xml",
+   "https://versa-networks.com/de/sitemap.xml",
+   "https://versa-networks.com/jp/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Vertiv",
+  "domains": [
+   "vertiv.com"
+  ],
+  "aliases": [
+   "vertiv",
+   "avocent"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "WAGO",
+  "domains": [
+   "wago.com"
+  ],
+  "aliases": [
+   "wago"
+  ],
+  "model_prefixes": [
+   "^852-"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Wanglink",
+  "domains": [
+   "wanglink.cn"
+  ],
+  "aliases": [
+   "wanglink"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "Westermo",
+  "domains": [
+   "westermo.com"
+  ],
+  "aliases": [
+   "westermo"
+  ],
+  "model_prefixes": [
+   "^LYNX",
+   "^VIPER",
+   "^REDFOX",
+   "^CORE"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Xexagon",
+  "domains": [
+   "xexagon.com"
+  ],
+  "aliases": [
+   "xexagon"
+  ],
+  "model_prefixes": [],
+  "sitemaps": []
+ },
+ {
+  "name": "Yamaha",
+  "domains": [
+   "yamaha.com",
+   "usa.yamaha.com"
+  ],
+  "aliases": [
+   "yamaha"
+  ],
+  "model_prefixes": [
+   "^SWR\\d",
+   "^SWX\\d"
+  ],
+  "sitemaps": [
+   "http://www.yamaha.com/sitemap.xml"
+  ]
+ },
+ {
+  "name": "Yokogawa",
+  "domains": [
+   "yokogawa.com"
+  ],
+  "aliases": [
+   "yokogawa"
+  ],
+  "model_prefixes": [],
+  "sitemaps": [
+   "https://www.yokogawa.com/sitemap_index.xml"
+  ]
+ },
+ {
+  "name": "ZTE",
+  "domains": [
+   "zte.com.cn"
+  ],
+  "aliases": [
+   "zte"
+  ],
+  "model_prefixes": [
+   "^ZXR10"
+  ],
+  "sitemaps": []
+ },
+ {
+  "name": "Zyxel",
+  "domains": [
+   "zyxel.com"
+  ],
+  "aliases": [
+   "zyxel"
+  ],
+  "model_prefixes": [
+   "^GS\\d{4}",
+   "^XGS\\d",
+   "^XS\\d{4}",
+   "^XMG"
+  ],
+  "sitemaps": [
+   "https://www.zyxel.com/sitemap.xml"
+  ]
+ }
+]

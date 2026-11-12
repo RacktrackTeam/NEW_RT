@@ -1,0 +1,10 @@
+{
+  "about": "A site's Excel dataset as lib/matrix.js stores it (snake_case rows), for the rack naming ladder tests. Two racks: R01-A12 holds PP-A01 at U42, SW-A1 at U40 and FW-A1 at U38; R02-B07 holds PP-24 A at U39, SW-B1 at U30 and PP-B02 at U28.",
+  "cables": [
+    { "row_no": 2, "cable_label": "EOS-F-0141", "a_device": "SW-A1", "a_port": "Et1", "a_rack": "R01-A12", "a_unit": "40", "z_device": "PP-24 A", "z_port": "1", "z_rack": "R02-B07", "z_unit": "39", "cable_type": "OS2", "notes": "" },
+    { "row_no": 3, "cable_label": "EOS-F-0142", "a_device": "SW-A1", "a_port": "Et2", "a_rack": "R01-A12", "a_unit": "40", "z_device": "PP-24 A", "z_port": "2", "z_rack": "R02-B07", "z_unit": "39", "cable_type": "OS2", "notes": "" },
+    { "row_no": 4, "cable_label": "EOS-F-0143", "a_device": "PP-A01", "a_port": "1", "a_rack": "R01-A12", "a_unit": "42", "z_device": "SW-B1", "z_port": "Gi1", "z_rack": "R02-B07", "z_unit": "30", "cable_type": "Cat6", "notes": "" },
+    { "row_no": 5, "cable_label": "EOS-F-0144", "a_device": "FW-A1", "a_port": "1", "a_rack": "R01-A12", "a_unit": "38", "z_device": "PP-B02", "z_port": "1", "z_rack": "R02-B07", "z_unit": "28", "cable_type": "Cat6", "notes": "" },
+    { "row_no": 6, "cable_label": "EOS-F-0145", "a_device": "SW-A1", "a_port": "Et3", "a_rack": "R01-A12", "a_unit": "40", "z_device": "FW-A1", "z_port": "2", "z_rack": "R01-A12", "z_unit": "38", "cable_type": "Cat6", "notes": "" }
+  ]
+}

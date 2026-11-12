@@ -1,0 +1,120 @@
+{
+ "vendor": "Kemp (Progress)",
+ "model": "LM-X1",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "4x RJ45 | 0x SFP | 2 named port type(s): Console, USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.tecisoft.com/cdn/shop/products/KEMP-LoadMaster-LM-X1-Server-Load-Balancer.jpg?v=1663439165&width=650",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1458,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   726,
+   30,
+   183,
+   121
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    739,
+    42,
+    62,
+    49
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    739,
+    88,
+    64,
+    52
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    835,
+    42,
+    62,
+    48
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    834,
+    88,
+    64,
+    51
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    508,
+    82,
+    66,
+    56
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    589,
+    75,
+    57,
+    29
+   ]
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    589,
+    105,
+    57,
+    31
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 0,
+  "2": 0,
+  "3": 0,
+  "4": 0,
+  "Console": 0,
+  "USB": 0,
+  "USB 2": 0
+ },
+ "chassis_aligned": 0,
+ "saved_quality": 0.844,
+ "saved_label": "template agent (internet/image_search)",
+ "saved_at": "2026-10-22 21:35"
+}

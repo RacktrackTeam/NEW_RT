@@ -1,0 +1,36 @@
+{
+ "vendor": "Dell",
+ "model": "PowerConnect 2824",
+ "url": "https://www.5ti.com.br/369-thickbox_default/dell-switch-powerconnect-2824.jpg",
+ "page": "https://www.5ti.com.br/switches/314-dell-switch-powerconnect-2824.html",
+ "source": "image_search",
+ "agent_score": 20,
+ "quality": 0.914,
+ "photo_inliers": 51,
+ "aspect": 7.35,
+ "ports_found": 26,
+ "ports_expected": 26,
+ "row_slope": 0.0002,
+ "others": [
+  {
+   "url": "https://cdn2.bigcommerce.com/server900/b18w/products/47410/images/83989/F491K_Display__92388.1607634056.1280.1280.jpg?c=2",
+   "quality": 0.907,
+   "inliers": 52
+  },
+  {
+   "url": "https://cdn.awsli.com.br/2500x2500/2505/2505007/produto/312049639/dell-powerconnect-2824---002-x92ctv0d28.jpg",
+   "quality": 0.683,
+   "inliers": 33
+  },
+  {
+   "url": "https://cdn10.bigcommerce.com/s-kw5wz/products/837/images/1087/F119748223__83871.1428593827.1280.1280.png?c=2",
+   "quality": 0.587,
+   "inliers": 0
+  },
+  {
+   "url": "https://www.powerdcs.com/cdn/shop/files/POWERCONNECT2824__12.png?v=1761209849&width=3840",
+   "quality": 0.0,
+   "inliers": 0
+  }
+ ]
+}

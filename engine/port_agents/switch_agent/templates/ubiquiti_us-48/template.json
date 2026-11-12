@@ -1,0 +1,550 @@
+{
+ "vendor": "Ubiquiti",
+ "model": "US-48",
+ "description": "",
+ "summary": "48x RJ45 (ports 1-48) | detected automatically",
+ "image": "front.png",
+ "image_source": "Ubiquiti_US-48_3.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   9,
+   2241,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    9,
+    18,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    9,
+    88,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    81,
+    18,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    81,
+    88,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    157,
+    18,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    157,
+    88,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    232,
+    18,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    232,
+    88,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    307,
+    21,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    307,
+    88,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    382,
+    22,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    382,
+    88,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    477,
+    21,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    477,
+    88,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    551,
+    21,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    551,
+    88,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    626,
+    22,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    626,
+    88,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 19,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    700,
+    22,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 20,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    700,
+    88,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    775,
+    22,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    775,
+    88,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 23,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    849,
+    22,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 24,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    849,
+    88,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 25,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    945,
+    22,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 26,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    944,
+    88,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 27,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1018,
+    22,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 28,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1018,
+    88,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 29,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1092,
+    22,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 30,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1092,
+    88,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 31,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1166,
+    23,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 32,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1166,
+    88,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 33,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1240,
+    23,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 34,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1240,
+    89,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 35,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1314,
+    23,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 36,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1314,
+    89,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 37,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1408,
+    23,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 38,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1407,
+    89,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 39,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1481,
+    23,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 40,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1481,
+    88,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 41,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1554,
+    23,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 42,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1554,
+    89,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 43,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1628,
+    23,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 44,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1628,
+    89,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 45,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1702,
+    18,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 46,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1701,
+    89,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 47,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1776,
+    18,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 48,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1775,
+    89,
+    69,
+    56
+   ]
+  }
+ ],
+ "ignore_regions_note": "cleared 24 Oct: the region ran past the image edge, so it never masked anything in the tested runs; cleared to keep the tested behaviour now that regions are clipped (review #22)"
+}

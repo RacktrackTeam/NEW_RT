@@ -1,0 +1,120 @@
+/* wt/features: the rack tools (mobile/features.js) in the RT-EOS minimal look: white, flat, 1px lines, full device width. Light theme only. */
+.ft-head h1 { margin:4px 0 6px; }
+.ft-head .eyebrow a { color:inherit; }
+.ft-list .grow { align-items:center; }
+.ft-t { display:flex; flex-direction:column; gap:2px; flex:1; min-width:0; } .ft-t small { color:var(--t2); font-size:13px; }
+.ft-form { display:flex !important; flex-direction:row !important; flex-wrap:wrap; gap:12px; align-items:flex-end !important; padding:16px !important; }
+.ft-field { display:flex; flex-direction:column; gap:6px; flex:1 1 220px; min-width:0; margin:0; } .ft-field span { font-size:13px; color:var(--t2); }
+.ft-form select, .ft-form input { width:100%; }
+.ft-form .btn { flex:0 0 auto; padding:0 22px; }
+.ft-found, .ft-dev, .ft-sfp, .ft-wl, .ft-again, .ft-ids { padding:16px; margin-top:12px; display:flex; flex-direction:column; gap:8px; }
+.ft-found h2, .ft-dev h2, .ft-sfp h2 { margin:2px 0; font-size:18px; overflow-wrap:anywhere; }
+.ft-pic { margin:4px 0; } .ft-pic img { width:100%; height:auto; border-radius:10px; border:1px solid var(--line); display:block; }
+.ft-kvs { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:4px 24px; }
+.ft-kv { display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-bottom:1px solid var(--line2); font-size:14px; }
+.ft-kv span { color:var(--t2); flex:none; } .ft-kv b { text-align:right; overflow-wrap:anywhere; font-weight:600; }
+.ft-devh { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.ft-probs { margin:0; padding-left:18px; display:flex; flex-direction:column; gap:6px; font-size:14px; }
+.ft-cells { display:flex; flex-wrap:wrap; gap:4px; }
+.ft-cell { display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:26px; padding:0 4px; border-radius:6px; font-size:12px; font-weight:600; border:1px solid var(--line); }
+.ft-cell.on { background:#121212; color:#fff; border-color:#121212; } .ft-cell.off { background:#fff; color:#121212; border-color:rgba(18,18,18,.35); }
+.ft-cell.na { background:#f6f6f6; color:#757575; border-style:dashed; }
+.ft-legend { display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:13px; color:var(--t2); }
+.ft-wrap { overflow-x:auto; margin-top:12px; border:1px solid var(--line); border-radius:12px; }
+.ft-table { width:100%; border-collapse:collapse; font-size:13px; } .ft-table th, .ft-table td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line2); vertical-align:top; }
+.ft-table th { color:var(--t2); font-weight:600; white-space:nowrap; background:#fff; } .ft-table tr:last-child td { border-bottom:0; }
+.ft-h2 { margin:28px 0 4px; font-size:18px; }
+.ft-btns { display:flex; flex-wrap:wrap; gap:8px; align-items:center; } .ft-btns select { flex:1 1 180px; }
+.ft-wl b { font-size:15px; } .ft-wl.ft-done { opacity:.7; }
+.ft-bar { height:8px; border-radius:999px; background:#f1f1f1; overflow:hidden; } .ft-bar i { display:block; height:100%; background:#121212; }
+.ft-topo { margin-top:12px; }
+.ft-ids { margin-top:12px; } .ft-ids .btn.file { align-self:flex-start; padding:0 18px; display:inline-flex; align-items:center; }
+@media (max-width:600px) { .ft-form .btn { width:100%; } .ft-kv { flex-direction:column; gap:2px; } .ft-kv b { text-align:left; } .ft-table { font-size:12px; } }
+@media (max-width:600px) {   /* a table on a phone: one card per row, each cell with its column name */
+  .ft-table thead { display:none; } .ft-table, .ft-table tbody { display:block; }
+  .ft-table tr { display:block; padding:8px 0; border-bottom:1px solid var(--line); } .ft-table tr:last-child { border-bottom:0; }
+  .ft-table td { display:flex; justify-content:space-between; gap:12px; border:0; padding:3px 12px; text-align:right; overflow-wrap:anywhere; }
+  .ft-table td::before { content:attr(data-label); color:var(--t2); font-weight:600; flex:none; max-width:40%; text-align:left; } }
+
+/* Find a port: the picture on the left, the pickers and the answer on the right (testers, 4 Nov 2026: the answer sat far below the picture) */
+.fp-top { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px; align-items:start; }
+.fp-pick label { display:block; margin:0 0 10px; } .fp-pick label > span { display:block; font-size:12px; font-weight:600; color:var(--t2); margin-bottom:4px; }
+.fp-pick select { width:100%; } #fp-out { margin-top:16px; } #fp-out .fx-two { grid-template-columns:1fr; gap:14px; }
+.fp-read { display:flex; flex-direction:column; gap:8px; align-items:flex-start; margin:8px 0; }
+@media (max-width:799px) { .fp-top { grid-template-columns:1fr; } }
+/* The tool pages as screens of the app: a picture with the thing marked, the facts beside it. White page, #1f2a3a accent. */
+.fx-page { display:flex; flex-direction:column; gap:16px; } .fx-title h1 { margin:0; font-size:22px; }
+.fx-bar { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; } .fx-bar label { display:flex; flex-direction:column; gap:4px; flex:1 1 220px; min-width:0; font-size:12px; color:var(--t2); font-weight:600; } .fx-bar label.fx-num { flex:0 0 96px; }
+.fx-bar select, .fx-bar input { width:100%; } .fx-bar .btn { flex:0 0 auto; padding:0 20px; }
+.fx-two { display:grid; grid-template-columns:minmax(0,3fr) minmax(0,2fr); gap:28px; align-items:start; }
+.fx-left { min-width:0; } .fx-right { display:flex; flex-direction:column; gap:12px; min-width:0; } .fx-right h2 { margin:0; font-size:22px; }
+.fx-eye { font-size:12px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--t2); }
+.fx-fig { position:relative; margin:0; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#f6f6f6; line-height:0; }
+.fx-fig img { width:100%; height:auto; display:block; } .fx-fig svg { position:absolute; inset:0; width:100%; height:100%; }
+.fx-fig.fx-rack { width:fit-content; max-width:100%; margin:0 auto; background:#111; } .fx-fig.fx-rack img { width:auto; max-width:100%; max-height:70vh; }
+.fx-box { fill:rgba(31,42,58,.04); stroke:rgba(255,255,255,.85); stroke-width:1.5; vector-effect:non-scaling-stroke; cursor:pointer; transition:fill .2s; }
+.fx-box.on { fill:rgba(31,42,58,.55); } .fx-box.off { fill:rgba(255,255,255,.18); } .fx-box.na { fill:rgba(255,255,255,.04); stroke-dasharray:3 3; }
+.fx-box.hl { fill:rgba(220,38,38,.18); stroke:#dc2626; stroke-width:3; animation:fx-pulse .6s ease-out 1; } .fx-fig.fx-rack .fx-box.hl { fill:rgba(220,38,38,.25); }
+@keyframes fx-pulse { 0% { stroke-width:9; fill:rgba(220,38,38,.5); } 100% { stroke-width:3; } }
+.fx-pills { display:flex; flex-wrap:wrap; gap:6px; align-items:center; } .fx-key { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:0; }
+.fx-pill { display:inline-flex; align-items:center; height:24px; padding:0 10px; border-radius:12px; font-size:12px; font-weight:600; background:#f3f4f6; color:#444; border:1px solid transparent; white-space:nowrap; }
+.fx-pill.on { background:#1f2a3a; color:#fff; } .fx-pill.off { background:#fff; color:#1f2a3a; border-color:rgba(31,42,58,.4); } .fx-pill.na { background:#f6f6f6; color:#757575; border:1px dashed rgba(18,18,18,.25); }
+.fx-pill.ok { background:rgba(22,163,74,.09); color:#15803d; } .fx-pill.bad { background:rgba(185,28,28,.08); color:#b91c1c; }
+.fx-kv { display:grid; grid-template-columns:auto 1fr; gap:0; margin:0; font-size:14px; } .fx-kv dt { color:var(--t2); padding:7px 18px 7px 0; border-bottom:1px solid var(--line2); } .fx-kv dd { margin:0; padding:7px 0; border-bottom:1px solid var(--line2); font-weight:600; text-align:right; overflow-wrap:anywhere; } .fx-kv em { color:var(--t3); font-weight:400; font-style:normal; }
+.fx-note { margin:8px 0 0; font-size:13px; color:var(--t2); line-height:1.4; }
+.fx-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px; align-items:start; } .fx-wl { grid-template-columns:repeat(auto-fill, minmax(340px,1fr)); }
+.fx-card { border:1px solid var(--line); border-radius:12px; background:#fff; overflow:hidden; display:flex; flex-direction:column; } .fx-card .fx-fig { border:0; border-radius:0; border-bottom:1px solid var(--line); }
+.fx-body { padding:14px 16px 16px; display:flex; flex-direction:column; gap:10px; min-width:0; } .fx-body h2 { margin:2px 0 0; font-size:17px; overflow-wrap:anywhere; } .fx-body > b { font-size:15px; }
+.fx-head { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+.fx-probs { margin:0; padding-left:18px; display:flex; flex-direction:column; gap:4px; font-size:13px; } .fx-acts .btn { flex:1 1 auto; min-height:44px; }
+.fx-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; } .fx-row { appearance:none; font:inherit; width:100%; display:flex; gap:10px; align-items:center; text-align:left; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:#fff; cursor:pointer; transition:border-color .15s, background .15s; }
+.fx-row small { display:block; color:var(--t2); font-size:12px; } .fx-row:hover, .fx-row.on { border-color:#1f2a3a; background:#fafafa; }
+.fx-wait { display:flex; align-items:center; gap:10px; color:var(--t2); margin:12px 0; } .fx-spin { width:16px; height:16px; border-radius:50%; border:2px solid rgba(31,42,58,.2); border-top-color:#1f2a3a; animation:fx-rot .8s linear infinite; }
+@keyframes fx-rot { to { transform:rotate(360deg); } }
+.fx-empty { border:1px dashed rgba(18,18,18,.2); border-radius:12px; padding:22px; display:flex; flex-direction:column; gap:4px; color:var(--t2); } .fx-empty b { color:var(--ink); }
+.fx-err { margin:8px 0; padding:12px 14px; border-radius:12px; background:rgba(185,28,28,.07); color:#b91c1c; font-size:14px; }
+.fx-in { animation:fx-in .22s ease-out both; animation-delay:calc(var(--i, 0) * 30ms); } @keyframes fx-in { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+.fx-page .btn, .fx-row { transition:transform .12s, background .15s, border-color .15s; } .fx-page .btn:active, .fx-row:active { transform:scale(.98); }
+.fx-page .ft-cells { gap:4px; } .fx-page :focus-visible { outline:2px solid #1f2a3a; outline-offset:2px; }
+@media (prefers-reduced-motion:reduce) { .fx-in, .fx-box.hl, .fx-spin { animation:none; } }
+@media (max-width:760px) { .fx-two, .fx-grid, .fx-wl { grid-template-columns:1fr; gap:14px; } .fx-bar .btn { width:100%; } .fx-bar label.fx-num { flex:1 1 100%; } .fx-kv dd { text-align:left; } }
+
+/* Find a port: the whole rack picture with every device outlined on the left, the pickers on the right, the crop and facts below */
+.fp-top { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:28px; align-items:start; margin-bottom:24px; }
+.fp-top .fx-rack { margin:0; } .fp-top .fx-rack img { max-height:68vh; }
+.fp-pick { display:flex; flex-direction:column; gap:14px; min-width:0; } .fp-pick label { display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--t2); } .fp-pick select { width:100%; }
+.fp-grid { gap:6px; } .fp-grid .ft-cell { min-width:36px; height:32px; cursor:pointer; font-family:inherit; } .fp-grid .ft-cell.chosen { outline:2px solid #1f2a3a; outline-offset:2px; }
+.fp-dev { fill:rgba(255,255,255,.04); stroke:rgba(255,255,255,.75); stroke-width:1.5; } .fp-dev.fp-none { cursor:default; stroke-dasharray:4 4; stroke:rgba(255,255,255,.4); }
+.fp-dev.sel { fill:rgba(255,255,255,.28); stroke:#fff; stroke-width:4; }
+@media (max-width:760px) { .fp-top { grid-template-columns:1fr; gap:14px; } .fp-top .fx-rack img { max-height:55vh; } }
+
+/* The key to the port cells is drawn with the cells themselves; a tapped port answers under its card (testers, 10 Nov 2026) */
+.ft-keys { display:inline-flex; flex-wrap:wrap; gap:8px 18px; align-items:center; }
+.ft-key { display:inline-flex; align-items:center; gap:7px; font-size:13px; color:var(--t2); white-space:nowrap; }
+.fx-note .ft-keys { vertical-align:middle; }
+.fx-keybox { display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:#fff; }
+.fx-keynote { flex:1 1 100%; font-size:13px; color:var(--t2); }
+.fx-portsof { display:block; margin-top:4px; }
+.fx-card .ft-cell { cursor:pointer; }
+.fx-card .ft-cell.chosen { outline:2px solid #1f2a3a; outline-offset:2px; }
+.fx-portsay { margin:4px 0 0; color:#1f2a3a; font-weight:600; }
+/* the tester's second list of 10 Nov 2026: the key is three plain swatches (6); the Find a port column has no empty blocks and the picture sits centred (1) */
+.ft-key .ft-cell.sw { min-width:22px; width:22px; height:22px; padding:0; border-radius:5px; }
+#fp-grid:empty, #fp-out:empty, #fp-hint:empty { display:none; }
+#fp-hint { margin-top:4px; }
+@media (max-width:760px) { .fp-top .fx-rack { margin:0 auto; } }
+.fx-page.fx-page { gap:12px !important; } .fx-title { margin:0; padding:0; }   /* doubled and important: standard.css, loaded last, sets the page gap with !important */
+.fp-pick > label { margin:0; } #fp-out { margin-top:0; }
+@media (max-width:760px) { .fp-top .fx-rack img { max-height:42vh; } }   /* the Device box stays in view under the picture on a phone */
+/* the Connections key: each state is a button; the chosen one is ringed, every port in that state is outlined (the tester, 10 Nov 2026) */
+.fx-keybox .ft-key[data-key] { border:1px solid var(--line); border-radius:999px; padding:4px 12px 4px 6px; background:#fff; cursor:pointer; font:inherit; font-size:13px; color:var(--ink); }
+.fx-keybox .ft-key.on2 { border-color:#1f2a3a; box-shadow:0 0 0 1px #1f2a3a inset; }
+.fx-card .ft-cell.khl { outline:2px solid #1f2a3a; outline-offset:2px; }
+.fx-keyans { margin:0; font-size:13px; flex:1 1 100%; color:var(--ink); } .fx-keyans[hidden] { display:none; } .fx-keyans .link { min-height:30px; padding:0 10px; font-size:12.5px; margin-left:4px; }
+/* the Connections key: three equal cells in one row, no note (owner, 10 Nov 2026) */
+.fx-keybox { display:flex; flex-direction:column; gap:8px; padding:0; border:0; background:none; }
+.fx-keybox .ft-keys { display:flex; flex-wrap:nowrap; gap:8px; width:100%; }
+.fx-keybox .ft-key[data-key] { flex:1 1 0; min-width:0; justify-content:center; padding:9px 6px; font-size:12.5px; font-weight:600; border-radius:10px; white-space:nowrap; }
+.fx-keybox .ft-key .ft-cell.sw { width:16px; min-width:16px; height:16px; border-radius:4px; }
+.fx-keybox .ft-key.on2 { background:#f4f6f9; }
+.fx-keyans { padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#fff; }

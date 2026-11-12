@@ -1,0 +1,198 @@
+{
+ "vendor": "D-Link",
+ "model": "DGS-10160",
+ "description": "",
+ "summary": "16x RJ45 (ports 1-16) | detected automatically",
+ "image": "front.png",
+ "image_source": "https://www.dlink.com/es/es/-/media/product-pages/dgs/1016d/i1/dgs1016di1image-lfront.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   588,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    6,
+    38,
+    60,
+    48
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    4,
+    94,
+    61,
+    46
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    64,
+    39,
+    58,
+    46
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    65,
+    94,
+    56,
+    45
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    119,
+    39,
+    58,
+    47
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    119,
+    94,
+    58,
+    45
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    176,
+    38,
+    62,
+    49
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    173,
+    94,
+    65,
+    46
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    260,
+    38,
+    62,
+    50
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    258,
+    95,
+    63,
+    45
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    319,
+    38,
+    59,
+    48
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    318,
+    94,
+    58,
+    45
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    376,
+    39,
+    59,
+    47
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    374,
+    94,
+    57,
+    46
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    433,
+    38,
+    61,
+    48
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    428,
+    94,
+    66,
+    47
+   ]
+  }
+ ],
+ "ignore_regions_note": "cleared 24 Oct: the region ran past the image edge, so it never masked anything in the tested runs; cleared to keep the tested behaviour now that regions are clipped (review #22)"
+}

@@ -1,0 +1,314 @@
+{
+ "vendor": "Dell",
+ "model": "PowerConnect 2824",
+ "description": "",
+ "summary": "24x RJ45 (ports 1-24) | 2x SFP (25, 26) | detected automatically",
+ "image": "front.png",
+ "image_source": "Dell_PowerConnect_2824.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1821,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   529,
+   21,
+   767,
+   129
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    541,
+    36,
+    60,
+    49
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    542,
+    84,
+    59,
+    49
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    602,
+    34,
+    58,
+    50
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    602,
+    84,
+    58,
+    48
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    661,
+    34,
+    58,
+    50
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    662,
+    83,
+    58,
+    49
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    720,
+    34,
+    57,
+    50
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    720,
+    84,
+    58,
+    48
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    792,
+    36,
+    58,
+    49
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    792,
+    85,
+    58,
+    49
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    851,
+    35,
+    57,
+    50
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    851,
+    84,
+    57,
+    49
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    909,
+    35,
+    58,
+    50
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    909,
+    84,
+    58,
+    49
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    968,
+    35,
+    59,
+    50
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    967,
+    86,
+    58,
+    48
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1041,
+    36,
+    60,
+    51
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1040,
+    87,
+    58,
+    49
+   ]
+  },
+  {
+   "id": 19,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1101,
+    35,
+    59,
+    52
+   ]
+  },
+  {
+   "id": 20,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1101,
+    86,
+    59,
+    50
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1162,
+    35,
+    60,
+    52
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1161,
+    87,
+    60,
+    50
+   ]
+  },
+  {
+   "id": 23,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1222,
+    36,
+    62,
+    52
+   ]
+  },
+  {
+   "id": 24,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1221,
+    88,
+    60,
+    51
+   ]
+  },
+  {
+   "id": 25,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1349,
+    91,
+    70,
+    56
+   ]
+  },
+  {
+   "id": 26,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1423,
+    91,
+    70,
+    57
+   ]
+  }
+ ]
+}

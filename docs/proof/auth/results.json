@@ -1,0 +1,125 @@
+{
+ "when": "2026-11-03 12:00",
+ "checks": [
+  {
+   "check": "no engine route answers without a session (no cookie, and a token signed with another key)",
+   "ok": true,
+   "detail": "49 routes called twice"
+  },
+  {
+   "check": "health stays open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "a technician sees only their site's runs",
+   "ok": true,
+   "detail": "tech sees ['fx1hyd000001']"
+  },
+  {
+   "check": "the technician's own run opens (status, view, report, drift)",
+   "ok": true,
+   "detail": "[200, 200, 200, 200]"
+  },
+  {
+   "check": "another site's, another organization's and a pre-sign-in run answer 404",
+   "ok": true,
+   "detail": "{'fx1chn000001': [404, 404, 404, 404], 'fx2pun000001': [404, 404, 404, 404], 'fxlegacy0001': [404, 404, 404, 404]}"
+  },
+  {
+   "check": "deleting another organization's run answers 404",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "check": "the organization admin sees both sites of the organization",
+   "ok": true,
+   "detail": "admin sees ['fx1chn000001', 'fx1hyd000001']"
+  },
+  {
+   "check": "the second organization's admin sees only its own run",
+   "ok": true,
+   "detail": "admin2 sees ['fx2pun000001']"
+  },
+  {
+   "check": "the platform owner sees every run",
+   "ok": true,
+   "detail": "owner sees ['fx1chn000001', 'fx1hyd000001', 'fx2pun000001', 'fxlegacy0001']"
+  },
+  {
+   "check": "the engine knows the person from the session",
+   "ok": true,
+   "detail": "{\"name\": \"techt\", \"user\": 25, \"role\": \"member\", \"organization\": 9, \"site\": 9, \"org_name\": \"Test Organization\", \"site_name\": \"Test Hyderabad DC\", \"host\": \"Aasrithas-MacBook-Pro.local\"}"
+  },
+  {
+   "check": "the first organization imports a workbook",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "check": "the second organization cannot import the first one's upload",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "check": "database copies are per organization",
+   "ok": true,
+   "detail": "first 6, second 0"
+  },
+  {
+   "check": "the second organization cannot delete the first one's copy",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "check": "connections are per organization",
+   "ok": true,
+   "detail": "first saved True, second saved False"
+  },
+  {
+   "check": "a connection never sends its secret back",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "self sign-up is refused (organizations are created by the platform owner)",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "check": "the platform owner creates an organization",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "check": "its first person is the organization owner",
+   "ok": true,
+   "detail": "org_owner"
+  },
+  {
+   "check": "the organization owner opens the engine",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "check": "forgot password: the code from the outbox resets the password",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "check": "the reset password signs in",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "an invite link is accepted and opens the engine on the invited site",
+   "ok": true,
+   "detail": "200 200 200 200"
+  },
+  {
+   "check": "Google, Apple and Facebook sign-in are gone (no provider route, the owner's order of 2 Nov)",
+   "ok": true,
+   "detail": "404"
+  }
+ ]
+}

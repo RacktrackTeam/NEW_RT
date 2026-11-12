@@ -1,0 +1,122 @@
+{
+ "vendor": "D-Link",
+ "model": "DSR-1000AC",
+ "device": "router",
+ "description": "",
+ "summary": "6x RJ45 | 0x SFP | 1 named port type(s): Console | built from the vendor image by the router mapper",
+ "image": "front.png",
+ "image_source": "https://www.dlink.com.au/images/product_images/494/494_dsr-1000ac_a1_lowres_front_.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1103,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   416,
+   50,
+   562,
+   91
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    431,
+    69,
+    66,
+    57
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    498,
+    68,
+    62,
+    57
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    560,
+    67,
+    62,
+    58
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    622,
+    68,
+    66,
+    57
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    786,
+    67,
+    78,
+    61
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    887,
+    64,
+    78,
+    64
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    1000,
+    68,
+    74,
+    59
+   ]
+  }
+ ],
+ "labels_read": [
+  "WAN"
+ ],
+ "chassis_votes": {
+  "1": 4,
+  "2": 4,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "Console": 4
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.91,
+ "saved_label": "router store #89",
+ "saved_at": "2026-10-23 18:57"
+}

@@ -1,0 +1,192 @@
+{
+ "vendor": "Array Networks",
+ "model": "APV5800",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "7x RJ45 | 4x SFP | 1 named port type(s): USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://cdn.blueally.com/arrayguard/images/apv-x800/gl-apv5800-prod-img.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   912,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   104,
+   20,
+   161,
+   139
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    110,
+    26,
+    36,
+    27
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    186,
+    33,
+    34,
+    28
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    186,
+    62,
+    34,
+    28
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    186,
+    126,
+    35,
+    27
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    225,
+    33,
+    34,
+    28
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    225,
+    62,
+    35,
+    30
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    225,
+    126,
+    35,
+    28
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    420,
+    30,
+    34,
+    31
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    452,
+    30,
+    30,
+    30
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    482,
+    30,
+    31,
+    30
+   ]
+  },
+  {
+   "id": 11,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    512,
+    30,
+    34,
+    31
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    112,
+    125,
+    35,
+    19
+   ]
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    112,
+    71,
+    36,
+    19
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 0,
+  "2": 0,
+  "3": 0,
+  "4": 0,
+  "5": 0,
+  "6": 0,
+  "7": 0,
+  "8": 0,
+  "9": 0,
+  "10": 0,
+  "11": 0,
+  "USB": 0,
+  "USB 2": 0
+ },
+ "chassis_aligned": 0,
+ "saved_quality": 0.721,
+ "saved_label": "internet/web_page",
+ "saved_at": "2026-10-24 22:53"
+}

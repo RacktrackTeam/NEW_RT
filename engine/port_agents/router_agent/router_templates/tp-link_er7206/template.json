@@ -1,0 +1,124 @@
+{
+ "vendor": "TP-Link",
+ "model": "ER7206",
+ "device": "router",
+ "description": "",
+ "summary": "5x RJ45 | 1x SFP | 1 named port type(s): USB | built from the vendor image by the router mapper",
+ "image": "front.png",
+ "image_source": "https://static.tp-link.com/upload/image-line/overview_ER7206_UN_2.6_01_normal_20230627055542g.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   932,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   450,
+   46,
+   375,
+   95
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    357,
+    73,
+    75,
+    56
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    465,
+    62,
+    76,
+    65
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    540,
+    62,
+    69,
+    62
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    609,
+    64,
+    65,
+    60
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    674,
+    64,
+    64,
+    60
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    738,
+    64,
+    72,
+    62
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    221,
+    55,
+    43,
+    72
+   ]
+  }
+ ],
+ "labels_read": [
+  "SFP",
+  "USB",
+  "WAN"
+ ],
+ "chassis_votes": {
+  "1": 3,
+  "2": 3,
+  "3": 3,
+  "4": 3,
+  "5": 3,
+  "6": 3,
+  "USB": 3
+ },
+ "chassis_aligned": 3,
+ "saved_quality": 0.961,
+ "saved_label": "official/vendor page www.omadanetworks.com: Omada Gigabit VPN Router 1",
+ "saved_at": "2026-10-23 19:08"
+}

@@ -1,0 +1,151 @@
+{
+ "vendor": "Cisco",
+ "model": "C1161-8P",
+ "device": "router",
+ "description": "",
+ "summary": "9x RJ45 | 1x SFP | 1 named port type(s): USB | built from the vendor image by the router mapper",
+ "image": "front.png",
+ "image_source": "https://www.cisco.com/c/dam/en/us/products/collateral/routers/1000-series-integrated-services-routers-isr/datasheet-c78-739512.docx/_jcr_content/renditions/datasheet-c78-739512_7.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   677,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   76,
+   3,
+   402,
+   155
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    99,
+    21,
+    69,
+    57
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    91,
+    84,
+    77,
+    62
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    163,
+    22,
+    66,
+    55
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    164,
+    88,
+    64,
+    58
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    226,
+    23,
+    64,
+    55
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    228,
+    88,
+    63,
+    58
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    287,
+    22,
+    73,
+    57
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    287,
+    88,
+    74,
+    57
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    370,
+    18,
+    95,
+    85
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    465,
+    94,
+    87,
+    60
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    577,
+    124,
+    42,
+    24
+   ]
+  }
+ ],
+ "labels_read": []
+}

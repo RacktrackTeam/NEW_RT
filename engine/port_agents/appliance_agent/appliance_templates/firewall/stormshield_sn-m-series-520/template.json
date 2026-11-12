@@ -1,0 +1,168 @@
+{
+ "vendor": "Stormshield",
+ "model": "SN-M-Series-520",
+ "device": "firewall",
+ "description": "",
+ "summary": "8x RJ45 | 0x SFP | 2 named port type(s): Console, USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://documentation.stormshield.eu/SNS/v4/en/Content/PDF/InstallationGuides/sns-en_SN-M-SERIES-520-quickstart_v1.0.pdf#page1-img56",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1172,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   843,
+   32,
+   318,
+   129
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    856,
+    44,
+    61,
+    51
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    858,
+    95,
+    58,
+    54
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    934,
+    44,
+    60,
+    52
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    935,
+    96,
+    59,
+    52
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1012,
+    44,
+    62,
+    51
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1013,
+    96,
+    59,
+    52
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1090,
+    45,
+    60,
+    50
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1091,
+    96,
+    58,
+    52
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    701,
+    29,
+    62,
+    50
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    701,
+    110,
+    60,
+    32
+   ]
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    703,
+    80,
+    58,
+    30
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 4,
+  "2": 4,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "7": 4,
+  "8": 4,
+  "Console": 4,
+  "USB": 3,
+  "USB 2": 3
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.81,
+ "saved_label": "official/vendor data sheet sns-en_SN-M-SERIES-520-quickstart_v1.0.pdf p1",
+ "saved_at": "2026-10-22 21:39"
+}

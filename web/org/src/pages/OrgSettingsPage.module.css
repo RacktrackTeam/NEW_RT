@@ -1,0 +1,63 @@
+/* Organization settings (board screen 16). */
+
+.picker {
+  max-width: 420px;
+  margin-top: var(--s4);
+}
+
+.sitesRow {
+  margin-top: var(--s3);
+}
+
+.links {
+  margin-top: var(--s3);
+}
+
+.days {
+  max-width: 260px;
+}
+
+.unit {
+  color: var(--grey);
+  font-size: var(--t3);
+}
+
+.mt24 {
+  margin-top: var(--s6);
+}
+
+.sentence {
+  margin: var(--s2) 0 var(--s4);
+}
+
+.menu {
+  margin-top: var(--s3);
+  border-top: 1px solid var(--line);
+}
+
+.danger {
+  color: var(--bad);
+}
+
+.orgs {
+  margin-top: var(--s8);
+}
+
+.orgRight {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s2) var(--s4);
+}
+
+.word {
+  font-size: var(--t3);
+  color: var(--grey);
+}
+
+.off {
+  font-size: var(--t3);
+  color: var(--warn);
+}
+

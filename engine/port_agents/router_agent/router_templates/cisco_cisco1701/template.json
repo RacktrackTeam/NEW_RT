@@ -1,0 +1,67 @@
+{
+ "vendor": "Cisco",
+ "model": "CISCO1701",
+ "device": "router",
+ "description": "",
+ "summary": "2x RJ45 | 2x SFP | built from the vendor image by the router mapper",
+ "image": "front.png",
+ "image_source": "https://st.in.ua/products-images/1/CISCO1701.webp",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   914,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    389,
+    87,
+    62,
+    50
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    467,
+    46,
+    59,
+    45
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    464,
+    93,
+    61,
+    47
+   ]
+  },
+  {
+   "id": 4,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    674,
+    51,
+    58,
+    48
+   ]
+  }
+ ],
+ "labels_read": []
+}

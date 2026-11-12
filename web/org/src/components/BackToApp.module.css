@@ -1,0 +1,17 @@
+.bar {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 8px 32px;
+  background: #fff;
+  border-bottom: 1px solid #e3e7ec;
+}
+.back {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2a3a;
+  text-decoration: underline;
+}
+@media (max-width: 700px) {
+  .bar { padding: 8px 16px; }
+}

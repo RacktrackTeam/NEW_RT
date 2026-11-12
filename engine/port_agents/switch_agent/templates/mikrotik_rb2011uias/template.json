@@ -1,0 +1,138 @@
+{
+ "vendor": "MikroTik",
+ "model": "RB2011UIAS",
+ "description": "",
+ "summary": "10x RJ45 (ports 1-10) | detected automatically",
+ "image": "front.png",
+ "image_source": "52bc0f412576b293.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1146,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   201,
+   34,
+   917,
+   107
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    218,
+    52,
+    76,
+    71
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    295,
+    52,
+    69,
+    70
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    364,
+    53,
+    68,
+    69
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    434,
+    52,
+    68,
+    70
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    505,
+    52,
+    74,
+    73
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    738,
+    52,
+    73,
+    70
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    813,
+    53,
+    69,
+    70
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    882,
+    53,
+    68,
+    69
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    952,
+    52,
+    70,
+    69
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1023,
+    51,
+    78,
+    73
+   ]
+  }
+ ]
+}

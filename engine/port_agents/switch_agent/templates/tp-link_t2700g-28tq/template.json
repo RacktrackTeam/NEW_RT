@@ -1,0 +1,369 @@
+{
+ "vendor": "TP-Link",
+ "model": "T2700G-28TQ",
+ "description": "",
+ "summary": "24x RJ45 (ports 1-24) | 6x SFP (25, 26, 27, 28, 29, 30) | console port | detected automatically",
+ "image": "front.png",
+ "image_source": "https://static.tp-link.com/res/images/products/large/T2700G-28TQ-01.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1645,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   520,
+   30,
+   687,
+   126
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    533,
+    42,
+    58,
+    52
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    534,
+    95,
+    57,
+    50
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    589,
+    43,
+    55,
+    51
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    589,
+    94,
+    54,
+    50
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    641,
+    43,
+    55,
+    51
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    642,
+    94,
+    55,
+    50
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    694,
+    43,
+    55,
+    50
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    694,
+    94,
+    55,
+    50
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    747,
+    43,
+    55,
+    50
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    746,
+    94,
+    55,
+    50
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    799,
+    44,
+    55,
+    50
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    799,
+    95,
+    57,
+    49
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    876,
+    44,
+    56,
+    49
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    876,
+    95,
+    57,
+    50
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    931,
+    44,
+    54,
+    50
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    931,
+    95,
+    54,
+    49
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    983,
+    44,
+    55,
+    50
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    984,
+    95,
+    55,
+    49
+   ]
+  },
+  {
+   "id": 19,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1036,
+    44,
+    55,
+    49
+   ]
+  },
+  {
+   "id": 20,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1036,
+    94,
+    55,
+    50
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1089,
+    44,
+    54,
+    50
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1088,
+    95,
+    55,
+    49
+   ]
+  },
+  {
+   "id": 23,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1141,
+    44,
+    52,
+    49
+   ]
+  },
+  {
+   "id": 24,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1141,
+    95,
+    55,
+    49
+   ]
+  },
+  {
+   "id": 25,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1216,
+    39,
+    62,
+    53
+   ]
+  },
+  {
+   "id": 26,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1217,
+    96,
+    60,
+    50
+   ]
+  },
+  {
+   "id": 27,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1285,
+    38,
+    63,
+    53
+   ]
+  },
+  {
+   "id": 28,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1285,
+    95,
+    62,
+    53
+   ]
+  },
+  {
+   "id": 29,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1358,
+    38,
+    65,
+    54
+   ]
+  },
+  {
+   "id": 30,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1358,
+    96,
+    65,
+    53
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    448,
+    85,
+    72,
+    64
+   ]
+  }
+ ]
+}

@@ -1,0 +1,255 @@
+{
+ "vendor": "Juniper",
+ "model": "SRX345",
+ "device": "firewall",
+ "description": "",
+ "summary": "9x RJ45 | 8x SFP | 1 named port type(s): Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.juniper.net/documentation/us/en/quick-start/srx345/srx345-quick-start.pdf#page2-img46",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1796,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   455,
+   38,
+   648,
+   101
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    471,
+    56,
+    77,
+    68
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    557,
+    55,
+    73,
+    68
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    627,
+    56,
+    67,
+    65
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    692,
+    57,
+    68,
+    64
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    757,
+    58,
+    67,
+    62
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    824,
+    56,
+    65,
+    64
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    888,
+    54,
+    67,
+    66
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    952,
+    55,
+    68,
+    65
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1019,
+    58,
+    69,
+    63
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1095,
+    71,
+    66,
+    54
+   ]
+  },
+  {
+   "id": 11,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1160,
+    70,
+    61,
+    54
+   ]
+  },
+  {
+   "id": 12,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1218,
+    69,
+    61,
+    55
+   ]
+  },
+  {
+   "id": 13,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1276,
+    69,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 14,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1444,
+    69,
+    69,
+    56
+   ]
+  },
+  {
+   "id": 15,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1508,
+    70,
+    62,
+    54
+   ]
+  },
+  {
+   "id": 16,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1566,
+    70,
+    63,
+    55
+   ]
+  },
+  {
+   "id": 17,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1626,
+    71,
+    66,
+    53
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    338,
+    64,
+    78,
+    60
+   ],
+   "name": "CONSOLE"
+  }
+ ],
+ "labels_read": [
+  "CONSOLE"
+ ],
+ "chassis_votes": {
+  "1": 2,
+  "2": 2,
+  "3": 2,
+  "4": 2,
+  "5": 2,
+  "6": 2,
+  "7": 2,
+  "8": 2,
+  "9": 2,
+  "10": 2,
+  "11": 2,
+  "12": 2,
+  "13": 2,
+  "14": 2,
+  "15": 2,
+  "16": 2,
+  "17": 2,
+  "Console": 2
+ },
+ "chassis_aligned": 2,
+ "saved_quality": 0.942,
+ "saved_label": "official/vendor data sheet srx345-quick-start.pdf p2",
+ "saved_at": "2026-10-19 12:47"
+}

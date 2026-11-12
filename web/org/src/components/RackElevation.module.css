@@ -1,0 +1,167 @@
+/* A rack drawn as HTML: two rails, one row per block of units. */
+.rack {
+  --uh: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px;
+  border-radius: var(--r);
+  background: var(--sunken);
+  box-shadow: var(--press);
+}
+
+.compact {
+  --uh: 24px;
+  padding: 4px;
+}
+
+.row {
+  display: flex;
+  align-items: stretch;
+  min-height: calc(var(--u) * var(--uh));
+}
+
+.u {
+  flex: none;
+  display: flex;
+  align-items: center;
+  width: 58px;
+  padding: 0 8px 0 6px;
+  color: var(--grey);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.compact .u {
+  width: 44px;
+  padding: 0 4px;
+  font-size: 10px;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding: 3px 0;
+}
+
+.dev .body {
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 2px 2px 6px rgba(17, 17, 17, 0.06);
+}
+
+.compact .dev .body {
+  padding: 4px 6px;
+}
+
+.sel .body {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 1.5px var(--ink);
+}
+
+.gap .body {
+  padding: 0 12px;
+  border: 1px dashed rgba(18, 18, 18, 0.12);
+  border-radius: 10px;
+}
+
+.gapWord {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  color: #9a9a9a;
+  font-size: 12px;
+}
+
+.exp {
+  color: var(--warn);
+  font-weight: 500;
+}
+
+/* ── Port cells ──────────────────────────────────────────── */
+.cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 6px;
+}
+
+.cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 22px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid rgba(107, 107, 107, 0.55);
+  border-radius: 5px;
+  background: #fff;
+  color: #555;
+  font: 600 10px / 1 var(--font);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.compact .cell {
+  width: 19px;
+  height: 18px;
+  font-size: 9px;
+}
+
+.c_matched {
+  border-color: var(--ok);
+  background: var(--ok);
+  color: #fff;
+}
+
+.c_wrong_port {
+  border-color: var(--bad);
+  background: var(--bad);
+  color: #fff;
+}
+
+.c_missing_cable {
+  border: 2px solid var(--bad);
+  color: var(--bad);
+}
+
+.c_not_in_sheet {
+  border-color: var(--warn);
+  background: var(--warn);
+  color: #fff;
+}
+
+.c_not_found {
+  border: 2px solid var(--warn);
+  color: var(--warn);
+}
+
+.c_uncapped {
+  border: 2px solid var(--warn);
+  background: repeating-linear-gradient(135deg, rgba(138, 90, 0, 0.28) 0 2px, #fff 2px 5px);
+  color: var(--warn);
+}
+
+.c_connected {
+  border-color: #3b3d42;
+  background: #3b3d42;
+  color: #fff;
+}
+
+.c_unknown {
+  border-color: #d9dbe0;
+  background: #d9dbe0;
+  color: #55575c;
+}
+
+.cellOn {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}

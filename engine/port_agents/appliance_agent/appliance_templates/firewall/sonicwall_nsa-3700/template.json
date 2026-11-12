@@ -1,0 +1,472 @@
+{
+ "vendor": "SonicWall",
+ "model": "NSa 3700",
+ "device": "firewall",
+ "description": "",
+ "summary": "24x RJ45 | 10x SFP | 2 named port type(s): Console, USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://images.contentstack.io/v3/assets/blt281ecbfc2563bf9b/blt2f63320f39e3717e/6643e739e7431284fd817fc3/nsa-3700.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1458,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   711,
+   39,
+   636,
+   110
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    468,
+    50,
+    52,
+    46
+   ]
+  },
+  {
+   "id": 2,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    468,
+    100,
+    50,
+    41
+   ]
+  },
+  {
+   "id": 3,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    519,
+    51,
+    46,
+    43
+   ]
+  },
+  {
+   "id": 4,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    516,
+    101,
+    48,
+    40
+   ]
+  },
+  {
+   "id": 5,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    565,
+    51,
+    45,
+    42
+   ]
+  },
+  {
+   "id": 6,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    562,
+    101,
+    49,
+    41
+   ]
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    617,
+    51,
+    50,
+    44
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    615,
+    100,
+    49,
+    42
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    665,
+    51,
+    47,
+    43
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    663,
+    100,
+    49,
+    42
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    722,
+    50,
+    49,
+    43
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    722,
+    96,
+    50,
+    43
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    771,
+    50,
+    50,
+    44
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    771,
+    95,
+    51,
+    44
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    821,
+    50,
+    50,
+    43
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    821,
+    94,
+    50,
+    44
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    871,
+    50,
+    50,
+    44
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    871,
+    94,
+    51,
+    44
+   ]
+  },
+  {
+   "id": 19,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    921,
+    51,
+    50,
+    44
+   ]
+  },
+  {
+   "id": 20,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    921,
+    94,
+    51,
+    44
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    971,
+    51,
+    51,
+    43
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    970,
+    95,
+    51,
+    44
+   ]
+  },
+  {
+   "id": 23,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1032,
+    50,
+    51,
+    43
+   ]
+  },
+  {
+   "id": 24,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1032,
+    95,
+    51,
+    43
+   ]
+  },
+  {
+   "id": 25,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1084,
+    50,
+    50,
+    44
+   ]
+  },
+  {
+   "id": 26,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1083,
+    95,
+    51,
+    43
+   ]
+  },
+  {
+   "id": 27,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1134,
+    50,
+    51,
+    45
+   ]
+  },
+  {
+   "id": 28,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1133,
+    94,
+    52,
+    44
+   ]
+  },
+  {
+   "id": 29,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1184,
+    49,
+    51,
+    44
+   ]
+  },
+  {
+   "id": 30,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1183,
+    94,
+    52,
+    44
+   ]
+  },
+  {
+   "id": 31,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1234,
+    50,
+    51,
+    44
+   ]
+  },
+  {
+   "id": 32,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1234,
+    94,
+    51,
+    44
+   ]
+  },
+  {
+   "id": 33,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1285,
+    49,
+    53,
+    45
+   ]
+  },
+  {
+   "id": 34,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1285,
+    94,
+    53,
+    44
+   ]
+  },
+  {
+   "id": "Mgmt",
+   "type": "management_port",
+   "poe": null,
+   "box": [
+    200,
+    88,
+    60,
+    54
+   ],
+   "name": "MGMT"
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    309,
+    112,
+    56,
+    30
+   ]
+  }
+ ],
+ "labels_read": [
+  "MGMT",
+  "E"
+ ],
+ "chassis_votes": {
+  "1": 2,
+  "2": 2,
+  "3": 2,
+  "4": 2,
+  "5": 2,
+  "6": 2,
+  "7": 2,
+  "8": 2,
+  "9": 2,
+  "10": 2,
+  "11": 2,
+  "12": 2,
+  "13": 2,
+  "14": 2,
+  "15": 2,
+  "16": 2,
+  "17": 2,
+  "18": 2,
+  "19": 2,
+  "20": 2,
+  "21": 2,
+  "22": 2,
+  "23": 2,
+  "24": 2,
+  "25": 2,
+  "26": 2,
+  "27": 2,
+  "28": 2,
+  "29": 2,
+  "30": 2,
+  "31": 2,
+  "32": 2,
+  "33": 2,
+  "34": 2,
+  "Mgmt": 1,
+  "USB": 2
+ },
+ "chassis_aligned": 2,
+ "saved_quality": 0.956,
+ "saved_label": "template agent (official/official_search)",
+ "saved_at": "2026-10-22 21:27"
+}

@@ -1,0 +1,77 @@
+{
+ "vendor": "TP-Link",
+ "model": "TL-R480T+",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "3x RJ45 | 0x SFP | 1 named port type(s): Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://static.tp-link.com/TL-R480T%2B_UN_9.0_normal_1513060089771u.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1135,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    571,
+    58,
+    73,
+    66
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    656,
+    57,
+    72,
+    67
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    740,
+    58,
+    73,
+    66
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    486,
+    59,
+    72,
+    64
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 2,
+  "2": 2,
+  "3": 1,
+  "Console": 2
+ },
+ "chassis_aligned": 2,
+ "saved_quality": 0.845,
+ "saved_label": "official/vendor page www.omadanetworks.com: Load Balance Broadband Router 1",
+ "saved_at": "2026-10-19 15:49"
+}

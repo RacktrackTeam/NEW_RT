@@ -1,0 +1,248 @@
+{
+ "vendor": "MikroTik",
+ "model": "CCR2004-16G-2S+PC",
+ "description": "",
+ "summary": "16x RJ45 (ports 1-16) | 2x SFP (17, 18) | console port | detected automatically",
+ "image": "front.png",
+ "image_source": "https://cdn.mikrotik.com/web-assets/rb_images/2634_tm.webp",
+ "auto_generated": true,
+ "numbering_scheme": "top-even",
+ "match_regions": [
+  [
+   0,
+   0,
+   960,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   230,
+   25,
+   499,
+   127
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    244,
+    92,
+    56,
+    48
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    242,
+    39,
+    57,
+    49
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    301,
+    91,
+    54,
+    48
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    301,
+    38,
+    55,
+    49
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    356,
+    92,
+    54,
+    48
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    356,
+    38,
+    54,
+    50
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    412,
+    91,
+    57,
+    49
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    412,
+    37,
+    58,
+    51
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    491,
+    91,
+    56,
+    49
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    490,
+    38,
+    58,
+    50
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    548,
+    91,
+    55,
+    49
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    549,
+    38,
+    55,
+    50
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    604,
+    91,
+    55,
+    48
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    605,
+    38,
+    55,
+    50
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    659,
+    91,
+    57,
+    49
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    660,
+    38,
+    58,
+    50
+   ]
+  },
+  {
+   "id": 17,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    88,
+    93,
+    67,
+    53
+   ]
+  },
+  {
+   "id": 18,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    164,
+    94,
+    64,
+    53
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    731,
+    88,
+    66,
+    55
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    820,
+    78,
+    40,
+    64
+   ]
+  }
+ ]
+}

@@ -1,0 +1,240 @@
+{
+ "vendor": "F5",
+ "model": "5000s",
+ "device": "load_balancer",
+ "description": "",
+ "summary": "7x RJ45 | 8x SFP | 2 named port type(s): Console, USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://techdocs.f5.com/content/kb/en-us/products/big-ip_ltm/manuals/product/platform-b5000/_jcr_content/pdfAttach/download/file.res/Platform_Guide__5000_Series.pdf#page9-img22",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1520,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   126,
+   25,
+   1353,
+   127
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    139,
+    38,
+    58,
+    49
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    140,
+    89,
+    60,
+    52
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    225,
+    37,
+    52,
+    49
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    226,
+    89,
+    53,
+    49
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    276,
+    37,
+    54,
+    49
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    277,
+    87,
+    56,
+    52
+   ]
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    378,
+    37,
+    56,
+    48
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    377,
+    91,
+    57,
+    49
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    431,
+    37,
+    54,
+    49
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    430,
+    89,
+    54,
+    52
+   ]
+  },
+  {
+   "id": 11,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    482,
+    38,
+    52,
+    49
+   ]
+  },
+  {
+   "id": 12,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    482,
+    89,
+    53,
+    52
+   ]
+  },
+  {
+   "id": 13,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    532,
+    37,
+    56,
+    50
+   ]
+  },
+  {
+   "id": 14,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    532,
+    91,
+    57,
+    50
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1356,
+    43,
+    113,
+    98
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    56,
+    23,
+    58,
+    49
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    55,
+    73,
+    57,
+    31
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 2,
+  "2": 2,
+  "3": 2,
+  "4": 2,
+  "5": 2,
+  "6": 2,
+  "7": 2,
+  "8": 2,
+  "9": 2,
+  "10": 2,
+  "11": 2,
+  "12": 2,
+  "13": 2,
+  "14": 2,
+  "15": 0,
+  "Console": 1,
+  "USB": 0
+ },
+ "chassis_aligned": 2,
+ "saved_quality": 0.877,
+ "saved_label": "official/vendor data sheet Platform_Guide__5000_Series.pdf p9",
+ "saved_at": "2026-10-19 15:55"
+}

@@ -1,0 +1,358 @@
+{
+ "vendor": "D-Link",
+ "model": "DES-1210-28P",
+ "description": "",
+ "summary": "28x RJ45 (ports 1-28) | 2x SFP (25F, 26F) | detected automatically",
+ "image": "front.png",
+ "image_source": "e9ae18ffaeb3f44f.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1550,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   537,
+   23,
+   958,
+   133
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    549,
+    39,
+    60,
+    51
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    556,
+    94,
+    55,
+    48
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    607,
+    38,
+    51,
+    49
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    609,
+    94,
+    51,
+    48
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    656,
+    38,
+    52,
+    51
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    658,
+    93,
+    51,
+    48
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    706,
+    37,
+    56,
+    51
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    708,
+    93,
+    54,
+    50
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    788,
+    38,
+    57,
+    52
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    790,
+    92,
+    55,
+    50
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    842,
+    38,
+    53,
+    51
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    843,
+    92,
+    52,
+    49
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    892,
+    38,
+    52,
+    50
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    892,
+    92,
+    52,
+    50
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    942,
+    38,
+    56,
+    51
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    942,
+    93,
+    55,
+    50
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1023,
+    38,
+    58,
+    52
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1025,
+    93,
+    56,
+    50
+   ]
+  },
+  {
+   "id": 19,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1079,
+    37,
+    53,
+    52
+   ]
+  },
+  {
+   "id": 20,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1079,
+    93,
+    53,
+    49
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1128,
+    37,
+    52,
+    51
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1128,
+    93,
+    52,
+    49
+   ]
+  },
+  {
+   "id": 23,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1178,
+    36,
+    56,
+    52
+   ]
+  },
+  {
+   "id": 24,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1179,
+    93,
+    55,
+    50
+   ]
+  },
+  {
+   "id": 25,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1329,
+    37,
+    64,
+    52
+   ]
+  },
+  {
+   "id": 26,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1330,
+    92,
+    62,
+    52
+   ]
+  },
+  {
+   "id": 27,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1416,
+    35,
+    67,
+    54
+   ]
+  },
+  {
+   "id": 28,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1416,
+    91,
+    65,
+    54
+   ]
+  },
+  {
+   "id": "25F",
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1251,
+    35,
+    63,
+    56
+   ]
+  },
+  {
+   "id": "26F",
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1252,
+    95,
+    60,
+    52
+   ]
+  }
+ ]
+}

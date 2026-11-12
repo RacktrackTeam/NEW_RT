@@ -1,0 +1,108 @@
+{
+ "vendor": "Cisco",
+ "model": "CISCO2911",
+ "device": "router",
+ "description": "",
+ "summary": "4x RJ45 | 0x SFP | 1 named port type(s): USB | built from the vendor image by the router mapper",
+ "image": "front.png",
+ "image_source": "https://media.router-switch.com/media/mf_webp/jpg/media/catalog/product/cache/b90fceee6a5fa7acd36a04c7b968181c/r/o/routers-cisco2911-k9-cisco2911-k9-back-view.webp",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1399,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   1049,
+   38,
+   147,
+   116
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1061,
+    53,
+    54,
+    46
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1060,
+    100,
+    53,
+    41
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1127,
+    49,
+    58,
+    47
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1128,
+    99,
+    55,
+    44
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    1206,
+    112,
+    57,
+    28
+   ]
+  },
+  {
+   "id": "USB 2",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    1207,
+    86,
+    58,
+    26
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 2,
+  "2": 1,
+  "3": 2,
+  "4": 2,
+  "USB": 2,
+  "USB 2": 2
+ },
+ "chassis_aligned": 2,
+ "saved_quality": 0.851,
+ "saved_label": "router store #94",
+ "saved_at": "2026-10-22 21:12"
+}

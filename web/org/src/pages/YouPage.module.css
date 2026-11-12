@@ -1,0 +1,95 @@
+/* You: a profile header, then plain grouped rows with no headings. */
+
+.me {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--s2) 0 var(--s6);
+  text-align: center;
+}
+
+.me .avatar {
+  width: 88px;
+  height: 88px;
+  font-size: 30px;
+  margin-bottom: var(--s3);
+}
+
+.who {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.name {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.line {
+  margin: 4px 0 0;
+  color: var(--grey);
+  font-size: var(--t3);
+  overflow-wrap: anywhere;
+}
+
+/* One group of action rows; 16 between groups. */
+.group + .group {
+  margin-top: var(--s4);
+}
+
+/* The three-dots menu, as a short action sheet. */
+.menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.mi {
+  display: block;
+  width: 100%;
+  min-height: var(--row);
+  padding: 0 var(--s2);
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--t2);
+  text-align: left;
+  cursor: pointer;
+}
+
+.mi:last-child {
+  border-bottom: 0;
+}
+
+.mi:hover,
+.mi:focus-visible {
+  background: var(--sunken);
+}
+
+.miOut {
+  color: var(--bad);
+}
+
+@media (min-width: 1024px) {
+  .me {
+    flex-direction: row;
+    gap: var(--s6);
+    padding: var(--s6) 0 var(--s8);
+    text-align: left;
+  }
+
+  .me .avatar {
+    width: 96px;
+    height: 96px;
+    margin-bottom: 0;
+  }
+
+  .name {
+    font-size: 20px;
+  }
+}

@@ -1,0 +1,655 @@
+{
+ "vendor": "Dell",
+ "model": "S5048F-ON",
+ "description": "",
+ "summary": "46x RJ45 (ports 1-46) | 11x SFP (47, 48, 49, 50, 51, 52, 53, 55, 54, 56, 57) | detected automatically",
+ "image": "front.png",
+ "image_source": "https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-enterprise-products/networking-products/dell/s-series/s5048f/pdp/dell-networking-s5048f-on-ff-pdp.psd?fmt=jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1697,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   115,
+   19,
+   1336,
+   136
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    129,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    129,
+    89,
+    57,
+    53
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    184,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    184,
+    88,
+    58,
+    54
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    240,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    240,
+    88,
+    58,
+    55
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    296,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    295,
+    85,
+    60,
+    58
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    352,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    351,
+    82,
+    59,
+    60
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    408,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    407,
+    82,
+    60,
+    61
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    467,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    464,
+    77,
+    63,
+    66
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    533,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    531,
+    73,
+    61,
+    70
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    589,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    589,
+    71,
+    58,
+    72
+   ]
+  },
+  {
+   "id": 19,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    645,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 20,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    645,
+    71,
+    57,
+    72
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    702,
+    36,
+    54,
+    41
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    700,
+    70,
+    56,
+    72
+   ]
+  },
+  {
+   "id": 23,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    755,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 24,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    755,
+    78,
+    57,
+    64
+   ]
+  },
+  {
+   "id": 25,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    812,
+    36,
+    55,
+    48
+   ]
+  },
+  {
+   "id": 26,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    812,
+    89,
+    55,
+    53
+   ]
+  },
+  {
+   "id": 27,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    866,
+    37,
+    56,
+    47
+   ]
+  },
+  {
+   "id": 28,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    866,
+    88,
+    56,
+    54
+   ]
+  },
+  {
+   "id": 29,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    923,
+    36,
+    60,
+    48
+   ]
+  },
+  {
+   "id": 30,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    922,
+    83,
+    61,
+    60
+   ]
+  },
+  {
+   "id": 31,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    988,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 32,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    987,
+    82,
+    60,
+    61
+   ]
+  },
+  {
+   "id": 33,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1046,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 34,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1046,
+    89,
+    57,
+    53
+   ]
+  },
+  {
+   "id": 35,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1102,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 36,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1102,
+    89,
+    58,
+    53
+   ]
+  },
+  {
+   "id": 37,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1158,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 38,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1158,
+    88,
+    57,
+    53
+   ]
+  },
+  {
+   "id": 39,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1214,
+    38,
+    55,
+    46
+   ]
+  },
+  {
+   "id": 40,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1213,
+    88,
+    56,
+    53
+   ]
+  },
+  {
+   "id": 41,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1268,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 42,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1269,
+    89,
+    55,
+    52
+   ]
+  },
+  {
+   "id": 43,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1324,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 44,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1324,
+    89,
+    56,
+    51
+   ]
+  },
+  {
+   "id": 45,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1382,
+    33,
+    57,
+    54
+   ]
+  },
+  {
+   "id": 46,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1381,
+    90,
+    59,
+    52
+   ]
+  },
+  {
+   "id": 47,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    70,
+    36,
+    61,
+    52
+   ]
+  },
+  {
+   "id": 48,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    72,
+    92,
+    59,
+    50
+   ]
+  },
+  {
+   "id": 49,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    130,
+    37,
+    56,
+    49
+   ]
+  },
+  {
+   "id": 50,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    186,
+    37,
+    56,
+    48
+   ]
+  },
+  {
+   "id": 51,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    242,
+    37,
+    55,
+    46
+   ]
+  },
+  {
+   "id": 52,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    297,
+    36,
+    57,
+    49
+   ]
+  },
+  {
+   "id": 53,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1325,
+    38,
+    55,
+    47
+   ]
+  },
+  {
+   "id": 55,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1450,
+    38,
+    76,
+    48
+   ]
+  },
+  {
+   "id": 54,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1446,
+    92,
+    78,
+    50
+   ]
+  },
+  {
+   "id": 56,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1525,
+    37,
+    74,
+    48
+   ]
+  },
+  {
+   "id": 57,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1525,
+    95,
+    70,
+    46
+   ]
+  }
+ ]
+}

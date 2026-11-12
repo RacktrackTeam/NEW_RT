@@ -1,0 +1,205 @@
+/* Home. Phone: the organization, a photo of a whole rack, a title, one line
+   and one button, all on one left edge. Laptop (the bar carries the logo):
+   the words on the left and the photo on the right, side by side. */
+.home {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  min-height: calc(100vh - var(--nav-top) - var(--nav-bottom));
+  min-height: calc(100dvh - var(--nav-top) - var(--nav-bottom));
+  padding: calc(var(--s4) + var(--safe-top)) var(--s4) var(--s4);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  min-width: 0;
+}
+
+.logo {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  object-fit: cover;
+}
+
+.org {
+  min-width: 0;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.center {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  text-align: left;
+}
+
+.photo {
+  display: block;
+  width: 100%;
+  max-height: 46vh;
+  max-height: 46dvh;
+  aspect-ratio: 4 / 5;
+  margin-bottom: var(--s6);
+  border-radius: 20px;
+  object-fit: cover;
+  object-position: center 30%;
+  background: var(--sunken);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* The organization over the title: a laptop only (the phone has it above). */
+.eyebrow {
+  display: none;
+}
+
+.title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.sub {
+  margin: var(--s2) 0 20px;
+  color: var(--grey);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--s3);
+}
+
+.btn {
+  justify-content: center;
+  width: 100%;
+}
+
+.second {
+  display: none;
+}
+
+.reads {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .home {
+    padding: var(--s8) var(--s8) var(--s8);
+  }
+
+  .brand {
+    display: none;
+  }
+
+  .center {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-items: center;
+    gap: var(--s12);
+  }
+
+  .photo {
+    order: 2;
+    width: 100%;
+    height: min(72vh, 680px);
+    max-height: none;
+    aspect-ratio: auto;
+    margin: 0;
+    border-radius: 24px;
+  }
+
+  .text {
+    order: 1;
+    max-width: 560px;
+  }
+
+  .eyebrow {
+    display: block;
+    margin: 0 0 var(--s3);
+    color: var(--grey);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .title {
+    font-size: clamp(40px, 3.6vw, 54px);
+    line-height: 1.04;
+    letter-spacing: -0.03em;
+  }
+
+  .sub {
+    margin: var(--s4) 0 var(--s6);
+    font-size: 17px;
+    line-height: 1.55;
+    max-width: 52ch;
+  }
+
+  .actions {
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .btn {
+    width: auto;
+    padding-inline: 28px;
+  }
+
+  .second {
+    display: inline;
+    color: var(--ink);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1px;
+  }
+
+  .reads {
+    display: grid;
+    gap: 10px;
+    margin: var(--s8) 0 0;
+    padding: 20px 0 0;
+    border-top: 1px solid var(--line);
+    list-style: none;
+    color: var(--grey);
+    font-size: 14.5px;
+  }
+
+  .reads li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .reads li::before {
+    content: '';
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ink);
+  }
+}

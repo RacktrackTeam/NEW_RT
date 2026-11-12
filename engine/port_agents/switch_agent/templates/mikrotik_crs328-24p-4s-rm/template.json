@@ -1,0 +1,314 @@
+{
+ "vendor": "MikroTik",
+ "model": "CRS328-24P-4S+RM",
+ "description": "",
+ "summary": "24x RJ45 (ports 1-24) | 2x SFP (25, 26) | detected automatically",
+ "image": "front.png",
+ "image_source": "https://cdn.mikrotik.com/web-assets/rb_images/1494_xl.webp",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1339,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   11,
+   29,
+   524,
+   125
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    21,
+    43,
+    39,
+    40
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    21,
+    93,
+    38,
+    39
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    56,
+    93,
+    38,
+    39
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    58,
+    51,
+    36,
+    39
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    89,
+    93,
+    38,
+    39
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    91,
+    58,
+    35,
+    39
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    124,
+    65,
+    37,
+    41
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    124,
+    93,
+    38,
+    39
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    191,
+    39,
+    38,
+    38
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    191,
+    80,
+    39,
+    41
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    227,
+    45,
+    37,
+    38
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    229,
+    89,
+    37,
+    42
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    263,
+    56,
+    37,
+    37
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    264,
+    98,
+    36,
+    41
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    299,
+    62,
+    39,
+    40
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    300,
+    104,
+    38,
+    42
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    371,
+    79,
+    39,
+    38
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    372,
+    52,
+    38,
+    39
+   ]
+  },
+  {
+   "id": 19,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    411,
+    52,
+    38,
+    39
+   ]
+  },
+  {
+   "id": 20,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    411,
+    87,
+    38,
+    40
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    448,
+    52,
+    38,
+    39
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    448,
+    97,
+    38,
+    39
+   ]
+  },
+  {
+   "id": 23,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    486,
+    105,
+    41,
+    38
+   ]
+  },
+  {
+   "id": 24,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    488,
+    52,
+    38,
+    39
+   ]
+  },
+  {
+   "id": 25,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    561,
+    120,
+    45,
+    41
+   ]
+  },
+  {
+   "id": 26,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    604,
+    127,
+    46,
+    44
+   ]
+  }
+ ]
+}

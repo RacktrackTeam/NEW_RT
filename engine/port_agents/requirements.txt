@@ -1,0 +1,21 @@
+# All three agents. Python 3.10 or 3.11; tested on Python 3.10.11 and 3.11.9.
+opencv-python>=4.13,<5
+numpy>=2.2.6,<3
+pillow>=12.2,<13
+requests>=2.34,<3
+certifi>=2024.2           # root certificates for vendor-site lookups (run_agent.py sets SSL_CERT_FILE)
+beautifulsoup4>=4.15,<5     # all agents: data-sheet pages (spec lookup); switch agent: spec scrapers
+pandas>=2.3.3,<4            # catalogue spreadsheets
+openpyxl>=3.1.5,<4          # reads the .xlsx catalogues (the switch catalogue at run time)
+pymupdf>=1.26,<2            # vendor data-sheet PDFs (import fitz): template images and the spec lookup
+rapidfuzz>=3.14,<4
+pydantic>=2.13,<3
+rapidocr-onnxruntime==1.4.4 # OCR of the panel text
+onnxruntime>=1.23,<2
+ultralytics>=8.4.83,<9      # runs the port detector (best_merged_ports*.pt)
+torch>=2.12,<3
+torchvision>=0.27,<1
+# optional: a headless browser for vendor sites that block plain requests
+# playwright>=1.61   then:  python -m playwright install chromium
+# optional: switch agent data-sheet tables when PyMuPDF cannot read a PDF
+# pdfplumber

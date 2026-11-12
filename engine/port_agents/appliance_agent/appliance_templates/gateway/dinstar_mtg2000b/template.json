@@ -1,0 +1,312 @@
+{
+ "vendor": "Dinstar",
+ "model": "MTG2000B",
+ "device": "gateway",
+ "description": "",
+ "summary": "23x RJ45 | 0x SFP | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.dinstar.com/web/images/14270/2019-03-08/MTG_2000.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1203,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   114,
+   30,
+   871,
+   124
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    126,
+    41,
+    48,
+    46
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    128,
+    98,
+    45,
+    46
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    170,
+    42,
+    41,
+    44
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    172,
+    97,
+    41,
+    45
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    209,
+    42,
+    41,
+    43
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    210,
+    98,
+    41,
+    45
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    248,
+    43,
+    46,
+    44
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    250,
+    98,
+    45,
+    44
+   ]
+  },
+  {
+   "id": 9,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    467,
+    41,
+    47,
+    46
+   ]
+  },
+  {
+   "id": 10,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    468,
+    99,
+    45,
+    45
+   ]
+  },
+  {
+   "id": 11,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    511,
+    41,
+    41,
+    44
+   ]
+  },
+  {
+   "id": 12,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    511,
+    99,
+    41,
+    44
+   ]
+  },
+  {
+   "id": 13,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    550,
+    42,
+    41,
+    43
+   ]
+  },
+  {
+   "id": 14,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    550,
+    99,
+    41,
+    43
+   ]
+  },
+  {
+   "id": 15,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    589,
+    42,
+    46,
+    45
+   ]
+  },
+  {
+   "id": 16,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    589,
+    99,
+    44,
+    43
+   ]
+  },
+  {
+   "id": 17,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    807,
+    41,
+    48,
+    44
+   ]
+  },
+  {
+   "id": 18,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    815,
+    93,
+    50,
+    50
+   ]
+  },
+  {
+   "id": 19,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    852,
+    42,
+    41,
+    41
+   ]
+  },
+  {
+   "id": 20,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    866,
+    92,
+    50,
+    50
+   ]
+  },
+  {
+   "id": 21,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    891,
+    44,
+    40,
+    40
+   ]
+  },
+  {
+   "id": 22,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    930,
+    43,
+    46,
+    41
+   ]
+  },
+  {
+   "id": 23,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    918,
+    93,
+    49,
+    47
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 3,
+  "2": 4,
+  "3": 3,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "7": 4,
+  "8": 4,
+  "9": 3,
+  "10": 3,
+  "11": 3,
+  "12": 2,
+  "13": 3,
+  "14": 2,
+  "15": 3,
+  "16": 3,
+  "17": 3,
+  "18": 4,
+  "19": 3,
+  "20": 4,
+  "21": 3,
+  "22": 3,
+  "23": 4
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.988,
+ "saved_label": "official/vendor page www.dinstar.com:  ",
+ "saved_at": "2026-10-19 16:12"
+}

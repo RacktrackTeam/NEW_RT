@@ -1,0 +1,91 @@
+{
+ "vendor": "Cisco",
+ "model": "ISR4321",
+ "device": "router",
+ "description": "",
+ "summary": "3x RJ45 | 0x SFP | 2 named port type(s): Console, USB | built from the vendor image by the router mapper",
+ "image": "front.png",
+ "image_source": "https://erc.ua/upload/uploaded_images/045/5950470e085e7_cisco_isr4321-k9-back.jpg",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1226,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    339,
+    45,
+    56,
+    42
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    416,
+    42,
+    58,
+    45
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    416,
+    90,
+    56,
+    48
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    217,
+    58,
+    59,
+    44
+   ]
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    214,
+    103,
+    62,
+    34
+   ]
+  }
+ ],
+ "labels_read": [
+  "E"
+ ],
+ "chassis_votes": {
+  "1": 2,
+  "2": 2,
+  "3": 2,
+  "Console": 2,
+  "USB": 2
+ },
+ "chassis_aligned": 2,
+ "saved_quality": 0.868,
+ "saved_label": "template agent (store/internet/image_search)",
+ "saved_at": "2026-10-22 20:26"
+}

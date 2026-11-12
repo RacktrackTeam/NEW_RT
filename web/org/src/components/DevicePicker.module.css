@@ -1,0 +1,26 @@
+.field { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.label { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--grey); }
+.trigger {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: var(--btn); padding: 6px var(--s4);
+  border: 1px solid var(--field-line); border-radius: var(--r); background: #fff;
+  color: var(--ink); font: inherit; text-align: left; cursor: pointer;
+}
+.trigger:active { background: rgba(17, 17, 17, 0.03); }
+.placeholder { flex: 1; color: var(--grey); font-size: 16px; }
+.unit {
+  flex: none; min-width: 44px; padding: 3px 6px; border-radius: 6px; background: rgba(17, 17, 17, 0.06);
+  font-family: var(--mono); font-size: 12px; font-weight: 600; text-align: center; color: var(--ink);
+}
+.main { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; }
+.sub { font-size: 13px; color: var(--grey); white-space: nowrap; overflow: hidden; }
+.chev { flex: none; color: var(--grey); transform: rotate(90deg); }
+.list { margin: 0; padding: 0; list-style: none; }
+.list > li + li { border-top: 1px solid var(--line-soft, rgba(17, 17, 17, 0.06)); }
+.row {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: var(--row); padding: 8px 4px;
+  border: 0; background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer;
+}
+.row:active { background: rgba(17, 17, 17, 0.04); }
+.on .name { color: var(--ink); }
+.tick { flex: none; color: var(--ink); }

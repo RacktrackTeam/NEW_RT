@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#e9ece8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="RackTrack">
+<meta name="color-scheme" content="light">
+<title>RackTrack</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/app/img/logo-96.png">
+<link rel="apple-touch-icon" href="/app/img/logo-192.png">
+<link rel="preload" href="/app/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/app/app.css?v=128">
+<link rel="stylesheet" href="/app/rt/rt-topology.css?v=12">
+<link rel="stylesheet" href="/app/flow.css?v=25">
+<link rel="stylesheet" href="/app/features.css?v=10"><!-- wt/features -->
+<link rel="stylesheet" href="/app/standard.css?v=12">
+<style>
+/* the Drift tab: the database the run is checked against, the matched record, the differences */
+#df-top { display:flex; flex-direction:column; gap:12px; width:100%; }
+.dfsrc { display:flex; gap:8px; flex-wrap:wrap; }
+.dfsrc .btn.on { background:var(--ink); color:#fff; }
+.dfrow { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.dftable { width:100%; border-collapse:collapse; font-size:14px; }
+.dftable th, .dftable td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line, #e5e7eb); vertical-align:top; }
+.dftable td p { margin:4px 0 0; color:var(--t2); font-size:13px; }
+.dftable .dk { font-weight:600; white-space:nowrap; }
+.dfok { color:var(--sig-deep, #166534); font-weight:600; }
+#df-top select { min-height:40px; max-width:100%; }
+.wbrep { display:flex; flex-direction:column; gap:10px; border-top:1px solid var(--line, #e5e7eb); padding-top:12px; margin-top:4px; }
+.wbkinds { display:flex; flex-wrap:wrap; gap:6px 16px; margin:0; padding:0; list-style:none; font-size:13px; }
+.wbtable { max-height:none; } .wbtable td:first-child { white-space:nowrap; }
+.cptable .cpn { text-align:right; font-variant-numeric:tabular-nums; } .cptable tr.on td { background:#f8fafc; }
+.cpwhen { display:none; } .cpon { display:inline-block; padding:2px 8px; border-radius:3px; font-size:12px; font-weight:600; background:#ecfdf3; color:#166534; }
+@media (max-width:600px) { .cptable .wide { display:none; } .cpwhen { display:block; font-family:var(--mono); } .cptable { font-size:13px; } .cptable th, .cptable td { padding:8px 4px; } .cptable th:first-child, .cptable td:first-child { padding-left:10px; } .cptable .btn { padding:0 8px; min-height:34px; font-size:13px; } .cpon { padding:2px 5px; } }
+.cnlist { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:14px; width:100%; }
+.cnform { display:flex; flex-direction:column; gap:10px; } .cnform label { display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--t2); }
+.cnstate { display:inline-block; padding:2px 8px; border-radius:3px; font-size:12px; font-weight:600; background:#f3f4f6; color:var(--t2); }
+.cnstate.ok { background:#ecfdf3; color:#166534; } .cnstate.failed { background:#fef2f2; color:var(--bad); }
+@media (max-width:600px) { .cnlist { grid-template-columns:1fr; } .wbtable td:first-child { white-space:normal; word-break:break-all; max-width:110px; font-size:12px; } }
+@media (max-width:600px) { .dftable th:nth-child(2), .dftable td:nth-child(2) { display:none; } .dftable th, .dftable td { padding:8px; } }
+</style>
+</head>
+<body>
+<!-- icons: drawn once, used everywhere with <use> -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19z"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 4v4h4"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="12.5" height="12" rx="2.5"/><path d="m15.5 10.5 5.5-3v9l-5.5-3z"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M21 20H3"/></symbol>
+    <symbol id="n-home" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21v-9h6v9"/></symbol>
+    <symbol id="n-camera" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></symbol>
+    <symbol id="n-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.7"/><path d="M4.8 20c0-3.7 3.2-5.8 7.2-5.8s7.2 2.1 7.2 5.8"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18.5" cy="12" r="1.3"/></symbol>
+    <symbol id="i-rack" viewBox="0 0 24 24"><rect x="4.5" y="3" width="15" height="18" rx="1.8"/><rect x="7.2" y="6.1" width="9.6" height="2.7" rx=".7"/><rect x="7.2" y="10.7" width="9.6" height="2.7" rx=".7"/><rect x="7.2" y="15.3" width="9.6" height="2.7" rx=".7"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+    <symbol id="i-guide" viewBox="0 0 24 24"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8"/><path d="M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8"/><path d="M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16"/><path d="M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M4 16v2.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V16"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="6.5" rx="2"/><rect x="3.5" y="13.5" width="17" height="6.5" rx="2"/><path d="M7.5 7.3h.01M7.5 16.8h.01"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></symbol>
+    <symbol id="i-out" viewBox="0 0 24 24"><path d="M14 4h4.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H14"/><path d="M10 16.5 5.5 12 10 7.5"/><path d="M5.5 12H15"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6.5 3h7l4 4v12.5A1.5 1.5 0 0 1 16 21H6.5A1.5 1.5 0 0 1 5 19.5v-15A1.5 1.5 0 0 1 6.5 3z"/><path d="M13 3v4.5h4.5"/><path d="M8.5 12.5h7M8.5 16h5"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11.5a8 8 0 0 0-14.3-4.6L4 9"/><path d="M4 4.5V9h4.5"/><path d="M4 12.5a8 8 0 0 0 14.3 4.6L20 15"/><path d="M20 19.5V15h-4.5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-device" viewBox="0 0 24 24"><rect x="3" y="7.5" width="18" height="9" rx="1.8"/><path d="M7 12h.01M10.5 12h.01M14 12h.01"/><path d="M17.5 10.5v3"/></symbol>
+    <symbol id="i-port" viewBox="0 0 24 24"><rect x="7" y="9" width="10" height="9" rx="1.6"/><path d="M9.5 9V5M14.5 9V5"/><path d="M12 18v3"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1 1"/><path d="M14 10a3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1-1"/></symbol>
+    <symbol id="i-cable" viewBox="0 0 24 24"><path d="M4 7h4a3 3 0 0 1 3 3v4a3 3 0 0 0 3 3h6"/><path d="M4 4.5v5M20 14.5v5"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 6.5h15"/><path d="M9.5 6.5V4.5h5v2"/><path d="M6.5 6.5l1 13a1.5 1.5 0 0 0 1.5 1.4h6a1.5 1.5 0 0 0 1.5-1.4l1-13"/></symbol>
+  </defs>
+</svg>
+
+<div class="splash" id="splash"><div class="splash-in"><img class="logo big" src="/app/img/logo-192.png" alt=""><b>RackTrack</b></div></div>
+
+<div class="shell">
+<aside class="side" id="side" hidden>
+  <div class="sidetop"><a class="brand" href="#home" aria-label="Home"><img class="logo" src="/app/img/logo-96.png" alt=""><div><b>RackTrack</b><small id="site2" hidden></small></div></a>
+    <button class="sidetog" id="side-tog" type="button" aria-label="Close the menu" title="Close the menu"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button></div>
+  <nav class="snav">
+    <a href="#home" data-nav="home" title="Home"><svg class="ic"><use href="#i-home"/></svg><span class="lbl">Home</span></a>
+    <a href="#sweep" data-nav="sweep" title="Scan"><svg class="ic"><use href="#i-video"/></svg><span class="lbl">Scan</span></a>
+    <a href="#more" data-nav="more" title="Profile"><svg class="ic"><use href="#i-user"/></svg><span class="lbl">Profile</span></a>
+  </nav>
+  <div class="sfoot"><span class="avatar" id="av2"></span><div><b id="who2"></b><button class="link" id="signout2" type="button">Sign out</button></div></div>
+</aside>
+
+<div class="content">
+<header class="top" id="top" hidden>
+  <button class="iconbtn back" id="back" type="button" aria-label="Back" hidden>‹</button>
+  <a class="markbtn" id="topmark" href="#home" aria-label="Home"><img class="logo" src="/app/img/logo-96.png" alt=""></a>
+  <div class="toptxt"><b class="toptitle" id="toptitle">RackTrack</b><small class="topsub" id="topsub" hidden></small></div>
+  <button class="avatar" id="who" type="button" aria-label="Profile"></button>
+  <span class="topspacer" id="topspacer" hidden></span>
+</header>
+<div class="donebar" id="done-bar" hidden></div>
+
+<main id="view">
+  <!-- sign in (racktrack-app sign-in: RT-EOS's sign-in service, auth.sh; the screens below call it, the engine trusts its session) -->
+  <section class="screen" data-screen="signin" hidden>
+    <div class="auth signin">
+      <img class="logo big" src="/app/img/logo-192.png" alt="">
+      <h1>Sign in to RackTrack</h1>
+      <form class="form" id="signin">
+        <label>Email or username<input id="si-user" autocomplete="username" maxlength="120" required></label>
+        <label>Password<input id="si-pass" type="password" autocomplete="current-password" maxlength="200" required></label>
+        <button class="btn primary big block" type="submit">Sign in</button>
+        <p class="err" id="si-err" hidden></p>
+      </form>
+      <p class="si-links"><a href="#forgot">Forgot password</a><a href="#contact">Contact us</a></p>
+      <p class="muted small" id="si-server" hidden></p>
+    </div>
+  </section>
+  <section class="screen" data-screen="contact" hidden>
+    <div class="auth">
+      <img class="logo big" src="/app/img/logo-192.png" alt="">
+      <h1>Contact us</h1>
+      <p class="muted">For a new organization, an account or help with signing in. RackTrack creates organizations; we answer by email.</p>
+      <form class="card form" id="contact">
+        <label>Your name<input id="ct-name" autocomplete="name" maxlength="80" required></label>
+        <label>Email<input id="ct-email" type="email" autocomplete="email" maxlength="120" required></label>
+        <label>Organization<input id="ct-org" autocomplete="organization" maxlength="120"></label>
+        <label>Message<textarea id="ct-msg" rows="4" maxlength="2000" required></textarea></label>
+        <button class="btn primary big block" type="submit">Send</button>
+        <p class="err" id="ct-err" hidden></p><p class="dfok" id="ct-ok" hidden>Thank you. We have your message and will answer by email.</p>
+        <p class="si-links"><a href="#signin">Back to sign in</a></p>
+      </form>
+    </div>
+  </section>
+
+  <section class="screen" data-screen="forgot" hidden>
+    <div class="auth">
+      <h1>Reset your password</h1>
+      <p class="muted" id="fg-lead">Enter the email on your account. We send a code to it.</p>
+      <form class="card form" id="forgot">
+        <label>Email<input id="fg-email" type="email" autocomplete="email" maxlength="120" required></label>
+        <div id="fg-step2" hidden>
+          <label>Code from the email<input id="fg-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6"></label>
+          <label>New password<input id="fg-pass" type="password" autocomplete="new-password" maxlength="200"></label>
+          <p class="muted small">At least 8 characters, with an upper and a lower case letter, a digit and a symbol.</p>
+        </div>
+        <button class="btn primary big block" type="submit" id="fg-go">Send the code</button>
+        <p class="err" id="fg-err" hidden></p>
+        <p class="si-links"><a href="#signin">Back to sign in</a></p>
+      </form>
+    </div>
+  </section>
+  <section class="screen" data-screen="invite" hidden>
+    <div class="auth">
+      <h1>Join your team</h1>
+      <p class="muted" id="iv-lead">Checking the invite...</p>
+      <form class="card form" id="invite" hidden>
+        <label>Choose a username<input id="iv-user" autocomplete="username" maxlength="32" required></label>
+        <label>Choose a password<input id="iv-pass" type="password" autocomplete="new-password" maxlength="200" required></label>
+        <p class="muted small">At least 8 characters, with an upper and a lower case letter, a digit and a symbol.</p>
+        <button class="btn primary big block" type="submit">Join</button>
+        <p class="err" id="iv-err" hidden></p>
+      </form>
+    </div>
+  </section>
+  <section class="screen" data-screen="pending" hidden>
+    <div class="auth">
+      <h1>Waiting for approval</h1>
+      <p class="muted" id="pd-lead">Your organization is set up. The RackTrack team approves every new organization before it can scan. You can sign in again once it is approved.</p>
+      <div class="card form">
+        <button class="btn primary big block" type="button" id="pd-check">Check again</button>
+        <button class="btn big block" type="button" id="pd-out">Sign out</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- home: the racks scanned and their state, one button -->
+  <section class="screen" data-screen="home" hidden>
+    <div class="phead"><div><p class="eyebrow web-only" id="greet-sub"></p><h1 class="web-only">Racks</h1><h1 class="phone-only">RackTrack</h1><p class="muted web-only">Each rack, when it was last read and its compare result.</p><p class="muted phone-only">Film a rack from top to bottom. Its units, devices and ports are read from the video.</p></div>
+      <div class="homeart phone-only" aria-hidden="true"><svg viewBox="0 0 180 300"><defs><linearGradient id="hg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34496b"/><stop offset="1" stop-color="#1f2a3a"/></linearGradient></defs><rect x="10" y="6" width="160" height="288" rx="14" fill="url(#hg)"/><rect x="24" y="20" width="132" height="262" rx="6" fill="#0f1620"/><line x1="29" y1="26" x2="29" y2="276" stroke="#8a97ad" stroke-width="2" stroke-dasharray="2 10"/><line x1="151" y1="26" x2="151" y2="276" stroke="#8a97ad" stroke-width="2" stroke-dasharray="2 10"/><rect x="36" y="28" width="108" height="18" rx="3" fill="#e9edf3"/><g fill="#1f2a3a"><rect x="42" y="33" width="8" height="8" rx="1"/><rect x="54" y="33" width="8" height="8" rx="1"/><rect x="66" y="33" width="8" height="8" rx="1"/><rect x="78" y="33" width="8" height="8" rx="1"/><rect x="90" y="33" width="8" height="8" rx="1"/><rect x="102" y="33" width="8" height="8" rx="1"/><rect x="114" y="33" width="8" height="8" rx="1"/><rect x="126" y="33" width="8" height="8" rx="1"/></g><rect x="36" y="52" width="108" height="20" rx="3" fill="#d7dee8"/><g fill="#1f2a3a"><rect x="42" y="56" width="6" height="5" rx="1"/><rect x="50" y="56" width="6" height="5" rx="1"/><rect x="58" y="56" width="6" height="5" rx="1"/><rect x="66" y="56" width="6" height="5" rx="1"/><rect x="74" y="56" width="6" height="5" rx="1"/><rect x="82" y="56" width="6" height="5" rx="1"/><rect x="42" y="63" width="6" height="5" rx="1"/><rect x="50" y="63" width="6" height="5" rx="1"/><rect x="58" y="63" width="6" height="5" rx="1"/><rect x="66" y="63" width="6" height="5" rx="1"/><rect x="74" y="63" width="6" height="5" rx="1"/><rect x="82" y="63" width="6" height="5" rx="1"/></g><circle class="led" cx="118" cy="62" r="2.4" fill="#22c55e" style="--d:0s"/><circle class="led" cx="126" cy="62" r="2.4" fill="#22c55e" style="--d:.7s"/><circle class="led" cx="134" cy="62" r="2.4" fill="#f59e0b" style="--d:1.3s"/><rect x="36" y="78" width="108" height="8" rx="2" fill="#182230"/><rect x="36" y="92" width="108" height="36" rx="3" fill="#e3e8ef"/><g fill="none" stroke="#9aa7ba" stroke-width="1.5"><rect x="41" y="97" width="18" height="11" rx="1.5"/><rect x="63" y="97" width="18" height="11" rx="1.5"/><rect x="85" y="97" width="18" height="11" rx="1.5"/><rect x="107" y="97" width="18" height="11" rx="1.5"/><rect x="41" y="112" width="18" height="11" rx="1.5"/><rect x="63" y="112" width="18" height="11" rx="1.5"/><rect x="85" y="112" width="18" height="11" rx="1.5"/><rect x="107" y="112" width="18" height="11" rx="1.5"/></g><circle class="led" cx="134" cy="100" r="2.2" fill="#22c55e" style="--d:.4s"/><rect x="36" y="134" width="108" height="36" rx="3" fill="#e3e8ef"/><g fill="none" stroke="#9aa7ba" stroke-width="1.5"><rect x="41" y="139" width="18" height="11" rx="1.5"/><rect x="63" y="139" width="18" height="11" rx="1.5"/><rect x="85" y="139" width="18" height="11" rx="1.5"/><rect x="107" y="139" width="18" height="11" rx="1.5"/><rect x="41" y="154" width="18" height="11" rx="1.5"/><rect x="63" y="154" width="18" height="11" rx="1.5"/><rect x="85" y="154" width="18" height="11" rx="1.5"/><rect x="107" y="154" width="18" height="11" rx="1.5"/></g><circle class="led" cx="134" cy="142" r="2.2" fill="#22c55e" style="--d:1s"/><rect x="36" y="176" width="108" height="8" rx="2" fill="#182230"/><rect x="36" y="190" width="108" height="52" rx="3" fill="#dfe5ee"/><g fill="#1f2a3a" opacity=".85"><rect x="41" y="196" width="98" height="6" rx="1.5"/><rect x="41" y="206" width="98" height="6" rx="1.5"/><rect x="41" y="216" width="98" height="6" rx="1.5"/><rect x="41" y="226" width="98" height="6" rx="1.5"/></g><circle class="led" cx="134" cy="236" r="2.2" fill="#22c55e" style="--d:1.6s"/><rect x="36" y="250" width="108" height="14" rx="3" fill="#2a3a52"/><g fill="#e9edf3"><circle cx="48" cy="257" r="2.6"/><circle cx="62" cy="257" r="2.6"/><circle cx="76" cy="257" r="2.6"/><circle cx="90" cy="257" r="2.6"/><circle cx="104" cy="257" r="2.6"/><circle cx="118" cy="257" r="2.6"/><circle cx="132" cy="257" r="2.6"/></g><rect x="36" y="270" width="108" height="8" rx="2" fill="#182230"/></svg></div>
+      <a class="btn primary big" href="#sweep"><svg class="ic"><use href="#n-camera"/></svg>Scan a rack</a></div>
+    <a class="card nowcard" id="now-card" href="#" hidden><i class="sig live"></i><b id="now-title">Reading your rack</b><span class="mono muted small" id="now-step"></span></a>
+    <div id="home-racks" class="racklist"><p class="muted">Loading...</p></div>
+  </section>
+
+  <!-- history -->
+  <section class="screen" data-screen="history" hidden>
+    <div class="phead"><div><h1>My racks</h1><p class="muted">Every rack read, newest first.</p></div>
+      <button class="btn ghost" id="hist-refresh" type="button"><svg class="ic"><use href="#i-refresh"/></svg><span>Refresh</span></button></div>
+    <div id="hist" class="runs"><p class="muted">Loading…</p></div>
+  </section>
+
+  <!-- sweep: two ways in, the camera (the guided capture) or an upload -->
+  <section class="screen scanpage" data-screen="sweep" hidden>
+    <div class="swh a1"><h1 id="sw-title">Scan a rack</h1><p class="muted" id="sw-lead">Film the rack from top to bottom, or upload a video of it.</p></div>
+    <div class="scanbody a2" id="sw-choices">
+      <div class="upcard dropzone" id="dropzone" role="button" tabindex="0" aria-label="Pick a video">
+        <div class="dz-idle choices" id="dz-idle">
+          <button class="choice rec" id="sw-camera" type="button"><span class="cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="13" height="12" rx="2"/><path d="m15.5 10.5 6-3.5v10l-6-3.5"/></svg></span><b>Record with the camera</b><small>One slow pass, top to bottom</small></button>
+          <span class="choice up" id="sw-pickvideo"><span class="cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m-5 5 5-5 5 5M4 20h16"/></svg></span><b>Upload a video</b><small>MP4 or MOV from this phone or computer</small></span>
+        </div>
+        <div class="dz-pick" id="dz-pick" hidden><button class="link dzback" id="dz-back" type="button">‹ Back to Record or upload</button><video id="dz-video" muted playsinline preload="metadata"></video><div class="dz-meta"><b id="dz-name"></b><small id="dz-info"></small></div><div class="dz-acts"><button class="btn" id="dz-clear" type="button"><svg class="ic"><use href="#i-upload"/></svg>Choose another video</button></div></div>
+      </div>
+      <div class="scanfoot a3"><button class="btn primary big" id="vsend" type="button" disabled>Read the rack</button></div>
+      <div class="filmrow a3" id="sw-tips"><span class="filmlab">How to film</span><ol class="filmsteps"><li><i>1</i><span>Hold the phone upright, the rack filling the picture</span></li><li><i>2</i><span>Keep both rails in view</span></li><li><i>3</i><span>One slow pass, top to bottom, 20 to 60 seconds</span></li></ol></div>
+      <button id="sw-upload" type="button" hidden></button>
+      <input type="file" id="vcam" accept="video/*" capture="environment" hidden>
+      <input type="file" id="vfile" accept="video/*" hidden>
+    </div>
+    <div class="modepanel" id="sw-guide" hidden>
+      <button class="link swback" type="button">‹ Camera or upload</button>
+      <div class="guide"><iframe id="guide" title="camera guide" allow="camera; microphone; accelerometer; gyroscope; magnetometer; autoplay; fullscreen; screen-wake-lock"></iframe></div>
+      <p class="muted small">When the guide says "Sent", the analysis starts by itself.</p>
+    </div>
+    <div class="card sendcard" id="sw-send" hidden>
+      <span class="filechip" id="vfile-name" hidden></span>
+      <div class="upbar" id="upbar" hidden><div class="bar"><i id="up-bar"></i></div><span class="muted small" id="up-txt"></span></div>
+    </div>
+    <p class="err" id="v-err" hidden></p>
+  </section>
+
+  <!-- the run -->
+  <section class="screen" data-screen="job" hidden>
+    <div class="runpage">
+      <figure class="runpic" id="run-pic"><img id="run-img" alt="" hidden><span class="runpic-ph" id="run-ph">The picture of the rack appears here</span></figure>
+      <div class="runbody">
+        <h1 id="job-title">Reading the rack</h1>
+        <p class="muted" id="run-line">The video is read frame by frame. First one straight picture of the rack, then every unit, device and port.</p>
+        <ol class="runstages" id="run-stages"></ol>
+        <p class="muted small mono" id="run-time">Elapsed 0 s</p>
+        <p class="muted small" id="run-leave">You can leave this page. The reading carries on, and the rack is under Home when you come back.</p>
+        <p class="err" id="job-err" hidden></p>
+        <div class="runact">
+          <button class="btn danger" id="job-del" type="button" hidden><svg class="ic"><use href="#i-trash"/></svg><span>Remove this run</span></button>
+          <a class="btn primary big" id="job-retry" href="#sweep" hidden>Try again</a>
+          <a class="btn primary big" id="job-open" href="#" hidden>Open the result</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- the result: four tabs, Rack, Devices, Layout, Report; only the open one is shown (data-tab on this section) -->
+  <section class="screen" data-screen="result" hidden>
+    <span id="res-eyebrow" hidden></span><span id="res-title" hidden></span><span id="res-sub" hidden></span><a id="rep-full" href="#" hidden></a>
+    <div class="card note" id="res-pending" hidden><span class="dot run"></span><div><b>Ports are being read in the background.</b><p class="muted small">Makes, models and ports fill in when done. Everything else is final.</p></div></div>
+    <div class="rpart" id="res-rack">
+      <div class="card rkask" id="rk-ask" hidden></div>
+      <a class="nextstrip" id="rk-next" href="#" hidden></a>
+      <div class="rkid" id="rk-id" hidden></div>
+      <div class="seg" id="lay-seg" role="tablist"><span class="segknob" id="segknob"></span>
+        <button type="button" role="tab" data-lay="units">Units</button><button type="button" role="tab" data-lay="space">Space</button><button type="button" role="tab" data-lay="devices">Devices</button><button type="button" role="tab" data-lay="kinds">Types</button>
+      </div>
+      <figure class="rackshot" id="rackshot"><div class="rackinner" id="rackinner"><img id="res-rack-plain" alt="The rack"><canvas id="res-rack-flat" hidden></canvas><svg id="lay-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg></div><div class="lchips" id="lay-chips"></div></figure>
+      <div class="caprow" id="caprow"><p class="laycap" id="lay-cap"></p><button class="link fittog" id="fit-tog" type="button">Zoom in</button></div>
+      <aside class="webside" id="rack-side"></aside>
+    </div>
+    <div class="rpart" id="res-devices">
+      <div id="dv-pick"><p class="glabel" id="dv-pick-title">Choose a device</p><div class="card flush plist2" id="dv-list"></div></div>
+      <div id="dv-one" hidden>
+        <div class="card onecard" id="res-dev"></div>
+        <aside class="webside" id="dev-side"></aside>
+        <div class="oneacts"><button class="btn ghost big" id="dv-rack" type="button">Back to the rack</button><button class="btn primary big" id="dv-another" type="button">Pick another device</button></div>
+      </div>
+    </div>
+    <div class="rpart" id="res-layout">
+      <div class="elegend" id="rt-legend"></div>
+      <div class="rteos" id="rt-topo"></div>
+    </div>
+    <div class="rpart" id="res-report">
+      <div class="rpbar"><a class="btn" id="rep-pdf" href="#" download hidden><svg class="ic"><use href="#i-doc"/></svg>Download PDF</a><div class="cmpdd"><button class="btn primary" type="button" id="cmp-btn" aria-haspopup="true" aria-expanded="false">Compare against the database</button>
+        <div class="ddmenu" id="cmp-menu" hidden><button type="button" data-cmpsrc="excel">Excel workbook</button><button type="button" data-cmpsrc="netbox">NetBox</button><button type="button" data-cmpsrc="cmdb">ServiceNow CMDB</button></div></div></div>
+      <a href="#" id="cmp-back" class="cmpback" hidden>Back to the report</a>
+      <div id="cmp-status" class="cmpstatus" hidden></div>
+      <div id="rp-top"></div>
+      <div class="cmpsec" id="sec-compare"><div id="df-top"></div></div>
+      <div class="cmpsec" id="sec-diff"><div id="diff-top"></div></div>
+      <div id="res-others"></div>
+</div>
+  </section>
+
+  <!-- wt/features: one rack tool at a time (#tools/<run>/<tool>, #tools/site) -->
+  <section class="screen" data-screen="tools" hidden><div id="ft-root"></div></section>
+
+  <!-- more -->
+  <section class="screen" data-screen="more" hidden>
+    <div class="card phero a1"><span class="avatar big" id="av3"></span><div class="pwho"><span class="eyebrow">Signed in</span><b id="who3"></b><span class="muted small" id="site3" hidden></span></div></div>
+    <div class="pstats a2"><div><b class="num" id="ps-racks" data-n="0">0</b><span>racks read</span></div><div><b class="num" id="ps-units" data-n="0">0</b><span>units</span></div><div><b class="num" id="ps-devs" data-n="0">0</b><span>devices</span></div></div>
+    <span class="glabel a3">Your racks</span>
+    <div class="card group a3">
+      <a class="grow" href="#history"><svg class="ic"><use href="#i-history"/></svg><span>My racks</span><em id="runs-count"></em><span class="arr"><svg class="ic"><use href="#i-next"/></svg></span></a>
+    </div>
+    <span class="glabel a3">Databases</span>
+    <div class="card group a3">
+      <a class="grow" href="#connections"><svg class="ic"><use href="#i-server"/></svg><span>Connections</span><em>NetBox, ServiceNow</em><span class="arr"><svg class="ic"><use href="#i-next"/></svg></span></a>
+      <a class="grow" href="#copies"><svg class="ic"><use href="#i-history"/></svg><span>Database copies</span><em id="copies-count"></em><span class="arr"><svg class="ic"><use href="#i-next"/></svg></span></a>
+      <a class="grow" href="#tools/site" id="site-pos" hidden><svg class="ic"><use href="#i-server"/></svg><span>Site position</span><em>Latitude, longitude</em><span class="arr"><svg class="ic"><use href="#i-next"/></svg></span></a><!-- wt/features -->
+    </div>
+    <span class="glabel a4" id="org-label" hidden>Organization</span>
+    <div class="card group a4" id="org-links" hidden></div>
+    <span class="glabel a4">Account</span>
+    <div class="card group a4">
+      <div id="acct-settings" style="display:contents"></div>
+      <button class="grow danger" id="signout" type="button"><svg class="ic"><use href="#i-out"/></svg><span>Sign out</span></button>
+    </div>
+  </section>
+
+  <!-- the logins vault: NetBox and ServiceNow for this organization; secrets are kept encrypted and never shown again -->
+  <section class="screen" data-screen="connections" hidden>
+    <div class="phead"><div><h1>Connections</h1><p class="muted">The logins used to copy NetBox and ServiceNow records in. Passwords and tokens are stored encrypted.</p></div></div>
+    <div id="cn-list" class="cnlist"></div>
+  </section>
+
+  <!-- every copy of a database read into ours (Excel, NetBox, CMDB): version, time, counts, the active one marked -->
+  <section class="screen" data-screen="copies" hidden>
+    <div class="phead"><div><h1>Database copies</h1><p class="muted">Each copy-in keeps a new copy. A result is compared with the newest copy of its rack.</p></div></div>
+    <div class="card" id="cp-in"><b>Copy a database in</b><p class="muted small">Read the manager's workbook, or copy NetBox or the CMDB in with the login under Connections.</p>
+      <div class="dfrow"><input type="file" id="df-file" accept=".xlsx" aria-label="The workbook to read"><button class="btn" type="button" id="df-xlsx">Read workbook</button><button class="btn" type="button" data-dfimp="netbox">Copy in from NetBox</button><button class="btn" type="button" data-dfimp="cmdb">Copy in from CMDB</button></div>
+      <div id="df-report"></div></div>
+    <div id="cp-list"></div>
+  </section>
+
+  <section class="screen" data-screen="models" hidden>
+    <div class="phead"><div><h1>How accurate it is</h1><p class="muted">How well each step scores on our test photos.</p></div></div>
+    <div class="card flush mtable">
+      <div class="mrow"><div><b>Finding the units</b><small>Every unit row of the rack is found on the picture</small></div><span class="acc">98.1 %</span></div>
+      <div class="mrow"><div><b>Full or free</b><small>Whether a unit holds something</small></div><span class="acc">99.4 %</span></div>
+      <div class="mrow"><div><b>Finding the devices</b><small>Where each device starts and ends</small></div><span class="acc">95.3 %</span></div>
+      <div class="mrow"><div><b>Naming the type</b><small>Switch, router, patch panel and so on; a device is named only when two readings agree, else it is marked Not sure for a person to settle</small></div><span class="acc">99.2 %</span></div>
+    </div>
+    <p class="muted small">Measured on our test photos of racks; a video of your own rack can score lower.</p>
+  </section>
+</main>
+</div>
+</div>
+
+<!-- the result's own bar: it replaces the app bar while a result is open -->
+<nav class="bottom" id="rnav" hidden>
+  <div class="pill">
+    <a href="#" data-rtab="rack"><svg class="ic"><use href="#i-rack"/></svg><span>Rack</span></a>
+    <a href="#" data-rtab="devices"><svg class="ic"><use href="#i-device"/></svg><span>Devices</span></a>
+    <a href="#" data-rtab="find" data-tool="1"><svg class="ic"><use href="#i-port"/></svg><span>Find a port</span></a>
+    <a href="#" data-rtab="connections" data-tool="1"><svg class="ic"><use href="#i-link"/></svg><span>Connections</span></a>
+    <a href="#" data-rtab="cables" data-tool="1"><svg class="ic"><use href="#i-cable"/></svg><span>Cables</span></a>
+    <a href="#" data-rtab="layout"><svg class="ic"><use href="#i-grid"/></svg><span>Layout</span></a>
+    <a href="#" data-rtab="report"><svg class="ic"><use href="#i-doc"/></svg><span>Report</span></a>
+  </div>
+</nav>
+<nav class="bottom" id="nav" hidden>
+  <div class="pill">
+    <a href="#home" data-nav="home"><svg class="ic"><use href="#n-home"/></svg><span>Home</span></a>
+    <a href="#sweep" data-nav="sweep"><svg class="ic"><use href="#n-camera"/></svg><span>Scan</span></a>
+    <a href="#more" data-nav="more"><svg class="ic"><use href="#n-person"/></svg><span>Profile</span></a>
+  </div>
+</nav>
+<div class="sbar" id="sbar" hidden><i id="sbar-thumb"></i></div>
+<div class="dvbar" id="dv-bar" hidden></div>
+<div class="zoomov" id="dv-zoomov" hidden></div>
+<div class="rteos" id="rt-analysing"></div>
+<div id="lb" hidden><img id="lbimg" alt=""><span>tap to close</span></div>
+<script src="/app/topology.js?v=1"></script>
+<script src="/app/rt/rt-topology.js?v=13" defer></script>
+<script src="/app/app.js?v=175"></script>
+<script src="/app/features.js?v=16"></script><!-- wt/features -->
+</body>
+</html>

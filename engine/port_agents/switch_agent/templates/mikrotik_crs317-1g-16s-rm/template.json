@@ -1,0 +1,226 @@
+{
+ "vendor": "MikroTik",
+ "model": "CRS317-1G-16S+RM",
+ "description": "",
+ "summary": "2x RJ45 (ports 1-2) | 16x SFP (3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18) | detected automatically",
+ "image": "front.png",
+ "image_source": "14f511845423ab48.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1805,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   1057,
+   24,
+   95,
+   136
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1072,
+    37,
+    68,
+    51
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    1070,
+    92,
+    67,
+    55
+   ]
+  },
+  {
+   "id": 3,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    107,
+    93,
+    62,
+    54
+   ]
+  },
+  {
+   "id": 4,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    165,
+    95,
+    57,
+    52
+   ]
+  },
+  {
+   "id": 5,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    219,
+    94,
+    57,
+    53
+   ]
+  },
+  {
+   "id": 6,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    272,
+    94,
+    64,
+    54
+   ]
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    350,
+    94,
+    60,
+    52
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    406,
+    94,
+    57,
+    52
+   ]
+  },
+  {
+   "id": 9,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    459,
+    94,
+    58,
+    52
+   ]
+  },
+  {
+   "id": 10,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    513,
+    93,
+    64,
+    52
+   ]
+  },
+  {
+   "id": 11,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    590,
+    94,
+    61,
+    52
+   ]
+  },
+  {
+   "id": 12,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    647,
+    94,
+    57,
+    52
+   ]
+  },
+  {
+   "id": 13,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    701,
+    93,
+    58,
+    53
+   ]
+  },
+  {
+   "id": 14,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    755,
+    93,
+    61,
+    53
+   ]
+  },
+  {
+   "id": 15,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    831,
+    94,
+    60,
+    52
+   ]
+  },
+  {
+   "id": 16,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    888,
+    94,
+    57,
+    51
+   ]
+  },
+  {
+   "id": 17,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    942,
+    94,
+    56,
+    51
+   ]
+  },
+  {
+   "id": 18,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    996,
+    94,
+    59,
+    52
+   ]
+  }
+ ]
+}

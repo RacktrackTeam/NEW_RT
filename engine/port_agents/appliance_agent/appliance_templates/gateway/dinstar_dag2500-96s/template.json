@@ -1,0 +1,77 @@
+{
+ "vendor": "Dinstar",
+ "model": "DAG2500-96S",
+ "device": "gateway",
+ "description": "",
+ "summary": "3x RJ45 | 0x SFP | 1 named port type(s): Console | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.myipgear.com/wp-content/uploads/image/png/dinstar-dag2500-96s-front.png",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1385,
+   180
+  ]
+ ],
+ "ignore_regions": [],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    892,
+    44,
+    58,
+    48
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    894,
+    93,
+    56,
+    46
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    964,
+    44,
+    56,
+    47
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    1031,
+    88,
+    58,
+    51
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 0,
+  "2": 0,
+  "3": 0,
+  "Console": 0
+ },
+ "chassis_aligned": 0,
+ "saved_quality": 0.817,
+ "saved_label": "template agent (internet/image_search)",
+ "saved_at": "2026-10-19 16:25"
+}

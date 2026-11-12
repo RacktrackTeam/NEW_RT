@@ -1,0 +1,1528 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Rack Sweep Guide</title>
+<link rel="icon" href="data:,">
+<style>
+/* Light, card-based theme - neutral slate accent, white floating pills/cards
+   over the live camera feed, rounded everything. Colour is kept for meaning
+   only: red for the record dot and real problems, amber for a heads-up,
+   green for good. The camera stage itself stays a black backdrop (it's just
+   whatever the lens sees); every other surface (intro, result, the tip card,
+   and the floating chrome on top of the video) uses this palette. */
+:root {
+  --page: #f2f3f5; --card: #ffffff; --ink: #1c2130; --muted: #6b7280;
+  --accent: #1f2937; --accent-soft: #e5e7eb;
+  --good: #15803d; --good-soft: #e6f4ea;
+  --warn: #b45309; --warn-soft: #fdf3e1;
+  --bad: #b91c1c; --bad-soft: #fbeaea;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; background: var(--page); color: var(--ink); font: 15px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
+#stage { position: fixed; inset: 0; background: #000; }
+video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #000; }
+#overlay { position: absolute; inset: 0; pointer-events: none; }
+/* Toast/timer/button/etc. live in their own layer, separate from the video
+   and its canvas overlay below - see updateManualRotate() for why. */
+#uiLayer { position: absolute; inset: 0; pointer-events: none; }
+#uiLayer button, #uiLayer label { pointer-events: auto; }
+
+/* Shown only before recording starts, while the phone isn't landscape yet.
+   Deliberately a separate element OUTSIDE #uiLayer and never rotated by
+   updateManualRotate() - its whole job is to be readable in whatever
+   orientation the operator is actually holding the phone right now
+   (normally portrait, since that's exactly why it's showing), not forced
+   into the landscape layout everything else uses once recording is live. */
+#orientGate { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; }
+#orientGate[hidden] { display: none; }
+#orientGate .gate-card { display: flex; align-items: center; gap: 14px; max-width: 320px;
+  padding: 18px 22px; border-radius: 18px; background: var(--bad-soft); box-shadow: 0 10px 30px rgba(20,25,50,.22); }
+#orientGate .chip { flex: none; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--bad); }
+#orientGate .chip svg { width: 22px; height: 22px; animation: tiltPhone 1.8s ease-in-out infinite; }
+#orientGate .chip rect { fill: none; stroke: #fff; stroke-width: 3; }
+#orientGate .chip circle { fill: #fff; }
+#orientGate .msg { font-size: 16px; font-weight: 700; color: #991b1b; }
+#orientGate .sub { font-size: 13px; color: #991b1bc0; margin-top: 2px; }
+
+/* Floating status toast: a soft-tinted card (cream for warn, pink for a
+   critical issue) with a solid-coloured icon chip, not a full-width
+   bar. Only shown when there's something to say (an active issue, or the
+   landscape gate before recording); hidden the rest of the time so the live
+   view stays clean. */
+#toast { position: absolute; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 14px); transform: translateX(-50%);
+  max-width: min(86%, 360px); display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 16px; border-radius: 16px; background: var(--warn-soft);
+  box-shadow: 0 10px 30px rgba(20,25,50,.22); }
+#toast[hidden] { display: none; }
+#toast .chip { flex: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--warn); }
+#toast .chip svg { width: 16px; height: 16px; fill: #fff; }
+#toast .msg { font-size: 14px; font-weight: 700; color: #92400e; letter-spacing: .01em; }
+#toast .sub { font-size: 12px; color: #92400ec0; margin-top: 1px; }
+#toast.bad { background: var(--bad-soft); }
+#toast.bad .chip { background: var(--bad); }
+#toast.bad .msg { color: #991b1b; }
+#toast.bad .sub { color: #991b1bc0; }
+
+/* One icon chip, several possible glyphs - only the one matching the
+   current issue is shown. Arrows point in the corrective/relevant
+   direction (set via a JS rotation) so "too fast"/"keep moving down" point
+   down, "moving up" points up, "drifted" points left/right to match. */
+#toast .chip svg { display: none; }
+#toast.icon-arrow #iconArrow { display: block; }
+#toast.icon-warn #iconWarn { display: block; }
+#toast.icon-sun #iconSun { display: block; }
+#toast.icon-phone #iconPhone { display: block; }
+/* Rotate-phone icon: shown instead of the other glyphs whenever the phone
+   isn't in landscape yet - a glance at the shape should read faster than a
+   sentence. */
+#toast.icon-orient #orientIcon { display: block; animation: tiltPhone 1.8s ease-in-out infinite; }
+#orientIcon rect { fill: none; stroke: #fff; stroke-width: 3; }
+#orientIcon circle { fill: #fff; }
+@keyframes tiltPhone {
+  0%, 15%  { transform: rotate(0deg); }
+  45%, 70% { transform: rotate(-90deg); }
+  100%     { transform: rotate(0deg); }
+}
+
+/* Speed readout (top-left) and recording timer (top-right) - small white
+   pills over the video, like a normal camera app's on-screen readouts. */
+#speedPill, #timer { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 14px);
+  display: flex; align-items: center; gap: 7px; padding: 7px 14px; border-radius: 999px; background: var(--card);
+  box-shadow: 0 6px 16px rgba(20,25,50,.2); font: 700 13px var(--mono); color: var(--ink); }
+#speedPill { left: max(16px, env(safe-area-inset-left, 0px)); }
+#timer { right: max(16px, env(safe-area-inset-right, 0px)); }
+#timer[hidden], #speedPill[hidden] { display: none; }
+/* Dot colour mirrors capture health: green while it's going well, amber for
+   a "warn"-level issue, red for a "bad" one. */
+#timer .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); animation: recBlink 1s steps(1) infinite; }
+#timer.warn .dot { background: var(--warn); }
+#timer.bad .dot { background: var(--bad); }
+@keyframes recBlink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: .3; } }
+
+/* Bottom-right hint pill - a short, persistent two-line status (unlike the
+   toast, it never hides): what's idle, and that pace is good once recording. */
+#hintPill { position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
+  padding: 8px 14px; border-radius: 12px; background: var(--card); box-shadow: 0 6px 16px rgba(20,25,50,.2);
+  text-align: right; font-size: 11.5px; line-height: 1.3; }
+#hintPill[hidden] { display: none; }
+#hintPill .t1 { font-weight: 700; color: var(--ink); }
+#hintPill .t2 { color: var(--muted); }
+#hintPill.good .t1 { color: var(--good); }
+#hintPill.bad .t1 { color: var(--bad); }
+
+/* Right edge, vertically centred - clear of both the toggles card and the
+   hint pill (both sit at the bottom corners), and clear of the timer/speed
+   pills (top corners). */
+#hud { position: absolute; top: 0; bottom: 0; right: 0; left: auto; display: flex; align-items: center; justify-content: center;
+  padding: 0 max(18px, env(safe-area-inset-right, 0px)) 0 0; }
+
+/* Base look for the ordinary (non-circular) buttons: Start camera, the tip
+   card's confirm, Do another one. #bRec overrides this with its own
+   circular styling below - an ID selector beats this element selector
+   regardless of source order, so both rule sets can coexist here. */
+button { padding: 14px; border-radius: 999px; border: none; background: var(--accent-soft); color: var(--ink); font: 700 15px system-ui, sans-serif; }
+input[type="checkbox"] { accent-color: var(--accent); }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.primary { background: var(--accent); color: #fff; }
+button:disabled { opacity: .4; }
+
+/* Single record button: a solid white disc (not just a ring) with a red dot
+   that becomes a stop-square while recording - the disc's border tints
+   green/amber/red to carry capture health, no separate text badge needed. */
+#bRec { width: 74px; height: 74px; padding: 0; border-radius: 50%; border: 4px solid #fff; background: #fff;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35); display: flex; align-items: center; justify-content: center; transition: border-color .15s; }
+#bRec:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+#bRec:disabled { opacity: .35; }
+#bRec .shape { width: 30px; height: 30px; border-radius: 50%; background: var(--bad); transition: border-radius .15s, width .15s, height .15s, background .15s, box-shadow .15s; }
+#bRec.rec .shape { width: 26px; height: 26px; border-radius: 7px; }
+/* Ring colour: green reads as "good capture in progress" at a glance,
+   without needing any text on screen for it. An ordinary "warn" issue
+   deliberately leaves the ring neutral (white) - the toast and the hint
+   pill carry that one - and only an actual "bad" issue escalates it to red. */
+#bRec.rec { border-color: var(--good); }
+#bRec.rec.warn { border-color: #fff; }
+#bRec.rec.bad { border-color: var(--bad); }
+
+/* Voice / Buzz toggles - a small white card, bottom-left, readable over
+   any video content without obstructing the view. */
+#toggles { position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
+  display: flex; flex-direction: column; gap: 7px; padding: 10px 14px; border-radius: 14px;
+  background: var(--card); box-shadow: 0 6px 16px rgba(20,25,50,.2); font-size: 12.5px; color: var(--ink); }
+#toggles label { display: flex; align-items: center; gap: 6px; }
+/* The #toggles label rule above would otherwise beat the browser's own
+   [hidden] rule, so the Buzz toggle hidden on iPhone needs this. */
+#toggles label[hidden] { display: none; }
+#toggles button { margin-top: 4px; padding: 6px 10px; border-radius: 10px; border: 1px solid #d5d8de; background: #fff; color: var(--ink); font: 600 12px system-ui, sans-serif; }
+
+#result, #intro { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: auto;
+  background: var(--page); padding: 24px; }
+#result[hidden], #intro[hidden] { display: none; }
+.card { background: var(--card); border-radius: 20px; padding: 28px 26px; max-width: 380px; width: 100%;
+  border: 1px solid #e3e5ea; box-shadow: 0 12px 32px rgba(17,24,39,.10); }
+.icon-badge { width: 44px; height: 44px; border-radius: 14px; background: var(--accent);
+  display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+.icon-badge svg { width: 22px; height: 22px; fill: #fff; }
+.icon-badge.result-icon { border-radius: 50%; width: 48px; height: 48px; }
+.icon-badge.result-icon.good { background: var(--good-soft); }
+.icon-badge.result-icon.good svg { fill: var(--good); }
+.icon-badge.result-icon.bad { background: var(--bad-soft); }
+.icon-badge.result-icon.bad svg { fill: var(--bad); }
+.card h1, .card h2 { margin: 0 0 6px; font-size: 22px; font-weight: 800; }
+.card .sub { margin: 0 0 18px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.card .sub b { font-weight: 700; }
+.steps { list-style: none; margin: 0 0 20px; padding: 0; display: grid; gap: 8px; }
+.steps li { display: flex; align-items: center; gap: 10px; background: var(--accent-soft); border-radius: 12px; padding: 10px 12px; font-size: 13.5px; color: var(--ink); }
+.steps .num { flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff;
+  font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+#introErr { color: var(--bad); white-space: pre-wrap; line-height: 1.45; font-size: 13px; }
+/* Tester name on the intro card: typed once, remembered on this phone, sent
+   with every take so the team's captures page says whose sweep it is. */
+.field { display: grid; gap: 6px; margin: 0 0 14px; font-size: 13px; color: var(--muted); }
+.field input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid #d5d8de; font: 600 15px system-ui, sans-serif; color: var(--ink); background: #fff; }
+.field input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* Upload status on the result card. A button so the failed state can be
+   tapped to retry; otherwise it just reads as a status line. */
+.upload-note { display: block; width: 100%; margin: 0 0 10px; padding: 10px 12px; border-radius: 12px; background: var(--accent-soft); color: var(--ink); font: 600 13px system-ui, sans-serif; text-align: center; }
+.upload-note.sent { background: var(--good-soft); color: var(--good); }
+.upload-note.failed { background: var(--bad-soft); color: var(--bad); }
+.upload-note:disabled { opacity: 1; }
+.upload-note[hidden] { display: none; }
+.stats { display: grid; margin-bottom: 20px; border-top: 1px solid #eef0f6; }
+.stat-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 2px; border-bottom: 1px solid #eef0f6; font-size: 13.5px; }
+.stat-row span { color: var(--muted); }
+.stat-row b { font-weight: 700; text-align: right; }
+.stat-row b.good { color: var(--good); }
+.stat-row b.warn { color: var(--warn); }
+.stat-row b.bad { color: var(--bad); }
+.links { display: grid; gap: 10px; }
+.links[hidden] { display: none; }
+.links a { display: block; text-align: center; padding: 13px; border-radius: 999px; text-decoration: none; font-weight: 700; }
+.links a.primary { background: var(--accent); color: #fff; }
+.links a.secondary { background: var(--accent-soft); color: var(--ink); }
+.links a.saved { background: var(--good-soft); color: var(--good); }
+.links .text-link { background: none; color: var(--accent); text-decoration: underline; font-weight: 600; padding: 4px; }
+.auto-note { margin: 0 0 10px; text-align: center; font-size: 12.5px; color: var(--muted); font-style: italic; }
+.auto-note[hidden] { display: none; }
+
+#startTip { position: absolute; inset: 0; z-index: 5; background: rgba(28,33,48,.45); display: flex; align-items: center; justify-content: center; padding: 24px; transition: opacity .25s; }
+#startTip[hidden] { display: none; }
+#startTip.fade { opacity: 0; }
+.tip-card { background: var(--card); border-radius: 18px; padding: 22px 22px 18px; max-width: 320px; width: 100%; box-shadow: 0 12px 32px rgba(17,24,39,.22); }
+.tip-card h3 { margin: 0 0 14px; font-size: 17px; font-weight: 800; color: var(--ink); }
+.tip-card button { width: 100%; margin-top: 4px; }
+
+/* Driven by a JS-maintained class (syncLandscapeClass(), keyed off the same
+   isLandscape() the rest of the app trusts), not a CSS orientation media
+   query. With auto-rotate off the two can disagree - the phone is
+   physically landscape but the CSS viewport itself never changes shape -
+   and a plain media query would miss that case entirely, leaving every
+   compact/short-viewport rule below un-applied exactly when the uiLayer
+   rotation compensation (updateManualRotate) is also kicking in, which is
+   what was cutting the tip popup off and leaving the button at its
+   portrait size/position instead of matching landscape recording. */
+body.landscape #toast { top: calc(env(safe-area-inset-top, 0px) + 8px); padding: 9px 14px; }
+body.landscape #toast .msg { font-size: 13px; }
+body.landscape #toast .sub { font-size: 10.5px; }
+body.landscape #timer, body.landscape #speedPill { top: calc(env(safe-area-inset-top, 0px) + 8px); padding: 5px 11px; font-size: 11px; }
+body.landscape #bRec { width: 58px; height: 58px; border-width: 3px; }
+body.landscape #bRec .shape { width: 24px; height: 24px; }
+body.landscape #bRec.rec .shape { width: 20px; height: 20px; border-radius: 5px; }
+body.landscape #toggles { font-size: 10.5px; padding: 7px 11px; bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); }
+/* Short landscape phone screens: the result/intro card can otherwise run
+   taller than the viewport. Tighten padding and row height so the whole
+   card fits without needing to scroll to see the icon or the buttons. */
+/* Percent, not vh: when #result is turned by updateManualRotate() its height
+   is the viewport's short side, and 94vh would overshoot it. */
+body.landscape .card, body.landscape .tip-card { padding: 16px 20px; max-height: 94%; overflow: auto; }
+body.landscape .icon-badge { width: 34px; height: 34px; margin-bottom: 8px; }
+body.landscape .icon-badge svg { width: 18px; height: 18px; }
+body.landscape .icon-badge.result-icon { width: 36px; height: 36px; }
+body.landscape .card h1, body.landscape .card h2, body.landscape .tip-card h3 { font-size: 16px; margin-bottom: 6px; }
+body.landscape .card .sub { margin-bottom: 10px; font-size: 12.5px; }
+body.landscape .steps { gap: 5px; margin-bottom: 12px; }
+body.landscape .steps li { padding: 7px 10px; font-size: 12px; }
+body.landscape .stats { margin-bottom: 12px; }
+body.landscape .stat-row { padding: 6px 2px; font-size: 12px; }
+body.landscape .links { gap: 6px; }
+body.landscape .links a, body.landscape .links .text-link { padding: 10px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div id="stage">
+  <video id="video" playsinline muted autoplay></video>
+  <canvas id="overlay"></canvas>
+
+  <!-- Everything the operator reads/taps while the camera's open, separate
+       from the video+canvas underneath. With auto-rotate off, the phone can
+       be physically landscape while the CSS viewport stays portrait-shaped;
+       only THIS layer needs rotating to compensate (see updateManualRotate)
+       - the live camera image itself is handled by the browser/OS already,
+       and the canvas guide-lines follow it via the existing axis swap, not
+       a CSS rotation. Rotating the camera feed too would double-rotate it. -->
+  <div id="uiLayer">
+    <div id="toast" hidden>
+      <div class="chip">
+        <svg id="iconArrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 12h4v9h6v-9h4z"></path></svg>
+        <svg id="iconWarn" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 1 21h22L12 2zm0 15.5a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5zM11 10h2v4h-2z"></path></svg>
+        <svg id="iconSun" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="4" fill="#fff" stroke="none"></circle><path d="M12 2v3M12 19v3M4 12H1M23 12h-3M5.6 5.6 3.5 3.5M20.5 20.5l-2.1-2.1M5.6 18.4 3.5 20.5M20.5 3.5l-2.1 2.1"></path></svg>
+        <svg id="iconPhone" viewBox="0 0 48 48" aria-hidden="true"><rect x="15" y="6" width="18" height="36" rx="4"></rect><circle cx="24" cy="37" r="1.6"></circle></svg>
+        <svg id="orientIcon" viewBox="0 0 48 48" aria-hidden="true"><rect x="15" y="6" width="18" height="36" rx="4"></rect><circle cx="24" cy="37" r="1.6"></circle></svg>
+      </div>
+      <div><div class="msg" id="msg"></div><div class="sub" id="sub"></div></div>
+    </div>
+
+    <div id="speedPill" hidden><span id="speedText"></span></div>
+    <div id="timer" hidden><span class="dot"></span><span id="timerText">0:00</span></div>
+    <div id="hintPill" hidden></div>
+
+    <div id="hud">
+      <button id="bRec" disabled aria-label="Record"><span class="shape"></span></button>
+    </div>
+    <div id="toggles">
+      <label><input type="checkbox" id="tVoice" checked> Voice</label>
+      <label id="lVibe"><input type="checkbox" id="tVibe" checked> Buzz</label>
+      <button type="button" id="tFlip" title="The buttons face the wrong way? Tap to turn the view the other way">Flip the view</button>
+    </div>
+
+    <div id="startTip" hidden>
+      <div class="tip-card">
+        <h3>Quick reminder</h3>
+        <ol class="steps">
+          <li><span class="num">1</span>One continuous video, top to bottom</li>
+          <li><span class="num">2</span>Hold horizontally, both hands, steady</li>
+          <li><span class="num">3</span>Face the rack straight on, rails centred</li>
+          <li><span class="num">4</span>Don't move closer, left or right</li>
+          <li><span class="num">5</span>Move straight down, slow and steady</li>
+        </ol>
+        <button id="bTipOk" class="primary">OK, start recording</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="orientGate" hidden>
+    <div class="gate-card">
+      <div class="chip"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="15" y="6" width="18" height="36" rx="4"></rect><circle cx="24" cy="37" r="1.6"></circle></svg></div>
+      <div><div class="msg">Turn your mobile to landscape</div><div class="sub" id="orientSub">then tap Record</div></div>
+    </div>
+  </div>
+
+  <div id="intro">
+    <div class="card">
+      <div class="icon-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 10.5V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-3.5l4 4v-11l-4 4z"></path></svg></div>
+      <h1>Let's sweep this rack</h1>
+      <p class="sub">One slow video from top to bottom. I'll talk you through it and flag anything that needs fixing.</p>
+      <ol class="steps">
+        <li><span class="num">1</span>Hold it sideways, 1× lens</li>
+        <li><span class="num">2</span>Keep both rails in the middle</li>
+        <li><span class="num">3</span>Start at the top, tap the big button</li>
+        <li><span class="num">4</span>Glide straight down, nice and slow</li>
+        <li><span class="num">5</span>Stop when you see the bottom</li>
+      </ol>
+      <label class="field" for="tester">Your name<input id="tester" type="text" autocomplete="name" placeholder="First name" maxlength="40"></label>
+      <button id="bStart" class="primary">Start camera</button>
+      <div id="introErr"></div>
+    </div>
+  </div>
+
+  <div id="result" hidden>
+    <div class="card">
+      <div class="icon-badge result-icon" id="rIcon"></div>
+      <h2 id="rTitle">Nice sweep!</h2>
+      <p class="sub" id="rVerdict"></p>
+      <div class="stats" id="rStats"></div>
+      <p class="auto-note" id="rReshootNote" hidden>This capture needs a reshoot, but you can still save it if you'd like.</p>
+      <button class="upload-note" id="rUpload" hidden></button>
+      <div class="links" id="rLinks">
+        <a id="rVideo" class="primary" href="#">Save video</a>
+        <a id="rLog" class="secondary" href="#">Save capture log</a>
+        <button id="rAgain" class="text-link">Do another one</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+// ============================================================
+// Configuration
+// Speeds are in frame-heights per second (fh/s); positive = moving down.
+// ============================================================
+const CFG = {
+  W: 120,              // analysis width (px)
+  fpsAnalysis: 18,     // analysis rate (Hz)
+
+  // Speed
+  vStop: 0.015,        // below this the phone counts as stopped
+  vGoodMin: 0.03,      // below this: "a little faster is OK"
+  vFast: 0.40,         // above this: too fast (≈ a full rack in under ~10 s)
+  fastSecs: 0.8,       // must stay too fast this long before warning
+  stopSecs: 2.0,       // stopped this long → "keep moving"
+  refLag: 0.25,        // s - speed is measured against a frame this far back
+  trackBand: 0.06,     // ± fine-search band around the coarse estimate (fraction of frame)
+  lostSecs: 0.4,       // tracking lost this long + shake/blur → too fast
+  shakeAccel: 1.2,     // m/s² of dynamic acceleration that counts as hard movement
+
+  // Moving up
+  vUp: -0.04,          // speed below this counts as moving up
+  vUpAccel: 0.6,       // m/s² upward kick the accelerometer must see to start an up-detection
+  upSecs: 0.35,        // must be moving up this long before warning…
+  upDist: 0.05,        // …AND have actually travelled up this far (frame-heights) - hand bounce doesn't
+  calibDist: 0.05,     // first movement this far (frame-heights) after Record defines "down"
+
+  // Moving forward / sideways (rack compared with a frame from ~geoLag seconds ago,
+  // so these react to the MOVEMENT itself, not to an absolute distance)
+  geoLag: 2.0,         // s
+  geoSecs: 0.35,       // must stay over tolerance this long before warning
+  scaleTol: 0.12,      // rack grew more than 12% → moving forward (too close)
+  driftTol: 0.10,      // rack slid more than 10% of the frame width → drifted sideways
+
+  // Orientation, image quality
+  pitchTol: 25, rollTol: 8,  // degrees
+  blurRatio: 0.35,     // sharpness vs. recent best
+  dark: 45, bright: 215, expJump: 18,
+
+  // Output
+  keyEvery: 0.40,      // keyframe every 0.4 frame-heights of travel (60% overlap)
+  showSpeed: false,    // keep the live calibration readout off for testers
+};
+
+// ============================================================
+// State
+// ============================================================
+const $ = id => document.getElementById(id);
+const video = $('video'), ov = $('overlay'), octx = ov.getContext('2d');
+const work = document.createElement('canvas');
+const wctx = work.getContext('2d', { willReadFrequently: true });
+
+let stream = null, track = null, recorder = null, chunks = [], recording = false;
+let tRecStart = 0, wakeLock = null, log = null, interrupted = false;
+const issueState = {};                 // rule id → { active, since, total }
+let lastSpoken = { id: null, t: 0 };
+
+const S = {
+  // vertical motion
+  hist: [], vBuf: [], lastT: 0, v: 0, vCoarse: 0, axis: 'y',
+  dirFlip: 1, dirLocked: false,        // learned direction correction (see updateSpeed)
+  travel: 0, sinceKey: 0, stoppedFor: 0, upFor: 0, upDist: 0, lowTrackFor: 0, fastFor: 0,
+  // moving forward / sideways
+  geoHist: [], geoOk: false, scale: 1, drift: 0, nearFor: 0, sideFor: 0,
+  // image quality
+  sharpBest: 0, sharp: 0, lumaFast: 128, lumaSlow: 128, textured: true,
+  // motion sensor
+  pitch: null, roll: null,
+  gx: null, gy: null, gz: null,        // fast gravity estimate (orientation)
+  sgx: null, sgy: null, sgz: null,     // slow gravity estimate (to isolate hand motion)
+  vertAccel: 0, lastUpKickT: 0, shake: 0,
+};
+
+// ============================================================
+// Camera
+// ============================================================
+(function preflight() {
+  const problems = [];
+  if (location.protocol === 'file:') problems.push('Opened as a local file. Phones block the camera for local files - open it from an https:// link.');
+  else if (!window.isSecureContext) problems.push('This page is on plain http://. Phones only allow the camera on https://.');
+  if (!navigator.mediaDevices?.getUserMedia) problems.push('This browser has no camera API here. Use Chrome (Android) or Safari (iPhone), over https://.');
+  if (/FBAN|FBAV|Instagram|Line\/|WhatsApp/i.test(navigator.userAgent)) problems.push('Opened inside an in-app browser. Use "Open in Chrome/Safari" instead.');
+  if (problems.length) $('introErr').textContent = '⚠ ' + problems.join('\n⚠ ');
+  // iPhone Safari has no vibration API at all, so a Buzz switch there is a
+  // promise the app can't keep - hide it rather than show a dead control.
+  if (!navigator.vibrate) $('lVibe').hidden = true;
+})();
+
+// Tester name: typed once, remembered on this phone, required before the
+// camera starts so no take ever arrives at the team as "unknown".
+const testerInput = $('tester');
+try { testerInput.value = localStorage.getItem('rackTester') || ''; } catch (e) {}
+testerInput.addEventListener('change', () => { try { localStorage.setItem('rackTester', testerInput.value.trim()); } catch (e) {} });
+$('tFlip').addEventListener('click', () => { flipView = !flipView; try { localStorage.setItem('rackGuideFlip', flipView ? '1' : '0'); } catch (e) {} manualRotateW = 0; updateManualRotate(); });
+const testerName = () => testerInput.value.trim() || 'unknown';
+
+$('bStart').onclick = async () => {
+  $('introErr').textContent = '';
+  if (!testerInput.value.trim()) { $('introErr').textContent = 'Type your name first, so the team knows whose sweep this is.'; testerInput.focus(); return; }
+  if (!navigator.mediaDevices?.getUserMedia) { $('introErr').textContent = 'Camera API not available. Open this page over https:// in Chrome or Safari.'; return; }
+  try {
+    if (typeof DeviceMotionEvent !== 'undefined' && DeviceMotionEvent.requestPermission) {
+      try { await DeviceMotionEvent.requestPermission(); } catch (e) {}
+    }
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } },
+    });
+  } catch (e) {
+    $('introErr').textContent = 'Camera not available: ' + e.message + '. Open this page over HTTPS and allow camera access.';
+    return;
+  }
+  track = stream.getVideoTracks()[0];
+  video.srcObject = stream;
+  await video.play().catch(() => {});
+  $('intro').hidden = true;
+  $('bRec').disabled = false;
+  window.addEventListener('devicemotion', onMotion);
+  updateManualRotate();   // don't wait for the first motion event to position the button
+  try { wakeLock = await navigator.wakeLock?.request('screen'); } catch (e) {}
+  resize();
+  loop();
+};
+
+// ============================================================
+// Recording
+// ============================================================
+$('bRec').onclick = () => {
+  if (recording) { stopRec(); return; }
+  // iOS can end the camera track while the page is in the background; a
+  // take started on a dead track would record a black frame throughout.
+  if (!track || track.readyState === 'ended') { flash('Camera stopped - reload the page and start again'); return; }
+  if (!isLandscape()) { flash('Turn your mobile to landscape first'); vibe([40, 40, 40]); return; }
+  showTip();
+};
+
+$('bTipOk').onclick = () => {
+  hideTip();
+  if (!isLandscape()) { flash('Turn your mobile to landscape first'); return; }
+  startRec();
+};
+
+function showTip() { const el = $('startTip'); el.hidden = false; el.classList.remove('fade'); }
+function hideTip() {
+  const el = $('startTip');
+  if (el.hidden) return;
+  el.classList.add('fade');
+  setTimeout(() => { el.hidden = true; }, 250);
+}
+
+function pickMime() {
+  const opts = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+  return opts.find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || '';
+}
+
+// Saved video is turned 90° to vertical - a plain whole-frame rotation, same
+// as tapping "rotate" in a gallery app, not a rotation tied to which way is
+// physically "down" (that guess proved unreliable - see the reference doc's
+// revision log - and isn't needed here anyway, since this doesn't try to
+// keep the sweep direction aligned with the output's own vertical axis, just
+// turns the whole frame). No cropping: the canvas is sized to the full
+// swapped width/height, so drawImage's centred draw covers it edge to edge
+// with nothing cut off.
+//
+// Mobile browsers normally auto-rotate delivered camera frames to match
+// physical orientation at the OS/driver level, so the frame is landscape-
+// shaped (vw > vh) whenever the phone is genuinely held sideways - that's
+// the common case this rotation is built for. It isn't universal, though
+// (notably with auto-rotate off on some Android combinations): the frame
+// can already arrive portrait-shaped. recRotate is decided once, from the
+// actual frame shape when recording starts, rather than assumed - turning
+// an already-portrait frame again would spin it sideways instead.
+let recRotate = true;
+const recCanvas = document.createElement('canvas');
+const recCtx = recCanvas.getContext('2d');
+function drawRecFrame() {
+  if (!recording) return;
+  const vw = video.videoWidth, vh = video.videoHeight;
+  if (!vw) return;
+  if (!recRotate) {
+    if (recCanvas.width !== vw || recCanvas.height !== vh) { recCanvas.width = vw; recCanvas.height = vh; }
+    recCtx.setTransform(1, 0, 0, 1, 0, 0);
+    recCtx.drawImage(video, 0, 0, vw, vh);
+    return;
+  }
+  if (recCanvas.width !== vh || recCanvas.height !== vw) { recCanvas.width = vh; recCanvas.height = vw; }
+  recCtx.setTransform(1, 0, 0, 1, 0, 0);
+  recCtx.translate(vh / 2, vw / 2);
+  recCtx.rotate(-Math.PI / 2);   // confirmed against a real saved video: +90° came out anti-clockwise/reversed
+  recCtx.drawImage(video, -vw / 2, -vh / 2, vw, vh);
+}
+
+function startRec() {
+  if (recording) return;   // guards against a double-tap on "OK, start recording" starting two overlapping recorders
+  const mime = pickMime();
+  let recStream = stream;
+  if (!recCanvas.captureStream) {
+    flash('This browser cannot rotate the saved video - saving landscape instead');
+  } else {
+    recRotate = video.videoWidth > video.videoHeight;   // decided once for the whole take - see note above drawRecFrame()
+    recording = true; drawRecFrame(); recording = false;   // size the canvas, draw first frame
+    recStream = recCanvas.captureStream(30);
+  }
+  try {
+    // 8 Mbit/s: about 1 MB per second of video, so a 90 s sweep still fits
+    // under the 100 MB per-upload limit of the Cloudflare tunnel route.
+    recorder = new MediaRecorder(recStream, mime ? { mimeType: mime, videoBitsPerSecond: 8e6 } : undefined);
+    chunks = [];
+    recorder.ondataavailable = e => e.data.size && chunks.push(e.data);
+    recorder.onstop = finish;
+    recorder.start(1000);
+  } catch (e) { flash('Recording not supported: ' + e.message); return; }
+
+  recording = true;
+  lastTimerSec = -1;
+  analysisErrorShown = false;
+  tRecStart = performance.now();
+  Object.keys(issueState).forEach(k => delete issueState[k]);
+  Object.assign(S, { travel: 0, sinceKey: 0, stoppedFor: 0, upFor: 0, upDist: 0, lowTrackFor: 0, fastFor: 0, dirLocked: false,
+                     geoHist: [], geoOk: false, scale: 1, drift: 0, nearFor: 0, sideFor: 0 });
+
+  const st = track.getSettings();
+  log = {
+    app: 'rack-sweep-guide', version: 3, tester: testerName(), startedAt: new Date().toISOString(), mimeType: recorder.mimeType,
+    camera: { width: st.width, height: st.height, frameRate: st.frameRate },
+    analysisAxis: S.axis, thresholds: CFG, motionAvailable: S.gx != null,
+    keyframes: [], events: [], samples: [],
+  };
+  logKey('start');
+  syncRecUI('good');
+  vibe([60]);
+  // Tilt ('pitch'/'roll') and moving-up checks both read the motion sensor
+  // (S.pitch/S.roll/S.upFor) and simply never fire without it - say so once,
+  // rather than let the sweep look silently clean.
+  if (S.gx == null) {
+    flash('Motion access is off - tilt and up/down checks are off');
+    speak('Recording. Move down slowly. Motion access is off - tilt and direction checks are off.', true);
+  } else {
+    speak('Recording. Move down slowly.', true);
+  }
+}
+
+function stopRec() {
+  if (recorder && recorder.state !== 'inactive') recorder.stop();
+  recording = false;
+  hideTip();
+  syncRecUI(null);
+}
+
+// Drives the record button's own look and the top-right timer's colour -
+// green while the capture is good, amber for a "warn" issue, red for a
+// "bad" one. The button alone carries this, so no separate text badge is
+// needed. Issues are shown (toast/voice/vibration) but never pause the
+// recorder - it's purely instructional, not restrictive.
+function syncRecUI(sev) {
+  const btn = $('bRec'), timer = $('timer');
+  if (sev === null) { btn.className = ''; timer.hidden = true; lastTimerSec = -1; return; }
+  timer.hidden = false;
+  const tier = sev === 'bad' ? 'bad' : sev === 'warn' ? 'warn' : '';
+  btn.className = ('rec ' + tier).trim();
+  timer.className = tier;
+}
+
+let lastTimerSec = -1;
+function updateTimerText(now) {
+  if (!recording) return;
+  const elapsed = Math.max(0, (now - tRecStart) / 1000);
+  const sec = Math.floor(elapsed);
+  if (sec === lastTimerSec) return;
+  lastTimerSec = sec;
+  $('timerText').textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+}
+
+// Turns the raw per-rule issue seconds into the result screen's coloured
+// stat rows - same underlying numbers as the reshoot reasons below, just
+// grouped into categories a non-technical reader can scan at a glance.
+// Every rule in RULES is accounted for in some row here (fast/stopped →
+// Speed, up → Direction, near/side → Distance, pitch/roll/blur →
+// Steadiness, dark/bright/exposure/texture → Lighting), plus the two
+// verdict numbers (Corrections, Length) so nothing that factored into the
+// pass/reshoot decision is invisible on the result screen.
+function buildStats(dur, issueCount) {
+  const tot = id => issueState[id]?.total || 0;
+  const row = (tier, value) => ({ tier, value });
+  const rows = [];
+
+  { const f = tot('fast'), stopped = tot('stopped');
+    // Text and colour must describe the same thing - pick whichever of the
+    // two (too fast / paused) is actually dominant, and derive both the
+    // wording and the tier from that one value, not from the combined total.
+    const useFast = f >= stopped;
+    const amt = useFast ? f : stopped;
+    const value = amt === 0 ? 'Steady' : useFast ? `${f.toFixed(1)}s too fast` : `${stopped.toFixed(1)}s paused`;
+    const tier = amt === 0 ? 'good' : useFast ? (f > 1.5 ? 'bad' : 'warn') : 'warn';   // 'stopped' is a warn-only rule
+    rows.push(['Speed', row(tier, value)]); }
+
+  { const u = tot('up');
+    rows.push(['Direction', u > 0.5 ? row('bad', `${u.toFixed(1)}s moved up`)
+      : u > 0 ? row('warn', `${u.toFixed(1)}s moved up`)
+      : row('good', 'Down only')]); }
+
+  { const near = tot('near'), side = tot('side');
+    const total = near + side;
+    const label = near >= side ? 'too close' : 'off-centre';   // whichever actually happened more, not a generic catch-all
+    rows.push(['Distance', total > 1.5 ? row('bad', `${total.toFixed(1)}s ${label}`)
+      : total > 0 ? row('warn', `${total.toFixed(1)}s ${label}`)
+      : row('good', 'Steady & centred')]); }
+
+  { const pitch = tot('pitch'), roll = tot('roll'), blur = tot('blur');
+    const blurBad = blur > dur * 0.10;
+    const tier = (pitch > 2 || roll > 2 || blurBad) ? 'bad' : ((pitch + roll + blur) > 0 ? 'warn' : 'good');
+    const value = tier === 'good' ? 'Level & sharp'
+      : blurBad ? 'Blurry footage'
+      : (pitch > 0 || roll > 0) ? `${(pitch + roll).toFixed(1)}s tilted`
+      : `${blur.toFixed(1)}s blurry`;
+    rows.push(['Steadiness', row(tier, value)]); }
+
+  { const dark = tot('dark'), bright = tot('bright'), exp = tot('exposure'), texture = tot('texture');
+    const total = dark + bright + exp + texture;
+    const worst = Math.max(dark, bright, exp, texture);
+    const cause = worst === 0 ? '' : worst === dark ? 'too dark' : worst === bright ? 'too bright' : worst === texture ? 'low detail' : 'changing light';
+    rows.push(['Lighting', total > dur * 0.15 ? row('bad', `${total.toFixed(1)}s poor light (${cause})`)
+      : total > 0 ? row('warn', `${total.toFixed(1)}s poor light (${cause})`)
+      : row('good', 'Good')]); }
+
+  rows.push(['Corrections', issueCount > 10 ? row('bad', `${issueCount} (max 10)`) : row('good', `${issueCount}`)]);
+  rows.push(['Length', dur < 10 ? row('bad', `${dur.toFixed(0)}s (min 10s)`) : row('good', `${dur.toFixed(0)}s`)]);
+
+  return rows;
+}
+
+function finish() {
+  const nowT = performance.now();
+  const dur = (nowT - tRecStart) / 1000;
+  Object.values(issueState).forEach(s => { if (s.active) { s.total += (nowT - s.since) / 1000; s.active = false; } });
+  logKey('end');
+
+  const tot = id => issueState[id]?.total || 0;
+  // Trust the live pause/correction system: if nothing actually went
+  // wrong while recording (issueCount low) and it ran long enough to be a
+  // real attempt, that's a save - full stop. The vision-based "travel"
+  // measurement (how far the frame-correlation tracker thinks the sweep
+  // moved) used to also gate this, but tested against a real rack-sweep
+  // clip shot on an actual phone with zero issues the whole way through,
+  // it read only 0.8 of the required 3.0 frame-heights - unreliable on
+  // real footage, and penalising a clean sweep for the tracker's own
+  // under-measurement rather than anything the operator actually did
+  // wrong. Dropped as a blocker; duration and the issue count (both
+  // simple, reliable counters, not vision-dependent) are what decide it.
+  //
+  // issueCount counts distinct EPISODES, not raw start events: several
+  // "warn" rules (roll, blur, dark, bright, exposure, texture) test an
+  // instantaneous reading every single frame with no sustain window at
+  // all - on real, noisy camera/sensor data (unlike this app's own
+  // synthetic test harness) a reading that hovers right at the threshold
+  // can flicker on/off dozens of times a second, each flicker logging its
+  // own 'start' event. Counting those raw would make an otherwise-clean
+  // real recording blow past 10 "issues" from flicker alone. Two starts
+  // for the same rule within gapSec of each other are treated as the same
+  // ongoing episode, not two separate corrections.
+  const countEpisodes = (events, gapSec = 1.0) => {
+    const lastEnd = {};
+    let count = 0;
+    for (const e of events) {
+      if (e.state === 'start') {
+        const prevEnd = lastEnd[e.issue];
+        if (prevEnd == null || e.t - prevEnd > gapSec) count++;
+      } else if (e.state === 'end') {
+        lastEnd[e.issue] = e.t;
+      }
+    }
+    return count;
+  };
+  const issueCount = countEpisodes(log.events);
+  const reasons = [];
+  if (interrupted) reasons.push('Interrupted - the app was left mid-sweep, so part of the video is a frozen frame.');
+  if (dur < 10) reasons.push(`Too short (${dur.toFixed(0)} s). A full rack needs about 20-40 s.`);
+  if (issueCount > 10) reasons.push(`${issueCount} separate issues during the sweep (more than 10) - too many corrections needed.`);
+  const ok = reasons.length === 0;
+
+  Object.assign(log, {
+    durationSec: +dur.toFixed(2),
+    travelFrames: +S.travel.toFixed(2),
+    issueSeconds: Object.fromEntries(Object.entries(issueState).map(([k, s]) => [k, +s.total.toFixed(2)])),
+    issueCount,
+    verdict: ok ? 'ok' : 'reshoot',
+    reasons,
+    interrupted,
+  });
+  interrupted = false;   // consumed - next capture starts clean
+
+  $('rIcon').className = 'icon-badge result-icon ' + (ok ? 'good' : 'bad');
+  $('rIcon').innerHTML = ok
+    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"></path></svg>'
+    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 1 21h22L12 2zm0 15.5a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5zM11 10h2v4h-2z"></path></svg>';
+  $('rTitle').textContent = ok ? 'Nice sweep!' : "Let's reshoot that";
+  // Keyframe count deliberately left off this screen: it's built on the
+  // same vision-based "travel" estimate noted above as unreliable on real
+  // footage (read a quarter of the true distance in testing), so it looks
+  // exact without being trustworthy. Still written to the capture log for
+  // anyone who wants to look at it there.
+  $('rVerdict').innerHTML = ok
+    ? `<b style="color:var(--good)">Passed the checks</b> · ${dur.toFixed(1)}s`
+    : `<b style="color:var(--bad)">Re-shoot recommended</b> · ${dur.toFixed(1)}s`;
+  $('rStats').innerHTML = buildStats(dur, issueCount).map(([label, { tier, value }]) =>
+    `<div class="stat-row"><span>${label}</span><b class="${tier}">${value}</b></div>`
+  ).join('');
+
+  // Save video / Save capture log / Do another one are always available,
+  // reshoot or not - it's the operator's call whether a flagged capture is
+  // still worth keeping, not something to decide for them. Saving always
+  // takes a tap, even for a good capture: a download the page starts by
+  // itself (outside a tap) is not reliable on iPhone Safari, and the button
+  // used to flip to "Downloaded" whether or not the browser went ahead.
+  $('rReshootNote').hidden = false;
+  $('rReshootNote').textContent = ok
+    ? 'Wait for "Sent to team" before you move on. To keep a copy too, tap Save video, then Save Video.'
+    : reasons.join(' ') + ' It is still sent to the team, and you can save a copy too.';
+  const ext = (recorder.mimeType || '').includes('mp4') ? 'mp4' : 'webm';
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const videoBlob = new Blob(chunks, { type: recorder.mimeType || 'video/webm' });
+  const logBlob = new Blob([JSON.stringify(log, null, 2)], { type: 'application/json' });
+  setLink($('rVideo'), videoBlob, `rack_${stamp}.${ext}`);
+  setLink($('rLog'), logBlob, `rack_${stamp}_log.json`);
+  uploadTake(stamp, videoBlob, `video.${ext}`, logBlob);
+  $('result').hidden = false;
+  speak(ok ? 'Capture good. Sending to the team.' : 'Re-shoot recommended.', true);
+}
+
+// Every take, good or not, goes to the team's server automatically: the
+// testers will not send files by hand, so the app has to. The video goes
+// first (with a progress readout, since it can be tens of MB), then the
+// log. A failure leaves a tappable "send again" rather than a silent loss.
+// Relative URL, so it works the same through the tunnel and the Wi-Fi address.
+let uploadRetry = null;
+const UPLOAD_PIECE = 32 * 1024 * 1024;
+let joinsParts = null;   // asked once per page load
+async function serverJoinsParts() {
+  if (joinsParts === null) {
+    try { joinsParts = (await fetch('upload-info', { cache: 'no-store' })).ok; } catch (e) { joinsParts = false; }
+  }
+  return joinsParts;
+}
+function uploadTake(stamp, videoBlob, videoName, logBlob) {
+  const note = $('rUpload');
+  const q = `take=${encodeURIComponent(stamp)}&tester=${encodeURIComponent(testerName())}`;
+  const setNote = (cls, text, tappable) => { note.hidden = false; note.className = 'upload-note ' + cls; note.textContent = text; note.disabled = !tappable; };
+  const put = (file, blob, onProgress, extra = '') => new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `upload?${q}&file=${encodeURIComponent(file)}${extra}`);
+    xhr.timeout = 180000;
+    xhr.upload.onprogress = e => { if (e.lengthComputable && onProgress) onProgress(e.loaded / e.total); };
+    xhr.onload = () => xhr.status === 200 ? resolve() : reject(new Error('server replied ' + xhr.status));
+    xhr.onerror = () => reject(new Error('no connection to the server'));
+    xhr.ontimeout = () => reject(new Error('timed out'));
+    xhr.send(blob);
+  });
+  const run = async () => {
+    uploadRetry = null;
+    try {
+      setNote('', 'Sending to team - 0%', false);
+      // iPhone records at about 14 Mbit/s whatever the app asks for, and the
+      // Cloudflare link refuses any request over 100 MB, so a long take goes
+      // in 32 MB pieces - but only to a server that says it can join them.
+      const total = videoBlob.size;
+      const parts = (await serverJoinsParts()) ? Math.max(1, Math.ceil(total / UPLOAD_PIECE)) : 1;
+      for (let i = 0; i < parts; i++) {
+        const start = parts === 1 ? 0 : i * UPLOAD_PIECE;
+        const piece = parts === 1 ? videoBlob : videoBlob.slice(start, Math.min(total, start + UPLOAD_PIECE));
+        const extra = parts === 1 ? '' : `&part=${i}&parts=${parts}&offset=${start}`;
+        await put(videoName, piece, f => setNote('', `Sending to team - ${Math.round(100 * (start + f * piece.size) / total)}%`, false), extra);
+      }
+      await put('log.json', logBlob);
+      setNote('sent', '✓ Sent to team', false);
+    } catch (e) {
+      uploadRetry = run;
+      setNote('failed', `Not sent (${e.message}). Tap here to send again.`, true);
+    }
+  };
+  run();
+}
+$('rUpload').onclick = () => { if (uploadRetry) uploadRetry(); };
+
+function setLink(a, blob, name) {
+  if (a.href.startsWith('blob:')) URL.revokeObjectURL(a.href);
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a._file = new File([blob], name, { type: blob.type });   // for the share sheet below
+  // A fresh file to save - reset off any "✓ Downloaded" state left over
+  // from a previous capture, since this is a different file the operator
+  // hasn't downloaded yet.
+  a.textContent = a.dataset.label;
+  a.classList.remove('saved');
+}
+// Confirm the tap actually did something: once clicked (by the operator or
+// by the good-capture auto-click), the link visibly flips to "✓ Downloaded"
+// instead of silently staying "Save video" - same for manually saving a
+// flagged reshoot. Says "Downloaded", not "Saved": a click only means the
+// browser's save/share action was triggered, e.g. on iOS Safari that opens
+// a share sheet the operator can still back out of, so this confirms the
+// tap worked without claiming to know the file definitely landed on the
+// phone. Remembers each link's own original label up front so setLink()
+// above can restore it for the next capture.
+//
+// Save video goes through the share sheet where the phone has one (iPhone
+// Safari does): its "Save Video" puts the file in Photos, in the phone's own
+// storage. A plain download lands wherever Safari's download setting points,
+// which is often iCloud Drive - and fails outright when iCloud is full.
+// Without a share sheet (desktop, older phones) it stays a normal download.
+const canShareFile = f => !!(f && navigator.canShare && navigator.canShare({ files: [f] }));
+['rVideo', 'rLog'].forEach(id => {
+  const a = $(id);
+  a.dataset.label = a.textContent;
+  a.addEventListener('click', ev => {
+    if (id === 'rVideo' && canShareFile(a._file)) {
+      ev.preventDefault();
+      navigator.share({ files: [a._file] })
+        .then(() => { a.textContent = '✓ Saved'; a.classList.add('saved'); })
+        .catch(() => {});   // closed the sheet without saving: leave the button as it was
+      return;
+    }
+    a.textContent = '✓ Downloaded'; a.classList.add('saved');
+  });
+});
+$('rAgain').onclick = () => { $('result').hidden = true; };
+
+function logKey(kind) {
+  if (!log) return;
+  log.keyframes.push({ t: +((performance.now() - tRecStart) / 1000).toFixed(3), travel: +S.travel.toFixed(3), sharp: +S.sharp.toFixed(1), kind });
+}
+
+// ============================================================
+// Motion sensor
+// ============================================================
+function onMotion(e) {
+  const g = e.accelerationIncludingGravity;
+  if (!g || g.x == null) return;
+  const ax = g.x, ay = g.y, az = g.z, deg = 180 / Math.PI;
+  const ema = (prev, x, k) => prev == null ? x : prev * (1 - k) + x * k;
+
+  // Fast gravity estimate in the device frame - works even with auto-rotate off.
+  S.gx = ema(S.gx, ax, 0.2); S.gy = ema(S.gy, ay, 0.2); S.gz = ema(S.gz, az, 0.2);
+  // Slow gravity estimate; subtracting it leaves the hand's own motion.
+  S.sgx = ema(S.sgx, ax, 0.03); S.sgy = ema(S.sgy, ay, 0.03); S.sgz = ema(S.sgz, az, 0.03);
+
+  const landscapeHold = Math.abs(S.gx) > Math.abs(S.gy);
+  const roll = landscapeHold ? Math.atan2(ay, Math.abs(ax)) * deg : Math.atan2(ax, Math.abs(ay)) * deg;
+  const pitch = Math.atan2(az, Math.hypot(ax, ay)) * deg;
+  S.roll = ema(S.roll, roll, 0.2);
+  S.pitch = ema(S.pitch, pitch, 0.2);
+
+  // Dynamic acceleration along "up" (m/s²). A kick above vUpAccel is remembered
+  // by time, because it only lasts ~100 ms at the start of a real reversal.
+  const gMag = Math.hypot(S.sgx, S.sgy, S.sgz) || 1;
+  const dx = ax - S.sgx, dy = ay - S.sgy, dz = az - S.sgz;
+  S.vertAccel = S.vertAccel * 0.6 + ((dx * S.sgx + dy * S.sgy + dz * S.sgz) / gMag) * 0.4;
+  if (S.vertAccel > CFG.vUpAccel) S.lastUpKickT = performance.now();
+  S.shake = S.shake * 0.7 + Math.hypot(dx, dy, dz) * 0.3;
+  updateManualRotate();   // also syncs body.landscape
+}
+
+// Prefer the motion sensor (works with auto-rotate off); fall back to viewport shape.
+function isLandscape() {
+  return (S.gx != null && S.gy != null) ? Math.abs(S.gx) > Math.abs(S.gy) : innerWidth > innerHeight;
+}
+
+// True whenever #uiLayer is being shown in its landscape arrangement -
+// either because the CSS viewport genuinely is landscape-shaped, or because
+// updateManualRotate() below is forcing it to look that way regardless.
+// Every body.landscape rule keys off this, not the raw viewport shape, so
+// the button/toast/etc. end up styled consistently in both cases.
+function syncLandscapeClass() {
+  document.body.classList.toggle('landscape', manualRotateDeg !== 0 || innerWidth > innerHeight);
+}
+
+// The record button (and the rest of #uiLayer: toast/timer/pills/toggles)
+// should always show up in the same place - "the landscape view" - not
+// jump to a different spot depending on how the phone happens to be held
+// right now. So whenever the viewport isn't landscape-shaped, #uiLayer is
+// rotated to force that arrangement regardless of why it's portrait-shaped:
+//   - phone genuinely held upright (not rotated at all) - there's no real
+//     "direction" to match here, so a fixed default (90°) is used, purely
+//     to keep the layout consistent and predictable.
+//   - auto-rotate off while physically landscape - same CSS problem as
+//     above, but here the direction DOES matter (matching how the phone is
+//     actually being held), so the accelerometer's xDownSign() picks it.
+// The live camera <video> is deliberately left alone: mobile browsers
+// already auto-rotate the delivered frames to match physical orientation
+// at the OS/driver level (confirmed reliable on iOS, generally true on
+// Android), so rotating it again here would double it. The canvas
+// guide-lines follow the same un-rotated video via the existing axis-swap
+// logic in analyze() (S.axis), not a CSS transform.
+let manualRotateDeg = 0, manualRotateW = 0, manualRotateH = 0;
+// A phone whose motion sensor reports gravity with the other sign shows the forced landscape view upside down (a tester,
+// 10 Nov 2026: "everything in the opposite direction"). Flip the view turns it the other way and the phone remembers it.
+let flipView = /Android/i.test(navigator.userAgent);   // Android phones here report gravity the other way round: the view starts flipped (owner, 12 Nov 2026: "default it is left"); iPhone as before
+try { const f = localStorage.getItem('rackGuideFlip'); if (f === '1' || f === '0') flipView = f === '1'; } catch (e) {}
+function updateManualRotate() {
+  const sensorSaysLandscape = S.gx != null && S.gy != null && isLandscape();
+  // xDownSign() === 1 means the screen's right edge (+x) points at the
+  // floor, i.e. the phone's top is to the operator's RIGHT. Text must then
+  // have its tops pointing to -x, which is the -90 turn (checked against a
+  // real iPhone with rotation lock on: +90 here showed everything upside down).
+  const flip = flipView ? -1 : 1;
+  const needed = innerWidth > innerHeight ? 0 : (sensorSaysLandscape ? (xDownSign() * flip === 1 ? -90 : 90) : 90 * flip);
+  // Re-apply sizing not just when the angle changes, but whenever the
+  // viewport itself does - iOS Safari resizes the visible viewport (its
+  // address bar growing/shrinking) without any rotation at all, which used
+  // to leave the forced-landscape #uiLayer sized for a viewport that no
+  // longer exists. Comparing the cached width/height (not just the angle)
+  // still skips the no-op case, since devicemotion fires ~60x/second.
+  if (needed !== manualRotateDeg || (needed && (innerWidth !== manualRotateW || innerHeight !== manualRotateH))) {
+    manualRotateDeg = needed; manualRotateW = innerWidth; manualRotateH = innerHeight;
+    // The result screen gets the same turn: with rotation lock on, the phone
+    // is still sideways when the take ends, so an unturned card reads sideways.
+    // The intro is left alone - the operator reads it holding the phone upright,
+    // and no sensor data exists yet to pick a direction from.
+    for (const el of [$('uiLayer'), $('result')]) {
+      if (!needed) {
+        el.style.cssText = '';
+      } else {
+        el.style.width = innerHeight + 'px';
+        el.style.height = innerWidth + 'px';
+        el.style.transformOrigin = 'top left';
+        el.style.transform = needed === 90 ? 'rotate(90deg) translateY(-100%)' : 'rotate(-90deg) translateX(-100%)';
+      }
+    }
+  }
+  syncLandscapeClass();
+}
+
+// When the rack's vertical runs along image X (page didn't rotate), which way is "down"?
+// iOS reports accelerationIncludingGravity with the opposite sign to Android.
+function xDownSign() {
+  const ios = /iP(hone|ad|od)/.test(navigator.userAgent) ||
+    (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function');
+  const gx = (S.gx || 0) * (ios ? -1 : 1);
+  return gx > 0 ? -1 : 1;
+}
+
+// ============================================================
+// Image analysis helpers
+// ============================================================
+
+// Best shift s in [center − R, center + R] such that c[i] ≈ p[i + s] (SSD + sub-pixel fit).
+function bestShift(p, c, R, center = 0) {
+  const n = p.length, c0 = Math.round(center), err = new Float32Array(2 * R + 1);
+  let best = Infinity, bi = 0;
+  for (let k = -R; k <= R; k++) {
+    const s = c0 + k;
+    let sum = 0, cnt = 0;
+    for (let y = Math.max(0, -s), y1 = Math.min(n, n - s); y < y1; y++) { const d = p[y + s] - c[y]; sum += d * d; cnt++; }
+    const e = cnt > n * 0.5 ? sum / cnt : Infinity;
+    err[k + R] = e;
+    if (e < best) { best = e; bi = s; }
+  }
+  let sub = 0;
+  const i = bi - c0 + R;
+  if (i > 0 && i < err.length - 1 && isFinite(err[i - 1]) && isFinite(err[i + 1])) {
+    const den = err[i - 1] - 2 * err[i] + err[i + 1];
+    if (den > 1e-9) sub = 0.5 * (err[i - 1] - err[i + 1]) / den;
+  }
+  const finite = Array.from(err).filter(isFinite).sort((a, b) => a - b);
+  const med = finite[finite.length >> 1] || 1;
+  return { shift: bi + sub, conf: 1 - best / med };
+}
+
+// Normalise in place to zero mean, unit SD. Returns the original SD.
+function znorm(a) {
+  let m = 0; for (const v of a) m += v; m /= a.length;
+  let sd = 0; for (const v of a) sd += (v - m) ** 2; sd = Math.sqrt(sd / a.length);
+  for (let i = 0; i < a.length; i++) a[i] = sd > 1e-6 ? (a[i] - m) / sd : 0;
+  return sd;
+}
+
+// Vertical-edge strength across the rack (rails, posts), summed along the sweep.
+function edgeProfile(g, W, H, axis) {
+  let e;
+  if (axis === 'y') {
+    e = new Float32Array(W);
+    for (let y = 0; y < H; y++) { const o = y * W; for (let x = 1; x < W - 1; x++) e[x] += Math.abs(g[o + x + 1] - g[o + x - 1]); }
+  } else {
+    e = new Float32Array(H);
+    for (let y = 1; y < H - 1; y++) { const o = y * W; for (let x = 0; x < W; x++) e[y] += Math.abs(g[o + W + x] - g[o - W + x]); }
+  }
+  const s = new Float32Array(e.length);
+  for (let i = 0; i < e.length; i++) s[i] = (e[Math.max(0, i - 1)] + 2 * e[i] + e[Math.min(e.length - 1, i + 1)]) / 4;
+  znorm(s);
+  return s;
+}
+
+// How much the rack has grown (scale, >1 = closer) and slid (shift, px; + = content
+// moved toward +index) relative to ref. Fits that push part of the old view out
+// of frame are penalised, so "moved away" isn't read as "closer + shifted".
+function matchScaleShift(ref, cur, maxShift) {
+  const n = ref.length, c = (n - 1) / 2, errs = [];
+  let best = Infinity, bs = 1, bd = 0;
+  for (let s = 0.82; s <= 1.2001; s += 0.01) {
+    for (let d = -maxShift; d <= maxShift; d++) {
+      let sum = 0, cnt = 0;
+      for (let x = 2; x < n - 2; x++) {
+        const u = c + (x - c - d) / s;
+        if (u < 0 || u > n - 1) continue;
+        const i = Math.floor(u), f = u - i;
+        const rv = i + 1 < n ? ref[i] * (1 - f) + ref[i + 1] * f : ref[i];
+        const e = cur[x] - rv; sum += e * e; cnt++;
+      }
+      if (cnt < n * 0.6) continue;
+      const lo = c - c * s + d, hi = c + (n - 1 - c) * s + d;
+      const seen = Math.max(0, Math.min(1, (Math.min(n - 1, hi) - Math.max(0, lo)) / ((n - 1) * s)));
+      const err = sum / cnt + 1.5 * (1 - seen);
+      errs.push(err);
+      if (err < best) { best = err; bs = s; bd = d; }
+    }
+  }
+  errs.sort((a, b) => a - b);
+  const med = errs[errs.length >> 1] || 1;
+  return { scale: bs, shift: bd, conf: 1 - best / med };
+}
+
+// Which way the operator should move to undo the drift, in their own left/right.
+function sideAdvice() {
+  const towardRight = S.axis === 'y' ? Math.sign(S.drift) : Math.sign(S.drift) * (xDownSign() === 1 ? -1 : 1);
+  return towardRight > 0 ? 'RIGHT' : 'LEFT';
+}
+
+// ============================================================
+// Per-frame analysis
+// ============================================================
+function analyze(now) {
+  const vw = video.videoWidth, vh = video.videoHeight;
+  if (!vw) return;
+  const W = CFG.W, H = Math.round(W * vh / vw);
+  if (work.width !== W || work.height !== H) { work.width = W; work.height = H; S.hist = []; }
+  wctx.drawImage(video, 0, 0, W, H);
+  const d = wctx.getImageData(0, 0, W, H).data;
+
+  // Greyscale + mean luma
+  const g = new Float32Array(W * H);
+  let lum = 0;
+  for (let i = 0, j = 0; j < g.length; i += 4, j++) { g[j] = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]; lum += g[j]; }
+  lum /= g.length;
+
+  // Row / column projections of the centre region
+  const row = new Float32Array(H), col = new Float32Array(W);
+  const x0 = Math.round(W * .15), x1 = Math.round(W * .85), y0 = Math.round(H * .15), y1 = Math.round(H * .85);
+  for (let y = 0; y < H; y++) { let s = 0; for (let x = x0; x < x1; x++) s += g[y * W + x]; row[y] = s / (x1 - x0); }
+  for (let x = 0; x < W; x++) { let s = 0; for (let y = y0; y < y1; y++) s += g[y * W + x]; col[x] = s / (y1 - y0); }
+  const rowSd = znorm(row), colSd = znorm(col);
+  S.textured = rowSd > 3 && colSd > 3;
+
+  // Sharpness: variance of Laplacian
+  let lap = 0, n = 0;
+  for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+    const k = y * W + x, L = 4 * g[k] - g[k - 1] - g[k + 1] - g[k - W] - g[k + W];
+    lap += L * L; n++;
+  }
+  S.sharp = lap / n;
+  S.sharpBest = Math.max(S.sharpBest * 0.95, S.sharp);
+
+  // Exposure
+  S.lumaFast = S.lumaFast * 0.6 + lum * 0.4;
+  S.lumaSlow = S.lumaSlow * 0.95 + lum * 0.05;
+
+  const dt = S.lastT ? (now - S.lastT) / 1000 : 0;
+  S.lastT = now;
+
+  // Which image axis is the rack's vertical? With auto-rotate off the phone is
+  // landscape but the frame stays portrait, so the rack runs along image X.
+  const axis = (isLandscape() && vh > vw) ? 'x' : 'y';
+  if (axis !== S.axis) { S.axis = axis; S.hist = []; S.vBuf = []; S.geoHist = []; }
+
+  updateGeometry(g, W, H, axis, now, dt);
+  updateSpeed(axis === 'x' ? col : row, (axis === 'x' ? xDownSign() : 1) * S.dirFlip, now, dt);
+
+  if (CFG.showSpeed) {
+    $('speedPill').hidden = !recording;
+    $('speedText').textContent = `${S.v >= 0 ? '↓' : '↑'}${Math.abs(S.v).toFixed(2)}`;
+  }
+  evaluate(now);
+}
+
+// Moving forward / sideways: fit how much the rack's edge profile has grown
+// (scale) and slid (drift) since ~geoLag s ago. Comparing with a recent frame,
+// not the start of recording, means only an actual MOVEMENT fires - not the
+// rack content changing as you sweep, and not standing at a fixed distance.
+// Size and slide are fitted together: fitting slide alone misreads a forward
+// move as a sideways one.
+function updateGeometry(g, W, H, axis, now, dt) {
+  if (!recording) { Object.assign(S, { geoHist: [], geoOk: false, scale: 1, drift: 0, nearFor: 0, sideFor: 0 }); return; }
+  const ep = edgeProfile(g, W, H, axis);
+  S.geoHist.push({ t: now, p: ep });
+  while (S.geoHist.length && now - S.geoHist[0].t > CFG.geoLag * 3000) S.geoHist.shift();
+
+  let ref = null;
+  for (let i = S.geoHist.length - 2; i >= 0; i--) {
+    if (now - S.geoHist[i].t >= CFG.geoLag * 1000) { ref = S.geoHist[i]; break; }
+  }
+  S.geoOk = !!(ref && ref.p.length === ep.length);
+  if (S.geoOk) {
+    const m = matchScaleShift(ref.p, ep, Math.round(ep.length * 0.22));
+    if (m.conf > 0.35) { S.scale = m.scale; S.drift = m.shift / ep.length; }
+  }
+
+  // Each as a multiple of its own tolerance; only the bigger one can fire, so a
+  // forward move can't show as "sideways" or vice versa. Must be sustained for
+  // geoSecs; a brief blip decays away.
+  const nearX = Math.max(0, S.scale - 1) / CFG.scaleTol;
+  const sideX = Math.abs(S.drift) / CFG.driftTol;
+  S.nearFor = (nearX > 1 && nearX > sideX) ? S.nearFor + dt : Math.max(0, S.nearFor - dt);
+  S.sideFor = (sideX > 1 && sideX >= nearX) ? S.sideFor + dt : Math.max(0, S.sideFor - dt);
+}
+
+// Vertical speed, direction and travel.
+//  1. Coarse: frame-to-frame shift in a small window (can't jump to a repeated
+//     rack pattern), summed into a running position.
+//  2. Fine: shift against a frame ~refLag ago, searched only near the coarse
+//     estimate - accurate without sub-pixel bias.
+function updateSpeed(prof, sign, now, dt) {
+  const L = prof.length;
+  if (dt >= 0.5) S.hist = [];   // stalled (tab hidden etc.)
+
+  const last = S.hist[S.hist.length - 1];
+  let cum = 0;
+  if (last && last.p.length === L) {
+    const predicted = dt > 0 ? sign * S.v * L * dt : 0;
+    const f = bestShift(last.p, prof, Math.max(3, Math.round(L * 0.08)), predicted);
+    cum = last.cum + (f.conf > 0.15 ? f.shift : predicted);   // unreadable frame → keep momentum
+  }
+  S.hist.push({ t: now, p: prof, cum });
+  while (S.hist.length && now - S.hist[0].t > CFG.refLag * 3000) S.hist.shift();
+
+  let ref = null;
+  for (let i = S.hist.length - 2; i >= 0; i--) if (now - S.hist[i].t >= CFG.refLag * 1000) { ref = S.hist[i]; break; }
+  if (!ref && S.hist.length > 1 && now - S.hist[0].t >= 80) ref = S.hist[0];
+  if (!ref || !(dt > 0 && dt < 0.5)) return;
+
+  const span = (now - ref.t) / 1000;
+  const coarse = cum - ref.cum;
+  const r = bestShift(ref.p, prof, Math.max(3, Math.round(L * CFG.trackBand)), coarse);
+  const ok = r.conf > 0.15;
+  const raw = ok ? sign * r.shift / L / span : null;
+
+  // Median of the last 5 readings, then smoothing: one bad match can't spike the speed.
+  if (raw != null) { S.vBuf.push(raw); if (S.vBuf.length > 5) S.vBuf.shift(); }
+  const med = S.vBuf.length ? [...S.vBuf].sort((a, b) => a - b)[S.vBuf.length >> 1] : 0;
+  const instant = raw != null ? raw : S.v;
+  S.v = S.v * 0.45 + med * 0.55;
+  S.vCoarse = sign * coarse / L / span;
+  S.lowTrackFor = ok ? 0 : S.lowTrackFor + dt;
+
+  if (recording) {
+    const step = ok ? instant * dt : 0;
+    S.travel += step;
+    S.sinceKey += Math.max(0, step);
+    if (S.sinceKey >= CFG.keyEvery) { S.sinceKey = 0; logKey('overlap'); }
+
+    // Direction self-calibration: the operator is told to move DOWN, so the first
+    // steady movement of the recording defines "down". If it came out negative,
+    // this phone's direction sign is reversed - flip it for the rest of the take.
+    if (!S.dirLocked && Math.abs(S.travel) >= CFG.calibDist) {
+      S.dirLocked = true;
+      if (S.travel < 0) {
+        S.dirFlip = -S.dirFlip;
+        S.v = -S.v; S.vCoarse = -S.vCoarse;
+        S.vBuf = S.vBuf.map(x => -x);
+        S.travel = -S.travel;
+        S.sinceKey = S.travel % CFG.keyEvery;
+      }
+      if (log) log.directionFlipped = S.dirFlip === -1;
+      return;   // this frame's readings were in the old sign
+    }
+  }
+
+  S.stoppedFor = Math.abs(S.v) < CFG.vStop ? S.stoppedFor + dt : 0;
+
+  // Moving up: both vision estimates and the smoothed speed must point up, with
+  // tracking intact. The accelerometer kick is needed to start a detection; after
+  // that a long steady up-move keeps counting. Cleared as soon as S.v ≥ 0.
+  const visionUp = instant < CFG.vUp && S.vCoarse < CFG.vUp;
+  const accelOk = (S.lastUpKickT && now - S.lastUpKickT < 600) || S.upFor > 0.1;
+  // upDist = net distance moved up during this episode (downward motion subtracts),
+  // so a small bounce while sweeping down never adds up to a real move up.
+  if (S.v >= 0 || !S.dirLocked) { S.upFor = 0; S.upDist = 0; }   // no "up" until direction is learned
+  else if (visionUp && accelOk && S.v < CFG.vUp && S.lowTrackFor < 0.3) { S.upFor += dt; S.upDist += -instant * dt; }
+  else { S.upFor = Math.max(0, S.upFor - dt * 3); S.upDist = Math.max(0, S.upDist - Math.max(0, instant) * dt); }
+  if (S.upFor === 0) S.upDist = 0;
+
+  // Too fast: magnitude of this frame's reading (either direction).
+  S.fastFor = Math.abs(instant) > CFG.vFast ? S.fastFor + dt : 0;
+}
+
+// ============================================================
+// Rules → guidance (first match wins the toast, voice line, and vibration)
+// ============================================================
+const isBlurry = () => S.sharpBest > 20 && S.sharp < S.sharpBest * CFG.blurRatio;
+
+const RULES = [
+  // id, severity, test, message, sub-text
+  ['up', 'bad', () => S.upFor > CFG.upSecs && S.upDist > CFG.upDist,
+    'Moving UP - go down only', 'Never move back up. Continue down slowly.'],
+  ['fast', 'bad', () => S.fastFor > CFG.fastSecs ||
+      (S.lowTrackFor > CFG.lostSecs && S.textured && (S.shake > CFG.shakeAccel || isBlurry())),
+    'TOO FAST - slow down',
+    () => S.fastFor > CFG.fastSecs ? `Slow, steady pace. (speed ${Math.abs(S.v).toFixed(2)} fh/s)` : 'Slow, steady pace. (tracking lost)'],
+  ['near', 'bad', () => recording && S.geoOk && S.nearFor > CFG.geoSecs,
+    'Moving closer - step back', 'Keep the same distance from the rack.'],
+  ['side', 'bad', () => recording && S.geoOk && S.sideFor > CFG.geoSecs,
+    () => `Drifted sideways - move ${sideAdvice()}`, 'Keep the rack centred in frame.'],
+  ['pitch', 'bad', () => S.pitch != null && Math.abs(S.pitch) > CFG.pitchTol,
+    'Don’t tilt forward/back', 'Phone is leaning. Point the lens straight at the rack.'],
+  ['roll', 'warn', () => S.roll != null && Math.abs(S.roll) > CFG.rollTol,
+    'Straighten the phone', 'Keep the rack rails level in frame.'],
+  ['blur', 'warn', isBlurry, 'Blurry - slow down / steady', 'Labels must stay readable.'],
+  ['dark', 'warn', () => S.lumaFast < CFG.dark, 'Too dark - add light', 'Use side light, not straight-on flash.'],
+  ['bright', 'warn', () => S.lumaFast > CFG.bright, 'Too bright / glare', 'Angle the light or step back a little.'],
+  ['exposure', 'warn', () => Math.abs(S.lumaFast - S.lumaSlow) > CFG.expJump, 'Brightness changing', 'Keep the lighting steady.'],
+  ['stopped', 'warn', () => recording && S.stoppedFor > CFG.stopSecs, 'Keep moving down', 'Smooth, continuous motion.'],
+  ['texture', 'warn', () => !S.textured, 'Can’t see rack detail', 'Add light so equipment detail is visible.'],
+];
+
+// Which toast icon glyph each rule gets, and which way an arrow points (0°
+// = up). Arrows point in whatever direction is most useful at a glance -
+// the corrective action for speed/stall, the actual motion for "moving up",
+// the direction to move for drift. 'side' has no fixed rotation here since
+// it depends on sideAdvice(), resolved in iconFor() instead.
+const RULE_ICON = {
+  up: ['arrow', 0], fast: ['arrow', 180], near: ['arrow', -90], stopped: ['arrow', 180],
+  pitch: ['warn', 0], roll: ['phone', 0], blur: ['warn', 0], texture: ['warn', 0],
+  dark: ['sun', 0], bright: ['sun', 0], exposure: ['sun', 0],
+};
+function iconFor(id) {
+  if (id === 'orient') return ['orient', 0];
+  if (id === 'side') return ['arrow', sideAdvice() === 'RIGHT' ? 90 : -90];
+  return RULE_ICON[id] || ['warn', 0];
+}
+
+function evaluate(now) {
+  let top = null;
+  const tRel = () => +((now - tRecStart) / 1000).toFixed(2);
+
+  if (recording) {
+    for (const [id, sev, test, msg, sub] of RULES) {
+      const on = !!test();
+      const st = issueState[id] || (issueState[id] = { active: false, since: 0, total: 0 });
+      if (on && !st.active) { st.active = true; st.since = now; log?.events.push({ t: tRel(), issue: id, state: 'start' }); }
+      if (!on && st.active) { st.active = false; st.total += (now - st.since) / 1000; log?.events.push({ t: tRel(), issue: id, state: 'end' }); }
+      if (on && !top) top = { id, sev, msg: typeof msg === 'function' ? msg() : msg, sub: typeof sub === 'function' ? sub() : sub };
+    }
+    if (!isLandscape()) top = { id: 'orient', sev: 'bad', msg: 'Turn your mobile to landscape', sub: 'Keep sweeping once it’s turned.' };
+
+    // Button ring + timer dot colour: green when nothing's active (a good
+    // capture in progress - this is the "show green too" feedback), amber
+    // for a live "warn", red for a "bad" issue - purely instructional, the
+    // recorder itself never stops.
+    syncRecUI(top ? top.sev : 'good');
+
+    if (log && log.samples.length < 20000) log.samples.push([tRel(), +S.v.toFixed(3), +S.sharp.toFixed(0), +S.lumaFast.toFixed(0)]);
+  }
+
+  // Before recording starts, the landscape gate is handled entirely by
+  // #orientGate (see below) - a separate, never-rotated element, since its
+  // whole job is to stay readable in whatever orientation the phone is
+  // actually in right now. The toast only ever appears once recording is
+  // live, and only when there's something to say; otherwise (recording
+  // with nothing wrong) it stays hidden and the record button alone
+  // carries the state, the way a normal camera app's clean viewfinder does.
+  let show = true, cls, msg, sub, iconType = 'warn', iconRot = 0;
+  if (!recording) {
+    show = false;
+  }
+  else if (top) {
+    cls = top.sev; [iconType, iconRot] = iconFor(top.id);
+    msg = top.msg;
+    sub = top.sub;
+  }
+  else show = false;
+  setToast(show, cls, msg, sub, iconType, iconRot);
+  const gateShown = !recording && !isLandscape();
+  $('orientGate').hidden = !gateShown;
+  // Without motion-sensor data, landscape can only be detected from the
+  // viewport's own shape - which never changes if the phone's rotation
+  // lock is on. Spell out the actual fix instead of repeating an
+  // instruction the operator may already be following.
+  if (gateShown) $('orientSub').textContent = (S.gx == null)
+    ? 'If this doesn’t change: turn off rotation lock, or reload and allow Motion & Orientation Access.'
+    : 'then tap Record';
+
+  // Bottom-right hint pill: unlike the toast, this one never hides - it's a
+  // quiet, persistent status (what to do before recording, or that pace is
+  // good).
+  if (!recording) setHint('Hold landscape', 'top of rack in view');
+  else if (top) setHint(top.sev === 'bad' ? 'Fix this' : 'Heads up', 'see the tip above', top.sev);
+  else setHint('Pace', 'just right', 'good');
+
+  // Speak once when an issue starts, then stay quiet while it's still the
+  // same ongoing issue - not on a repeating timer. The old 4 s reminder made
+  // a sustained "too fast" announce itself over and over, each one force-
+  // interrupting (cutting off) the one before it, since bad warnings jump the
+  // queue. One instruction should finish before the next is even considered;
+  // it naturally speaks again later if this same issue clears and recurs.
+  // 'side' is keyed on its direction too (not just the rule id), so a drift
+  // that flips from "move left" to "move right" counts as a new instruction.
+  if (top && recording) {
+    const topKey = top.id === 'side' ? 'side:' + sideAdvice() : top.id;
+    if (lastSpoken.id !== topKey) {
+      lastSpoken = { id: topKey, t: now, voiced: false };
+      if (top.sev === 'bad') vibe([120, 60, 120]);
+    }
+    // " - " reads as a pause and "/" as "or" - the dash used to cut the
+    // message off entirely, dropping exactly the instruction half ("slow
+    // down", "step back", "move left"). Messages use a plain hyphen with
+    // spaces around it as the separator, not an em-dash - matching " - "
+    // specifically (not just "-") keeps this from also matching a bare
+    // word-internal hyphen like "off-centre". And a tip only counts as
+    // spoken once speak() actually queued it: a non-"bad" tip that arrived
+    // mid-utterance used to be silently dropped yet marked said, so it was
+    // never retried even after the voice freed up.
+    if (!lastSpoken.voiced) {
+      const spokenText = top.msg.replace(/ - /g, ', ').replace(/\//g, ' or ').toLowerCase();
+      if (speak(spokenText, top.sev === 'bad')) lastSpoken.voiced = true;
+    }
+  } else if (!top) lastSpoken.id = null;
+}
+
+// ============================================================
+// Toast, voice, vibration
+// ============================================================
+let toastKey = '', toastSetAt = 0, flashTimer = 0;
+
+function applyToast(show, cls, msg, sub, iconType, iconRot) {
+  toastKey = show + cls + msg + sub + iconType + iconRot;
+  toastSetAt = performance.now();
+  const el = $('toast');
+  el.hidden = !show;
+  el.className = [cls, iconType && ('icon-' + iconType)].filter(Boolean).join(' ');
+  if (iconType === 'arrow') $('iconArrow').style.transform = `rotate(${iconRot}deg)`;
+  if (show) { $('msg').textContent = msg; $('sub').textContent = sub; }
+}
+
+// "bad" warnings show immediately. Other messages (including hiding the
+// toast again) are held at least 1.2 s to avoid flicker - but a finished
+// "bad" warning is taken down after 0.25 s.
+function setToast(show, cls, msg, sub, iconType, iconRot) {
+  if (show + cls + msg + sub + iconType + iconRot === toastKey) return;
+  const hold = $('toast').classList.contains('bad') ? 250 : 1200;
+  if (cls !== 'bad' && toastSetAt && performance.now() - toastSetAt < hold) return;
+  applyToast(show, cls, msg, sub, iconType, iconRot);
+}
+
+function setHint(t1, t2, tier) {
+  const el = $('hintPill');
+  el.hidden = false;
+  const key = t1 + t2 + tier;
+  if (el.dataset.key === key) return;
+  el.dataset.key = key;
+  el.className = tier || '';
+  el.innerHTML = `<div class="t1">${t1}</div><div class="t2">${t2}</div>`;
+}
+
+function flash(t) {
+  applyToast(true, '', t, '', 'warn', 0);
+  toastKey = 'flash';
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => { toastKey = ''; }, 1800);
+}
+
+// Returns whether the utterance was actually queued, so a caller tracking
+// "have I said this yet" doesn't mark a dropped tip as said.
+function speak(text, force) {
+  if (!$('tVoice').checked || !window.speechSynthesis) return false;
+  if (force) speechSynthesis.cancel(); else if (speechSynthesis.speaking) return false;
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 1.1;
+  speechSynthesis.speak(u);
+  return true;
+}
+
+function vibe(p) { if ($('tVibe').checked && navigator.vibrate) navigator.vibrate(p); }
+
+// ============================================================
+// Overlay drawing
+// ============================================================
+function resize() { ov.width = innerWidth * devicePixelRatio; ov.height = innerHeight * devicePixelRatio; }
+addEventListener('resize', () => { updateManualRotate(); resize(); });
+
+// Screen rectangle covered by the (object-fit: cover) video. Deliberately
+// plain innerWidth/innerHeight, not the uiLayer's rotated size - the video
+// itself isn't rotated (see updateManualRotate), so neither is this.
+function videoRect() {
+  const vw = video.videoWidth || 9, vh = video.videoHeight || 16;
+  const s = Math.max(innerWidth / vw, innerHeight / vh), w = vw * s, h = vh * s;
+  return { x: (innerWidth - w) / 2, y: (innerHeight - h) / 2, w, h };
+}
+
+function draw() {
+  const r = videoRect(), dpr = devicePixelRatio;
+  octx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  octx.clearRect(0, 0, innerWidth, innerHeight);
+
+  // A line running along the rack's vertical, at across-the-rack position f (0…1).
+  const alongLine = f => {
+    octx.beginPath();
+    if (S.axis === 'x') { const y = r.y + f * r.h; octx.moveTo(r.x, y); octx.lineTo(r.x + r.w, y); }
+    else { const x = r.x + f * r.w; octx.moveTo(x, r.y); octx.lineTo(x, r.y + r.h); }
+    octx.stroke();
+  };
+  const cx = r.x + r.w / 2;
+
+  // Centre line
+  octx.lineWidth = 2; octx.setLineDash([4, 10]); octx.strokeStyle = 'rgba(255,255,255,.35)';
+  alongLine(0.5);
+  octx.setLineDash([]);
+
+  // Horizon line rotated by roll
+  if (S.roll != null) {
+    octx.save();
+    octx.translate(cx, r.y + r.h / 2);
+    octx.rotate(-S.roll * Math.PI / 180);
+    octx.strokeStyle = Math.abs(S.roll) > CFG.rollTol ? '#ef4444' : 'rgba(22,163,74,.9)';
+    octx.lineWidth = 3;
+    octx.beginPath(); octx.moveTo(-r.w * 0.3, 0); octx.lineTo(r.w * 0.3, 0); octx.stroke();
+    octx.restore();
+  }
+
+  // Direction arrow
+  if (recording) {
+    const ay = r.y + r.h * 0.78;
+    octx.fillStyle = 'rgba(255,255,255,.75)';
+    octx.beginPath(); octx.moveTo(cx - 18, ay); octx.lineTo(cx + 18, ay); octx.lineTo(cx, ay + 22); octx.closePath(); octx.fill();
+  }
+}
+
+// ============================================================
+// Main loop
+// ============================================================
+let lastA = 0, analysisErrorShown = false;
+function loop() {
+  const now = performance.now();
+  // analyze() ends by calling evaluate(), which drives every live rule check
+  // and the toast/button/hint - if analyze() throws before reaching it, that
+  // was silently swallowed and a frame with every check broken looked
+  // identical to a frame with nothing wrong. Now it's logged and surfaced
+  // once per recording instead.
+  if (now - lastA >= 1000 / CFG.fpsAnalysis) {
+    lastA = now;
+    try { analyze(now); } catch (e) {
+      console.error('[rack-sweep] analyze() failed:', e);
+      if (log) { if (!log.errors) log.errors = []; log.errors.push({ t: +((now - tRecStart) / 1000).toFixed(2), message: String(e && e.message || e) }); }
+      if (recording && !analysisErrorShown) { analysisErrorShown = true; flash('Guidance paused - something went wrong'); }
+    }
+  }
+  try { drawRecFrame(); } catch (e) {}
+  try { updateTimerText(now); } catch (e) {}
+  draw();
+  requestAnimationFrame(loop);
+}
+
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState === 'visible' && stream) {
+    try { wakeLock = await navigator.wakeLock?.request('screen'); } catch (e) {}
+    video.play().catch(() => {});   // iOS can leave the preview paused after a switch away
+    if (track && track.readyState === 'ended') flash('Camera stopped - reload the page and start again');
+  } else if (document.visibilityState === 'hidden' && recording) {
+    // The draw loop that feeds the recorder is driven by requestAnimationFrame,
+    // which browsers throttle or fully pause while the page is hidden - so the
+    // saved video would otherwise freeze on its last frame for however long the
+    // operator was away, with nothing recorded to say so. End the take now and
+    // force a reshoot instead of letting a frozen clip slip through as "good".
+    interrupted = true;
+    stopRec();
+  }
+});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "import": { "id": "mc0000000001", "file_name": "missing-cable-fixture.xlsx", "sheet_name": "Cables", "header_row": 0, "uploaded_by": "mc_barry", "uploaded_at": "2026-09-29T07:00:00Z", "row_count": 5, "cable_count": 5, "problem_count": 0 },
+  "mapping": {},
+  "problems": [],
+  "cables": [
+    { "row_no": 2, "cable_label": "MC-101", "a_device": "SW-EDGE-05", "a_port": "Gi1/0/1", "a_rack": "R05", "a_unit": "20", "z_device": "PP-CORE-01", "z_port": "7", "z_rack": "R09", "z_unit": "2", "cable_type": "Cat6 UTP", "notes": "" },
+    { "row_no": 3, "cable_label": "MC-102", "a_device": "SW-EDGE-05", "a_port": "Gi1/0/2", "a_rack": "R05", "a_unit": "20", "z_device": "PP-CORE-01", "z_port": "8", "z_rack": "R09", "z_unit": "2", "cable_type": "Cat6 UTP", "notes": "" },
+    { "row_no": 4, "cable_label": "MC-103", "a_device": "PP-CORE-01", "a_port": "9", "a_rack": "R09", "a_unit": "2", "z_device": "SW-EDGE-05", "z_port": "Gi1/0/4", "z_rack": "R05", "z_unit": "20", "cable_type": "Cat6 UTP", "notes": "" },
+    { "row_no": 5, "cable_label": "MC-104", "a_device": "SW-EDGE-05", "a_port": "Gi1/0/5", "a_rack": "R05", "a_unit": "20", "z_device": "PP-CORE-01", "z_port": "10", "z_rack": "R09", "z_unit": "2", "cable_type": "Cat6 UTP", "notes": "" },
+    { "row_no": 6, "cable_label": "MC-105", "a_device": "SW-EDGE-05", "a_port": "Gi1/0/3", "a_rack": "R99", "a_unit": "20", "z_device": "PP-CORE-01", "z_port": "11", "z_rack": "R09", "z_unit": "2", "cable_type": "Cat6 UTP", "notes": "" }
+  ]
+}

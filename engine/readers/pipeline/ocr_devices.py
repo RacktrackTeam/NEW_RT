@@ -1,0 +1,731 @@
+"""
+ocr_devices.py - per-device OCR for chassis labels.
+
+For each device detected by the rack-scan CV pipeline, crops its bounding box
+from the rack image. The photo is read ONCE by switch-ocr and each device
+is given the text that fell inside its box. Parses the recognized
+text for vendor name and model number. Output is keyed by
+U-position so the rest of the scan result can use it.
+
+Pipeline:
+  1. Load device_unit_map.json (per-device boxes from CV).
+  2. Resolve the scan's photo (photo.jpg beside the engine folder).
+  3. Read the whole image once; assign each label to the device box
+     containing it; normalize text, parse make/model.
+  4. Match make against the Switch_Vendors_Websites.xlsx vendor list.
+  5. Write <engine dir>/ocr_devices.json with one record per device.
+
+Output schema (single JSON file):
+{
+  "rack_id": "RK-XXXXXXXX",
+  "image": "photo.jpg",
+  "generated_at": "2026-05-05T19:55:19Z",
+  "devices": [
+    {
+      "position":     "U18",
+      "class_name":   "Switch",
+      "box":          [x1, y1, x2, y2],
+      "make":         "Cisco" | null,
+      "model":        "C9300-48P" | null,
+      "raw_text":     "Cisco Catalyst 9300 ...",
+      "ocr_conf":     0.84,        # avg OCR confidence inside this crop
+      "match_conf":   0.95,        # vendor-list/model-regex match strength
+      "source":       "ocr_full" | "ocr_make_only" | "ocr_failed",
+    },
+    ...
+  ]
+}
+
+Usage:
+    python -m pipeline.ocr_devices <rack_id> --dir <engine dir>
+    python -m pipeline.ocr_devices <rack_id> --dir <engine dir> --json   # one JSON line on stdout
+
+The server passes the scan's engine folder explicitly; nothing here builds a
+path into the data tree.
+"""
+
+from __future__ import annotations
+
+import argparse
+import datetime as _dt
+import json
+import re
+import sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
+
+from pipeline.model_read import model_in_text, settle as settle_model  # noqa: E402
+
+VENDOR_EXCEL = ROOT / "reference" / "Switch_Vendors_Websites.xlsx"
+
+# Class names from the CV pipeline that we actually try to OCR.
+#
+# Includes "Unidentified" and "Closed Unit" deliberately: when the CV
+# classifier can't pin down a device, it tends to be the unusual chassis
+# we most need OCR for (CRS518 wavy fascia, the rare HP/QNAP/Synology unit
+# the model wasn't trained on). Skipping them costs us recall on exactly
+# the devices we already struggle with.
+#
+# Patch panels, PDUs, UPS, blank panels, and pure storage chassis are
+# still skipped - those rarely have model text on the front, and OCRing
+# them just adds noise (port-number text "1 2 3 ... 24" everywhere).
+OCR_CLASSES = {
+    "Switch",
+    "Server",
+    "Router",
+    "Firewall",
+    "Aggregation Core",
+    "Unidentified",
+    "Closed Unit",
+}
+
+
+def _slug(s: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", (s or "").lower())
+
+
+def load_vendor_names() -> list[str]:
+    """Vendor display names from the Excel sheet (column B). Used as the
+    canonical list to match OCR'd manufacturer text against.
+    """
+    if not VENDOR_EXCEL.exists():
+        return []
+    try:
+        import openpyxl
+
+        wb = openpyxl.load_workbook(VENDOR_EXCEL, read_only=True, data_only=True)
+        ws = wb.active
+        out = []
+        rows = ws.iter_rows(values_only=True)
+        next(rows, None)  # header
+        for row in rows:
+            if len(row) < 2:
+                continue
+            name = row[1]
+            if name and isinstance(name, str):
+                out.append(name.strip())
+        return out
+    except Exception:
+        return []
+
+
+# Per-vendor model-number patterns. We try each in order; the first to hit
+# wins. These are intentionally conservative - false positives would push
+# wrong data into the record. Better to fall back to "ocr_make_only" than to
+# guess a model.
+MODEL_PATTERNS: list[tuple[str, re.Pattern]] = [
+    # Cisco Catalyst part numbers: WS-C2960X-24TS-L, C9300-48P, C9500-32C, etc.
+    ("Cisco", re.compile(r"\b(?:WS-C|C)\d{4,5}[A-Z]*-\d{1,3}[A-Z]{0,4}(?:-\w{1,4})?\b")),
+    # Cisco Nexus
+    ("Cisco", re.compile(r"\bN\d[A-Z]?-C\d{4,5}[A-Z0-9-]*\b")),
+    # Cisco PIX firewalls (legacy but still in production at small sites)
+    ("Cisco", re.compile(r"\bPIX-?\d{3,4}[A-Z]?\b")),
+    # TP-Link JetStream / TL-prefix
+    ("TP-Link", re.compile(r"\bTL-[A-Z]{2,4}\d{3,5}[A-Z]{0,4}\b")),
+    ("TP-Link", re.compile(r"\bT[1-9]\d{2,3}[A-Z]{0,4}\b")),
+    # D-Link
+    ("D-Link", re.compile(r"\bD[GX]S-\d{3,4}[A-Z]?-\d{1,3}[A-Z]{0,4}\b")),
+    # D-Link DSR (services router) and DIR (consumer)
+    ("D-Link", re.compile(r"\bDSR-\d{3,4}[A-Z]?\b")),
+    # Juniper EX/QFX/MX/SRX
+    ("Juniper", re.compile(r"\b(?:EX|QFX|MX|SRX)\d{3,5}[A-Z0-9-]*\b")),
+    # Aruba (HPE) - CX 6100, 8320, 8400 series; older 2530/2540
+    ("Aruba", re.compile(r"\bCX\s?\d{4}[A-Z]?\b")),
+    ("Aruba", re.compile(r"\b\d{4}[A-Z]{1,3}-\d{1,3}[A-Z]{0,4}\b")),
+    # HP / HPE OfficeConnect & ProCurve switches: 1820-24G, 1920-48G,
+    # 2530-24G-PoE+, 2920-48G, V1810. Also MicroServer Gen8/Gen10.
+    (
+        "HP",
+        re.compile(
+            r"\b(?:HP[E]?-?)?(?:1810|1820|1910|1920|2530|2540|2620|2920|2930|3810)[A-Z]?-?\d{0,3}[A-Z+]{0,4}\b"
+        ),
+    ),
+    ("HP", re.compile(r"\bMicroServer\s*Gen\d+\b", re.IGNORECASE)),
+    ("HP", re.compile(r"\bProLiant\s*[A-Z]{2}\d{2,4}[A-Z0-9]*\b", re.IGNORECASE)),
+    # Arista 7050, 7280, 7500 series
+    ("Arista", re.compile(r"\b(?:DCS-)?7\d{3}[A-Z]?-\d{1,3}[A-Z0-9-]*\b")),
+    # Huawei S-series / CE-series
+    ("Huawei", re.compile(r"\b(?:S|CE)\d{4}[A-Z]?-\d{1,3}[A-Z0-9-]*\b")),
+    # Dell PowerSwitch / PowerEdge
+    ("Dell", re.compile(r"\b(?:S|N|R)\d{4}[A-Z]{1,3}\b")),
+    # Mikrotik CRS / CCR / CSS / RB series. CRS328, CRS354-48G-4S+2Q+RM,
+    # CCR2004, CSS326-24G-2S+RM (Cloud Smart Switch), RB2011iL-RM, etc.
+    ("Mikrotik", re.compile(r"\b(?:CRS|CCR|CSS)\d{3,4}(?:-\w{1,12})*\b")),
+    ("Mikrotik", re.compile(r"\bRB\d{3,4}[A-Z]{0,4}(?:-\w{1,8})?\b")),
+    # Ubiquiti UniFi switches (USW-*), gateways (USG/UDM), access points (UAP-*)
+    ("Ubiquiti", re.compile(r"\bUSW-[A-Z][A-Za-z0-9]*(?:-\w{1,12}){0,3}\b")),
+    ("Ubiquiti", re.compile(r"\bU(?:SG|DM|AP|XG)-[A-Z0-9]{2,12}(?:-\w{1,8}){0,2}\b")),
+    ("Ubiquiti", re.compile(r"\bES-\d{2,4}[A-Z]?(?:-\w{1,8})?\b")),  # EdgeSwitch
+    ("Ubiquiti", re.compile(r"\bER-[A-Z0-9]{2,12}\b")),  # EdgeRouter
+    # NETGEAR ProSafe / ReadyNAS: GS108, GS724T, JGS524, GS308P, M4300-24X4F
+    ("NETGEAR", re.compile(r"\b(?:GS|JGS|FS|XS|MS|M4|M5)\d{3,4}[A-Z]{0,4}(?:-\w{1,8})?\b")),
+    # SonicWall TZ-series, NSa, NSv: TZ370, TZ670, NSa-2700, NSv-470
+    ("SonicWall", re.compile(r"\b(?:TZ|NSa|NSv|NSsp)-?\d{3,4}[A-Z]?\b")),
+    # Synology DiskStation NAS: DS216+II, DS918+, DS1819+
+    ("Synology", re.compile(r"\bDS\d{3,4}\+?(?:II|III)?\b")),
+    ("Synology", re.compile(r"\bRS\d{3,4}\+?(?:II|III)?\b")),  # RackStation
+    # QNAP TS-, TVS-, TS-h-, TES-: TS-451+, TVS-872XT, TS-h1290FX
+    ("QNAP", re.compile(r"\b(?:TS|TVS|TES|TS-h)-\d{2,4}[A-Z+]{0,6}\b")),
+    # APC Smart-UPS / Back-UPS: SUA1500R, SMT2200RM2U, SRT3000RMXLI
+    ("APC", re.compile(r"\b(?:SU[AM]|SMT|SRT|BR|BX|BE)\d{3,4}[A-Z0-9]{0,8}\b")),
+    # Eaton UPS series: 5SC1500i, 9SX2000I, 5P1500R, 5PX1500iRT
+    ("Eaton", re.compile(r"\b(?:5SC|5PX?|9SX|9PX|EBM)\d{3,4}[A-Za-z0-9]{0,8}\b")),
+    # TRENDnet: TEG-S82g, TPE-S88, TEG-30284
+    ("TRENDnet", re.compile(r"\bT(?:EG|PE|FC|FI|U)-[A-Z0-9]{2,8}\b")),
+    # HikVision NVRs / PoE switches: DS-7732NI-K4, DS-3E0528P-E
+    ("HikVision", re.compile(r"\bDS-\d{1,4}[A-Z]?-\w{2,12}(?:-\w{1,6})?\b")),
+]
+
+def _normalize_ocr_text(text: str) -> str:
+    """Normalize common OCR misreads before model-regex matching.
+    - Underscores near letters/digits → hyphens (TL_SG → TL-SG)
+    - Double punctuation collapse (_- or -_ → -)
+    - Spaces inside model-like tokens removed (TL -SG → TL-SG)
+    """
+    # Collapse _- or -_ to single hyphen
+    text = re.sub(r"[_][-]|[-][_]", "-", text)
+    # Underscores between alphanumeric chars → hyphen
+    text = re.sub(r"(?<=[A-Za-z0-9])_(?=[A-Za-z0-9])", "-", text)
+    # Space between letters and hyphen (e.g., "TL -SG" → "TL-SG")
+    text = re.sub(r"([A-Z]{2})\s+(-[A-Z])", r"\1\2", text)
+    return text
+
+
+# Brand keyword index. The keyword list per vendor includes both the
+# canonical spelling and the most common OCR misreads we've actually seen
+# in the wild ("Csco" for Cisco, "Mikrorik" for MikroTik, "Unfi" for
+# UniFi, etc.). The fuzzy matcher below catches single-character drifts
+# beyond what's enumerated here, so we don't have to spell out every
+# possible mangling - only the ones short enough that fuzzy can't safely
+# bridge them on its own.
+BRAND_KEYWORDS: list[tuple[str, tuple[str, ...]]] = [
+    ("Cisco", ("cisco", "catalyst", "nexus", "meraki", "csco")),
+    ("TP-Link", ("tplink", "tp-link", "jetstream", "omada")),
+    ("D-Link", ("dlink", "d-link")),
+    ("Juniper", ("juniper",)),
+    ("Aruba", ("aruba", "procurve")),
+    ("Arista", ("arista",)),
+    ("Huawei", ("huawei",)),
+    ("Dell", ("dell", "poweredge", "powerswitch", "idrac")),
+    ("NETGEAR", ("netgear", "prosafe", "readynas")),
+    # Ubiquiti / UniFi - OCR commonly drops a letter ("Unfi", "Ubiqui");
+    # fuzzy match handles those.
+    ("Ubiquiti", ("ubiquiti", "unifi", "edgeswitch", "edgemax", "edgerouter", "amplifi", "ufiber")),
+    # MikroTik OCR misreads we've seen on real photos: Mikrorik, Mikroz,
+    # Mikrovi, Mikroi, Ruzot (badly mangled). Fuzzy match takes care of
+    # "mikrot" / "mikrok" 1-edit variants.
+    (
+        "Mikrotik",
+        (
+            "mikrotik",
+            "mikrorik",
+            "mikroz",
+            "mikrot",
+            "routeros",
+            "routerboard",
+            "cloudrouter",
+            "cloudswitch",
+            "cloudsmart",
+        ),
+    ),
+    ("HP", ("hewlett", "hewlettpackard", "proliant", "microserver", "officeconnect")),
+    ("HPE", ("hpe",)),
+    ("SonicWall", ("sonicwall", "sonicos")),
+    ("Synology", ("synology", "diskstation", "rackstation")),
+    ("QNAP", ("qnap",)),
+    ("APC", ("apc", "smartups", "smart-ups", "back-ups", "schneider")),
+    ("Eaton", ("eaton",)),
+    ("TRENDnet", ("trendnet",)),
+    ("HikVision", ("hikvision", "hikrision")),
+    ("Fortinet", ("fortinet", "fortigate", "fortiswitch", "fortiap")),
+    ("CheckPoint", ("checkpoint",)),
+    ("Palo Alto", ("paloalto", "panos")),
+    ("Extreme", ("extreme", "extremenetworks", "summit")),
+    ("Brocade", ("brocade", "ruckus", "icx")),
+    ("Zyxel", ("zyxel",)),
+    ("Allied Telesis", ("alliedtelesis", "allied-telesis")),
+    ("Edge-Core", ("edgecore", "edge-core")),
+]
+
+
+def _levenshtein_bounded(a: str, b: str, max_dist: int) -> int:
+    """Return Levenshtein distance, but bail out (returning > max_dist) as
+    soon as we know the answer can't be ≤ max_dist. Faster than full DP
+    when we only care about close matches.
+    """
+    la, lb = len(a), len(b)
+    if abs(la - lb) > max_dist:
+        return max_dist + 1
+    if la == 0:
+        return lb
+    if lb == 0:
+        return la
+    if a == b:
+        return 0
+    prev = list(range(lb + 1))
+    for i, ca in enumerate(a, 1):
+        curr = [i] + [0] * lb
+        row_min = curr[0]
+        for j, cb in enumerate(b, 1):
+            curr[j] = min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + (ca != cb))
+            if curr[j] < row_min:
+                row_min = curr[j]
+        if row_min > max_dist:
+            return max_dist + 1
+        prev = curr
+    return prev[-1]
+
+
+# Pre-compile token splitter - one regex used per OCR pass.
+_TOKEN_RE = re.compile(r"[a-z0-9]+")
+
+
+def _fuzzy_keyword_match(text_lower: str, keyword: str) -> bool:
+    """Token-level fuzzy match for brand keywords.
+
+    First a cheap substring check (the original behavior - catches exact
+    hits and embedded matches like "mikrotik" inside "mikrotikrouterboard").
+
+    Then a token-level Levenshtein pass: split the text into alphanumeric
+    tokens and accept any token within the distance budget. The budget
+    grows with keyword length:
+       length ≤ 4: NO fuzzy (ambiguity risk too high - "ASP" vs "APC")
+       5-8 chars : 1 edit allowed     (Csco→Cisco, Unfi→UniFi)
+       9-12 chars: 2 edits allowed   (Mikrorik→Mikrotik, Hewlett→Hewlettt)
+       13+       : 3 edits allowed   (PowerEdge→PoverEdges, EdgeSwitch typos)
+
+    Distance scales with length because a single OCR misread
+    represents a smaller fraction of total characters in longer words -
+    "Mikrorik" vs "Mikrotik" is still 87% similar at 1 edit / 8 chars.
+    """
+    if keyword in text_lower:
+        return True
+    klen = len(keyword)
+    if klen < 5:
+        return False
+    budget = 1 if klen <= 8 else (2 if klen <= 12 else 3)
+    for tok in _TOKEN_RE.findall(text_lower):
+        if abs(len(tok) - klen) > budget:
+            continue
+        if _levenshtein_bounded(tok, keyword, budget) <= budget:
+            return True
+    return False
+
+
+def parse_make_model(text: str, vendor_names: list[str]) -> tuple[str | None, str | None]:
+    """Returns (make, model). make is the canonical name from the Excel
+    sheet when matched; model comes from MODEL_PATTERNS.
+    """
+    if not text:
+        return None, None
+
+    # Normalize OCR artifacts before attempting regex match
+    normalized = _normalize_ocr_text(text)
+
+    # Try MODEL_PATTERNS first - a model match also nails down the make.
+    # Try on both normalized and original text.
+    for vendor, rx in MODEL_PATTERNS:
+        m = rx.search(normalized) or rx.search(text)
+        if m:
+            return vendor, m.group(0).upper()
+
+    return parse_make(text, vendor_names), None
+
+
+def parse_make(text: str, vendor_names: list[str]) -> str | None:
+    """The make named in the text (vendor list, then brand words with
+    one-letter misreads), or None. Never from a model shape."""
+    if not text:
+        return None
+    # Try to identify make from vendor list (substring, slugified).
+    text_slug = _slug(text)
+    for name in vendor_names:
+        if not name or len(name) < 3:
+            continue
+        if _slug(name) and _slug(name) in text_slug:
+            return name
+
+    # Brand-keyword pass with fuzzy matching. Goal: tolerate the common
+    # OCR misreads ("Csco", "Unfi", "Mikrorik") that would otherwise drop
+    # us to "no vendor identified" even when the brand was clearly visible
+    # in the photo. Two passes: lowercased original (preserves token
+    # boundaries - needed for fuzzy) and slugified (catches keywords that
+    # only appear without separators, e.g. "tplink").
+    text_lower = text.lower()
+    for vendor, kws in BRAND_KEYWORDS:
+        for kw in kws:
+            if _fuzzy_keyword_match(text_lower, kw) or kw in text_slug:
+                return vendor
+
+    return None
+
+
+def _read_whole_image(reader, img) -> list[dict]:
+    """One OCR pass over the entire rack photo.
+
+    This module used to crop each device and run three preprocessing passes
+    over every crop, because EasyOCR is cheap on small images (~50ms a pass)
+    and each variant catches text the others miss. switch-ocr inverts both
+    halves of that trade: it already applies its own preprocessing variants
+    internally (see TextDetection.variant), so the three passes are redundant,
+    and it costs ~24s per call, so 3 passes x N devices is minutes of work.
+
+    One pass over the full image instead. Detections come back in original
+    image coordinates, so they can be handed to whichever device box contains
+    them - which also gives each label a real position, something the old
+    per-crop path never had (the sort by y,x was a no-op because crop-relative
+    coordinates were discarded).
+    """
+    result = reader.read(img)
+    out = []
+    for det in getattr(result, "detections", []) or []:
+        text = (det.text or "").strip()
+        if len(text) < 2:
+            continue
+        box = [int(v) for v in (det.box or [0, 0, 0, 0])]
+        out.append(
+            {
+                "text": text,
+                "conf": float(det.confidence),
+                "box": box,
+                "cx": (box[0] + box[2]) / 2.0,
+                "cy": (box[1] + box[3]) / 2.0,
+                # Keep the original detection so a device's make+model can be read
+                # by switch-ocr's own identify_device (see _identify_switch), which
+                # covers far more vendors/models than the local MODEL_PATTERNS.
+                "_det": det,
+            }
+        )
+    return out
+
+
+def _identify_switch(labels: list[dict]) -> tuple[str | None, str | None]:
+    """Make + model for one device, using switch-ocr's own identifier.
+
+    We already ask switch-ocr to READ the faceplate; it also IDENTIFIES it
+    (fuzzy brand matching that absorbs OCR errors like "D-Lirk", vendor model
+    regexes, and a universal fallback that pulls a model shape for any vendor,
+    even ones not in its knowledge base). The old code threw that away and
+    re-derived make/model from a 26-vendor local regex, so any switch outside
+    that list came back make-only. Use the identifier the engine already ran.
+    """
+    try:
+        from pipeline.switch_ocr import identify_device
+    except Exception:
+        return None, None
+    dets = [l["_det"] for l in labels if l.get("_det") is not None]
+    if not dets:
+        return None, None
+    try:
+        dev = identify_device(dets)
+    except Exception:
+        return None, None
+    make = dev.brand or None
+    model = dev.model or None
+    # A model must look like one (has a digit, not a stray word) so the
+    # universal fallback can't promote a random faceplate string to a model.
+    if model and not any(c.isdigit() for c in model):
+        model = None
+    return make, model
+
+
+def _labels_for_box(detections: list[dict], box: list[int], pad: int = 2) -> list[dict]:
+    """Pick the detections belonging to one device.
+
+    A label belongs to the device whose box contains its centre. Centre rather
+    than overlap because rack devices are stacked with almost no vertical gap:
+    a tall detection straddling a chassis edge would otherwise be claimed by
+    both neighbours, and the same model number would appear on two devices.
+    """
+    x1, y1, x2, y2 = box[0] - pad, box[1] - pad, box[2] + pad, box[3] + pad
+    inside = [d for d in detections if x1 <= d["cx"] <= x2 and y1 <= d["cy"] <= y2]
+    # Reading order: top-to-bottom, then left-to-right within a line. Labels on
+    # a chassis are a single row far more often than not, so band the y a little
+    # before sorting or a 2px baseline wobble scrambles the line.
+    inside.sort(key=lambda d: (round(d["cy"] / 12.0), d["cx"]))
+    return [
+        {"text": d["text"], "conf": d["conf"], "x": d["cx"], "y": d["cy"], "_det": d.get("_det")}
+        for d in inside
+    ]
+
+
+# One reader per process. OCRConfig.accurate() loads its models on
+# construction, and this module used to be spawned fresh for every rack - so
+# every scan paid for the load before it read a single label. In the warm
+# worker the first rack pays and the rest do not.
+_READER = None
+
+
+def _build_reader():
+    """Build the switch-ocr reader.
+
+    EasyOCR used to be the engine here, with switch-ocr behind a flag. It is
+    gone: on the same rack photo EasyOCR returned 'Calb' and 'Drrotm' where
+    switch-ocr returns 'D-Link' and the model number 'DCS-1100-18', and a
+    vendor/model matcher fed the former cannot recover. There is no fallback on
+    purpose - silently degrading to an engine that misreads model numbers
+    produces a confident, wrong inventory, which is worse than a scan that
+    fails loudly and can be retried.
+    """
+    global _READER
+    if _READER is not None:
+        return _READER
+    from pipeline.switch_ocr import OCRConfig, SwitchTextReader
+
+    print("[ocr_devices] engine: switch-ocr", file=sys.stderr)
+    _READER = SwitchTextReader(OCRConfig.accurate())
+    return _READER
+
+
+def _resolve_image(rack_dir: Path) -> Path | None:
+    from pipeline.scan_paths import find_photo
+
+    return find_photo(rack_dir)
+
+
+def _sort_labels_by_position(labels: list[dict]) -> list[dict]:
+    """OCR returns boxes in detection order. For label-line reading we
+    want top-to-bottom, left-to-right within a row.
+    """
+    return sorted(labels, key=lambda l: (l.get("y", 0), l.get("x", 0)))
+
+
+def run(rack_id: str, rack_dir) -> dict:
+    rack_dir = Path(rack_dir)
+    dum_path = rack_dir / "device_unit_map.json"
+    if not dum_path.exists():
+        return {
+            "ok": False,
+            "error": f"no device_unit_map.json at {dum_path}",
+            "rack_id": rack_id,
+            "devices": [],
+        }
+
+    img_path = _resolve_image(rack_dir)
+    if not img_path:
+        return {
+            "ok": False,
+            "error": f"no original image in {rack_dir}",
+            "rack_id": rack_id,
+            "devices": [],
+        }
+
+    dum = json.loads(dum_path.read_text(encoding="utf-8"))
+    raw_devices = dum.get("devices") or []
+
+    # Lazy imports - these are heavy and we only need them on a real run.
+    import cv2
+
+    img = cv2.imread(str(img_path))
+    if img is None:
+        return {
+            "ok": False,
+            "error": f"cv2 could not read image {img_path}",
+            "rack_id": rack_id,
+            "devices": [],
+        }
+    h_img, w_img = img.shape[:2]
+
+    reader = _build_reader()
+    # ONE pass over the whole photo, not three per device: switch-ocr costs
+    # seconds per call, so 3 x N calls would run to minutes on a full rack.
+    detections = _read_whole_image(reader, img)
+    print(f"[ocr_devices] {len(detections)} text detections in the image", file=sys.stderr)
+    vendor_names = load_vendor_names()
+
+    out_devices = []
+    for dev in raw_devices:
+        cls = dev.get("class_name") or ""
+        box = dev.get("box") or []
+        units = dev.get("units") or []
+        position = (units[0] if units else "").upper() or None
+
+        # Skip CV detections we never expect to label-OCR usefully.
+        if cls not in OCR_CLASSES:
+            out_devices.append(
+                {
+                    "position": position,
+                    "class_name": cls,
+                    "box": box,
+                    "make": None,
+                    "model": None,
+                    "raw_text": "",
+                    "ocr_conf": 0.0,
+                    "match_conf": 0.0,
+                    "source": "skipped",
+                }
+            )
+            continue
+
+        if len(box) != 4:
+            out_devices.append(
+                {
+                    "position": position,
+                    "class_name": cls,
+                    "box": box,
+                    "make": None,
+                    "model": None,
+                    "raw_text": "",
+                    "ocr_conf": 0.0,
+                    "match_conf": 0.0,
+                    "source": "ocr_failed",
+                }
+            )
+            continue
+
+        x1, y1, x2, y2 = [int(v) for v in box]
+        # Clamp + tiny pad so tight boxes don't slice off the edge of text.
+        pad = 2
+        x1 = max(0, x1 - pad)
+        y1 = max(0, y1 - pad)
+        x2 = min(w_img, x2 + pad)
+        y2 = min(h_img, y2 + pad)
+        if x2 - x1 < 10 or y2 - y1 < 8:
+            out_devices.append(
+                {
+                    "position": position,
+                    "class_name": cls,
+                    "box": box,
+                    "make": None,
+                    "model": None,
+                    "raw_text": "",
+                    "ocr_conf": 0.0,
+                    "match_conf": 0.0,
+                    "source": "ocr_failed",
+                }
+            )
+            continue
+
+        # No crop and no upscale: the image was read once, in full, above.
+        # Cropping existed to give EasyOCR a small region and to enlarge tiny
+        # chassis stickers (~25px tall) before reading them. switch-ocr does
+        # its own scaling internally and reads the whole frame in one call, so
+        # all this device needs is the labels that fell inside its box.
+        labels = _labels_for_box(detections, [x1, y1, x2, y2])
+        # Concatenated text (preserves left-to-right reading inside one row).
+        text = " ".join(l["text"] for l in labels)
+        ocr_conf = round(sum(l["conf"] for l in labels) / len(labels), 3) if labels else 0.0
+
+        # switch-ocr's own identifier first - it covers the vendors and model
+        # formats the local MODEL_PATTERNS regex misses (which is why testers
+        # were seeing make with no model). Fall back to the local parser for
+        # anything it leaves blank.
+        make, model = _identify_switch(labels)
+        m2, mo2 = parse_make_model(text, vendor_names)
+        # A make the regex took from a model shape stands only with that model.
+        if mo2 and not model_in_text(mo2, text):
+            m2, mo2 = parse_make(text, vendor_names), None
+        make = make or m2
+        # The model is READ, never guessed (pipeline/model_read.py): the
+        # identifier snaps fragments to its catalogue ("sco ASR1" came back
+        # as NEXUS 7010) and takes names, tags and port labels for models
+        # (sis-rt02, RS-232). A clean model token in this device's own text
+        # wins; otherwise a candidate is kept only when it is in the text and
+        # is not a name, tag, serial, location or port. Else no model.
+        make, model = settle_model(make, [model, mo2], text)
+
+        if make and model:
+            source = "ocr_full"
+            # Strong prior: we matched a model regex AND the OCR was readable.
+            match_conf = round(min(1.0, 0.6 + 0.4 * ocr_conf), 3)
+        elif make:
+            source = "ocr_make_only"
+            match_conf = round(min(1.0, 0.4 + 0.4 * ocr_conf), 3)
+        else:
+            source = "ocr_failed"
+            match_conf = 0.0
+
+        out_devices.append(
+            {
+                "position": position,
+                "class_name": cls,
+                "box": [x1, y1, x2, y2],
+                "make": make,
+                "model": model,
+                "raw_text": text,
+                "ocr_conf": ocr_conf,
+                "match_conf": match_conf,
+                "source": source,
+            }
+        )
+
+    return {
+        "ok": True,
+        "rack_id": rack_id,
+        "image": img_path.name,
+        # datetime.UTC landed in 3.11; this venv is 3.10, where it does not
+        # exist - so every run of this module raised AttributeError at the
+        # very end, after doing all the reading, and wrote no file. That is
+        # why make and model never arrived. timezone.utc is the same instant
+        # and has been there since 3.2.
+        "generated_at": _dt.datetime.now(_dt.timezone.utc)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z"),
+        "devices": out_devices,
+    }
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("rack_id")
+    ap.add_argument("--dir", required=True, help="The scan's engine folder (read and written).")
+    ap.add_argument(
+        "--json", action="store_true", help="Emit one JSON line on stdout (for backend use)."
+    )
+    args = ap.parse_args()
+
+    try:
+        result = run(args.rack_id, args.dir)
+    except Exception as e:
+        result = {"ok": False, "error": f"unexpected: {e}", "rack_id": args.rack_id, "devices": []}
+
+    # Always persist to <engine dir>/ocr_devices.json so later steps can
+    # pick it up, even if --json wasn't requested.
+    if result.get("ok"):
+        try:
+            out_path = Path(args.dir) / "ocr_devices.json"
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_text(json.dumps(result, indent=2), encoding="utf-8")
+        except Exception as e:
+            result["_persist_error"] = str(e)
+
+    if args.json:
+        sys.stdout.write(json.dumps(result))
+        sys.stdout.flush()
+        sys.exit(0 if result.get("ok") else 2)
+
+    # Pretty mode - human-readable summary for CLI runs.
+    if not result.get("ok"):
+        print(f"FAILED: {result.get('error')}")
+        sys.exit(2)
+    devs = result["devices"]
+    full = sum(1 for d in devs if d["source"] == "ocr_full")
+    partial = sum(1 for d in devs if d["source"] == "ocr_make_only")
+    failed = sum(1 for d in devs if d["source"] == "ocr_failed")
+    skipped = sum(1 for d in devs if d["source"] == "skipped")
+    print(
+        f"Rack {args.rack_id}: {full} full / {partial} make-only / "
+        f"{failed} failed / {skipped} skipped (of {len(devs)} devices)"
+    )
+    for d in devs:
+        if d["source"] in ("ocr_full", "ocr_make_only"):
+            print(
+                f"  {d.get('position') or '?':<5} {d['class_name']:<14} "
+                f"{d.get('make') or '-'} {d.get('model') or '-'} "
+                f"(conf={d['match_conf']})"
+            )
+
+
+if __name__ == "__main__":
+    main()

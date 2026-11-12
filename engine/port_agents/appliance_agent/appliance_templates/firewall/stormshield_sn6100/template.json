@@ -1,0 +1,132 @@
+{
+ "vendor": "Stormshield",
+ "model": "SN6100",
+ "device": "firewall",
+ "description": "",
+ "summary": "8x RJ45 | 0x SFP | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://documentation.stormshield.eu/SNS/v4/fr/Content/PDF/InstallationGuides/sns-fr_SN6100-quickstart_v1.2.pdf#page1-img260",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1649,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   503,
+   30,
+   229,
+   118
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    514,
+    43,
+    52,
+    46
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    515,
+    90,
+    51,
+    46
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    566,
+    42,
+    52,
+    48
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    566,
+    88,
+    51,
+    48
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    618,
+    42,
+    51,
+    47
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    618,
+    88,
+    52,
+    49
+   ]
+  },
+  {
+   "id": 7,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    668,
+    42,
+    53,
+    47
+   ]
+  },
+  {
+   "id": 8,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    669,
+    90,
+    50,
+    47
+   ]
+  }
+ ],
+ "labels_read": [],
+ "chassis_votes": {
+  "1": 4,
+  "2": 4,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "7": 4,
+  "8": 4
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.672,
+ "saved_label": "official/vendor data sheet sns-fr_SN6100-quickstart_v1.2.pdf p1",
+ "saved_at": "2026-10-22 21:56"
+}

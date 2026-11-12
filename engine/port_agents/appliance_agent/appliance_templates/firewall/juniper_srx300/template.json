@@ -1,0 +1,159 @@
+{
+ "vendor": "Juniper",
+ "model": "SRX300",
+ "device": "firewall",
+ "description": "",
+ "summary": "6x RJ45 | 2x SFP | 2 named port type(s): Console, USB | built from the vendor image by the appliance mapper",
+ "image": "front.png",
+ "image_source": "https://www.juniper.net/documentation/us/en/quick-start/srx300/srx300-quick-start.pdf#page2-img326",
+ "auto_generated": true,
+ "numbering_scheme": "top-odd",
+ "match_regions": [
+  [
+   0,
+   0,
+   1286,
+   180
+  ]
+ ],
+ "ignore_regions": [
+  [
+   480,
+   40,
+   425,
+   93
+  ]
+ ],
+ "ports": [
+  {
+   "id": 1,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    495,
+    57,
+    70,
+    62
+   ]
+  },
+  {
+   "id": 2,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    564,
+    58,
+    67,
+    61
+   ]
+  },
+  {
+   "id": 3,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    628,
+    57,
+    66,
+    62
+   ]
+  },
+  {
+   "id": 4,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    692,
+    58,
+    66,
+    61
+   ]
+  },
+  {
+   "id": 5,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    756,
+    57,
+    66,
+    61
+   ]
+  },
+  {
+   "id": 6,
+   "type": "rj45",
+   "poe": null,
+   "box": [
+    820,
+    56,
+    70,
+    63
+   ]
+  },
+  {
+   "id": 7,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1052,
+    64,
+    73,
+    59
+   ]
+  },
+  {
+   "id": 8,
+   "type": "sfp",
+   "poe": null,
+   "box": [
+    1150,
+    66,
+    75,
+    56
+   ]
+  },
+  {
+   "id": "Console",
+   "type": "console",
+   "poe": null,
+   "box": [
+    350,
+    58,
+    80,
+    67
+   ],
+   "name": "CONSOLE"
+  },
+  {
+   "id": "USB",
+   "type": "usb_a",
+   "poe": null,
+   "box": [
+    275,
+    79,
+    65,
+    38
+   ]
+  }
+ ],
+ "labels_read": [
+  "CONSOLE"
+ ],
+ "chassis_votes": {
+  "1": 4,
+  "2": 4,
+  "3": 4,
+  "4": 4,
+  "5": 4,
+  "6": 4,
+  "7": 4,
+  "8": 4,
+  "Console": 4,
+  "USB": 3
+ },
+ "chassis_aligned": 4,
+ "saved_quality": 0.935,
+ "saved_label": "official/vendor data sheet srx300-quick-start.pdf p2",
+ "saved_at": "2026-10-19 16:41"
+}
