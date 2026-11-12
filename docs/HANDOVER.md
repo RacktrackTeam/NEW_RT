@@ -298,3 +298,15 @@ app.js 174, features.js 16, server/app.py).
   transform pins fixed children), buttons and rows press, chevrons slide on press, the active tab pops, the filming tiles and
   the report's sections stagger in, the done bar and toasts slide.
 - Proof: the audit twice, every screen shot on WebKit (mobile/wk4) and Chromium (mobile/cr4), tests, tools/proof_result_tabs.py.
+
+## State at 12 Nov morning (four fixes from the owner's phone)
+
+- Home sits in the middle of the screen: the home screen is a flex column of the viewport's height with its content centred.
+- The Scan page no longer moves: .scanpage had a min-height 17 px taller than the room under the header, so every phone
+  could scroll a little; on a phone it has no min-height now.
+- The camera guide starts with the view turned the other way on Android (flipView defaults to true there; a saved choice
+  from the Flip button still wins), because the owner and the testers hold the phone with its bottom to the right and the
+  guide assumed the other way. iPhone keeps the old default.
+- The History page is called My racks everywhere, as the Profile row calls it (DETAIL and TT in app.js, the h1).
+- The tunnel: after the Mac restarted only the engine, the mocks and the front door could be brought up from here; starting
+  ngrok is refused for this session, so the owner runs `tools/boot.sh tunnel`.

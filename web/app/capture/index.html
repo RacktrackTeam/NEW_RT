@@ -944,7 +944,8 @@ function syncLandscapeClass() {
 let manualRotateDeg = 0, manualRotateW = 0, manualRotateH = 0;
 // A phone whose motion sensor reports gravity with the other sign shows the forced landscape view upside down (a tester,
 // 10 Nov 2026: "everything in the opposite direction"). Flip the view turns it the other way and the phone remembers it.
-let flipView = false; try { flipView = localStorage.getItem('rackGuideFlip') === '1'; } catch (e) {}
+let flipView = /Android/i.test(navigator.userAgent);   // Android phones here report gravity the other way round: the view starts flipped (owner, 12 Nov 2026: "default it is left"); iPhone as before
+try { const f = localStorage.getItem('rackGuideFlip'); if (f === '1' || f === '0') flipView = f === '1'; } catch (e) {}
 function updateManualRotate() {
   const sensorSaysLandscape = S.gx != null && S.gy != null && isLandscape();
   // xDownSign() === 1 means the screen's right edge (+x) points at the

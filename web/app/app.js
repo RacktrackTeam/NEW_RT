@@ -66,7 +66,7 @@
     window.addEventListener('scroll', draw, { passive: true }); window.addEventListener('resize', draw); setInterval(draw, 400); })();
 
   // ---------------------------------------------------------------- routing: #signin #home #history #sweep #job/<id> #result/<id> #report/<id> #more #models
-  var DETAIL = { job: 'Run', result: 'Result', history: 'History', models: 'Models and accuracy', connections: 'Connections', copies: 'Database copies', tools: 'Rack tools' };   // tools: wt/features
+  var DETAIL = { job: 'Run', result: 'Result', history: 'My racks', models: 'Models and accuracy', connections: 'Connections', copies: 'Database copies', tools: 'Rack tools' };   // tools: wt/features
   // the result's bar: Main is the rack read from the data; the other four show the report's steps in groups
   var TABS = { rack: 'Rack', devices: 'Devices', layout: 'Layout', report: 'Report' };
   var TABNAME = { rack: 'Rack', devices: 'Devices', find: 'Find a port', connections: 'Connections', cables: 'Cables', layout: 'Layout', report: 'Report' };   // one page in four parts; the compare and its differences live inside the Report
@@ -117,7 +117,7 @@
     requestAnimationFrame(topbarHeight);                                           // the tab row sits under the header's real height, two lines or one (testers, 4 Nov 2026)
     $('back').hidden = !DETAIL[name]; $('topmark').hidden = !!DETAIL[name]; $('toptitle').textContent = (rtab || tool) ? (TABNAME[rtab || tool] || 'Result') : (DETAIL[name] || 'RackTrack');   // the header names the open tab (owner, 10 Nov 2026)
     $('top').classList.toggle('detail', !!DETAIL[name]); $('who').hidden = !!DETAIL[name]; $('topspacer').hidden = !DETAIL[name]; if (name !== 'result') { $('topsub').hidden = true; }
-    var TT = { home: 'Racks', sweep: 'Scan a rack', job: 'Reading the rack', history: 'History', more: 'Profile', models: 'Models and accuracy', connections: 'Connections', copies: 'Database copies', signin: 'Sign in', contact: 'Contact us', forgot: 'Reset your password', invite: 'Accept your invite', pending: 'Waiting for approval' };
+    var TT = { home: 'Racks', sweep: 'Scan a rack', job: 'Reading the rack', history: 'My racks', more: 'Profile', models: 'Models and accuracy', connections: 'Connections', copies: 'Database copies', signin: 'Sign in', contact: 'Contact us', forgot: 'Reset your password', invite: 'Accept your invite', pending: 'Waiting for approval' };
     var tt = rtab ? TABS[rtab] : tool ? ({ find: 'Find a port', connections: 'Connections', cables: 'Cables' }[tool] || 'Rack tool') : TT[name] || 'RackTrack';
     document.title = tt + (tt === 'RackTrack' ? '' : ' - RackTrack');
     clearInterval(pollTimer); stopGuide();

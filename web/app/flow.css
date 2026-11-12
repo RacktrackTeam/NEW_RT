@@ -670,3 +670,9 @@ body:not(.web) .screen[data-screen="home"] .phead { gap:14px; padding-top:6vh; }
   #nav .pill a.on, #nav .pill a.on span { font-weight:700 !important; }
 }
 #rnav .rmsheet, #rnav .rmsheet a { pointer-events:auto; }   /* the bar's container lets touches through; the sheet must take them */
+/* 12 Nov 2026: Home sits in the middle of the screen; the Scan page fits the screen without a scroll */
+@media (max-width:760px) {
+  body:not(.web) .screen[data-screen="home"] { min-height:calc(100svh - 56px - env(safe-area-inset-top, 0px) - var(--nav-clear) - 32px); display:flex; flex-direction:column; justify-content:center; }
+  body:not(.web) .screen[data-screen="home"] .phead { padding-top:0; margin:0; }
+  body:not(.web) .scanpage { min-height:0 !important; }
+}
